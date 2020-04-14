@@ -25,7 +25,9 @@ jobs:
     - name: 'Create settings.xml'
       uses: whelk-io/maven-settings-xml-action@v4
       with:
-        servers: '[{"id": "github", "username": "${{ github.actor }}", "password": "${{ github.token}}"}, {"id": "github-annotation", "username": "${{ github.actor }}", "password": "${{ github.token}}"}]'
+        servers: '[{"id": "github", "username": "${{ github.actor }}", "password": "${{ github.token}}"}, {"id": "github-annotation", "username": "${{ github.actor }}", "password": "${{ github.token }}"}]'
         repositories: '[{"id" : "github", "url" : "https://maven.pkg.github.com/Ubique-OSS/springboot-swagger3"}, {"id" : "github-annotation", "url" : "https://maven.pkg.github.com/Ubique-OSS/springboot-swagger3-annotations"}]'
     - name: Build with Maven
       run: mvn -B package --file dpppt-backend-sdk/pom.xml
+      env:
+        GITHUB_TOKEN: ${{ github.token }}
