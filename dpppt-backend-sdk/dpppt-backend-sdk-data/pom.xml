@@ -12,7 +12,7 @@
 
 	<dependencies>
 
-		<!-- d3pt models -->
+		<!-- dp3t models -->
 		<dependency>
 			<groupId>org.dpppt</groupId>
 			<artifactId>dpppt-backend-sdk-model</artifactId>
