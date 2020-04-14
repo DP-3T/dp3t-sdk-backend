@@ -1,0 +1,19 @@
+\subsection{ {{name}} }
+\label{sec:{{name}}}
+{{^is_enum}}
+\begin{ubresponses}{\textwidth}{|H|c|Y|p{3cm}|}
+\ubheader{Field} & \ubheader{Type}  &\ubheader{Description}& \ubheader{Example}\\
+\hline
+{{#fields}}
+{{>schema_field}}
+{{/fields}}
+\end{ubresponses}
+{{/is_enum}}
+{{#is_enum}}
+\begin{itemize}
+    {{#enumFields}}
+    \item {{field}}
+    {{/enumFields}}
+\end{itemize}
+{{/is_enum}}
+

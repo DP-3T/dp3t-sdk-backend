@@ -1,0 +1,71 @@
+\section{ {{ title }} }
+{{#methods}}
+    \begin{verbatim}
+    {{method}} {{path}}
+    \end{verbatim}
+{{/methods}}
+{{description}}
+{{#request_headers}}
+\subsection{ Request Headers }
+\begin{ubparam}{\textwidth}{|H|c|Y|}
+\ubheader{Field} & \ubheader{Type} & \ubheader{Description}\\
+\hline
+{{#headers}}
+{{> param}}
+\hline
+{{/headers}}
+\end{ubparam}
+{{/request_headers}}
+{{#query_parameters}}
+\subsection{ Query Parameters }
+\begin{ubparam}{\textwidth}{|H|c|Y|}
+\ubheader{Field} & \ubheader{Type} & \ubheader{Description}\\
+\hline
+{{#params}}
+{{>param}}
+\hline
+{{/params}}
+\end{ubparam}
+{{/query_parameters}}
+{{#path_parameters}}
+\subsection{ Path Parameters }
+\begin{ubparam}{\textwidth}{|H|c|Y|}
+\ubheader{Field} & \ubheader{Type} & \ubheader{Description}\\
+\hline
+{{#params}}
+{{>param}}
+\hline
+{{/params}}
+\end{ubparam}
+{{/path_parameters}}
+{{#response_body}}
+\subsection{ Request Body }
+\begin{ubparam}{\textwidth}{|H|c|Y|}
+\ubheader{Field} & \ubheader{Type} & \ubheader{Description}\\
+\hline
+{{#params}}
+{{>param}}
+\hline
+{{/params}}
+\end{ubparam}
+{{/response_body}}
+\subsection{Responses}
+{{#responses}}
+\subsubsection{ {{status_code}} {{status_string}} }
+{{description}} 
+
+{{^error}}
+    {{#application_json}}
+        \begin{ubresponses}{\textwidth}{|Y|}
+        \ubheader{Type}\\
+        \hline
+            {{#params}}
+            {{>response_field}}
+            {{/params}}
+        \end{ubresponses}
+    {{/application_json}}
+    {{^application_json}}
+    This request returns \textbf{ {{content_type}} }. This represents {{description}}.
+    {{/application_json}}
+{{/error}}
+{{/responses}}

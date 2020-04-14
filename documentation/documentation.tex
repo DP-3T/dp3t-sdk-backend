@@ -1,0 +1,211 @@
+% Options for packages loaded elsewhere
+\PassOptionsToPackage{unicode}{hyperref}
+\PassOptionsToPackage{hyphens}{url}
+%
+\documentclass[a4paper
+]{ubarticle}
+\usepackage{graphicx}
+\usepackage{amssymb,amsmath}
+    \usepackage{parskip}
+  \usepackage{tabu}
+  \usepackage{longtable}
+\makeatother
+
+\usepackage{seqsplit}
+\usepackage{hyperref}
+\hypersetup{
+  pdftitle={DPPPT API},
+  hidelinks,
+  pdfcreator={LaTeX via pandoc}}
+\urlstyle{same} % disable monospaced font for URLs
+\setlength{\emergencystretch}{3em} % prevent overfull lines
+\providecommand{\tightlist}{%
+  \setlength{\itemsep}{0pt}\setlength{\parskip}{0pt}}
+\setcounter{secnumdepth}{-\maxdimen} % remove section numbering
+
+\title{DPPPT API}
+\date{\today}
+\author{pepp-pt}
+
+\begin{document}
+\begin{titlepage}
+	%\includegraphics[width=7cm]{ubique-logo.png}
+	\hspace{4.3cm}
+ {\raggedleft
+	 \textbf{pepp-pt} \\
+	%\hspace{11.5cm} Niederdorfstrasse 77 \\
+%	8001 Zürich \\
+\vspace{0.3cm}
+	\url{https://www.pepp-pt.org/} 
+\par}
+	\vspace{3cm}
+	{\Huge D3PT API \par}
+	\vspace{1.5cm}
+	{\huge Documentation \par}
+	\vspace{3cm}
+	{ \large \today }
+	\end{titlepage}
+\thispagestyle{empty}
+\clearpage
+\tableofcontents
+\clearpage
+\include{introduction}
+\part{Web Service}
+\subsection{Introduction}
+A test implementation is hosted on: https://demo.dpppt.org. 
+
+This part of the documentation deals with the different API-Endpoints. Examples to fields are put into the models section~\ref{sec:Models} to increase readability. Every request lists all possible status codes and the reason for the status code.
+\section{ /v1/ }
+    \begin{verbatim}
+    get /v1/
+    \end{verbatim}
+hello
+
+\subsection{Responses}
+\subsubsection{ 200 Success }
+ 
+
+    
+        \begin{ubresponses}{\textwidth}{|Y|}
+        \ubheader{Type}\\
+        \hline
+             \hyperref[sec:string] { string } \\
+ \hline
+
+        \end{ubresponses}
+    
+\section{ /v1/exposed }
+    \begin{verbatim}
+    post /v1/exposed
+    \end{verbatim}
+Enpoint used to publish the SecretKey.
+
+\subsection{ Request Headers }
+\begin{ubparam}{\textwidth}{|H|c|Y|}
+\ubheader{Field} & \ubheader{Type} & \ubheader{Description}\\
+\hline
+\ubheader{ User-Agent }   \textcolor{red}{\emph{*}}  &  string  & App Identifier (PackageName/BundleIdentifier) + App-Version + OS (Android/iOS) + OS-Version
+ \\
+\hline
+\end{ubparam}
+
+\subsection{ Request Body }
+\begin{ubparam}{\textwidth}{|H|c|Y|}
+\ubheader{Field} & \ubheader{Type} & \ubheader{Description}\\
+\hline
+\ubheader{  }   \textcolor{red}{\emph{*}}  &  ExposeeRequest  & The ExposeeRequest contains the SecretKey from the guessed infection date, the infection date itself, and some authentication data to verify the test result
+ \\
+\hline
+\end{ubparam}
+\subsection{Responses}
+\subsubsection{ 200 Success }
+Returns OK if successful
+ 
+
+    
+        \begin{ubresponses}{\textwidth}{|Y|}
+        \ubheader{Type}\\
+        \hline
+             \hyperref[sec:string] { string } \\
+ \hline
+
+        \end{ubresponses}
+    
+\subsubsection{ 400 Bad Request }
+Key is not base64 encoded
+ 
+
+
+\section{ /v1/exposed/{dayDateStr} }
+    \begin{verbatim}
+    get /v1/exposed/{dayDateStr}
+    \end{verbatim}
+
+
+\subsection{ Path Parameters }
+\begin{ubparam}{\textwidth}{|H|c|Y|}
+\ubheader{Field} & \ubheader{Type} & \ubheader{Description}\\
+\hline
+\ubheader{ dayDateStr }   \textcolor{red}{\emph{*}}  &  string  & The date for which we want to get the SecretKey.
+ \\
+\hline
+\end{ubparam}
+\subsection{Responses}
+\subsubsection{ 200 Success }
+Returns ExposedOverview, which includes all secretkeys which were published on \emph{dayDateStr}.
+ 
+
+    
+        \begin{ubresponses}{\textwidth}{|Y|}
+        \ubheader{Type}\\
+        \hline
+             \hyperref[sec:ExposedOverview] { ExposedOverview } \\
+ \hline
+
+        \end{ubresponses}
+    
+\subsubsection{ 400 Bad Request }
+If dayDateStr has the wrong format
+ 
+
+
+
+\part{Models}
+All Models, which are used by the Enpoints are described here. For every field we give examples, to give an overview of what the backend expects.
+\label{sec:Models}
+\subsection{ ExposedOverview }
+\label{sec:ExposedOverview}
+\begin{ubresponses}{\textwidth}{|H|c|Y|p{3cm}|}
+\ubheader{Field} & \ubheader{Type}  &\ubheader{Description}& \ubheader{Example}\\
+\hline
+ \ubheader{ exposed }  & \hyperref[sec:Exposee]{ Exposee[] }   & A list of all SecretKeys
+ &  \seqsplit{c.f. Exposee model} \\
+\hline
+
+\end{ubresponses}
+
+\subsection{ Exposee }
+\label{sec:Exposee}
+\begin{ubresponses}{\textwidth}{|H|c|Y|p{3cm}|}
+\ubheader{Field} & \ubheader{Type}  &\ubheader{Description}& \ubheader{Example}\\
+\hline
+ \ubheader{ key }  \textcolor{red}{\emph{*}}  & \hyperref[sec:string]{ string }   & The SecretKey of a exposed as a base64 encoded string. The SecretKey consists of 32 bytes.
+ &  \seqsplit{QUJDREVGR0hJSktMTU5PUFFSU1RVVldYWVpBQkNERUY=} \\
+\hline
+ \ubheader{ onset }  \textcolor{red}{\emph{*}}  & \hyperref[sec:string]{ string }   & The onset of an exposed.
+ &  \seqsplit{2020-04-06} \\
+\hline
+
+\end{ubresponses}
+
+\subsection{ ExposeeAuthData }
+\label{sec:ExposeeAuthData}
+\begin{ubresponses}{\textwidth}{|H|c|Y|p{3cm}|}
+\ubheader{Field} & \ubheader{Type}  &\ubheader{Description}& \ubheader{Example}\\
+\hline
+ \ubheader{ value }  & \hyperref[sec:string]{ string }   & Authentication data used to verify the test result (base64 encoded)
+ &  \seqsplit{TBD} \\
+\hline
+
+\end{ubresponses}
+
+\subsection{ ExposeeRequest }
+\label{sec:ExposeeRequest}
+\begin{ubresponses}{\textwidth}{|H|c|Y|p{3cm}|}
+\ubheader{Field} & \ubheader{Type}  &\ubheader{Description}& \ubheader{Example}\\
+\hline
+ \ubheader{ key }  \textcolor{red}{\emph{*}}  & \hyperref[sec:string]{ string }   & The SecretKey used to generate EphID base64 encoded.
+ &  \seqsplit{QUJDREVGR0hJSktMTU5PUFFSU1RVVldYWVpBQkNERUY=} \\
+\hline
+ \ubheader{ onset }  \textcolor{red}{\emph{*}}  & \hyperref[sec:string]{ string }   & The onset date of the secret key. Format: yyyy-MM-dd
+ &  \seqsplit{2019-01-31} \\
+\hline
+ \ubheader{ authData }  \textcolor{red}{\emph{*}}  & \hyperref[sec:ExposeeAuthData]{ ExposeeAuthData }   & AuthenticationData provided by the health institutes to verify the test results
+ &  \seqsplit{TBD} \\
+\hline
+
+\end{ubresponses}
+
+
+
+\end{document}

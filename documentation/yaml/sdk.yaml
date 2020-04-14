@@ -1,0 +1,127 @@
+openapi: 3.0.0
+servers:
+- url: https://demo.dpppt.org
+  description: ''
+info:
+  version: 1.0-develop
+  description: D3PT SDK API
+  title: D3PT API
+paths:
+  /v1/:
+    get:
+      summary: hello
+      description: hello
+      responses:
+        '200':
+          description: ''
+          content:
+            application/json:
+              schema:
+                type: string
+  /v1/exposed:
+    post:
+      summary: addExposee
+      description: Enpoint used to publish the SecretKey.
+      responses:
+        '200':
+          description: Returns OK if successful
+          content:
+            application/json:
+              schema:
+                type: string
+        '400':
+          description: Key is not base64 encoded
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/org.dpppt.backend.sdk.model.ExposeeRequest'
+        description: The ExposeeRequest contains the SecretKey from the guessed infection
+          date, the infection date itself, and some authentication data to verify
+          the test result
+      parameters:
+      - name: User-Agent
+        in: header
+        description: App Identifier (PackageName/BundleIdentifier) + App-Version +
+          OS (Android/iOS) + OS-Version
+        example: ch.ubique.android.starsdk;1.0;iOS;13.3
+        required: true
+        schema:
+          type: string
+  /v1/exposed/{dayDateStr}:
+    get:
+      summary: getExposed
+      description: ''
+      responses:
+        '200':
+          description: Returns ExposedOverview, which includes all secretkeys which
+            were published on _dayDateStr_.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/org.dpppt.backend.sdk.model.ExposedOverview'
+        '400':
+          description: If dayDateStr has the wrong format
+      parameters:
+      - name: dayDateStr
+        in: path
+        description: The date for which we want to get the SecretKey.
+        example: '2019-01-31'
+        required: true
+        schema:
+          type: string
+components:
+  schemas:
+    org.dpppt.backend.sdk.model.ExposedOverview:
+      type: object
+      properties:
+        exposed:
+          type: array
+          items:
+            $ref: '#/components/schemas/org.dpppt.backend.sdk.model.Exposee'
+          description: A list of all SecretKeys
+          example: c.f. Exposee model
+    org.dpppt.backend.sdk.model.Exposee:
+      type: object
+      required:
+      - key
+      - onset
+      properties:
+        key:
+          type: string
+          description: The SecretKey of a exposed as a base64 encoded string. The
+            SecretKey consists of 32 bytes.
+          example: QUJDREVGR0hJSktMTU5PUFFSU1RVVldYWVpBQkNERUY=
+        onset:
+          type: string
+          description: The onset of an exposed.
+          example: '2020-04-06'
+    org.dpppt.backend.sdk.model.ExposeeAuthData:
+      type: object
+      properties:
+        value:
+          type: string
+          description: Authentication data used to verify the test result (base64
+            encoded)
+          example: TBD
+    org.dpppt.backend.sdk.model.ExposeeRequest:
+      type: object
+      required:
+      - key
+      - onset
+      - authData
+      properties:
+        key:
+          type: string
+          description: The SecretKey used to generate EphID base64 encoded.
+          example: QUJDREVGR0hJSktMTU5PUFFSU1RVVldYWVpBQkNERUY=
+        onset:
+          type: string
+          description: 'The onset date of the secret key. Format: yyyy-MM-dd'
+          example: '2019-01-31'
+        authData:
+          $ref: '#/components/schemas/org.dpppt.backend.sdk.model.ExposeeAuthData'
+          description: AuthenticationData provided by the health institutes to verify
+            the test results
+          example: TBD

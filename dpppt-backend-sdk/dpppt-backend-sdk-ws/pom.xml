@@ -1,0 +1,118 @@
+<project xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+	xmlns="http://maven.apache.org/POM/4.0.0"
+	xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+	<modelVersion>4.0.0</modelVersion>
+	<parent>
+		<groupId>org.dpppt</groupId>
+		<artifactId>dpppt-backend-sdk</artifactId>
+		<version>1.0.0-SNAPSHOT</version>
+	</parent>
+	<artifactId>dpppt-backend-sdk-ws</artifactId>
+	<name>DP3T Backend SDK WS</name>
+	<packaging>jar</packaging>
+
+	<properties>
+		<start-class>org.dpppt.backend.sdk.ws.Application</start-class>
+	</properties>
+
+	<dependencies>
+		<dependency>
+			<groupId>org.springframework.boot</groupId>
+			<artifactId>spring-boot-starter-web</artifactId>
+		</dependency>
+
+		<!-- d3pt models -->
+		<dependency>
+			<groupId>org.dpppt</groupId>
+			<artifactId>dpppt-backend-sdk-model</artifactId>
+			<version>1.0.0-SNAPSHOT</version>
+		</dependency>
+
+		<dependency>
+			<groupId>org.dpppt</groupId>
+			<artifactId>dpppt-backend-sdk-data</artifactId>
+			<version>1.0.0-SNAPSHOT</version>
+		</dependency>
+
+		<dependency>
+			<groupId>org.springframework.boot</groupId>
+			<artifactId>spring-boot-starter-test</artifactId>
+			<scope>test</scope>
+		</dependency>
+
+		<dependency>
+			<groupId>ch.ubique.openapi</groupId>
+			<artifactId>springboot-swagger-3</artifactId>
+			<version>1.1.2</version>
+		</dependency>
+
+	</dependencies>
+
+
+	<dependencyManagement>
+		<dependencies>
+			<dependency>
+				<groupId>org.springframework.boot</groupId>
+				<artifactId>spring-boot-dependencies</artifactId>
+				<type>pom</type>
+				<version>${spring-boot-version}</version>
+				<scope>import</scope>
+			</dependency>
+		</dependencies>
+	</dependencyManagement>
+
+	<repositories>
+		<repository>
+			<id>github</id>
+			<name>github</name>
+			<url>https://maven.pkg.github.com/Ubique-OSS/springboot-swagger3</url>
+		</repository>
+	</repositories>
+	<build>
+		<plugins>
+			<plugin>
+				<groupId>org.springframework.boot</groupId>
+				<artifactId>spring-boot-maven-plugin</artifactId>
+				<version>2.2.6.RELEASE</version>
+				<configuration>
+					<mainClass>org.dpppt.backend.sdk.ws.Application</mainClass>
+				</configuration>
+				<executions>
+					<execution>
+						<goals>
+							<goal>repackage</goal>
+						</goals>
+					</execution>
+				</executions>
+			</plugin>
+			<plugin>
+				<groupId>ch.ubique.openapi</groupId>
+				<artifactId>springboot-swagger-3</artifactId>
+				<version>1.1.2</version>
+
+				<executions>
+					<execution>
+						<phase>none</phase>
+						<goals>
+							<goal>springboot-swagger-3</goal>
+						</goals>
+					</execution>
+				</executions>
+				<configuration>
+					<apiVersion>1.0-develop</apiVersion>
+					<basePackages>
+						org.dpppt.backend.sdk
+					</basePackages>
+					<controllers>
+						<controller>org.dpppt.backend.sdk.ws.controller.DPPPTController</controller>
+					</controllers>
+					<description>D3PT SDK API</description>
+					<apiUrls>
+						<apiUrl>https://demo.dpppt.org</apiUrl>
+					</apiUrls>
+					<title>D3PT API</title>
+				</configuration>
+			</plugin>
+		</plugins>
+	</build>
+</project>
