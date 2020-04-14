@@ -6,4 +6,6 @@ if [ cargo ]; then
 else
     echo "Installing rust"
     curl https://sh.rustup.rs -sSf | sh
+    source ~/.cargo/env
+    cargo install rusty-swagger
 fi
