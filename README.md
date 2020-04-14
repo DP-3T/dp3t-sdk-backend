@@ -30,6 +30,8 @@ The full set of documents for DP3T is at https://github.com/DP-3T/documents. Ple
 ## Architecture
 A central discovery service is hosted on [Github](https://github.com/DP-3T/dp3t-discovery). This server provides the necessary information for the SDK to initialize itself. After the SDK loads the base url for its own backend, it will load the infected list from there, as well as post if a user is infected. This will also allow apps to fetch lists from other backend systems participating in this scheme and can handle roaming of users.
 
+The SDK-Backend provides an interface to publish exposed keys and get a list of exposed keys. 
+
 ![](documentation/img/dp3t-backend.svg)
 
 ### General
@@ -73,8 +75,24 @@ cd ws-sdk && docker build -t <the-tag-we-use> .
 ```
 
 ```bash
-docker run <the-tag-we-use>
+docker run -p 80:8080 <the-tag-we-use>
  ```
+
+### Makefile
+You can use the provided makefile to build the backend, build a docker image and generate the documentation.
+
+Without a target the makefile will generate everything except the docker image.
+
+```bash
+make
+``` 
+
+To build the docker image run
+
+```bash
+make docker-build
+```
+
 
 
 ## License
