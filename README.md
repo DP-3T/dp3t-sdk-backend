@@ -50,7 +50,7 @@ For development purposes an hsqldb can be used to run the webservice locally. Fo
 ### API
 The backend API specification is documented here:
 * [PDF](/documentation/documentation.pdf)
-* [Swagger Editor (Works as soon the repo is public)](https://editor.swagger.io/?url=https://raw.githubusercontent.com/DP-3T/dp3t-sdk-backend/master/documentation/yaml/sdk.yaml)
+* [Swagger Editor](https://editor.swagger.io/?url=https://raw.githubusercontent.com/DP-3T/dp3t-sdk-backend/develop/documentation/yaml/sdk.yaml)
 
 ### Build
 To build you need to install Maven.
