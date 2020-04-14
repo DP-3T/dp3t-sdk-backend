@@ -4,8 +4,8 @@ servers:
   description: ''
 info:
   version: 1.0-develop
-  description: D3PT SDK API
-  title: D3PT API
+  description: DP3T SDK API
+  title: DP3T API
 paths:
   /v1/:
     get:

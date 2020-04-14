@@ -106,11 +106,11 @@
 					<controllers>
 						<controller>org.dpppt.backend.sdk.ws.controller.DPPPTController</controller>
 					</controllers>
-					<description>D3PT SDK API</description>
+					<description>DP3T SDK API</description>
 					<apiUrls>
 						<apiUrl>https://demo.dpppt.org</apiUrl>
 					</apiUrls>
-					<title>D3PT API</title>
+					<title>DP3T API</title>
 				</configuration>
 			</plugin>
 		</plugins>
