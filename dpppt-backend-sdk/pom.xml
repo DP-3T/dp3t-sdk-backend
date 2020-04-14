@@ -105,6 +105,11 @@
             <name>github</name>
             <url>https://maven.pkg.github.com/Ubique-OSS/springboot-swagger3</url>
         </repository>
+         <plluginRepository>
+            <id>github</id>
+            <name>github</name>
+            <url>https://maven.pkg.github.com/Ubique-OSS/springboot-swagger3</url>
+        </plluginRepository>
         <repository>
             <id>github-annotation</id>
             <name>github</name>

@@ -92,7 +92,7 @@
 
 				<executions>
 					<execution>
-						<phase>none</phase>
+						<phase>compile</phase>
 						<goals>
 							<goal>springboot-swagger-3</goal>
 						</goals>
