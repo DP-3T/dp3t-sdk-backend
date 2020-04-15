@@ -35,12 +35,15 @@ public abstract class WSBaseConfig implements SchedulingConfigurer, WebMvcConfig
 
 	public abstract String getDbType();
 
+	@Value("${ws.exposedlist.cachecontrol: 5}")
+	int exposedListCacheControl;
+	
 	@Value("${ws.app.source}")
 	String appSource;
 	
 	@Bean
 	public DPPPTController dppptSDKController() {
-		return new DPPPTController(dppptSDKDataService(), etagGenerator(), appSource);
+		return new DPPPTController(dppptSDKDataService(), etagGenerator(), appSource, exposedListCacheControl);
 	}
 	
 

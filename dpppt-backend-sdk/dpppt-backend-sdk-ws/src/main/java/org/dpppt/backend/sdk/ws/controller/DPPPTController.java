@@ -47,16 +47,18 @@ public class DPPPTController {
 	private final DPPPTDataService dataService;
 	private final EtagGeneratorInterface etagGenerator;
 	private final String appSource;
+	private final int exposedListCacheContol;
 
 	private static final DateTimeFormatter DAY_DATE_FORMATTER = DateTimeFormat.forPattern("yyyy-MM-dd")
 			.withZone(DateTimeZone.UTC);
 
 	private static final Logger logger = LoggerFactory.getLogger(DPPPTController.class);
 
-	public DPPPTController(DPPPTDataService dataService, EtagGeneratorInterface etagGenerator, String appSource) {
+	public DPPPTController(DPPPTDataService dataService, EtagGeneratorInterface etagGenerator, String appSource, int exposedListCacheControl) {
 		this.dataService = dataService;
 		this.appSource = appSource;
 		this.etagGenerator = etagGenerator;
+		this.exposedListCacheContol = exposedListCacheControl;
 	}
 
 	@CrossOrigin(origins = {
@@ -113,7 +115,7 @@ public class DPPPTController {
 		if (request.checkNotModified(etag)) {
 			return ResponseEntity.status(HttpStatus.NOT_MODIFIED).build();
 		} else {
-			return ResponseEntity.ok().cacheControl(CacheControl.maxAge(Duration.ofMinutes(5))).body(overview);
+			return ResponseEntity.ok().cacheControl(CacheControl.maxAge(Duration.ofMinutes(exposedListCacheContol))).body(overview);
 		}
 	}
 
