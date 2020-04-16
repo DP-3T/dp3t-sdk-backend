@@ -32,10 +32,10 @@ public interface DPPPTDataService {
 	/**
 	 * Returns the maximum id of the stored exposed entries for the given day date
 	 * 
-	 * @param dayDate
+	 * @param day
 	 * 
 	 * @return
 	 */
-	Integer getMaxExposedId(DateTime dayDate);
+	Integer getMaxExposedIdDay(DateTime day);
 
 }
