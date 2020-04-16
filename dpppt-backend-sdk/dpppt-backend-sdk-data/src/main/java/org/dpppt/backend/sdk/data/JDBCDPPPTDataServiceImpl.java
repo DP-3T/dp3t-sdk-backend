@@ -60,4 +60,19 @@ public class JDBCDPPPTDataServiceImpl implements DPPPTDataService {
 		params.addValue("nextDayMidnight", dayMidnight.plusDays(1).toDate());
 		return jt.query(sql, params, new ExposeeRowMapper());
 	}
+
+	@Override
+	@Transactional(readOnly = true)
+	public Integer getMaxExposedId(DateTime day) {
+		MapSqlParameterSource params = new MapSqlParameterSource();
+		params.addValue("dayMidnight", day.toDate());
+		params.addValue("nextDayMidnight", day.plusDays(1).toDate());
+		String sql = "select max(pk_exposed_id) from t_exposed where received_at >= :dayMidnight and received_at < :nextDayMidnight";
+		Integer maxId = jt.queryForObject(sql, params, Integer.class);
+		if (maxId == null) {
+			return 0;
+		} else {
+			return maxId;
+		}
+	}
 }

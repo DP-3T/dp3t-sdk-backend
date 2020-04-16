@@ -29,4 +29,13 @@ public interface DPPPTDataService {
 	 */
 	List<Exposee> getSortedExposedForDay(DateTime day);
 
+	/**
+	 * Returns the maximum id of the stored exposed entries for the given day date
+	 * 
+	 * @param dayDate
+	 * 
+	 * @return
+	 */
+	Integer getMaxExposedId(DateTime dayDate);
+
 }
