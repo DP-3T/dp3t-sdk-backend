@@ -30,7 +30,9 @@ The full set of documents for DP3T is at https://github.com/DP-3T/documents. Ple
 ## Architecture
 A central discovery service is hosted on [Github](https://github.com/DP-3T/dp3t-discovery). This server provides the necessary information for the SDK to initialize itself. After the SDK loads the base url for its own backend, it will load the infected list from there, as well as post if a user is infected. This will also allow apps to fetch lists from other backend systems participating in this scheme and can handle roaming of users.
 
-The SDK-Backend provides an interface to publish exposed keys and get a list of exposed keys. 
+The SDK-Backend provides an interface to publish exposed keys and get a list of exposed keys.
+
+> Note that the requests on the image are not the actual endpoints in the reference implementation. They differ in the picture to show the possible separation of the two requests. For the actual enpoint paths refer to the backend documentation further down (e.g. PDF or OpenAPI).
 
 ![](documentation/img/dp3t-backend.svg)
 
