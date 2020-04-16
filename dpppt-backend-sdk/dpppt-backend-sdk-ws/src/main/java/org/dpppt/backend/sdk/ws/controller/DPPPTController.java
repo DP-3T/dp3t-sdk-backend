@@ -109,7 +109,7 @@ public class DPPPTController {
 	 	String dayDateStr, WebRequest request) {
 		DateTime dayDate = DAY_DATE_FORMATTER.parseDateTime(dayDateStr);
 		List<Exposee> exposeeList = dataService.getSortedExposedForDay(dayDate);
-		int max = exposeeList.isEmpty() ? 0 : exposeeList.get(exposeeList.size() - 1).getId();
+		int max = exposeeList.isEmpty() ? 0 : exposeeList.get(0).getId();
 		ExposedOverview overview = new ExposedOverview(exposeeList);
 		String etag = etagGenerator.getEtag(max);
 		if (request.checkNotModified(etag)) {
