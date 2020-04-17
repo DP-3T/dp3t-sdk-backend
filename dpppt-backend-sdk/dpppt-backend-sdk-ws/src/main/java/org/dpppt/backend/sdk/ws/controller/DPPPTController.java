@@ -106,15 +106,15 @@ public class DPPPTController {
 	@RequestMapping(value = "/exposed/{dayDateStr}")
 	public @ResponseBody ResponseEntity<ExposedOverview> getExposed(@PathVariable
 	 @Documentation(description = "The date for which we want to get the SecretKey.", example = "2019-01-31") 
-	 	String dayDateStr, WebRequest request) {
+	 	String dayDateStr, WebRequest request) {	
 		DateTime dayDate = DAY_DATE_FORMATTER.parseDateTime(dayDateStr);
-		List<Exposee> exposeeList = dataService.getSortedExposedForDay(dayDate);
-		int max = exposeeList.isEmpty() ? 0 : exposeeList.get(0).getId();
-		ExposedOverview overview = new ExposedOverview(exposeeList);
-		String etag = etagGenerator.getEtag(max);
+		int max = dataService.getMaxExposedIdForDay(dayDate);
+		String etag = etagGenerator.getEtag(max);		
 		if (request.checkNotModified(etag)) {
 			return ResponseEntity.status(HttpStatus.NOT_MODIFIED).build();
 		} else {
+			List<Exposee> exposeeList = dataService.getSortedExposedForDay(dayDate);
+			ExposedOverview overview = new ExposedOverview(exposeeList);
 			return ResponseEntity.ok().cacheControl(CacheControl.maxAge(Duration.ofMinutes(exposedListCacheContol))).body(overview);
 		}
 	}
