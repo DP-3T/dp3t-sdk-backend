@@ -57,7 +57,7 @@ public class DPPPTController {
 	@CrossOrigin(origins = { "https://editor.swagger.io" })
 	@RequestMapping(value = "", method = RequestMethod.GET)
 	public @ResponseBody String hello() {
-		return "Hello from DP3T SDK WS";
+		return "Hello from DP3T WS";
 	}
 
 	@CrossOrigin(origins = { "https://editor.swagger.io" })
