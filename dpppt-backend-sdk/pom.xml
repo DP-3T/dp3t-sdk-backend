@@ -129,4 +129,12 @@
 			</plugins>
 		</pluginManagement>
 	</build>
+
+	<distributionManagement>
+		<repository>
+			<id>github</id>
+			<name>GitHub Packages</name>
+			<url>https://maven.pkg.github.com/DP-3T/dp3t-sdk-backend</url>
+		</repository>
+	</distributionManagement>
 </project>
