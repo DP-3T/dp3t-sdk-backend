@@ -11,11 +11,11 @@ RUSTY_SWAGGER = rusty-swagger
 all: clean all1
 all1: clean updateproject swagger la la2 la3 
 no: clean updateproject swagger la la2 
-docker-build: updateproject swagger docker
+docker-build: updateproject docker
 
 updateproject:
 	mvn -f dpppt-backend-sdk/pom.xml install
-	cp dpppt-backend-sdk/dpppt-backend-sdk-ws/generated/swagger/swagger.yaml documentation/yaml/sdk.yaml
+	#cp dpppt-backend-sdk/dpppt-backend-sdk-ws/generated/swagger/swagger.yaml documentation/yaml/sdk.yaml
 
 swagger:
 	cd documentation; $(RUSTY_SWAGGER) --file ../dpppt-backend-sdk/dpppt-backend-sdk-ws/generated/swagger/swagger.yaml
