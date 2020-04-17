@@ -56,21 +56,6 @@ The backend API specification is documented here:
 * [PDF](/documentation/documentation.pdf)
 * [Swagger Editor](https://editor.swagger.io/?url=https://raw.githubusercontent.com/DP-3T/dp3t-sdk-backend/develop/documentation/yaml/sdk.yaml)
 
-### Github Packages
-We are using Github Packages to deploy our documentation toolset. This means that either one uses a `GITHUB_TOKEN` to install maven packages with the [GithubAPI](https://help.github.com/en/packages/using-github-packages-with-your-projects-ecosystem/configuring-apache-maven-for-use-with-github-packages), or one downloads the jars and installs them by themselves.
-
-> Maven uses a different markup to set repositories for plugins. If custom profiles are used then an entry to the `settings.xml` file should be added which looks like the following.
-```xml
-<pluginRepositories>
-    <pluginRepository>
-        <id>github</id>
-        <name>github</name>
-        <url>https://maven.pkg.github.com/Ubique-OSS/springboot-swagger3</url>
-    </pluginRepository>
-</pluginRepositories>
-```
-
-The documentation toolset can also be disabled. For this, one needs to remove all `@Documentation`-Annotation in the Java-Code. Further, one needs to remove the plugin reference in the web service directory's `pom.xml`. Finally remove all references to plugins from `ch.ubique.openapi`. The project can now be built without the Github packages.
 ### Build
 To build you need to install Maven.
 
