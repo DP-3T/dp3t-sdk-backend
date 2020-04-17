@@ -41,9 +41,8 @@
 		</dependency>
 
 		<dependency>
-			<groupId>ch.ubique.openapi</groupId>
-			<artifactId>springboot-swagger-3</artifactId>
-			<version>1.1.2</version>
+			<groupId>org.springframework.boot</groupId>
+			<artifactId>spring-boot-starter-actuator</artifactId>
 		</dependency>
 
 	</dependencies>
@@ -84,34 +83,6 @@
 						</goals>
 					</execution>
 				</executions>
-			</plugin>
-			<plugin>
-				<groupId>ch.ubique.openapi</groupId>
-				<artifactId>springboot-swagger-3</artifactId>
-				<version>1.1.2</version>
-
-				<executions>
-					<execution>
-						<phase>compile</phase>
-						<goals>
-							<goal>springboot-swagger-3</goal>
-						</goals>
-					</execution>
-				</executions>
-				<configuration>
-					<apiVersion>1.0-develop</apiVersion>
-					<basePackages>
-						org.dpppt.backend.sdk
-					</basePackages>
-					<controllers>
-						<controller>org.dpppt.backend.sdk.ws.controller.DPPPTController</controller>
-					</controllers>
-					<description>DP3T SDK API</description>
-					<apiUrls>
-						<apiUrl>https://demo.dpppt.org</apiUrl>
-					</apiUrls>
-					<title>DP3T API</title>
-				</configuration>
 			</plugin>
 		</plugins>
 	</build>

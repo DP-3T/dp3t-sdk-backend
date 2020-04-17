@@ -70,8 +70,7 @@ public class WSProdConfig extends WSBaseConfig {
 	@Bean
 	@Override
 	public Flyway flyway() {
-		Flyway flyWay = Flyway.configure().dataSource(dataSource()).locations("classpath:/db/migration/pgsql")
-				.baselineOnMigrate(false).validateOnMigrate(false).load();
+		Flyway flyWay = Flyway.configure().dataSource(dataSource()).locations("classpath:/db/migration/pgsql").load();
 		flyWay.migrate();
 		return flyWay;
 	}
@@ -83,7 +82,7 @@ public class WSProdConfig extends WSBaseConfig {
 
 	@Override
 	public void configureTasks(ScheduledTaskRegistrar taskRegistrar) {
-		
+
 	}
 
 }

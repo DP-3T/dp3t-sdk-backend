@@ -36,6 +36,6 @@ public interface DPPPTDataService {
 	 * 
 	 * @return
 	 */
-	Integer getMaxExposedIdDay(DateTime day);
+	Integer getMaxExposedIdForDay(DateTime day);
 
 }

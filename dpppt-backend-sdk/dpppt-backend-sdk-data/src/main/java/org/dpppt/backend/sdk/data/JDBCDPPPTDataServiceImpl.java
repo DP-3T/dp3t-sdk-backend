@@ -63,7 +63,7 @@ public class JDBCDPPPTDataServiceImpl implements DPPPTDataService {
 
 	@Override
 	@Transactional(readOnly = true)
-	public Integer getMaxExposedIdDay(DateTime day) {
+	public Integer getMaxExposedIdForDay(DateTime day) {
 		MapSqlParameterSource params = new MapSqlParameterSource();
 		params.addValue("dayMidnight", day.toDate());
 		params.addValue("nextDayMidnight", day.plusDays(1).toDate());
