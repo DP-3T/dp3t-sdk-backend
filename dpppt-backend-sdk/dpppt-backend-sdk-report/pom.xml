@@ -1,0 +1,89 @@
+<project xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+		 xmlns="http://maven.apache.org/POM/4.0.0"
+		 xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+	<modelVersion>4.0.0</modelVersion>
+	<parent>
+		<groupId>org.dpppt</groupId>
+		<artifactId>dpppt-backend-sdk</artifactId>
+		<version>1.0.0-SNAPSHOT</version>
+	</parent>
+	<artifactId>dpppt-backend-sdk-report</artifactId>
+	<name>DP3T Backend SDK Report</name>
+
+	<properties>
+		<code.coverage.project.folder>${basedir}/../</code.coverage.project.folder>
+		<code.coverage.overall.data.folder>${basedir}/../target/aggregate.exec</code.coverage.overall.data.folder>
+	</properties>
+
+	<dependencies>
+
+		<!-- dp3t models -->
+		<dependency>
+			<groupId>org.dpppt</groupId>
+			<artifactId>dpppt-backend-sdk-model</artifactId>
+			<version>1.0.0-SNAPSHOT</version>
+		</dependency>
+
+		<dependency>
+			<groupId>org.dpppt</groupId>
+			<artifactId>dpppt-backend-sdk-data</artifactId>
+			<version>1.0.0-SNAPSHOT</version>
+		</dependency>
+
+		<dependency>
+			<groupId>org.dpppt</groupId>
+			<artifactId>dpppt-backend-sdk-ws</artifactId>
+			<version>1.0.0-SNAPSHOT</version>
+		</dependency>
+
+	</dependencies>
+
+	<build>
+			<plugins>
+				<plugin>
+					<groupId>org.apache.maven.plugins</groupId>
+					<artifactId>maven-surefire-plugin</artifactId>
+					<version>2.19.1</version>
+					<configuration>
+						<!-- Jacoco prepare-agent builds some command-line params without -->
+						<!-- which jacoco will not instrument. Hence it is important to add -->
+						<!-- those command-line params here (${argLine} holds those params) -->
+						<argLine>${argLine} -Xms256m -Xmx2048m</argLine>
+						<forkCount>1</forkCount>
+						<runOrder>random</runOrder>
+					</configuration>
+				</plugin>
+				<plugin>
+					<groupId>org.jacoco</groupId>
+					<artifactId>jacoco-maven-plugin</artifactId>
+					<executions>
+						<execution>
+							<id>report-aggregate</id>
+							<phase>verify</phase>
+							<goals>
+								<goal>report-aggregate</goal>
+							</goals>
+						</execution>
+						<execution>
+							<id>merge-results</id>
+							<phase>verify</phase>
+							<goals>
+								<goal>merge</goal>
+							</goals>
+							<configuration>
+								<fileSets>
+									<fileSet>
+										<directory>${code.coverage.project.folder}</directory>
+										<includes>
+											<include>**/target/jacoco.exec</include>
+										</includes>
+									</fileSet>
+								</fileSets>
+								<destFile>${code.coverage.overall.data.folder}/aggregate.exec</destFile>
+							</configuration>
+						</execution>
+					</executions>
+				</plugin>
+			</plugins>
+	</build>
+</project>
