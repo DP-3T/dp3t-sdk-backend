@@ -2,6 +2,41 @@
 \section{Introduction}
 This document outlines the backend as it is. The models and requests are automatically generated. Hence, they should reflect the current live situation. We try to provide examples and description to clarify the use of the fields and responses returned.
 
+\section{Deployment architecture}
+
+From an architecture perspective - this API has two very different functions:
+
+\begin{description}
+\item[Acceptance of seeds for inclusion (\texttt{post /v1/exposed})] which occurs relatively rarely; and may be subject to very tight security controls (especially if it is in ahead of a medical test completing\footnote{Most EU countries have a ``\emph{right to not know}'' the results of a test, so it can be expedient to already provide the SecretKey ahead of time - and only push it onto the distributed list once a test result is in (the fact that the mobile app needs to reset its seed is not an issue; it either did it for good reason; or if the test came round negative - the rest is not an issue either).}). 
+
+From a systems perspective - this endpoint should be very reliable, and, especially, not loose data. 
+
+And privacy wise - one need to be somewhat careful as you have a vantage point of the IP addresses and similar identifying information. 
+
+\item[Publishing of confirmed seeds (\texttt{get /v1/exposed/\{date\}})] is a bulk affair; where efficiency and maximum reachability counts. But where always up is not that key (apps will have to retry anyway) and where best effort is good enough (e.g. the data being a few minutes or hours stale is not an issue).
+
+Here privacy is much less of an issue. And security is not really an issue from a confidentially perspective. 
+
+\end{description}
+
+For this reason - real world implementors should anticipate that the two calls will generally be deployed on separate systems. 
+
+And hence live on separate URLs; one of which may be anycast or similarly `virtualised'.
+
+\subsection{Deployment architecture}
+
+For all but the smallest countries; assuming daily fetches by a few million phones will require the use of a Content Delivery Network or similar `dumb' delivery architecture. 
+
+For this reason - implementors should:
+
+\begin{enumerate}
+\item Assume that the hierarchy under \texttt{get /v1/exposed/\{date\}} is a static file style hierarchy.
+\item Which\footnote{unless a binary/pyramid scheme is added to this proposal} will require the regeneration of all 14 files at least once per 24 hours.
+\item Assume that clients will use `Get-if-modified' and the Date: data; and thus be very careful with things like system wide, stable, e-Tags.
+\end{enumerate}
+
+
+
 \section{Verification of Data}
 To handle heavy workload, requests are routed via a content-delivery-network (CDN). This means that we need to provide proof that the data was not modified by the CDN. We propose a Elliptic-Curve Digital Signature Algorithm using the P256 elliptic curve with a SHA-256 hashing algorithm. The P256 elliptic curve has good native support for the Apple and Android platforms to verify signatures. The public key should be available on the discovery platform and is as well included and distributed with the applications for iOS and Android.
 
@@ -10,5 +45,10 @@ The ensure the possibility of signature verification, the signed endpoints retur
 Since we only want to ensure that the data we are processing was indeed the data sent from the specified backend, it is sufficient to generate the signature of the content which will be processed. 
 
 Too further improve operability, the algorithm used to generate the signature should as well be encoded within the json object, similiar to a JWK (Json web key).
+
+\subsection{Suggestion: RFC3161 digital timestamp and signature}
+
+Another option would be the use of a simple RFC 3161 digital timestamp and signature. As this ties in well with existing infrastructure and is easy to deploy\footnote{Signing side: \url{https://interop.redwax.eu/rs/timestamp/} is just a handful of lines in a webserver config; client side- iOS and Android have support build in.}.
+
 
 \section{Google/Apple Privacy-Preserving Contact Tracing Similarities}
