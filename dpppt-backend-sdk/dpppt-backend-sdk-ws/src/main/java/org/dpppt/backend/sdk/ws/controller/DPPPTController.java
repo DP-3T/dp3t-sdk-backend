@@ -96,7 +96,7 @@ public class DPPPTController {
 
 	@ExceptionHandler(IllegalArgumentException.class)
 	@ResponseStatus(HttpStatus.BAD_REQUEST)
-	public ResponseEntity<?> invalidArguments() {
+	public ResponseEntity<Object> invalidArguments() {
 		return ResponseEntity.badRequest().build();
 	}
 
