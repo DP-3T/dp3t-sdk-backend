@@ -21,7 +21,7 @@ paths:
   /v1/exposed:
     post:
       summary: addExposee
-      description: Enpoint used to publish the SecretKey.
+      description: Endpoint used to publish the SecretKey.
       responses:
         '200':
           description: Returns OK if successful
