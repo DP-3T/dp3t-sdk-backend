@@ -23,11 +23,12 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.CrossOrigin;
 import org.springframework.web.bind.annotation.ExceptionHandler;
+import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestHeader;
 import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.ResponseBody;
 import org.springframework.web.bind.annotation.ResponseStatus;
 import org.springframework.web.context.request.WebRequest;
@@ -55,13 +56,13 @@ public class DPPPTController {
 	}
 
 	@CrossOrigin(origins = { "https://editor.swagger.io" })
-	@RequestMapping(value = "", method = RequestMethod.GET)
+	@GetMapping(value = "")
 	public @ResponseBody String hello() {
 		return "Hello from DP3T WS";
 	}
 
 	@CrossOrigin(origins = { "https://editor.swagger.io" })
-	@RequestMapping(value = "/exposed", method = RequestMethod.POST)
+	@PostMapping(value = "/exposed")
 	public @ResponseBody ResponseEntity<String> addExposee(@Valid @RequestBody ExposeeRequest exposeeRequest,
 			@RequestHeader(value = "User-Agent", required = true) String userAgent) {
 		if (isValidBase64(exposeeRequest.getKey())) {
@@ -72,12 +73,12 @@ public class DPPPTController {
 			return ResponseEntity.ok().build();
 
 		} else {
-			return new ResponseEntity<String>("No valid base64 key", HttpStatus.BAD_REQUEST);
+			return new ResponseEntity<>("No valid base64 key", HttpStatus.BAD_REQUEST);
 		}
 	}
 
 	@CrossOrigin(origins = { "https://editor.swagger.io" })
-	@RequestMapping(value = "/exposed/{dayDateStr}")
+	@GetMapping(value = "/exposed/{dayDateStr}")
 	public @ResponseBody ResponseEntity<ExposedOverview> getExposed(@PathVariable String dayDateStr,
 			WebRequest request) {
 		DateTime dayDate = DAY_DATE_FORMATTER.parseDateTime(dayDateStr);
@@ -95,7 +96,7 @@ public class DPPPTController {
 
 	@ExceptionHandler(IllegalArgumentException.class)
 	@ResponseStatus(HttpStatus.BAD_REQUEST)
-	public ResponseEntity<?> invalidArguments() {
+	public ResponseEntity<Object> invalidArguments() {
 		return ResponseEntity.badRequest().build();
 	}
 
