@@ -31,8 +31,10 @@ jobs:
       run: mvn -B package --file dpppt-backend-sdk/pom.xml
       env:
         GITHUB_TOKEN: ${{ github.token }}
+    - name: Echo current ref
+      run: echo "${{ github.ref }}"
     - name: Publish to GitHub Packages Apache Maven
-      if: github.ref == 'refs/head/develop'
+      if: github.ref == 'refs/heads/develop'
       run: mvn deploy --file dpppt-backend-sdk/pom.xml -s $GITHUB_WORKSPACE/settings.xml
       env:
         GITHUB_TOKEN: ${{ github.token }}
