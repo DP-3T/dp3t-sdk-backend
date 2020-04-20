@@ -73,7 +73,7 @@ public class DPPPTController {
 			return ResponseEntity.ok().build();
 
 		} else {
-			return new ResponseEntity<String>("No valid base64 key", HttpStatus.BAD_REQUEST);
+			return new ResponseEntity<>("No valid base64 key", HttpStatus.BAD_REQUEST);
 		}
 	}
 
