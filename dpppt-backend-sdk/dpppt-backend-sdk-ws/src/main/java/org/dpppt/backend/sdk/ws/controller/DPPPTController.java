@@ -11,6 +11,7 @@ import org.dpppt.backend.sdk.data.EtagGeneratorInterface;
 import org.dpppt.backend.sdk.model.ExposedOverview;
 import org.dpppt.backend.sdk.model.Exposee;
 import org.dpppt.backend.sdk.model.ExposeeRequest;
+import org.dpppt.backend.sdk.ws.security.JWTValidateRequest;
 import org.joda.time.DateTime;
 import org.joda.time.DateTimeZone;
 import org.joda.time.format.DateTimeFormat;
@@ -20,6 +21,8 @@ import org.slf4j.LoggerFactory;
 import org.springframework.http.CacheControl;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.core.annotation.AuthenticationPrincipal;
+import org.springframework.security.oauth2.jwt.Jwt;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.CrossOrigin;
 import org.springframework.web.bind.annotation.ExceptionHandler;
@@ -41,6 +44,7 @@ public class DPPPTController {
 	private final EtagGeneratorInterface etagGenerator;
 	private final String appSource;
 	private final int exposedListCacheContol;
+	private final JWTValidateRequest validateRequest;
 
 	private static final DateTimeFormatter DAY_DATE_FORMATTER = DateTimeFormat.forPattern("yyyy-MM-dd")
 			.withZone(DateTimeZone.UTC);
@@ -48,11 +52,12 @@ public class DPPPTController {
 	private static final Logger logger = LoggerFactory.getLogger(DPPPTController.class);
 
 	public DPPPTController(DPPPTDataService dataService, EtagGeneratorInterface etagGenerator, String appSource,
-			int exposedListCacheControl) {
+			int exposedListCacheControl, JWTValidateRequest validateRequest) {
 		this.dataService = dataService;
 		this.appSource = appSource;
 		this.etagGenerator = etagGenerator;
 		this.exposedListCacheContol = exposedListCacheControl;
+		this.validateRequest = validateRequest;
 	}
 
 	@CrossOrigin(origins = { "https://editor.swagger.io" })
@@ -64,11 +69,12 @@ public class DPPPTController {
 	@CrossOrigin(origins = { "https://editor.swagger.io" })
 	@PostMapping(value = "/exposed")
 	public @ResponseBody ResponseEntity<String> addExposee(@Valid @RequestBody ExposeeRequest exposeeRequest,
-			@RequestHeader(value = "User-Agent", required = true) String userAgent) {
-		if (isValidBase64(exposeeRequest.getKey())) {
+			@RequestHeader(value = "User-Agent", required = true) String userAgent, @AuthenticationPrincipal Object principal) {
+	
+		if (this.validateRequest.isValid((Jwt)principal) && isValidBase64(exposeeRequest.getKey())) {
 			Exposee exposee = new Exposee();
 			exposee.setKey(exposeeRequest.getKey());
-			exposee.setOnset(exposeeRequest.getOnset());
+			exposee.setOnset(this.validateRequest.getOnset((Jwt) principal));
 			dataService.upsertExposee(exposee, appSource);
 			return ResponseEntity.ok().build();
 
