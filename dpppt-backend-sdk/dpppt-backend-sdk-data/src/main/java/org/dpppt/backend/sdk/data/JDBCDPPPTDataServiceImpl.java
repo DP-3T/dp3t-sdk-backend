@@ -75,4 +75,10 @@ public class JDBCDPPPTDataServiceImpl implements DPPPTDataService {
 			return maxId;
 		}
 	}
+
+	@Override
+	public boolean checkAndInsertPublishUUID(String uuid) {
+		// TODO Auto-generated method stub
+		return false;
+	}
 }
