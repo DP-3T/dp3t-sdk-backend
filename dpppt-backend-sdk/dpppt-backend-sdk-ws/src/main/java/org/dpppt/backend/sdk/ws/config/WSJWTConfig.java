@@ -44,7 +44,7 @@ public class WSJWTConfig extends WebSecurityConfigurerAdapter {
             .antMatchers(HttpMethod.POST, "/v1/exposed")
             .authenticated()
             .anyRequest()
-            .permitAll()
+			.permitAll()
         .and()
           .oauth2ResourceServer()
           .jwt();
@@ -86,6 +86,6 @@ public class WSJWTConfig extends WebSecurityConfigurerAdapter {
 		// file:/
 		// classpath:/
 		// http(s):/
-		return "";
+		return publicKeyUrl;
 	}
 }

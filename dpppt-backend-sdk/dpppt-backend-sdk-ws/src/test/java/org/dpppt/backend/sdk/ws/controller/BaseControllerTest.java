@@ -16,11 +16,13 @@ import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.setup.MockMvcBuilders;
 import org.springframework.web.context.WebApplicationContext;
 
+import static org.springframework.security.test.web.servlet.setup.SecurityMockMvcConfigurers.*;
+
 import java.io.IOException;
 
 @RunWith(SpringRunner.class)
 @SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT)
-@ActiveProfiles({"dev"})
+@ActiveProfiles({"dev", "jwt"})
 @TestPropertySource(properties = {
 		"ws.app.source=org.dpppt.demo",
 })
@@ -34,7 +36,7 @@ public abstract class BaseControllerTest {
 
 	@Before
 	public void setup() throws Exception {
-		this.mockMvc = MockMvcBuilders.webAppContextSetup(webApplicationContext).build();
+		this.mockMvc = MockMvcBuilders.webAppContextSetup(webApplicationContext).apply(springSecurity()).build();
 		this.objectMapper = new ObjectMapper(new JsonFactory());
 		this.objectMapper.registerModule(new JavaTimeModule());
 		this.objectMapper.registerModule(new JodaModule());

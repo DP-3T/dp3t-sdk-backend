@@ -79,6 +79,6 @@ public class JDBCDPPPTDataServiceImpl implements DPPPTDataService {
 	@Override
 	public boolean checkAndInsertPublishUUID(String uuid) {
 		// TODO Auto-generated method stub
-		return false;
+		return true;
 	}
 }
