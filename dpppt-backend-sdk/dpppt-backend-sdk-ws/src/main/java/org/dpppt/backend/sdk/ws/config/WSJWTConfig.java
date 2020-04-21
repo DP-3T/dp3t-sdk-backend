@@ -14,25 +14,27 @@ import org.dpppt.backend.sdk.ws.security.JWTValidator;
 import org.dpppt.backend.sdk.ws.security.ValidateRequest;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
-import org.springframework.boot.autoconfigure.security.oauth2.resource.OAuth2ResourceServerProperties;
+
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.Profile;
 import org.springframework.http.HttpMethod;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
+import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
 import org.springframework.security.config.annotation.web.configuration.WebSecurityConfigurerAdapter;
-import org.springframework.security.oauth2.core.OAuth2TokenValidator;
-import org.springframework.security.oauth2.jwt.Jwt;
+
 import org.springframework.security.oauth2.jwt.JwtDecoder;
 import org.springframework.security.oauth2.jwt.NimbusJwtDecoder;
 
 @Configuration
+@EnableWebSecurity
 @Profile(value = "jwt")
 public class WSJWTConfig extends WebSecurityConfigurerAdapter {
 	
 	@Value("${ws.app.jwt.publickey}")
 	String publicKeyUrl;
 
+	
 	@Override
 	protected void configure(HttpSecurity http) throws Exception {
 	// @formatter:off
@@ -50,7 +52,7 @@ public class WSJWTConfig extends WebSecurityConfigurerAdapter {
 	}
 
 	@Bean
-	public JwtDecoder jwtDecoder(OAuth2ResourceServerProperties properties)
+	public JwtDecoder jwtDecoder()
 			throws InvalidKeySpecException, NoSuchAlgorithmException {
 		X509EncodedKeySpec keySpecX509 = new X509EncodedKeySpec(Base64.getDecoder().decode(loadPublicKey()));
 		KeyFactory kf = KeyFactory.getInstance("RSA");
@@ -84,6 +86,6 @@ public class WSJWTConfig extends WebSecurityConfigurerAdapter {
 		// file:/
 		// classpath:/
 		// http(s):/
-		return null;
+		return "";
 	}
 }
