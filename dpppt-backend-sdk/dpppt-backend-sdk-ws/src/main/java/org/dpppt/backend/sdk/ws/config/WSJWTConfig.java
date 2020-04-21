@@ -9,7 +9,9 @@ import java.util.Base64;
 
 import org.dpppt.backend.sdk.data.DPPPTDataService;
 import org.dpppt.backend.sdk.ws.security.JWTClaimSetConverter;
+import org.dpppt.backend.sdk.ws.security.JWTValidateRequest;
 import org.dpppt.backend.sdk.ws.security.JWTValidator;
+import org.dpppt.backend.sdk.ws.security.ValidateRequest;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.autoconfigure.security.oauth2.resource.OAuth2ResourceServerProperties;
@@ -65,6 +67,11 @@ public class WSJWTConfig extends WebSecurityConfigurerAdapter {
 	@Bean
 	public JWTValidator jwtValidator() {
 		return new JWTValidator(dataService);
+	}
+
+	@Bean
+	public ValidateRequest requestValidator() {
+		return new JWTValidateRequest();
 	}
 
 	@Bean

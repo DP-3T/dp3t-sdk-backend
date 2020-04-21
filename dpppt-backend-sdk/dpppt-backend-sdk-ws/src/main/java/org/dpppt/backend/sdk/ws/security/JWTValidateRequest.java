@@ -6,19 +6,27 @@ import org.joda.time.format.DateTimeFormat;
 import org.joda.time.format.DateTimeFormatter;
 import org.springframework.security.oauth2.jwt.Jwt;
 
-public class JWTValidateRequest implements ValidateRequest<Jwt> {
+public class JWTValidateRequest implements ValidateRequest{
 
     private static final DateTimeFormatter DAY_DATE_FORMATTER = DateTimeFormat.forPattern("yyyy-MM-dd")
     .withZone(DateTimeZone.UTC);
 
     @Override
-    public boolean isValid(Jwt authObject) {
-        return authObject.containsClaim("scope") && authObject.getClaim("scope").equals("exposed");
+    public boolean isValid(Object authObject) {
+        if(authObject instanceof Jwt) {
+            Jwt token = (Jwt)authObject;
+            return token.containsClaim("scope") && token.getClaim("scope").equals("exposed");
+        }
+       return false;
     }
 
     @Override
-    public String getOnset(Jwt authObject) {
-        return authObject.getClaim("onset");
+    public String getOnset(Object authObject) {
+        if(authObject instanceof Jwt) {
+            Jwt token = (Jwt)authObject;
+            return token.getClaim("onset");
+        }
+        return "";
     }
 
 }

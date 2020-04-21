@@ -12,6 +12,7 @@ import org.dpppt.backend.sdk.model.ExposedOverview;
 import org.dpppt.backend.sdk.model.Exposee;
 import org.dpppt.backend.sdk.model.ExposeeRequest;
 import org.dpppt.backend.sdk.ws.security.JWTValidateRequest;
+import org.dpppt.backend.sdk.ws.security.ValidateRequest;
 import org.joda.time.DateTime;
 import org.joda.time.DateTimeZone;
 import org.joda.time.format.DateTimeFormat;
@@ -44,7 +45,7 @@ public class DPPPTController {
 	private final EtagGeneratorInterface etagGenerator;
 	private final String appSource;
 	private final int exposedListCacheContol;
-	private final JWTValidateRequest validateRequest;
+	private final ValidateRequest validateRequest;
 
 	private static final DateTimeFormatter DAY_DATE_FORMATTER = DateTimeFormat.forPattern("yyyy-MM-dd")
 			.withZone(DateTimeZone.UTC);
@@ -52,7 +53,7 @@ public class DPPPTController {
 	private static final Logger logger = LoggerFactory.getLogger(DPPPTController.class);
 
 	public DPPPTController(DPPPTDataService dataService, EtagGeneratorInterface etagGenerator, String appSource,
-			int exposedListCacheControl, JWTValidateRequest validateRequest) {
+			int exposedListCacheControl, ValidateRequest validateRequest) {
 		this.dataService = dataService;
 		this.appSource = appSource;
 		this.etagGenerator = etagGenerator;

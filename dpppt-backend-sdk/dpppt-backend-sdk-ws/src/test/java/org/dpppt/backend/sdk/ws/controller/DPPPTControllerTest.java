@@ -21,4 +21,10 @@ public class DPPPTControllerTest extends BaseControllerTest {
         assertNotNull(response);
         assertEquals("Hello from DP3T WS", response.getContentAsString());
     }
+
+    // @Test
+    // public void testJWT() throws Exception {
+    //     MockHttpServer
+    // }
+
 }

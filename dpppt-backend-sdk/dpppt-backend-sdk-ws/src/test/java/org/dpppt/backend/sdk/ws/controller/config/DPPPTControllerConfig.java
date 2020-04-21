@@ -1,11 +1,12 @@
 package org.dpppt.backend.sdk.ws.controller.config;
 
-
 import org.dpppt.backend.sdk.data.DPPPTDataService;
 import org.dpppt.backend.sdk.data.EtagGenerator;
 import org.dpppt.backend.sdk.data.EtagGeneratorInterface;
 import org.dpppt.backend.sdk.data.JDBCDPPPTDataServiceImpl;
 import org.dpppt.backend.sdk.ws.controller.DPPPTController;
+import org.dpppt.backend.sdk.ws.security.JWTValidateRequest;
+import org.dpppt.backend.sdk.ws.security.ValidateRequest;
 import org.flywaydb.core.Flyway;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -18,7 +19,12 @@ import javax.sql.DataSource;
 public class DPPPTControllerConfig {
     @Bean
     public DPPPTController dppptSDKController() {
-        return new DPPPTController(dppptSDKDataService(), etagGenerator(), "org.dpppt.demo", 5);
+        return new DPPPTController(dppptSDKDataService(), etagGenerator(), "org.dpppt.demo", 5,requestValidator());
+    }
+
+    @Bean 
+    public ValidateRequest requestValidator() {
+        return new JWTValidateRequest();
     }
 
     @Bean
