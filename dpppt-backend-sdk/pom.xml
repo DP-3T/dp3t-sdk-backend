@@ -14,12 +14,15 @@
 		<java-version>1.8</java-version>
 		<project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
 		<spring-boot-version>2.2.6.RELEASE</spring-boot-version>
+		<itCoverageAgent></itCoverageAgent>
+		<build-helper-maven-plugin.version>1.9.1</build-helper-maven-plugin.version>
 	</properties>
 
 	<modules>
 		<module>dpppt-backend-sdk-model</module>
 		<module>dpppt-backend-sdk-data</module>
 		<module>dpppt-backend-sdk-ws</module>
+		<module>dpppt-backend-sdk-report</module>
 	</modules>
 
 	<dependencies>
@@ -111,6 +114,98 @@
 					<target>${java-version}</target>
 				</configuration>
 			</plugin>
+			<plugin>
+				<groupId>org.jacoco</groupId>
+				<artifactId>jacoco-maven-plugin</artifactId>
+				<version>0.8.5</version>
+				<executions>
+					<!-- set arg line property for surefire -->
+					<execution>
+						<id>prepare-agent</id>
+						<goals>
+							<goal>prepare-agent</goal>
+						</goals>
+						<configuration>
+							<propertyName>surefireArgLine</propertyName>
+						</configuration>
+					</execution>
+					<!-- set arg line property for failsafe -->
+					<execution>
+						<id>prepare-agent-integration</id>
+						<goals>
+							<goal>prepare-agent-integration</goal>
+						</goals>
+						<configuration>
+							<propertyName>failsafeArgLine</propertyName>
+						</configuration>
+					</execution>
+				</executions>
+			</plugin>
+			<plugin>
+				<groupId>org.apache.maven.plugins</groupId>
+				<artifactId>maven-surefire-plugin</artifactId>
+				<version>2.19.1</version>
+				<configuration>
+					<forkCount>1</forkCount>
+				</configuration>
+			</plugin>
+
+			<plugin>
+				<groupId>org.apache.maven.plugins</groupId>
+				<artifactId>maven-failsafe-plugin</artifactId>
+				<version>2.18.1</version>
+				<executions>
+					<execution>
+						<id>integration-tests</id>
+						<goals>
+							<goal>integration-test</goal>
+							<goal>verify</goal>
+						</goals>
+						<configuration>
+							<argLine>${itCoverageAgent}</argLine>
+						</configuration>
+					</execution>
+				</executions>
+			</plugin>
+			<plugin>
+				<groupId>org.jacoco</groupId>
+				<artifactId>jacoco-maven-plugin</artifactId>
+				<version>0.8.5</version>
+				<executions>
+					<!-- METHOD 1 -->
+					<!--<execution>-->
+					<!--<id>prepare-agent</id>-->
+					<!--<goals>-->
+					<!--<goal>prepare-agent</goal>-->
+					<!--</goals>-->
+					<!--</execution>-->
+					<!-- prepare agent for measuring unit tests -->
+
+					<!-- METHOD 2 -->
+					<execution>
+						<id>prepare-unit-tests</id>
+						<goals>
+							<goal>prepare-agent</goal>
+						</goals>
+						<!--<configuration>-->
+						<!--<destFile>${sonar.jacoco.reportPath}</destFile>-->
+						<!--</configuration>-->
+					</execution>
+
+					<!-- prepare agent for measuring integration tests -->
+					<execution>
+						<id>prepare-agent</id>
+						<goals>
+							<goal>prepare-agent</goal>
+						</goals>
+						<phase>pre-integration-test</phase>
+						<configuration>
+							<!--<destFile>${sonar.jacoco.itReportPath}</destFile>-->
+							<propertyName>itCoverageAgent</propertyName>
+						</configuration>
+					</execution>
+				</executions>
+			</plugin>
 		</plugins>
 		<pluginManagement>
 			<plugins>
@@ -125,6 +220,11 @@
 							<arg>-parameters</arg>
 						</compilerArgs>
 					</configuration>
+				</plugin>
+				<plugin>
+					<groupId>org.jacoco</groupId>
+					<artifactId>jacoco-maven-plugin</artifactId>
+					<version>0.8.5</version>
 				</plugin>
 			</plugins>
 		</pluginManagement>
