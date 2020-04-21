@@ -77,6 +77,36 @@
 					</execution>
 				</executions>
 			</plugin>
+			<plugin>
+				<groupId>com.google.cloud.tools</groupId>
+				<artifactId>jib-maven-plugin</artifactId>
+				<configuration>
+					<skip>false</skip>
+					<container>
+						<!-- enable this if you do not care about reproducable builds, but
+							 prefer container creation times to be related to commit/build time
+							 <creationTime>USE_CURRENT_TIMESTAMP</creationTime>
+							 -->
+						<ports>
+							<port>8080</port>
+						</ports>
+					</container>
+					<from>
+						<!-- remove -debug on release versions, the debug version allow you to at least get a shell into the container -->
+						<image>gcr.io/distroless/java:8-debug</image>
+					</from>
+					<to>
+						<!-- read https://github.com/GoogleContainerTools/jib/blob/master/jib-maven-plugin/README.md#using-amazon-elastic-container-registry-ecr -->
+						<!-- can also be changed from command line: -Djib.to.image= -->
+						<image>979586646521.dkr.ecr.eu-west-1.amazonaws.com/ubiquevscovid19-ws:test</image>
+						<tags>
+							<!-- these are extra tags on top of the optional tag in the image name (else latest) -->
+							<!-- can also be further extended from command line with -Djib.to.tags= -->
+							<tag>${project.version}</tag>
+						</tags>
+					</to>
+				</configuration>
+			</plugin>
 		</plugins>
 	</build>
 

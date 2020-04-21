@@ -226,6 +226,15 @@
 					<artifactId>jacoco-maven-plugin</artifactId>
 					<version>0.8.5</version>
 				</plugin>
+				<plugin> <!-- automatically build docker containers from maven -->
+					<!-- docs: https://github.com/GoogleContainerTools/jib/blob/master/jib-maven-plugin/README.md -->
+					<groupId>com.google.cloud.tools</groupId>
+					<artifactId>jib-maven-plugin</artifactId>
+					<version>1.8.0</version>
+					<configuration>
+						<skip>true</skip>
+					</configuration>
+				</plugin>
 			</plugins>
 		</pluginManagement>
 	</build>
