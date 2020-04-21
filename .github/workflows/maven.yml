@@ -38,3 +38,17 @@ jobs:
       run: mvn deploy --file dpppt-backend-sdk/pom.xml -s $GITHUB_WORKSPACE/settings.xml
       env:
         GITHUB_TOKEN: ${{ github.token }}
+    - name: Create Snapshot Release
+      if: github.ref == 'refs/heads/develop'
+      id: create_release
+      uses: actions/create-release@latest
+      env:
+        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }} # This token is provided by Actions, you do not need to create your own token
+      with:
+        tag_name: ${{ github.ref }}
+        release_name: Release ${{ github.ref }}
+        body: |
+            Changes in this Release
+            - Snapshot release
+        draft: false
+        prerelease: false
