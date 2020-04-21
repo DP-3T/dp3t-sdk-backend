@@ -1,5 +1,6 @@
 package org.dpppt.backend.sdk.ws.controller;
 
+import java.security.Principal;
 import java.time.Duration;
 import java.util.Base64;
 import java.util.List;
@@ -72,10 +73,10 @@ public class DPPPTController {
 	public @ResponseBody ResponseEntity<String> addExposee(@Valid @RequestBody ExposeeRequest exposeeRequest,
 			@RequestHeader(value = "User-Agent", required = true) String userAgent, @AuthenticationPrincipal Object principal) {
 	
-		if (this.validateRequest.isValid((Jwt)principal) && isValidBase64(exposeeRequest.getKey())) {
+		if (this.validateRequest.isValid(principal) && isValidBase64(exposeeRequest.getKey())) {
 			Exposee exposee = new Exposee();
 			exposee.setKey(exposeeRequest.getKey());
-			exposee.setOnset(this.validateRequest.getOnset((Jwt) principal));
+			exposee.setOnset(this.validateRequest.getOnset(principal));
 			dataService.upsertExposee(exposee, appSource);
 			return ResponseEntity.ok().build();
 
