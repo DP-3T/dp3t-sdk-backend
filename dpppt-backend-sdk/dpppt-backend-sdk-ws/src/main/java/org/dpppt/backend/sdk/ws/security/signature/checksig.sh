@@ -1,0 +1,1 @@
+curl --silent localhost:8080/v1/exposed/2020-04-10 2>/dev/null | shasum -a 256 - && curl -v --silent localhost:8080/v1/exposed/2020-04-10 2>&1 | awk '/.*Digest:/ { gsub("SHA-256:", "", $3); print $3}'
