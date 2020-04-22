@@ -16,6 +16,9 @@
 		<spring-boot-version>2.2.6.RELEASE</spring-boot-version>
 		<itCoverageAgent></itCoverageAgent>
 		<build-helper-maven-plugin.version>1.9.1</build-helper-maven-plugin.version>
+		<sonar.host.url>https://sonarcloud.io</sonar.host.url>
+		<sonar.organization>${env.SONAR_ORGANIZATION}</sonar.organization>
+		<sonar.login>${env.SONAR_TOKEN}</sonar.login>
 	</properties>
 
 	<modules>
@@ -231,6 +234,11 @@
 					<groupId>org.jacoco</groupId>
 					<artifactId>jacoco-maven-plugin</artifactId>
 					<version>0.8.5</version>
+				</plugin>
+				<plugin>
+					<groupId>org.sonarsource.scanner.maven</groupId>
+					<artifactId>sonar-maven-plugin</artifactId>
+					<version>3.7.0.1746</version>
 				</plugin>
 			</plugins>
 		</pluginManagement>
