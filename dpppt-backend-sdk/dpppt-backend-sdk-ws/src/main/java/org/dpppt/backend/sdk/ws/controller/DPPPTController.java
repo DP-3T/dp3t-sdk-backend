@@ -1,11 +1,17 @@
 package org.dpppt.backend.sdk.ws.controller;
 
+import java.security.MessageDigest;
+import java.security.NoSuchAlgorithmException;
 import java.security.Principal;
 import java.time.Duration;
+import java.util.ArrayList;
 import java.util.Base64;
 import java.util.List;
 
 import javax.validation.Valid;
+
+import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.databind.ObjectMapper;
 
 import org.dpppt.backend.sdk.data.DPPPTDataService;
 import org.dpppt.backend.sdk.data.EtagGeneratorInterface;
@@ -37,6 +43,7 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.ResponseBody;
 import org.springframework.web.bind.annotation.ResponseStatus;
 import org.springframework.web.context.request.WebRequest;
+import org.springframework.beans.factory.annotation.Autowired;
 
 @Controller
 @RequestMapping("/v1")
@@ -47,6 +54,8 @@ public class DPPPTController {
 	private final String appSource;
 	private final int exposedListCacheContol;
 	private final ValidateRequest validateRequest;
+	@Autowired
+	private ObjectMapper jacksonObjectMapper;
 
 	private static final DateTimeFormatter DAY_DATE_FORMATTER = DateTimeFormat.forPattern("yyyy-MM-dd")
 			.withZone(DateTimeZone.UTC);
@@ -85,6 +94,34 @@ public class DPPPTController {
 		}
 	}
 
+	@CrossOrigin(origins = { "https://editor.swagger.io" })
+	@GetMapping(value = "/hashtest")
+	public @ResponseBody ResponseEntity<ExposedOverview> getExposed() throws NoSuchAlgorithmException, JsonProcessingException {
+		MessageDigest digest = MessageDigest.getInstance("SHA-256");
+		List<Exposee> exposeeList = new ArrayList<>();
+		Exposee exposee = new Exposee();
+		exposee.setId(1);
+		exposee.setKey("\"äö");
+		exposee.setOnset("2020-04-10");
+		exposeeList.add(exposee);
+		exposeeList.add(exposee);
+		ExposedOverview overview = new ExposedOverview(exposeeList);
+		byte[] hash = digest.digest(jacksonObjectMapper.writeValueAsString(
+			overview
+		).getBytes());
+		
+		return ResponseEntity.ok().header("Signature", bytesToHex(hash)).body(overview);
+	}
+
+	private static String bytesToHex(byte[] hash) {
+		StringBuffer hexString = new StringBuffer();
+		for (int i = 0; i < hash.length; i++) {
+		String hex = Integer.toHexString(0xff & hash[i]);
+		if(hex.length() == 1) hexString.append('0');
+			hexString.append(hex);
+		}
+		return hexString.toString();
+	}
 	@CrossOrigin(origins = { "https://editor.swagger.io" })
 	@GetMapping(value = "/exposed/{dayDateStr}")
 	public @ResponseBody ResponseEntity<ExposedOverview> getExposed(@PathVariable String dayDateStr,
