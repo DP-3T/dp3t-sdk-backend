@@ -9,6 +9,7 @@ import java.security.interfaces.RSAPublicKey;
 import java.security.spec.InvalidKeySpecException;
 import java.security.spec.X509EncodedKeySpec;
 import java.util.Base64;
+import java.util.Collection;
 
 import org.apache.commons.io.IOUtils;
 import org.dpppt.backend.sdk.data.DPPPTDataService;
@@ -29,7 +30,11 @@ import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
 import org.springframework.security.config.annotation.web.configuration.WebSecurityConfigurerAdapter;
 
+import org.springframework.security.oauth2.core.DelegatingOAuth2TokenValidator;
+import org.springframework.security.oauth2.core.OAuth2TokenValidator;
+import org.springframework.security.oauth2.jwt.Jwt;
 import org.springframework.security.oauth2.jwt.JwtDecoder;
+import org.springframework.security.oauth2.jwt.JwtValidators;
 import org.springframework.security.oauth2.jwt.NimbusJwtDecoder;
 
 @Configuration
@@ -65,7 +70,9 @@ public class WSJWTConfig extends WebSecurityConfigurerAdapter {
 		RSAPublicKey pubKey = (RSAPublicKey) kf.generatePublic(keySpecX509);
 		NimbusJwtDecoder jwtDecoder = NimbusJwtDecoder.withPublicKey(pubKey).build();
 		jwtDecoder.setClaimSetConverter(claimConverter());
-		jwtDecoder.setJwtValidator(jwtValidator());
+
+		OAuth2TokenValidator<Jwt> defaultValidators = JwtValidators.createDefault();
+		jwtDecoder.setJwtValidator(new DelegatingOAuth2TokenValidator<>(defaultValidators, jwtValidator()));
 		return jwtDecoder;
 	}
 

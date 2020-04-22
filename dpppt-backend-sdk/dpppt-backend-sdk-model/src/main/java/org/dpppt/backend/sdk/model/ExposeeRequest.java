@@ -18,7 +18,6 @@ public class ExposeeRequest {
 	@Size(max = 10)
 	private String onset;
 
-	@NotNull
 	private ExposeeAuthData authData;
 
 	public String getKey() {
