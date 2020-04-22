@@ -6,6 +6,7 @@
 
 package org.dpppt.backend.sdk.data;
 
+import java.util.Date;
 import java.util.List;
 
 import javax.sql.DataSource;
@@ -16,6 +17,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.jdbc.core.namedparam.MapSqlParameterSource;
 import org.springframework.jdbc.core.namedparam.NamedParameterJdbcTemplate;
+import org.springframework.jdbc.core.simple.SimpleJdbcInsert;
 import org.springframework.transaction.annotation.Transactional;
 
 public class JDBCDPPPTDataServiceImpl implements DPPPTDataService {
@@ -25,10 +27,13 @@ public class JDBCDPPPTDataServiceImpl implements DPPPTDataService {
 	private final String dbType;
 	private static final String PGSQL = "pgsql";
 	private final NamedParameterJdbcTemplate jt;
+	private final SimpleJdbcInsert reedemUUIDInsert;
 
 	public JDBCDPPPTDataServiceImpl(String dbType, DataSource dataSource) {
 		this.dbType = dbType;
 		this.jt = new NamedParameterJdbcTemplate(dataSource);
+		this.reedemUUIDInsert = new SimpleJdbcInsert(dataSource).withTableName("t_redeem_uuid")
+				.usingGeneratedKeyColumns("pk_redeem_uuid_id");
 	}
 
 	@Override
@@ -73,6 +78,20 @@ public class JDBCDPPPTDataServiceImpl implements DPPPTDataService {
 			return 0;
 		} else {
 			return maxId;
+		}
+	}
+
+	@Override
+	public boolean checkAndInsertPublishUUID(String uuid) {
+		String sql = "select count(1) from t_redeem_uuid where uuid = :uuid";
+		MapSqlParameterSource params = new MapSqlParameterSource("uuid", uuid);
+		params.addValue("received_at", new Date());
+		Integer count = jt.queryForObject(sql, params, Integer.class);
+		if (count > 0) {
+			return false;
+		} else {
+			reedemUUIDInsert.execute(params);
+			return true;
 		}
 	}
 }

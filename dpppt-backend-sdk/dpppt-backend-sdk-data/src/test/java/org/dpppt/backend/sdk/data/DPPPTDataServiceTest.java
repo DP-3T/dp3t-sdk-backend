@@ -46,4 +46,14 @@ public class DPPPTDataServiceTest {
         assertEquals(expected.getOnset(), actual.getOnset());
         assertNotNull(actual.getId());
     }
+
+    @Test
+    public void testRedeemUUID() {
+        boolean actual = dppptDataService.checkAndInsertPublishUUID("bc77d983-2359-48e8-835a-de673fe53ccb");
+        assertTrue(actual);
+        actual = dppptDataService.checkAndInsertPublishUUID("bc77d983-2359-48e8-835a-de673fe53ccb");
+        assertFalse(actual);
+        actual = dppptDataService.checkAndInsertPublishUUID("1c444adb-0924-4dc4-a7eb-1f52aa6b9575");
+        assertTrue(actual);
+    }
 }
