@@ -13,6 +13,7 @@ import org.dpppt.backend.sdk.data.EtagGeneratorInterface;
 import org.dpppt.backend.sdk.data.JDBCDPPPTDataServiceImpl;
 import org.dpppt.backend.sdk.data.DPPPTDataService;
 import org.dpppt.backend.sdk.ws.controller.DPPPTController;
+import org.dpppt.backend.sdk.ws.security.NoValidateRequest;
 import org.dpppt.backend.sdk.ws.security.ValidateRequest;
 import org.flywaydb.core.Flyway;
 import org.slf4j.Logger;
@@ -46,10 +47,14 @@ public abstract class WSBaseConfig implements SchedulingConfigurer, WebMvcConfig
 	
 	@Bean
 	public DPPPTController dppptSDKController() {
-		return new DPPPTController(dppptSDKDataService(), etagGenerator(), appSource, exposedListCacheControl, requestValidator);
+		ValidateRequest theValidator = requestValidator;
+		if(theValidator == null) {
+			theValidator = new NoValidateRequest();
+		}
+		return new DPPPTController(dppptSDKDataService(), etagGenerator(), appSource, exposedListCacheControl, theValidator);
 	}
 	
-	@Autowired
+	@Autowired(required = false)
 	ValidateRequest requestValidator;
 
 	@Bean

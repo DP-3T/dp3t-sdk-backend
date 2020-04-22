@@ -21,7 +21,7 @@ public class JWTValidateRequest implements ValidateRequest{
     }
 
     @Override
-    public String getOnset(Object authObject) {
+    public String getOnset(Object authObject, Object others) {
         if(authObject instanceof Jwt) {
             Jwt token = (Jwt)authObject;
             return token.getClaim("onset");

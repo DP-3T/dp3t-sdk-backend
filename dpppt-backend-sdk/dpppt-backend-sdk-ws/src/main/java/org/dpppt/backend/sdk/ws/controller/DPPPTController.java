@@ -85,7 +85,7 @@ public class DPPPTController {
 		if (this.validateRequest.isValid(principal) && isValidBase64(exposeeRequest.getKey())) {
 			Exposee exposee = new Exposee();
 			exposee.setKey(exposeeRequest.getKey());
-			exposee.setOnset(this.validateRequest.getOnset(principal));
+			exposee.setOnset(this.validateRequest.getOnset(principal, exposeeRequest));
 			dataService.upsertExposee(exposee, appSource);
 			return ResponseEntity.ok().build();
 
