@@ -1,5 +1,8 @@
 package org.dpppt.backend.sdk.ws.config;
 
+import java.io.FileInputStream;
+import java.io.IOException;
+import java.io.InputStream;
 import java.security.KeyFactory;
 import java.security.NoSuchAlgorithmException;
 import java.security.interfaces.RSAPublicKey;
@@ -7,17 +10,20 @@ import java.security.spec.InvalidKeySpecException;
 import java.security.spec.X509EncodedKeySpec;
 import java.util.Base64;
 
+import org.apache.commons.io.IOUtils;
 import org.dpppt.backend.sdk.data.DPPPTDataService;
 import org.dpppt.backend.sdk.ws.security.JWTClaimSetConverter;
 import org.dpppt.backend.sdk.ws.security.JWTValidateRequest;
 import org.dpppt.backend.sdk.ws.security.JWTValidator;
 import org.dpppt.backend.sdk.ws.security.ValidateRequest;
+import org.dpppt.backend.sdk.ws.util.KeyHelper;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.Profile;
+import org.springframework.core.io.ClassPathResource;
 import org.springframework.http.HttpMethod;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
@@ -32,7 +38,7 @@ import org.springframework.security.oauth2.jwt.NimbusJwtDecoder;
 public class WSJWTConfig extends WebSecurityConfigurerAdapter {
 	
 	@Value("${ws.app.jwt.publickey}")
-	String publicKeyUrl;
+	String publicKey;
 
 	
 	@Override
@@ -53,7 +59,7 @@ public class WSJWTConfig extends WebSecurityConfigurerAdapter {
 
 	@Bean
 	public JwtDecoder jwtDecoder()
-			throws InvalidKeySpecException, NoSuchAlgorithmException {
+			throws InvalidKeySpecException, NoSuchAlgorithmException, IOException {
 		X509EncodedKeySpec keySpecX509 = new X509EncodedKeySpec(Base64.getDecoder().decode(loadPublicKey()));
 		KeyFactory kf = KeyFactory.getInstance("RSA");
 		RSAPublicKey pubKey = (RSAPublicKey) kf.generatePublic(keySpecX509);
@@ -81,11 +87,20 @@ public class WSJWTConfig extends WebSecurityConfigurerAdapter {
 		return new JWTClaimSetConverter();
 	}
 
-	private String loadPublicKey() {
-		// TODO: read public key from differnt sources based on prefix:
-		// file:/
-		// classpath:/
-		// http(s):/
-		return publicKeyUrl;
+	private String loadPublicKey() throws IOException {
+		if(publicKey.startsWith("keycloak:")){
+			String url = publicKey.replace("keycloak:/", "");
+			return KeyHelper.getPublicKeyFromKeycloak(url);
+		}
+
+		InputStream in = null;
+		if (publicKey.startsWith("classpath:/")) {
+			in = new ClassPathResource(publicKey.substring(11)).getInputStream();
+			return IOUtils.toString(in);
+		} else if (publicKey.startsWith("file:/")){
+			in = new FileInputStream(publicKey);
+			return IOUtils.toString(in);
+		}
+		return publicKey;
 	}
 }
