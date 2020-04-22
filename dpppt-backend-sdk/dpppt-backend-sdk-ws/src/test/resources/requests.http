@@ -10,3 +10,9 @@ Authorization: Bearer eyJhbGciOiJSUzI1NiIsInR5cCIgOiAiSldUIiwia2lkIiA6ICI1LVJxcV
 }
 
 ###
+
+GET {{baseUrl}}/v1/exposed/22-04-2020
+Content-Type: application/protobuf
+User-Agent: test
+
+###

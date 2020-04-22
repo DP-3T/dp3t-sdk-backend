@@ -2,11 +2,13 @@ package org.dpppt.backend.sdk.ws.controller;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.google.protobuf.ByteString;
 import org.dpppt.backend.sdk.data.DPPPTDataService;
 import org.dpppt.backend.sdk.data.EtagGeneratorInterface;
 import org.dpppt.backend.sdk.model.ExposedOverview;
 import org.dpppt.backend.sdk.model.Exposee;
 import org.dpppt.backend.sdk.model.ExposeeRequest;
+import org.dpppt.backend.sdk.model.proto.Exposed;
 import org.dpppt.backend.sdk.ws.security.ValidateRequest;
 import org.joda.time.DateTime;
 import org.joda.time.DateTimeZone;
@@ -27,6 +29,7 @@ import javax.validation.Valid;
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
 import java.time.Duration;
+import java.util.ArrayList;
 import java.util.Base64;
 import java.util.List;
 
@@ -96,7 +99,7 @@ public class DPPPTController {
 		byte[] hash = digest.digest(jacksonObjectMapper.writeValueAsString(
 			overview
 		).getBytes());
-		
+
 		return ResponseEntity.ok().header("JSON-Sha256-Hash", bytesToHex(hash)).body(overview);
 	}
 
@@ -111,7 +114,7 @@ public class DPPPTController {
 	}
 	@CrossOrigin(origins = { "https://editor.swagger.io" })
 	@GetMapping(value = "/exposed/{dayDateStr}")
-	public @ResponseBody ResponseEntity<ExposedOverview> getExposed(@PathVariable String dayDateStr,
+	public @ResponseBody ResponseEntity<Exposed.ProtoExposedList> getExposed(@PathVariable String dayDateStr,
 			WebRequest request) {
 		DateTime dayDate = DAY_DATE_FORMATTER.parseDateTime(dayDateStr);
 		int max = dataService.getMaxExposedIdForDay(dayDate);
@@ -120,9 +123,16 @@ public class DPPPTController {
 			return ResponseEntity.status(HttpStatus.NOT_MODIFIED).build();
 		} else {
 			List<Exposee> exposeeList = dataService.getSortedExposedForDay(dayDate);
+			List<Exposed.ProtoExposee> exposees = new ArrayList<>();
+			for (Exposee exposee : exposeeList) {
+				Exposed.ProtoExposee protoExposee = Exposed.ProtoExposee.newBuilder().setKey(ByteString.copyFrom(Base64.getDecoder().decode(exposee.getKey())))
+						.setOnset(0L).build();//TODO set onset
+				exposees.add(protoExposee);
+			}
 			ExposedOverview overview = new ExposedOverview(exposeeList);
+			Exposed.ProtoExposedList protoExposee = Exposed.ProtoExposedList.newBuilder().addAllExposed(exposees).build();
 			return ResponseEntity.ok().cacheControl(CacheControl.maxAge(Duration.ofMinutes(exposedListCacheContol)))
-					.body(overview);
+					.body(protoExposee);
 		}
 	}
 
