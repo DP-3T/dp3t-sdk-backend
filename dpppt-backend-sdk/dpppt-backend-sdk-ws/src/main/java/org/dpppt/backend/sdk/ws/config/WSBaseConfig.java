@@ -6,6 +6,8 @@
 
 package org.dpppt.backend.sdk.ws.config;
 
+import java.security.KeyPair;
+
 import javax.sql.DataSource;
 
 import org.dpppt.backend.sdk.data.EtagGenerator;
@@ -27,6 +29,7 @@ import org.springframework.scheduling.annotation.EnableScheduling;
 import org.springframework.scheduling.annotation.SchedulingConfigurer;
 import org.springframework.web.servlet.config.annotation.WebMvcConfigurer;
 
+import io.jsonwebtoken.SignatureAlgorithm;
 @Configuration
 @EnableScheduling
 public abstract class WSBaseConfig implements SchedulingConfigurer, WebMvcConfigurer {
@@ -68,8 +71,12 @@ public abstract class WSBaseConfig implements SchedulingConfigurer, WebMvcConfig
 		return new EtagGenerator();
 	}
 
+	SignatureAlgorithm algorithm = SignatureAlgorithm.ES256;
+
 	@Bean
 	public ResponseWrapperFilter hashFilter() {
-		return new ResponseWrapperFilter();
+		return new ResponseWrapperFilter(getKeyPair(algorithm));
 	}
+
+	abstract protected KeyPair getKeyPair(SignatureAlgorithm algorithm); 
 }

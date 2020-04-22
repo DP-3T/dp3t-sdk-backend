@@ -6,6 +6,8 @@
 
 package org.dpppt.backend.sdk.ws.config;
 
+import java.security.KeyPair;
+import java.security.KeyPairGenerator;
 import java.util.Properties;
 
 import javax.sql.DataSource;
@@ -16,6 +18,8 @@ import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.Profile;
 import org.springframework.scheduling.config.ScheduledTaskRegistrar;
+
+import io.jsonwebtoken.SignatureAlgorithm;
 
 import com.zaxxer.hikari.HikariConfig;
 import com.zaxxer.hikari.HikariDataSource;
@@ -83,6 +87,16 @@ public class WSProdConfig extends WSBaseConfig {
 	@Override
 	public void configureTasks(ScheduledTaskRegistrar taskRegistrar) {
 
+	}
+
+	@Override
+	protected KeyPair getKeyPair(SignatureAlgorithm algorithm) {
+		try {
+			return KeyPairGenerator.getInstance("RSA").generateKeyPair();
+		}
+		catch(Exception ex) {
+			return null;
+		}
 	}
 
 }
