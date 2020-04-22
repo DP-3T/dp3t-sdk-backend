@@ -95,7 +95,7 @@ public class DPPPTController {
 	}
 
 	@CrossOrigin(origins = { "https://editor.swagger.io" })
-	@GetMapping(value = "/hashtest")
+	@GetMapping(value = "/hashtest/{dayDateStr}")
 	public @ResponseBody ResponseEntity<ExposedOverview> getExposed(@PathVariable String dayDateStr ) throws NoSuchAlgorithmException, JsonProcessingException {
 		DateTime dayDate = DAY_DATE_FORMATTER.parseDateTime(dayDateStr);
 		MessageDigest digest = MessageDigest.getInstance("SHA-256");
