@@ -66,17 +66,23 @@ public class DPPPTController {
 	@PostMapping(value = "/exposed")
 	public @ResponseBody ResponseEntity<String> addExposee(@Valid @RequestBody ExposeeRequest exposeeRequest,
 			@RequestHeader(value = "User-Agent", required = true) String userAgent, @AuthenticationPrincipal Object principal) {
-	
-		if (this.validateRequest.isValid(principal) && isValidBase64(exposeeRequest.getKey())) {
-			Exposee exposee = new Exposee();
-			exposee.setKey(exposeeRequest.getKey());
-			exposee.setOnset(this.validateRequest.getOnset(principal, exposeeRequest));
-			dataService.upsertExposee(exposee, appSource);
-			return ResponseEntity.ok().build();
-
-		} else {
+		if (!isValidBase64(exposeeRequest.getKey())) {
 			return new ResponseEntity<>("No valid base64 key", HttpStatus.BAD_REQUEST);
 		}
+		//TODO: should we give that information?
+		if (!this.validateRequest.isValid(principal)) {
+			return new ResponseEntity<>("Invalid authentication", HttpStatus.BAD_REQUEST);
+		}
+		if (!isValidDate(exposeeRequest.getOnset())) {
+			return new ResponseEntity<>("Invalid onset date", HttpStatus.BAD_REQUEST);
+		}
+		Exposee exposee = new Exposee();
+		exposee.setKey(exposeeRequest.getKey());
+		String onsetDate = this.validateRequest.getOnset(principal, exposeeRequest);
+	
+		exposee.setOnset(onsetDate);
+		dataService.upsertExposee(exposee, appSource);
+		return ResponseEntity.ok().build();
 	}
 
 	@CrossOrigin(origins = { "https://editor.swagger.io" })
@@ -129,6 +135,15 @@ public class DPPPTController {
 	private boolean isValidBase64(String value) {
 		try {
 			Base64.getDecoder().decode(value);
+			return true;
+		} catch (Exception e) {
+			return false;
+		}
+	}
+
+	private boolean isValidDate(String value) {
+		try {
+			DAY_DATE_FORMATTER.parseDateTime(value);
 			return true;
 		} catch (Exception e) {
 			return false;

@@ -38,3 +38,18 @@ jobs:
       run: mvn deploy --file dpppt-backend-sdk/pom.xml -s $GITHUB_WORKSPACE/settings.xml
       env:
         GITHUB_TOKEN: ${{ github.token }}
+    - name: Create Snapshot Release
+      uses: ncipollo/release-action@v1
+      if: github.ref == 'refs/heads/develop'
+      id: create_release
+      with:
+        name: Snapshot Release ${{ github.ref }}
+        tag: ${{ github.ref }}
+        artifacts: "dpppt-backend-sdk/dpppt-backend-sdk-ws/target/dpppt-backend-sdk-ws-*-SNAPSHOT.jar"
+        body: |
+            Changes in this Release
+            - Snapshot release
+        token: ${{ secrets.GITHUB_TOKEN }}
+        draft: false
+        prerelease: false
+        allowUpdates: true
