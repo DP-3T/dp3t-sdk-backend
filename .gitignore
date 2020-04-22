@@ -29,3 +29,7 @@ hs_err_pid*
 **/bin
 **/*.log.*
 **/.vscode
+
+# idea
+.idea
+*.iml

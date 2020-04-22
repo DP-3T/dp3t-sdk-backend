@@ -1,0 +1,24 @@
+version: "3.6"
+services:
+
+  dp3t-backend:
+    image: dp3t/dp3t-backend:develop
+    restart: unless-stopped
+    environment:
+      - _JAVA_OPTIONS=-Xmx1024m -Xms1024m -Duser.timezone=UTC
+      - SPRING_PROFILES_ACTIVE=prod
+      - DATASOURCE_URL=jdbc:postgresql://dp3t-database:5432/dp3t
+      - DATASOURCE_USERNAME=dp3t
+      - DATASOURCE_PASSWORD=dp3t
+    ports:
+      - 8080:8080
+    depends_on:
+      - dp3t-database
+
+  dp3t-database:
+    image: postgres:12
+    restart: unless-stopped
+    environment:
+      - POSTGRES_DB=dp3t
+      - POSTGRES_USER=dp3t
+      - POSTGRES_PASSWORD=dp3t
