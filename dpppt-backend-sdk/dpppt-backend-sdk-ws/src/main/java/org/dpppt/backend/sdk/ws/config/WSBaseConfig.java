@@ -13,6 +13,7 @@ import org.dpppt.backend.sdk.data.EtagGeneratorInterface;
 import org.dpppt.backend.sdk.data.JDBCDPPPTDataServiceImpl;
 import org.dpppt.backend.sdk.data.DPPPTDataService;
 import org.dpppt.backend.sdk.ws.controller.DPPPTController;
+import org.dpppt.backend.sdk.ws.filter.ResponseWrapperFilter;
 import org.dpppt.backend.sdk.ws.security.NoValidateRequest;
 import org.dpppt.backend.sdk.ws.security.ValidateRequest;
 import org.flywaydb.core.Flyway;
@@ -65,5 +66,10 @@ public abstract class WSBaseConfig implements SchedulingConfigurer, WebMvcConfig
 	@Bean
 	public EtagGeneratorInterface etagGenerator() {
 		return new EtagGenerator();
+	}
+
+	@Bean
+	public ResponseWrapperFilter hashFilter() {
+		return new ResponseWrapperFilter();
 	}
 }

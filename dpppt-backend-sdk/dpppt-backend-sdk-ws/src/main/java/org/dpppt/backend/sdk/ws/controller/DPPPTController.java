@@ -8,6 +8,7 @@ import org.dpppt.backend.sdk.model.ExposedOverview;
 import org.dpppt.backend.sdk.model.Exposee;
 import org.dpppt.backend.sdk.model.ExposeeRequest;
 import org.dpppt.backend.sdk.ws.security.ValidateRequest;
+import org.dpppt.backend.sdk.ws.util.ByteArrayHelper;
 import org.joda.time.DateTime;
 import org.joda.time.DateTimeZone;
 import org.joda.time.format.DateTimeFormat;
@@ -97,18 +98,10 @@ public class DPPPTController {
 			overview
 		).getBytes());
 		
-		return ResponseEntity.ok().header("JSON-Sha256-Hash", bytesToHex(hash)).body(overview);
+		return ResponseEntity.ok().header("JSON-Sha256-Hash", ByteArrayHelper.bytesToHex(hash)).body(overview);
 	}
 
-	private static String bytesToHex(byte[] hash) {
-		StringBuffer hexString = new StringBuffer();
-		for (int i = 0; i < hash.length; i++) {
-		String hex = Integer.toHexString(0xff & hash[i]);
-		if(hex.length() == 1) hexString.append('0');
-			hexString.append(hex);
-		}
-		return hexString.toString();
-	}
+	
 	@CrossOrigin(origins = { "https://editor.swagger.io" })
 	@GetMapping(value = "/exposed/{dayDateStr}")
 	public @ResponseBody ResponseEntity<ExposedOverview> getExposed(@PathVariable String dayDateStr,
