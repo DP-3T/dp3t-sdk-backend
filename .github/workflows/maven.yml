@@ -52,6 +52,7 @@ jobs:
             - Snapshot release
         draft: false
         prerelease: false
+        allowUpdates: true
     - name: Upload Snapshot Assets
       if: github.ref == 'refs/heads/develop'
       id: upload-release-asset 
