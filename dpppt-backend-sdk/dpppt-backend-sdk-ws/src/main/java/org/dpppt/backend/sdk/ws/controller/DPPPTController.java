@@ -96,21 +96,17 @@ public class DPPPTController {
 
 	@CrossOrigin(origins = { "https://editor.swagger.io" })
 	@GetMapping(value = "/hashtest")
-	public @ResponseBody ResponseEntity<ExposedOverview> getExposed() throws NoSuchAlgorithmException, JsonProcessingException {
+	public @ResponseBody ResponseEntity<ExposedOverview> getExposed(@PathVariable String dayDateStr ) throws NoSuchAlgorithmException, JsonProcessingException {
+		DateTime dayDate = DAY_DATE_FORMATTER.parseDateTime(dayDateStr);
 		MessageDigest digest = MessageDigest.getInstance("SHA-256");
-		List<Exposee> exposeeList = new ArrayList<>();
-		Exposee exposee = new Exposee();
-		exposee.setId(1);
-		exposee.setKey("\"äö");
-		exposee.setOnset("2020-04-10");
-		exposeeList.add(exposee);
-		exposeeList.add(exposee);
+		List<Exposee> exposeeList = dataService.getSortedExposedForDay(dayDate);
+
 		ExposedOverview overview = new ExposedOverview(exposeeList);
 		byte[] hash = digest.digest(jacksonObjectMapper.writeValueAsString(
 			overview
 		).getBytes());
 		
-		return ResponseEntity.ok().header("Signature", bytesToHex(hash)).body(overview);
+		return ResponseEntity.ok().header("JSON-Sha256-Hash", bytesToHex(hash)).body(overview);
 	}
 
 	private static String bytesToHex(byte[] hash) {
