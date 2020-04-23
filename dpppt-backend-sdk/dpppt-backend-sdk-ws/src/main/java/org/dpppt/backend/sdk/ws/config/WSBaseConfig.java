@@ -7,6 +7,7 @@
 package org.dpppt.backend.sdk.ws.config;
 
 import java.security.KeyPair;
+import java.util.List;
 
 import javax.sql.DataSource;
 
@@ -48,6 +49,9 @@ public abstract class WSBaseConfig implements SchedulingConfigurer, WebMvcConfig
 	@Value("${ws.exposedlist.cachecontrol: 5}")
 	int exposedListCacheControl;
 
+	@Value("${ws.headers.protected: }")
+	List<String> protectedHeaders;
+
 	@Value("${ws.retentiondays: 21}")
 	int retentionDays;
 
@@ -81,6 +85,7 @@ public abstract class WSBaseConfig implements SchedulingConfigurer, WebMvcConfig
 	@Value("${datasource.connectionTimeout}")
 	String dataSourceConnectionTimeout;
 
+
 	@Autowired(required = false)
 	ValidateRequest requestValidator;
 
@@ -108,7 +113,7 @@ public abstract class WSBaseConfig implements SchedulingConfigurer, WebMvcConfig
 
 	@Bean
 	public ResponseWrapperFilter hashFilter() {
-		return new ResponseWrapperFilter(getKeyPair(algorithm), retentionDays);
+		return new ResponseWrapperFilter(getKeyPair(algorithm), retentionDays, protectedHeaders);
 	}
 
 }
