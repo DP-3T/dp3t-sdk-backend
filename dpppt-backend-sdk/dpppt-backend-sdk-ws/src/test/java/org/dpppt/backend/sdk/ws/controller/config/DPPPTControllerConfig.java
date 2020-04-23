@@ -19,7 +19,7 @@ import javax.sql.DataSource;
 public class DPPPTControllerConfig {
     @Bean
     public DPPPTController dppptSDKController() {
-        return new DPPPTController(dppptSDKDataService(), etagGenerator(), "org.dpppt.demo", 5,requestValidator());
+        return new DPPPTController(dppptSDKDataService(), etagGenerator(), "org.dpppt.demo", 5,requestValidator(), 7200000);
     }
 
     @Bean 
