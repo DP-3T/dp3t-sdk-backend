@@ -107,13 +107,22 @@ public class SignatureResponseWrapper extends HttpServletResponseWrapper {
 		Claims claims = Jwts.claims();
 		claims.put(CLAIM_CONTENT_HASH, Base64.getEncoder().encodeToString(theHash));
         claims.put(CLAIM_HASH_ALG, "sha-256");
-        for(String header : protectedHeaders){
-			if(!this.containsHeader(header)) continue;
-            claims.put(header.toLowerCase().replace("x-", ""), this.getHeader(header));
-        }
+       
 		claims.setIssuer(ISSUER_DP3T);
 		claims.setIssuedAt(DateTime.now().toDate());
 		claims.setExpiration(DateTime.now().plusDays(retentionPeriod).toDate());
+		for(String header : protectedHeaders){
+			if(!this.containsHeader(header)) continue;
+
+			String normalizedHeader = header.toLowerCase().replace("x-", "");
+			String headerValue = this.getHeader(header);
+			claims.put(normalizedHeader, headerValue);
+			if(normalizedHeader.equals("batch-release-time")) {
+				DateTime issueDate = new DateTime(Long.parseLong(headerValue));
+				claims.setIssuedAt(issueDate.toDate());
+				claims.setExpiration(issueDate.plusDays(retentionPeriod).toDate());
+			}
+        }
 		String signature = Jwts.builder().setClaims(claims).signWith(pair.getPrivate()).compact();
 
 		this.setHeader(HEADER_DIGEST, "SHA-256:" + ByteArrayHelper.bytesToHex(theHash));
