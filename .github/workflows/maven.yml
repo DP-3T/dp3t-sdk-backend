@@ -44,7 +44,7 @@ jobs:
       id: create_release
       with:
         name: Snapshot Release ${{ github.ref }}
-        tag: ${{ github.ref }}
+        tag: SNAPSHOT
         artifacts: "dpppt-backend-sdk/dpppt-backend-sdk-ws/target/dpppt-backend-sdk-ws-*-SNAPSHOT.jar"
         body: |
             Changes in this Release
