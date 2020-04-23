@@ -6,14 +6,11 @@
 
 package org.dpppt.backend.sdk.ws.config;
 
-import java.security.KeyPair;
-import java.security.KeyPairGenerator;
 import java.util.Properties;
 
 import javax.sql.DataSource;
 
 import org.flywaydb.core.Flyway;
-import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.Profile;
@@ -21,8 +18,6 @@ import org.springframework.scheduling.config.ScheduledTaskRegistrar;
 
 import com.zaxxer.hikari.HikariConfig;
 import com.zaxxer.hikari.HikariDataSource;
-
-import io.jsonwebtoken.SignatureAlgorithm;
 
 @Configuration
 @Profile("prod")

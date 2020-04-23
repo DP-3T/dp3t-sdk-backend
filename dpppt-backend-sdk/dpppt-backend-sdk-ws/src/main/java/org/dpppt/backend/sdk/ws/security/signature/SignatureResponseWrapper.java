@@ -112,7 +112,9 @@ public class SignatureResponseWrapper extends HttpServletResponseWrapper {
 		claims.setIssuedAt(DateTime.now().toDate());
 		claims.setExpiration(DateTime.now().plusDays(retentionPeriod).toDate());
 		for(String header : protectedHeaders){
-			if(!this.containsHeader(header)) continue;
+			if(!this.containsHeader(header)) {
+				continue;
+			}
 
 			String normalizedHeader = header.toLowerCase().replace("x-", "");
 			String headerValue = this.getHeader(header);

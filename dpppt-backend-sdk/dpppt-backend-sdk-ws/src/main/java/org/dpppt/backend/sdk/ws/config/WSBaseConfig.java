@@ -61,7 +61,7 @@ public abstract class WSBaseConfig implements SchedulingConfigurer, WebMvcConfig
 	@Value("${ws.exposedlist.cachecontrol: 5}")
 	int exposedListCacheControl;
 
-	@Value("${ws.headers.protected: }")
+	@Value("${ws.headers.protected:}")
 	List<String> protectedHeaders;
 
 	@Value("${ws.retentiondays: 21}")
