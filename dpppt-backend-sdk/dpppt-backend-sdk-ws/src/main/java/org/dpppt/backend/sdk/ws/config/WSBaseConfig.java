@@ -41,6 +41,7 @@ import javax.sql.DataSource;
 import java.security.KeyPair;
 import java.util.List;
 
+
 @Configuration
 @EnableScheduling
 public abstract class WSBaseConfig implements SchedulingConfigurer, WebMvcConfigurer {
@@ -52,33 +53,6 @@ public abstract class WSBaseConfig implements SchedulingConfigurer, WebMvcConfig
 	public abstract Flyway flyway();
 
 	public abstract String getDbType();
-
-	@Value("${datasource.username}")
-	String dataSourceUser;
-
-	@Value("${datasource.password}")
-	String dataSourcePassword;
-
-	@Value("${datasource.url}")
-	String dataSourceUrl;
-
-	@Value("${datasource.driverClassName}")
-	String dataSourceDriver;
-
-	@Value("${datasource.failFast}")
-	String dataSourceFailFast;
-
-	@Value("${datasource.maximumPoolSize}")
-	String dataSourceMaximumPoolSize;
-
-	@Value("${datasource.maxLifetime}")
-	String dataSourceMaxLifetime;
-
-	@Value("${datasource.idleTimeout}")
-	String dataSourceIdleTimeout;
-
-	@Value("${datasource.connectionTimeout}")
-	String dataSourceConnectionTimeout;
 
 	@Value("${ws.exposedlist.cachecontrol: 5}")
 	int exposedListCacheControl;
