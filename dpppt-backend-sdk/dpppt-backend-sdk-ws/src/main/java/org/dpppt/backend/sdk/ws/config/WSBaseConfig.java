@@ -31,6 +31,7 @@ import org.springframework.scheduling.annotation.SchedulingConfigurer;
 import org.springframework.web.servlet.config.annotation.WebMvcConfigurer;
 
 import io.jsonwebtoken.SignatureAlgorithm;
+import io.jsonwebtoken.security.Keys;
 
 @Configuration
 @EnableScheduling
@@ -44,7 +45,7 @@ public abstract class WSBaseConfig implements SchedulingConfigurer, WebMvcConfig
 
 	public abstract String getDbType();
 
-	public abstract KeyPair getKeyPair(SignatureAlgorithm algorithm);
+	
 
 	@Value("${ws.exposedlist.cachecontrol: 5}")
 	int exposedListCacheControl;
@@ -114,6 +115,11 @@ public abstract class WSBaseConfig implements SchedulingConfigurer, WebMvcConfig
 	@Bean
 	public ResponseWrapperFilter hashFilter() {
 		return new ResponseWrapperFilter(getKeyPair(algorithm), retentionDays, protectedHeaders);
+	}
+
+	public KeyPair getKeyPair(SignatureAlgorithm algorithm) {
+		logger.warn("USING FALLBACK KEYPAIR. WONT'T PERSIST APP RESTART AND PROBABLY DOES NOT HAVE ENOUGH ENTROPY.");
+		return Keys.keyPairFor(algorithm);
 	}
 
 }

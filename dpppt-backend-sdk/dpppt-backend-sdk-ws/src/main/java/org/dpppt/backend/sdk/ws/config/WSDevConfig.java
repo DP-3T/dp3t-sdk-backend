@@ -49,9 +49,4 @@ public class WSDevConfig extends WSBaseConfig {
 
 	}
 
-	@Override
-	public KeyPair getKeyPair(SignatureAlgorithm algorithm) {
-		return Keys.keyPairFor(algorithm);
-	}
-
 }

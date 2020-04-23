@@ -44,14 +44,4 @@ public class WSCloudConfig extends WSBaseConfig {
 	public void configureTasks(ScheduledTaskRegistrar taskRegistrar) {
 
 	}
-
-	@Override
-	public KeyPair getKeyPair(SignatureAlgorithm algorithm) {
-		try {
-			return KeyPairGenerator.getInstance("RSA").generateKeyPair();
-		}
-		catch(Exception ex) {
-			return null;
-		}
-	}
 }
