@@ -97,13 +97,24 @@ public class JDBCDPPPTDataServiceImpl implements DPPPTDataService {
 
 	@Override
 	public int getMaxExposedIdForBatchReleaseTime(Long batchReleaseTime, long batchLength) {
-		// TODO Auto-generated method stub
-		return 0;
+		MapSqlParameterSource params = new MapSqlParameterSource();
+		params.addValue("batchReleaseTime", new DateTime(batchReleaseTime).toDate());
+		params.addValue("startBatch", new DateTime(batchReleaseTime - batchLength).toDate());
+		String sql = "select max(pk_exposed_id) from t_exposed where received_at >= :startBatch and received_at < :batchReleaseTime";
+		Integer maxId = jt.queryForObject(sql, params, Integer.class);
+		if (maxId == null) {
+			return 0;
+		} else {
+			return maxId;
+		}
 	}
 
 	@Override
 	public List<Exposee> getSortedExposedForBatchReleaseTime(Long batchReleaseTime, long batchLength) {
-		// TODO Auto-generated method stub
-		return null;
+		String sql = "select pk_exposed_id, key, to_char(onset, 'yyyy-MM-dd') as onset_string from t_exposed where received_at >= :startBatch and received_at < :batchReleaseTime order by pk_exposed_id desc";
+		MapSqlParameterSource params = new MapSqlParameterSource();
+		params.addValue("batchReleaseTime", new DateTime(batchReleaseTime).toDate());
+		params.addValue("startBatch", new DateTime(batchReleaseTime - batchLength).toDate());
+		return jt.query(sql, params, new ExposeeRowMapper());
 	}
 }
