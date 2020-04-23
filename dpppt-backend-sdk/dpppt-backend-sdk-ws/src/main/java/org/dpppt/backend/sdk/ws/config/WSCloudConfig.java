@@ -30,7 +30,7 @@ public class WSCloudConfig extends WSBaseConfig {
 	@Bean
 	@Override
 	public Flyway flyway() {
-		Flyway flyWay = Flyway.configure().dataSource(dataSource()).locations("classpath:/db/migration/pgsql").load();
+		Flyway flyWay = Flyway.configure().dataSource(dataSource()).locations("classpath:/db/migration/pgsql_cluster").load();
 		flyWay.migrate();
 		return flyWay;
 

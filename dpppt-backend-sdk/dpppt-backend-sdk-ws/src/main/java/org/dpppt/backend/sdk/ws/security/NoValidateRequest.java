@@ -16,11 +16,11 @@ public class NoValidateRequest implements ValidateRequest {
 	}
 
 	@Override
-	public String getOnset(Object authObject, Object others) {
+	public long getKeyDate(Object authObject, Object others) {
 		if (others instanceof ExposeeRequest) {
-			return ((ExposeeRequest) others).getOnset();
+			return ((ExposeeRequest) others).getKeyDate();
 		}
-		return "";
+		throw new IllegalArgumentException();
 	}
 
 }

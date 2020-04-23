@@ -98,14 +98,11 @@ public class DPPPTController {
 		if (!this.validateRequest.isValid(principal)) {
 			return new ResponseEntity<>("Invalid authentication", HttpStatus.BAD_REQUEST);
 		}
-		if (!isValidDate(exposeeRequest.getOnset())) {
-			return new ResponseEntity<>("Invalid onset date", HttpStatus.BAD_REQUEST);
-		}
 		Exposee exposee = new Exposee();
 		exposee.setKey(exposeeRequest.getKey());
-		String onsetDate = this.validateRequest.getOnset(principal, exposeeRequest);
+		long keyDate = this.validateRequest.getKeyDate(principal, exposeeRequest);
 
-		exposee.setOnset(onsetDate);
+		exposee.setKeyDate(keyDate);
 		dataService.upsertExposee(exposee, appSource);
 		return ResponseEntity.ok().build();
 	}
@@ -155,8 +152,7 @@ public class DPPPTController {
 			ExposedOverview overview = new ExposedOverview(exposeeList);
 			overview.setBatchReleaseTime(batchReleaseTime);
 			return ResponseEntity.ok().cacheControl(CacheControl.maxAge(Duration.ofMinutes(exposedListCacheContol)))
-					.header("X-BATCH-RELEASE-TIME", batchReleaseTime.toString())
-					.body(overview);
+					.header("X-BATCH-RELEASE-TIME", batchReleaseTime.toString()).body(overview);
 		}
 	}
 
@@ -180,16 +176,14 @@ public class DPPPTController {
 			for (Exposee exposee : exposeeList) {
 				Exposed.ProtoExposee protoExposee = Exposed.ProtoExposee.newBuilder()
 						.setKey(ByteString.copyFrom(Base64.getDecoder().decode(exposee.getKey())))
-						.setOnset(DAY_DATE_FORMATTER.parseMillis(exposee.getOnset())).build();
+						.setKeyDate(exposee.getKeyDate()).build();
 				exposees.add(protoExposee);
 			}
 			Exposed.ProtoExposedList protoExposee = Exposed.ProtoExposedList.newBuilder().addAllExposed(exposees)
-					.setBatchReleaseTime(batchReleaseTime)
-					.build();
-			
+					.setBatchReleaseTime(batchReleaseTime).build();
+
 			return ResponseEntity.ok().cacheControl(CacheControl.maxAge(Duration.ofMinutes(exposedListCacheContol)))
-					.header("X-BATCH-RELEASE-TIME", batchReleaseTime.toString())
-					.body(protoExposee);
+					.header("X-BATCH-RELEASE-TIME", batchReleaseTime.toString()).body(protoExposee);
 		}
 	}
 
@@ -202,15 +196,6 @@ public class DPPPTController {
 	private boolean isValidBase64(String value) {
 		try {
 			Base64.getDecoder().decode(value);
-			return true;
-		} catch (Exception e) {
-			return false;
-		}
-	}
-
-	private boolean isValidDate(String value) {
-		try {
-			DAY_DATE_FORMATTER.parseDateTime(value);
 			return true;
 		} catch (Exception e) {
 			return false;

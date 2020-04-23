@@ -6,9 +6,15 @@
 
 package org.dpppt.backend.sdk.ws.security;
 
+import org.joda.time.DateTimeZone;
+import org.joda.time.format.DateTimeFormat;
+import org.joda.time.format.DateTimeFormatter;
 import org.springframework.security.oauth2.jwt.Jwt;
 
 public class JWTValidateRequest implements ValidateRequest {
+
+	private static final DateTimeFormatter DAY_DATE_FORMATTER = DateTimeFormat.forPattern("yyyy-MM-dd")
+			.withZone(DateTimeZone.UTC);
 
 	@Override
 	public boolean isValid(Object authObject) {
@@ -20,12 +26,12 @@ public class JWTValidateRequest implements ValidateRequest {
 	}
 
 	@Override
-	public String getOnset(Object authObject, Object others) {
+	public long getKeyDate(Object authObject, Object others) {
 		if (authObject instanceof Jwt) {
 			Jwt token = (Jwt) authObject;
-			return token.getClaim("onset");
+			return DAY_DATE_FORMATTER.parseMillis(token.getClaim("onset"));
 		}
-		return "";
+		throw new IllegalArgumentException();
 	}
 
 }

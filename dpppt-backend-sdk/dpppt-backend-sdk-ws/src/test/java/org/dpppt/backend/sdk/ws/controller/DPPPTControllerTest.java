@@ -41,7 +41,7 @@ public class DPPPTControllerTest extends BaseControllerTest {
     public void testJWT() throws Exception {
         ExposeeRequest exposeeRequest = new ExposeeRequest();
         exposeeRequest.setAuthData(new ExposeeAuthData());
-        exposeeRequest.setOnset("2020-04-10");
+        exposeeRequest.setKeyDate(DateTime.parse("2020-04-10").getMillis());
         exposeeRequest.setKey(Base64.getEncoder().encodeToString("test".getBytes("UTF-8")));
         String token = createToken(DateTime.now().plusMinutes(5));
         MockHttpServletResponse response = mockMvc.perform(post("/v1/exposed")
@@ -62,7 +62,7 @@ public class DPPPTControllerTest extends BaseControllerTest {
     public void cannotUseSameTokenTwice() throws Exception {
         ExposeeRequest exposeeRequest = new ExposeeRequest();
         exposeeRequest.setAuthData(new ExposeeAuthData());
-        exposeeRequest.setOnset("2020-04-10");
+        exposeeRequest.setKeyDate(DateTime.parse("2020-04-10").getMillis());
         exposeeRequest.setKey(Base64.getEncoder().encodeToString("test".getBytes("UTF-8")));
         String token = createToken(DateTime.now().plusMinutes(5));
 
@@ -85,7 +85,7 @@ public class DPPPTControllerTest extends BaseControllerTest {
     public void cannotUseExpiredToken() throws Exception {
         ExposeeRequest exposeeRequest = new ExposeeRequest();
         exposeeRequest.setAuthData(new ExposeeAuthData());
-        exposeeRequest.setOnset("2020-04-10");
+        exposeeRequest.setKeyDate(DateTime.parse("2020-04-10").getMillis());
         exposeeRequest.setKey(Base64.getEncoder().encodeToString("test".getBytes("UTF-8")));
         String token = createToken(DateTime.now().minusMinutes(5));
 

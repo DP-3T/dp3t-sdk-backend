@@ -40,17 +40,17 @@ public class JDBCDPPPTDataServiceImpl implements DPPPTDataService {
     public void upsertExposee(Exposee exposee, String appSource) {
         String sql = null;
         if (dbType.equals(PGSQL)) {
-            sql = "insert into t_exposed (key, onset, app_source) values (:key, to_date(:onset, 'yyyy-MM-dd'), :app_source)"
+			sql = "insert into t_exposed (key, key_date, app_source) values (:key, to_date(:key_date, 'yyyy-MM-dd'), :app_source)"
                 + " on conflict on constraint key do nothing";
         } else {
-            sql = "merge into t_exposed using (values(cast(:key as varchar(10000)), cast(:onset as date), cast(:app_source as varchar(50))))"
-                + " as vals(key, onset, app_source) on t_exposed.key = vals.key"
-                + " when not matched then insert (key, onset, app_source) values (vals.key, vals.onset, vals.app_source)";
+			sql = "merge into t_exposed using (values(cast(:key as varchar(10000)), cast(:key_date as date), cast(:app_source as varchar(50))))"
+					+ " as vals(key, key_date, app_source) on t_exposed.key = vals.key"
+					+ " when not matched then insert (key, key_date, app_source) values (vals.key, vals.key_date, vals.app_source)";
         }
         MapSqlParameterSource params = new MapSqlParameterSource();
         params.addValue("key", exposee.getKey());
         params.addValue("app_source", appSource);
-        params.addValue("onset", exposee.getOnset());
+		params.addValue("key_date", new Date(exposee.getKeyDate()));
         jt.update(sql, params);
     }
 
@@ -58,7 +58,7 @@ public class JDBCDPPPTDataServiceImpl implements DPPPTDataService {
     @Transactional(readOnly = true)
     public List<Exposee> getSortedExposedForDay(DateTime day) {
         DateTime dayMidnight = day.withTimeAtStartOfDay();
-        String sql = "select pk_exposed_id, key, to_char(onset, 'yyyy-MM-dd') as onset_string from t_exposed where received_at >= :dayMidnight and received_at < :nextDayMidnight order by pk_exposed_id desc";
+        String sql = "select pk_exposed_id, key, key_date as onset_string from t_exposed where received_at >= :dayMidnight and received_at < :nextDayMidnight order by pk_exposed_id desc";
         MapSqlParameterSource params = new MapSqlParameterSource();
         params.addValue("dayMidnight", dayMidnight.toDate());
         params.addValue("nextDayMidnight", dayMidnight.plusDays(1).toDate());
@@ -111,7 +111,7 @@ public class JDBCDPPPTDataServiceImpl implements DPPPTDataService {
 
     @Override
     public List<Exposee> getSortedExposedForBatchReleaseTime(Long batchReleaseTime, long batchLength) {
-        String sql = "select pk_exposed_id, key, to_char(onset, 'yyyy-MM-dd') as onset_string from t_exposed where received_at >= :startBatch and received_at < :batchReleaseTime order by pk_exposed_id desc";
+		String sql = "select pk_exposed_id, key, key_date from t_exposed where received_at >= :startBatch and received_at < :batchReleaseTime order by pk_exposed_id desc";
         MapSqlParameterSource params = new MapSqlParameterSource();
         params.addValue("batchReleaseTime", new DateTime(batchReleaseTime).toDate());
         params.addValue("startBatch", new DateTime(batchReleaseTime - batchLength).toDate());
