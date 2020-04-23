@@ -7,6 +7,7 @@
 package org.dpppt.backend.sdk.ws.config;
 
 import java.security.KeyPair;
+
 import java.util.List;
 
 import javax.sql.DataSource;
@@ -26,12 +27,22 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.http.converter.HttpMessageConverter;
+import org.springframework.http.converter.json.MappingJackson2HttpMessageConverter;
+import org.springframework.http.converter.protobuf.ProtobufHttpMessageConverter;
 import org.springframework.scheduling.annotation.EnableScheduling;
 import org.springframework.scheduling.annotation.SchedulingConfigurer;
 import org.springframework.web.servlet.config.annotation.WebMvcConfigurer;
 
 import io.jsonwebtoken.SignatureAlgorithm;
 import io.jsonwebtoken.security.Keys;
+
+import com.fasterxml.jackson.annotation.JsonInclude;
+import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.databind.SerializationFeature;
+import com.fasterxml.jackson.datatype.jdk8.Jdk8Module;
+import com.hubspot.jackson.datatype.protobuf.ProtobufModule;
+
 
 @Configuration
 @EnableScheduling
@@ -55,6 +66,9 @@ public abstract class WSBaseConfig implements SchedulingConfigurer, WebMvcConfig
 
 	@Value("${ws.retentiondays: 21}")
 	int retentionDays;
+	
+	@Value("${ws.exposedlist.batchlength: 7200000}")
+	long batchLength;
 
 	@Value("${ws.app.source}")
 	String appSource;
@@ -99,12 +113,27 @@ public abstract class WSBaseConfig implements SchedulingConfigurer, WebMvcConfig
 			theValidator = new NoValidateRequest();
 		}
 		return new DPPPTController(dppptSDKDataService(), etagGenerator(), appSource, exposedListCacheControl,
-				theValidator);
+				theValidator, batchLength);
 	}
 
 	@Bean
 	public DPPPTDataService dppptSDKDataService() {
 		return new JDBCDPPPTDataServiceImpl(getDbType(), dataSource());
+	}
+
+	@Bean
+	public MappingJackson2HttpMessageConverter converter() {
+		ObjectMapper mapper = new ObjectMapper()
+				.configure(SerializationFeature.FAIL_ON_EMPTY_BEANS, false)
+				.setSerializationInclusion(JsonInclude.Include.NON_ABSENT)
+				.registerModules(new ProtobufModule(), new Jdk8Module());
+		return new MappingJackson2HttpMessageConverter(mapper);
+	}
+
+	@Override
+	public void extendMessageConverters(List<HttpMessageConverter<?>> converters) {
+		converters.add(new ProtobufHttpMessageConverter());
+		WebMvcConfigurer.super.extendMessageConverters(converters);
 	}
 
 	@Bean

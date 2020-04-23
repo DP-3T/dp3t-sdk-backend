@@ -38,6 +38,7 @@ import java.security.PublicKey;
 import java.security.spec.PKCS8EncodedKeySpec;
 import java.security.spec.X509EncodedKeySpec;
 import java.util.Base64;
+import java.util.UUID;
 
 @RunWith(SpringRunner.class)
 @SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT)
@@ -80,6 +81,7 @@ public abstract class BaseControllerTest {
 		Claims claims = Jwts.claims();
 		claims.put("scope", "exposed");
 		claims.put("onset", "2020-04-20");
+		claims.put("uuid", UUID.randomUUID().toString());
 		return Jwts.builder()
 			.setClaims(claims)
 			.setSubject("test-subject" + DateTime.now().toString())
@@ -92,6 +94,7 @@ public abstract class BaseControllerTest {
 	protected String createToken(String subject, DateTime expiresAt){
 		Claims claims = Jwts.claims();
 		claims.put("scope", "exposed");
+		claims.put("uuid", UUID.randomUUID().toString());
 		return Jwts.builder()
 			.setSubject(subject)
 			.setExpiration(expiresAt.toDate())
