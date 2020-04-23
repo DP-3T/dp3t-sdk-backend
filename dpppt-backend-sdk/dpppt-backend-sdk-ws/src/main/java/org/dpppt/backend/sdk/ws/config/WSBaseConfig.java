@@ -43,7 +43,6 @@ import com.fasterxml.jackson.databind.SerializationFeature;
 import com.fasterxml.jackson.datatype.jdk8.Jdk8Module;
 import com.hubspot.jackson.datatype.protobuf.ProtobufModule;
 
-
 @Configuration
 @EnableScheduling
 public abstract class WSBaseConfig implements SchedulingConfigurer, WebMvcConfigurer {
@@ -56,7 +55,32 @@ public abstract class WSBaseConfig implements SchedulingConfigurer, WebMvcConfig
 
 	public abstract String getDbType();
 
-	
+	@Value("${datasource.username}")
+	String dataSourceUser;
+
+	@Value("${datasource.password}")
+	String dataSourcePassword;
+
+	@Value("${datasource.url}")
+	String dataSourceUrl;
+
+	@Value("${datasource.driverClassName}")
+	String dataSourceDriver;
+
+	@Value("${datasource.failFast}")
+	String dataSourceFailFast;
+
+	@Value("${datasource.maximumPoolSize}")
+	String dataSourceMaximumPoolSize;
+
+	@Value("${datasource.maxLifetime}")
+	String dataSourceMaxLifetime;
+
+	@Value("${datasource.idleTimeout}")
+	String dataSourceIdleTimeout;
+
+	@Value("${datasource.connectionTimeout}")
+	String dataSourceConnectionTimeout;
 
 	@Value("${ws.exposedlist.cachecontrol: 5}")
 	int exposedListCacheControl;
@@ -66,7 +90,7 @@ public abstract class WSBaseConfig implements SchedulingConfigurer, WebMvcConfig
 
 	@Value("${ws.retentiondays: 21}")
 	int retentionDays;
-	
+
 	@Value("${ws.exposedlist.batchlength: 7200000}")
 	long batchLength;
 
@@ -95,8 +119,7 @@ public abstract class WSBaseConfig implements SchedulingConfigurer, WebMvcConfig
 
 	@Bean
 	public MappingJackson2HttpMessageConverter converter() {
-		ObjectMapper mapper = new ObjectMapper()
-				.configure(SerializationFeature.FAIL_ON_EMPTY_BEANS, false)
+		ObjectMapper mapper = new ObjectMapper().configure(SerializationFeature.FAIL_ON_EMPTY_BEANS, false)
 				.setSerializationInclusion(JsonInclude.Include.NON_ABSENT)
 				.registerModules(new ProtobufModule(), new Jdk8Module());
 		return new MappingJackson2HttpMessageConverter(mapper);
