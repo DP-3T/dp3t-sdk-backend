@@ -39,7 +39,7 @@ public class SignatureResponseWrapper extends HttpServletResponseWrapper {
 	private PrintWriter writer;
 
 	private static final String HEADER_SIGNATURE = "Signature";
-	private static final String HEADER_PUBLIC_KEY = "Public-Key";
+	private static final String HEADER_PUBLIC_KEY = "X-Public-Key";
 	private static final String HEADER_DIGEST = "Digest";
 	private static final String ISSUER_DP3T = "dp3t";
 	private static final String CLAIM_HASH_ALG = "hash-alg";
@@ -127,7 +127,7 @@ public class SignatureResponseWrapper extends HttpServletResponseWrapper {
         }
 		String signature = Jwts.builder().setClaims(claims).signWith(pair.getPrivate()).compact();
 
-		this.setHeader(HEADER_DIGEST, "SHA-256:" + ByteArrayHelper.bytesToHex(theHash));
+		this.setHeader(HEADER_DIGEST, "sha-256=" + ByteArrayHelper.bytesToHex(theHash));
 		this.setHeader(HEADER_PUBLIC_KEY, getPublicKeyAsPEM());
 		this.setHeader(HEADER_SIGNATURE, signature);
 
