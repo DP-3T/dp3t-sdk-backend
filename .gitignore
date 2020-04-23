@@ -29,3 +29,10 @@ hs_err_pid*
 **/bin
 **/*.log.*
 **/.vscode
+
+# intellij
+.idea
+*.iml
+
+# maven
+target
