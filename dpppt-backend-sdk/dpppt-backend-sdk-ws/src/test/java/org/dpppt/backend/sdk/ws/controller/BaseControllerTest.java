@@ -88,17 +88,15 @@ public abstract class BaseControllerTest {
 		Claims claims = Jwts.claims();
 		claims.put("scope", "exposed");
 		claims.put("onset", "2020-04-20");
-		claims.put("uuid", UUID.randomUUID().toString());
-		return Jwts.builder().setClaims(claims).setSubject("test-subject" + DateTime.now().toString())
-				.setExpiration(expiresAt.toDate()).setIssuedAt(DateTime.now().toDate())
-				.signWith(SignatureAlgorithm.RS256, (Key) privateKey).compact();
+		return Jwts.builder().setClaims(claims).setId(UUID.randomUUID().toString())
+				.setSubject("test-subject" + DateTime.now().toString()).setExpiration(expiresAt.toDate())
+				.setIssuedAt(DateTime.now().toDate()).signWith(SignatureAlgorithm.RS256, (Key) privateKey).compact();
 	}
 
 	protected String createToken(String subject, DateTime expiresAt) {
 		Claims claims = Jwts.claims();
 		claims.put("scope", "exposed");
-		claims.put("uuid", UUID.randomUUID().toString());
 		return Jwts.builder().setSubject(subject).setExpiration(expiresAt.toDate()).setClaims(claims)
-				.signWith(SignatureAlgorithm.RS256, (Key) privateKey).compact();
+				.setId(UUID.randomUUID().toString()).signWith(SignatureAlgorithm.RS256, (Key) privateKey).compact();
 	}
 }
