@@ -1,3 +1,9 @@
+/*
+ * Created by Ubique Innovation AG
+ * https://www.ubique.ch
+ * Copyright (c) 2020. All rights reserved.
+ */
+
 package org.dpppt.backend.sdk.ws.security.signature;
 
 import java.io.ByteArrayOutputStream;
@@ -32,8 +38,8 @@ public class SignatureResponseWrapper extends HttpServletResponseWrapper {
 
 	private final MessageDigest digest;
 	private final ByteArrayOutputStream output;
-    private final KeyPair pair;
-    private final List<String> protectedHeaders;
+	private final KeyPair pair;
+	private final List<String> protectedHeaders;
 
 	private HashStream stream;
 	private PrintWriter writer;
@@ -43,17 +49,17 @@ public class SignatureResponseWrapper extends HttpServletResponseWrapper {
 	private static final String HEADER_DIGEST = "Digest";
 	private static final String ISSUER_DP3T = "dp3t";
 	private static final String CLAIM_HASH_ALG = "hash-alg";
-    private static final String CLAIM_CONTENT_HASH = "content-hash";
+	private static final String CLAIM_CONTENT_HASH = "content-hash";
 
-
-	public SignatureResponseWrapper(HttpServletResponse response, KeyPair pair, int retentionDays, List<String> protectedHeaders) {
+	public SignatureResponseWrapper(HttpServletResponse response, KeyPair pair, int retentionDays,
+			List<String> protectedHeaders) {
 		super(response);
-        this.pair = pair;
-        this.protectedHeaders = protectedHeaders;
+		this.pair = pair;
+		this.protectedHeaders = protectedHeaders;
 		try {
 			this.output = new ByteArrayOutputStream(response.getBufferSize());
 			this.digest = MessageDigest.getInstance("SHA-256");
-            this.stream = new HashStream(this.digest, this.output);
+			this.stream = new HashStream(this.digest, this.output);
 			this.retentionPeriod = retentionDays;
 		} catch (Exception ex) {
 			throw new RuntimeException(ex);
@@ -106,25 +112,25 @@ public class SignatureResponseWrapper extends HttpServletResponseWrapper {
 
 		Claims claims = Jwts.claims();
 		claims.put(CLAIM_CONTENT_HASH, Base64.getEncoder().encodeToString(theHash));
-        claims.put(CLAIM_HASH_ALG, "sha-256");
-       
+		claims.put(CLAIM_HASH_ALG, "sha-256");
+
 		claims.setIssuer(ISSUER_DP3T);
 		claims.setIssuedAt(DateTime.now().toDate());
 		claims.setExpiration(DateTime.now().plusDays(retentionPeriod).toDate());
-		for(String header : protectedHeaders){
-			if(!this.containsHeader(header)) {
+		for (String header : protectedHeaders) {
+			if (!this.containsHeader(header)) {
 				continue;
 			}
 
 			String normalizedHeader = header.toLowerCase().replace("x-", "");
 			String headerValue = this.getHeader(header);
 			claims.put(normalizedHeader, headerValue);
-			if(normalizedHeader.equals("batch-release-time")) {
+			if (normalizedHeader.equals("batch-release-time")) {
 				DateTime issueDate = new DateTime(Long.parseLong(headerValue));
 				claims.setIssuedAt(issueDate.toDate());
 				claims.setExpiration(issueDate.plusDays(retentionPeriod).toDate());
 			}
-        }
+		}
 		String signature = Jwts.builder().setClaims(claims).signWith(pair.getPrivate()).compact();
 
 		this.setHeader(HEADER_DIGEST, "sha-256=" + ByteArrayHelper.bytesToHex(theHash));
