@@ -120,18 +120,25 @@ public class DPPPTController {
 	}
 
 	@CrossOrigin(origins = { "https://editor.swagger.io" })
-	@GetMapping(value = "/exposed/{dayDateStr}", produces = "application/json")
-	public @ResponseBody ResponseEntity<ExposedOverview> getExposedByDayDate(@PathVariable String dayDateStr,
+	@GetMapping(value = "/exposed/{batchReleaseTime}", produces = "application/json")
+	public @ResponseBody ResponseEntity<ExposedOverview> getExposedByDayDate(@PathVariable Long batchReleaseTime,
 			WebRequest request) {
-		DateTime dayDate = DAY_DATE_FORMATTER.parseDateTime(dayDateStr);
-		int max = dataService.getMaxExposedIdForDay(dayDate);
+		if (batchReleaseTime % batchLength != 0) {
+			return ResponseEntity.badRequest().build();
+		}
+		if (batchReleaseTime > System.currentTimeMillis()) {
+			return ResponseEntity.badRequest().build();
+		}
+
+		int max = dataService.getMaxExposedIdForBatchReleaseTime(batchReleaseTime, batchLength);
 		String etag = etagGenerator.getEtag(max);
 		if (request.checkNotModified(etag)) {
 			return ResponseEntity.status(HttpStatus.NOT_MODIFIED).build();
 		} else {
-			List<Exposee> exposeeList = dataService.getSortedExposedForDay(dayDate);
+			List<Exposee> exposeeList = dataService.getSortedExposedForBatchReleaseTime(batchReleaseTime, batchLength);
 			ExposedOverview overview = new ExposedOverview(exposeeList);
 			return ResponseEntity.ok().cacheControl(CacheControl.maxAge(Duration.ofMinutes(exposedListCacheContol)))
+					.header("X-BATCH-RELEASE-TIME", batchReleaseTime.toString())
 					.body(overview);
 		}
 	}
@@ -160,8 +167,11 @@ public class DPPPTController {
 				exposees.add(protoExposee);
 			}
 			Exposed.ProtoExposedList protoExposee = Exposed.ProtoExposedList.newBuilder().addAllExposed(exposees)
+					.setBatchReleaseTime(batchReleaseTime)
 					.build();
+			
 			return ResponseEntity.ok().cacheControl(CacheControl.maxAge(Duration.ofMinutes(exposedListCacheContol)))
+					.header("X-BATCH-RELEASE-TIME", batchReleaseTime.toString())
 					.body(protoExposee);
 		}
 	}
