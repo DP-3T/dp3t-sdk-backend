@@ -19,25 +19,30 @@ public final class Exposed {
       com.google.protobuf.MessageOrBuilder {
 
     /**
-     * <code>repeated .org.dpppt.backend.sdk.model.proto.ProtoExposee exposed = 1;</code>
+     * <code>int64 batchReleaseTime = 1;</code>
+     */
+    long getBatchReleaseTime();
+
+    /**
+     * <code>repeated .org.dpppt.backend.sdk.model.proto.ProtoExposee exposed = 2;</code>
      */
     java.util.List<org.dpppt.backend.sdk.model.proto.Exposed.ProtoExposee> 
         getExposedList();
     /**
-     * <code>repeated .org.dpppt.backend.sdk.model.proto.ProtoExposee exposed = 1;</code>
+     * <code>repeated .org.dpppt.backend.sdk.model.proto.ProtoExposee exposed = 2;</code>
      */
     org.dpppt.backend.sdk.model.proto.Exposed.ProtoExposee getExposed(int index);
     /**
-     * <code>repeated .org.dpppt.backend.sdk.model.proto.ProtoExposee exposed = 1;</code>
+     * <code>repeated .org.dpppt.backend.sdk.model.proto.ProtoExposee exposed = 2;</code>
      */
     int getExposedCount();
     /**
-     * <code>repeated .org.dpppt.backend.sdk.model.proto.ProtoExposee exposed = 1;</code>
+     * <code>repeated .org.dpppt.backend.sdk.model.proto.ProtoExposee exposed = 2;</code>
      */
     java.util.List<? extends org.dpppt.backend.sdk.model.proto.Exposed.ProtoExposeeOrBuilder> 
         getExposedOrBuilderList();
     /**
-     * <code>repeated .org.dpppt.backend.sdk.model.proto.ProtoExposee exposed = 1;</code>
+     * <code>repeated .org.dpppt.backend.sdk.model.proto.ProtoExposee exposed = 2;</code>
      */
     org.dpppt.backend.sdk.model.proto.Exposed.ProtoExposeeOrBuilder getExposedOrBuilder(
         int index);
@@ -49,6 +54,7 @@ public final class Exposed {
       com.google.protobuf.GeneratedMessageV3 implements
       // @@protoc_insertion_point(message_implements:org.dpppt.backend.sdk.model.proto.ProtoExposedList)
       ProtoExposedListOrBuilder {
+  private static final long serialVersionUID = 0L;
     // Use ProtoExposedList.newBuilder() to construct.
     private ProtoExposedList(com.google.protobuf.GeneratedMessageV3.Builder<?> builder) {
       super(builder);
@@ -67,6 +73,9 @@ public final class Exposed {
         com.google.protobuf.ExtensionRegistryLite extensionRegistry)
         throws com.google.protobuf.InvalidProtocolBufferException {
       this();
+      if (extensionRegistry == null) {
+        throw new java.lang.NullPointerException();
+      }
       int mutable_bitField0_ = 0;
       com.google.protobuf.UnknownFieldSet.Builder unknownFields =
           com.google.protobuf.UnknownFieldSet.newBuilder();
@@ -78,20 +87,25 @@ public final class Exposed {
             case 0:
               done = true;
               break;
-            default: {
-              if (!parseUnknownField(input, unknownFields,
-                                     extensionRegistry, tag)) {
-                done = true;
-              }
+            case 8: {
+
+              batchReleaseTime_ = input.readInt64();
               break;
             }
-            case 10: {
-              if (!((mutable_bitField0_ & 0x00000001) == 0x00000001)) {
+            case 18: {
+              if (!((mutable_bitField0_ & 0x00000002) != 0)) {
                 exposed_ = new java.util.ArrayList<org.dpppt.backend.sdk.model.proto.Exposed.ProtoExposee>();
-                mutable_bitField0_ |= 0x00000001;
+                mutable_bitField0_ |= 0x00000002;
               }
               exposed_.add(
-                  input.readMessage(org.dpppt.backend.sdk.model.proto.Exposed.ProtoExposee.PARSER, extensionRegistry));
+                  input.readMessage(org.dpppt.backend.sdk.model.proto.Exposed.ProtoExposee.parser(), extensionRegistry));
+              break;
+            }
+            default: {
+              if (!parseUnknownField(
+                  input, unknownFields, extensionRegistry, tag)) {
+                done = true;
+              }
               break;
             }
           }
@@ -102,7 +116,7 @@ public final class Exposed {
         throw new com.google.protobuf.InvalidProtocolBufferException(
             e).setUnfinishedMessage(this);
       } finally {
-        if (((mutable_bitField0_ & 0x00000001) == 0x00000001)) {
+        if (((mutable_bitField0_ & 0x00000002) != 0)) {
           exposed_ = java.util.Collections.unmodifiableList(exposed_);
         }
         this.unknownFields = unknownFields.build();
@@ -111,45 +125,56 @@ public final class Exposed {
     }
     public static final com.google.protobuf.Descriptors.Descriptor
         getDescriptor() {
-      return org.dpppt.backend.sdk.model.proto.Exposed.internal_static_org_dpppt_android_sdk_internal_backend_proto_ProtoExposedList_descriptor;
+      return org.dpppt.backend.sdk.model.proto.Exposed.internal_static_org_dpppt_backend_sdk_model_proto_ProtoExposedList_descriptor;
     }
 
+    @java.lang.Override
     protected com.google.protobuf.GeneratedMessageV3.FieldAccessorTable
         internalGetFieldAccessorTable() {
-      return org.dpppt.backend.sdk.model.proto.Exposed.internal_static_org_dpppt_android_sdk_internal_backend_proto_ProtoExposedList_fieldAccessorTable
+      return org.dpppt.backend.sdk.model.proto.Exposed.internal_static_org_dpppt_backend_sdk_model_proto_ProtoExposedList_fieldAccessorTable
           .ensureFieldAccessorsInitialized(
               org.dpppt.backend.sdk.model.proto.Exposed.ProtoExposedList.class, org.dpppt.backend.sdk.model.proto.Exposed.ProtoExposedList.Builder.class);
     }
 
-    public static final int EXPOSED_FIELD_NUMBER = 1;
+    private int bitField0_;
+    public static final int BATCHRELEASETIME_FIELD_NUMBER = 1;
+    private long batchReleaseTime_;
+    /**
+     * <code>int64 batchReleaseTime = 1;</code>
+     */
+    public long getBatchReleaseTime() {
+      return batchReleaseTime_;
+    }
+
+    public static final int EXPOSED_FIELD_NUMBER = 2;
     private java.util.List<org.dpppt.backend.sdk.model.proto.Exposed.ProtoExposee> exposed_;
     /**
-     * <code>repeated .org.dpppt.backend.sdk.model.proto.ProtoExposee exposed = 1;</code>
+     * <code>repeated .org.dpppt.backend.sdk.model.proto.ProtoExposee exposed = 2;</code>
      */
     public java.util.List<org.dpppt.backend.sdk.model.proto.Exposed.ProtoExposee> getExposedList() {
       return exposed_;
     }
     /**
-     * <code>repeated .org.dpppt.backend.sdk.model.proto.ProtoExposee exposed = 1;</code>
+     * <code>repeated .org.dpppt.backend.sdk.model.proto.ProtoExposee exposed = 2;</code>
      */
     public java.util.List<? extends org.dpppt.backend.sdk.model.proto.Exposed.ProtoExposeeOrBuilder> 
         getExposedOrBuilderList() {
       return exposed_;
     }
     /**
-     * <code>repeated .org.dpppt.backend.sdk.model.proto.ProtoExposee exposed = 1;</code>
+     * <code>repeated .org.dpppt.backend.sdk.model.proto.ProtoExposee exposed = 2;</code>
      */
     public int getExposedCount() {
       return exposed_.size();
     }
     /**
-     * <code>repeated .org.dpppt.backend.sdk.model.proto.ProtoExposee exposed = 1;</code>
+     * <code>repeated .org.dpppt.backend.sdk.model.proto.ProtoExposee exposed = 2;</code>
      */
     public org.dpppt.backend.sdk.model.proto.Exposed.ProtoExposee getExposed(int index) {
       return exposed_.get(index);
     }
     /**
-     * <code>repeated .org.dpppt.backend.sdk.model.proto.ProtoExposee exposed = 1;</code>
+     * <code>repeated .org.dpppt.backend.sdk.model.proto.ProtoExposee exposed = 2;</code>
      */
     public org.dpppt.backend.sdk.model.proto.Exposed.ProtoExposeeOrBuilder getExposedOrBuilder(
         int index) {
@@ -157,44 +182,47 @@ public final class Exposed {
     }
 
     private byte memoizedIsInitialized = -1;
+    @java.lang.Override
     public final boolean isInitialized() {
       byte isInitialized = memoizedIsInitialized;
       if (isInitialized == 1) return true;
       if (isInitialized == 0) return false;
 
-      for (int i = 0; i < getExposedCount(); i++) {
-        if (!getExposed(i).isInitialized()) {
-          memoizedIsInitialized = 0;
-          return false;
-        }
-      }
       memoizedIsInitialized = 1;
       return true;
     }
 
+    @java.lang.Override
     public void writeTo(com.google.protobuf.CodedOutputStream output)
                         throws java.io.IOException {
+      if (batchReleaseTime_ != 0L) {
+        output.writeInt64(1, batchReleaseTime_);
+      }
       for (int i = 0; i < exposed_.size(); i++) {
-        output.writeMessage(1, exposed_.get(i));
+        output.writeMessage(2, exposed_.get(i));
       }
       unknownFields.writeTo(output);
     }
 
+    @java.lang.Override
     public int getSerializedSize() {
       int size = memoizedSize;
       if (size != -1) return size;
 
       size = 0;
+      if (batchReleaseTime_ != 0L) {
+        size += com.google.protobuf.CodedOutputStream
+          .computeInt64Size(1, batchReleaseTime_);
+      }
       for (int i = 0; i < exposed_.size(); i++) {
         size += com.google.protobuf.CodedOutputStream
-          .computeMessageSize(1, exposed_.get(i));
+          .computeMessageSize(2, exposed_.get(i));
       }
       size += unknownFields.getSerializedSize();
       memoizedSize = size;
       return size;
     }
 
-    private static final long serialVersionUID = 0L;
     @java.lang.Override
     public boolean equals(final java.lang.Object obj) {
       if (obj == this) {
@@ -205,11 +233,12 @@ public final class Exposed {
       }
       org.dpppt.backend.sdk.model.proto.Exposed.ProtoExposedList other = (org.dpppt.backend.sdk.model.proto.Exposed.ProtoExposedList) obj;
 
-      boolean result = true;
-      result = result && getExposedList()
-          .equals(other.getExposedList());
-      result = result && unknownFields.equals(other.unknownFields);
-      return result;
+      if (getBatchReleaseTime()
+          != other.getBatchReleaseTime()) return false;
+      if (!getExposedList()
+          .equals(other.getExposedList())) return false;
+      if (!unknownFields.equals(other.unknownFields)) return false;
+      return true;
     }
 
     @java.lang.Override
@@ -219,6 +248,9 @@ public final class Exposed {
       }
       int hash = 41;
       hash = (19 * hash) + getDescriptor().hashCode();
+      hash = (37 * hash) + BATCHRELEASETIME_FIELD_NUMBER;
+      hash = (53 * hash) + com.google.protobuf.Internal.hashLong(
+          getBatchReleaseTime());
       if (getExposedCount() > 0) {
         hash = (37 * hash) + EXPOSED_FIELD_NUMBER;
         hash = (53 * hash) + getExposedList().hashCode();
@@ -298,6 +330,7 @@ public final class Exposed {
           .parseWithIOException(PARSER, input, extensionRegistry);
     }
 
+    @java.lang.Override
     public Builder newBuilderForType() { return newBuilder(); }
     public static Builder newBuilder() {
       return DEFAULT_INSTANCE.toBuilder();
@@ -305,6 +338,7 @@ public final class Exposed {
     public static Builder newBuilder(org.dpppt.backend.sdk.model.proto.Exposed.ProtoExposedList prototype) {
       return DEFAULT_INSTANCE.toBuilder().mergeFrom(prototype);
     }
+    @java.lang.Override
     public Builder toBuilder() {
       return this == DEFAULT_INSTANCE
           ? new Builder() : new Builder().mergeFrom(this);
@@ -325,12 +359,13 @@ public final class Exposed {
         org.dpppt.backend.sdk.model.proto.Exposed.ProtoExposedListOrBuilder {
       public static final com.google.protobuf.Descriptors.Descriptor
           getDescriptor() {
-        return org.dpppt.backend.sdk.model.proto.Exposed.internal_static_org_dpppt_android_sdk_internal_backend_proto_ProtoExposedList_descriptor;
+        return org.dpppt.backend.sdk.model.proto.Exposed.internal_static_org_dpppt_backend_sdk_model_proto_ProtoExposedList_descriptor;
       }
 
+      @java.lang.Override
       protected com.google.protobuf.GeneratedMessageV3.FieldAccessorTable
           internalGetFieldAccessorTable() {
-        return org.dpppt.backend.sdk.model.proto.Exposed.internal_static_org_dpppt_android_sdk_internal_backend_proto_ProtoExposedList_fieldAccessorTable
+        return org.dpppt.backend.sdk.model.proto.Exposed.internal_static_org_dpppt_backend_sdk_model_proto_ProtoExposedList_fieldAccessorTable
             .ensureFieldAccessorsInitialized(
                 org.dpppt.backend.sdk.model.proto.Exposed.ProtoExposedList.class, org.dpppt.backend.sdk.model.proto.Exposed.ProtoExposedList.Builder.class);
       }
@@ -351,26 +386,32 @@ public final class Exposed {
           getExposedFieldBuilder();
         }
       }
+      @java.lang.Override
       public Builder clear() {
         super.clear();
+        batchReleaseTime_ = 0L;
+
         if (exposedBuilder_ == null) {
           exposed_ = java.util.Collections.emptyList();
-          bitField0_ = (bitField0_ & ~0x00000001);
+          bitField0_ = (bitField0_ & ~0x00000002);
         } else {
           exposedBuilder_.clear();
         }
         return this;
       }
 
+      @java.lang.Override
       public com.google.protobuf.Descriptors.Descriptor
           getDescriptorForType() {
-        return org.dpppt.backend.sdk.model.proto.Exposed.internal_static_org_dpppt_android_sdk_internal_backend_proto_ProtoExposedList_descriptor;
+        return org.dpppt.backend.sdk.model.proto.Exposed.internal_static_org_dpppt_backend_sdk_model_proto_ProtoExposedList_descriptor;
       }
 
+      @java.lang.Override
       public org.dpppt.backend.sdk.model.proto.Exposed.ProtoExposedList getDefaultInstanceForType() {
         return org.dpppt.backend.sdk.model.proto.Exposed.ProtoExposedList.getDefaultInstance();
       }
 
+      @java.lang.Override
       public org.dpppt.backend.sdk.model.proto.Exposed.ProtoExposedList build() {
         org.dpppt.backend.sdk.model.proto.Exposed.ProtoExposedList result = buildPartial();
         if (!result.isInitialized()) {
@@ -379,48 +420,59 @@ public final class Exposed {
         return result;
       }
 
+      @java.lang.Override
       public org.dpppt.backend.sdk.model.proto.Exposed.ProtoExposedList buildPartial() {
         org.dpppt.backend.sdk.model.proto.Exposed.ProtoExposedList result = new org.dpppt.backend.sdk.model.proto.Exposed.ProtoExposedList(this);
         int from_bitField0_ = bitField0_;
+        int to_bitField0_ = 0;
+        result.batchReleaseTime_ = batchReleaseTime_;
         if (exposedBuilder_ == null) {
-          if (((bitField0_ & 0x00000001) == 0x00000001)) {
+          if (((bitField0_ & 0x00000002) != 0)) {
             exposed_ = java.util.Collections.unmodifiableList(exposed_);
-            bitField0_ = (bitField0_ & ~0x00000001);
+            bitField0_ = (bitField0_ & ~0x00000002);
           }
           result.exposed_ = exposed_;
         } else {
           result.exposed_ = exposedBuilder_.build();
         }
+        result.bitField0_ = to_bitField0_;
         onBuilt();
         return result;
       }
 
+      @java.lang.Override
       public Builder clone() {
-        return (Builder) super.clone();
+        return super.clone();
       }
+      @java.lang.Override
       public Builder setField(
           com.google.protobuf.Descriptors.FieldDescriptor field,
-          Object value) {
-        return (Builder) super.setField(field, value);
+          java.lang.Object value) {
+        return super.setField(field, value);
       }
+      @java.lang.Override
       public Builder clearField(
           com.google.protobuf.Descriptors.FieldDescriptor field) {
-        return (Builder) super.clearField(field);
+        return super.clearField(field);
       }
+      @java.lang.Override
       public Builder clearOneof(
           com.google.protobuf.Descriptors.OneofDescriptor oneof) {
-        return (Builder) super.clearOneof(oneof);
+        return super.clearOneof(oneof);
       }
+      @java.lang.Override
       public Builder setRepeatedField(
           com.google.protobuf.Descriptors.FieldDescriptor field,
-          int index, Object value) {
-        return (Builder) super.setRepeatedField(field, index, value);
+          int index, java.lang.Object value) {
+        return super.setRepeatedField(field, index, value);
       }
+      @java.lang.Override
       public Builder addRepeatedField(
           com.google.protobuf.Descriptors.FieldDescriptor field,
-          Object value) {
-        return (Builder) super.addRepeatedField(field, value);
+          java.lang.Object value) {
+        return super.addRepeatedField(field, value);
       }
+      @java.lang.Override
       public Builder mergeFrom(com.google.protobuf.Message other) {
         if (other instanceof org.dpppt.backend.sdk.model.proto.Exposed.ProtoExposedList) {
           return mergeFrom((org.dpppt.backend.sdk.model.proto.Exposed.ProtoExposedList)other);
@@ -432,11 +484,14 @@ public final class Exposed {
 
       public Builder mergeFrom(org.dpppt.backend.sdk.model.proto.Exposed.ProtoExposedList other) {
         if (other == org.dpppt.backend.sdk.model.proto.Exposed.ProtoExposedList.getDefaultInstance()) return this;
+        if (other.getBatchReleaseTime() != 0L) {
+          setBatchReleaseTime(other.getBatchReleaseTime());
+        }
         if (exposedBuilder_ == null) {
           if (!other.exposed_.isEmpty()) {
             if (exposed_.isEmpty()) {
               exposed_ = other.exposed_;
-              bitField0_ = (bitField0_ & ~0x00000001);
+              bitField0_ = (bitField0_ & ~0x00000002);
             } else {
               ensureExposedIsMutable();
               exposed_.addAll(other.exposed_);
@@ -449,7 +504,7 @@ public final class Exposed {
               exposedBuilder_.dispose();
               exposedBuilder_ = null;
               exposed_ = other.exposed_;
-              bitField0_ = (bitField0_ & ~0x00000001);
+              bitField0_ = (bitField0_ & ~0x00000002);
               exposedBuilder_ = 
                 com.google.protobuf.GeneratedMessageV3.alwaysUseFieldBuilders ?
                    getExposedFieldBuilder() : null;
@@ -463,15 +518,12 @@ public final class Exposed {
         return this;
       }
 
+      @java.lang.Override
       public final boolean isInitialized() {
-        for (int i = 0; i < getExposedCount(); i++) {
-          if (!getExposed(i).isInitialized()) {
-            return false;
-          }
-        }
         return true;
       }
 
+      @java.lang.Override
       public Builder mergeFrom(
           com.google.protobuf.CodedInputStream input,
           com.google.protobuf.ExtensionRegistryLite extensionRegistry)
@@ -491,12 +543,38 @@ public final class Exposed {
       }
       private int bitField0_;
 
+      private long batchReleaseTime_ ;
+      /**
+       * <code>int64 batchReleaseTime = 1;</code>
+       */
+      public long getBatchReleaseTime() {
+        return batchReleaseTime_;
+      }
+      /**
+       * <code>int64 batchReleaseTime = 1;</code>
+       */
+      public Builder setBatchReleaseTime(long value) {
+        
+        batchReleaseTime_ = value;
+        onChanged();
+        return this;
+      }
+      /**
+       * <code>int64 batchReleaseTime = 1;</code>
+       */
+      public Builder clearBatchReleaseTime() {
+        
+        batchReleaseTime_ = 0L;
+        onChanged();
+        return this;
+      }
+
       private java.util.List<org.dpppt.backend.sdk.model.proto.Exposed.ProtoExposee> exposed_ =
         java.util.Collections.emptyList();
       private void ensureExposedIsMutable() {
-        if (!((bitField0_ & 0x00000001) == 0x00000001)) {
+        if (!((bitField0_ & 0x00000002) != 0)) {
           exposed_ = new java.util.ArrayList<org.dpppt.backend.sdk.model.proto.Exposed.ProtoExposee>(exposed_);
-          bitField0_ |= 0x00000001;
+          bitField0_ |= 0x00000002;
          }
       }
 
@@ -504,7 +582,7 @@ public final class Exposed {
           org.dpppt.backend.sdk.model.proto.Exposed.ProtoExposee, org.dpppt.backend.sdk.model.proto.Exposed.ProtoExposee.Builder, org.dpppt.backend.sdk.model.proto.Exposed.ProtoExposeeOrBuilder> exposedBuilder_;
 
       /**
-       * <code>repeated .org.dpppt.backend.sdk.model.proto.ProtoExposee exposed = 1;</code>
+       * <code>repeated .org.dpppt.backend.sdk.model.proto.ProtoExposee exposed = 2;</code>
        */
       public java.util.List<org.dpppt.backend.sdk.model.proto.Exposed.ProtoExposee> getExposedList() {
         if (exposedBuilder_ == null) {
@@ -514,7 +592,7 @@ public final class Exposed {
         }
       }
       /**
-       * <code>repeated .org.dpppt.backend.sdk.model.proto.ProtoExposee exposed = 1;</code>
+       * <code>repeated .org.dpppt.backend.sdk.model.proto.ProtoExposee exposed = 2;</code>
        */
       public int getExposedCount() {
         if (exposedBuilder_ == null) {
@@ -524,7 +602,7 @@ public final class Exposed {
         }
       }
       /**
-       * <code>repeated .org.dpppt.backend.sdk.model.proto.ProtoExposee exposed = 1;</code>
+       * <code>repeated .org.dpppt.backend.sdk.model.proto.ProtoExposee exposed = 2;</code>
        */
       public org.dpppt.backend.sdk.model.proto.Exposed.ProtoExposee getExposed(int index) {
         if (exposedBuilder_ == null) {
@@ -534,7 +612,7 @@ public final class Exposed {
         }
       }
       /**
-       * <code>repeated .org.dpppt.backend.sdk.model.proto.ProtoExposee exposed = 1;</code>
+       * <code>repeated .org.dpppt.backend.sdk.model.proto.ProtoExposee exposed = 2;</code>
        */
       public Builder setExposed(
           int index, org.dpppt.backend.sdk.model.proto.Exposed.ProtoExposee value) {
@@ -551,7 +629,7 @@ public final class Exposed {
         return this;
       }
       /**
-       * <code>repeated .org.dpppt.backend.sdk.model.proto.ProtoExposee exposed = 1;</code>
+       * <code>repeated .org.dpppt.backend.sdk.model.proto.ProtoExposee exposed = 2;</code>
        */
       public Builder setExposed(
           int index, org.dpppt.backend.sdk.model.proto.Exposed.ProtoExposee.Builder builderForValue) {
@@ -565,7 +643,7 @@ public final class Exposed {
         return this;
       }
       /**
-       * <code>repeated .org.dpppt.backend.sdk.model.proto.ProtoExposee exposed = 1;</code>
+       * <code>repeated .org.dpppt.backend.sdk.model.proto.ProtoExposee exposed = 2;</code>
        */
       public Builder addExposed(org.dpppt.backend.sdk.model.proto.Exposed.ProtoExposee value) {
         if (exposedBuilder_ == null) {
@@ -581,7 +659,7 @@ public final class Exposed {
         return this;
       }
       /**
-       * <code>repeated .org.dpppt.backend.sdk.model.proto.ProtoExposee exposed = 1;</code>
+       * <code>repeated .org.dpppt.backend.sdk.model.proto.ProtoExposee exposed = 2;</code>
        */
       public Builder addExposed(
           int index, org.dpppt.backend.sdk.model.proto.Exposed.ProtoExposee value) {
@@ -598,7 +676,7 @@ public final class Exposed {
         return this;
       }
       /**
-       * <code>repeated .org.dpppt.backend.sdk.model.proto.ProtoExposee exposed = 1;</code>
+       * <code>repeated .org.dpppt.backend.sdk.model.proto.ProtoExposee exposed = 2;</code>
        */
       public Builder addExposed(
           org.dpppt.backend.sdk.model.proto.Exposed.ProtoExposee.Builder builderForValue) {
@@ -612,7 +690,7 @@ public final class Exposed {
         return this;
       }
       /**
-       * <code>repeated .org.dpppt.backend.sdk.model.proto.ProtoExposee exposed = 1;</code>
+       * <code>repeated .org.dpppt.backend.sdk.model.proto.ProtoExposee exposed = 2;</code>
        */
       public Builder addExposed(
           int index, org.dpppt.backend.sdk.model.proto.Exposed.ProtoExposee.Builder builderForValue) {
@@ -626,7 +704,7 @@ public final class Exposed {
         return this;
       }
       /**
-       * <code>repeated .org.dpppt.backend.sdk.model.proto.ProtoExposee exposed = 1;</code>
+       * <code>repeated .org.dpppt.backend.sdk.model.proto.ProtoExposee exposed = 2;</code>
        */
       public Builder addAllExposed(
           java.lang.Iterable<? extends org.dpppt.backend.sdk.model.proto.Exposed.ProtoExposee> values) {
@@ -641,12 +719,12 @@ public final class Exposed {
         return this;
       }
       /**
-       * <code>repeated .org.dpppt.backend.sdk.model.proto.ProtoExposee exposed = 1;</code>
+       * <code>repeated .org.dpppt.backend.sdk.model.proto.ProtoExposee exposed = 2;</code>
        */
       public Builder clearExposed() {
         if (exposedBuilder_ == null) {
           exposed_ = java.util.Collections.emptyList();
-          bitField0_ = (bitField0_ & ~0x00000001);
+          bitField0_ = (bitField0_ & ~0x00000002);
           onChanged();
         } else {
           exposedBuilder_.clear();
@@ -654,7 +732,7 @@ public final class Exposed {
         return this;
       }
       /**
-       * <code>repeated .org.dpppt.backend.sdk.model.proto.ProtoExposee exposed = 1;</code>
+       * <code>repeated .org.dpppt.backend.sdk.model.proto.ProtoExposee exposed = 2;</code>
        */
       public Builder removeExposed(int index) {
         if (exposedBuilder_ == null) {
@@ -667,14 +745,14 @@ public final class Exposed {
         return this;
       }
       /**
-       * <code>repeated .org.dpppt.backend.sdk.model.proto.ProtoExposee exposed = 1;</code>
+       * <code>repeated .org.dpppt.backend.sdk.model.proto.ProtoExposee exposed = 2;</code>
        */
       public org.dpppt.backend.sdk.model.proto.Exposed.ProtoExposee.Builder getExposedBuilder(
           int index) {
         return getExposedFieldBuilder().getBuilder(index);
       }
       /**
-       * <code>repeated .org.dpppt.backend.sdk.model.proto.ProtoExposee exposed = 1;</code>
+       * <code>repeated .org.dpppt.backend.sdk.model.proto.ProtoExposee exposed = 2;</code>
        */
       public org.dpppt.backend.sdk.model.proto.Exposed.ProtoExposeeOrBuilder getExposedOrBuilder(
           int index) {
@@ -684,7 +762,7 @@ public final class Exposed {
         }
       }
       /**
-       * <code>repeated .org.dpppt.backend.sdk.model.proto.ProtoExposee exposed = 1;</code>
+       * <code>repeated .org.dpppt.backend.sdk.model.proto.ProtoExposee exposed = 2;</code>
        */
       public java.util.List<? extends org.dpppt.backend.sdk.model.proto.Exposed.ProtoExposeeOrBuilder> 
            getExposedOrBuilderList() {
@@ -695,14 +773,14 @@ public final class Exposed {
         }
       }
       /**
-       * <code>repeated .org.dpppt.backend.sdk.model.proto.ProtoExposee exposed = 1;</code>
+       * <code>repeated .org.dpppt.backend.sdk.model.proto.ProtoExposee exposed = 2;</code>
        */
       public org.dpppt.backend.sdk.model.proto.Exposed.ProtoExposee.Builder addExposedBuilder() {
         return getExposedFieldBuilder().addBuilder(
             org.dpppt.backend.sdk.model.proto.Exposed.ProtoExposee.getDefaultInstance());
       }
       /**
-       * <code>repeated .org.dpppt.backend.sdk.model.proto.ProtoExposee exposed = 1;</code>
+       * <code>repeated .org.dpppt.backend.sdk.model.proto.ProtoExposee exposed = 2;</code>
        */
       public org.dpppt.backend.sdk.model.proto.Exposed.ProtoExposee.Builder addExposedBuilder(
           int index) {
@@ -710,7 +788,7 @@ public final class Exposed {
             index, org.dpppt.backend.sdk.model.proto.Exposed.ProtoExposee.getDefaultInstance());
       }
       /**
-       * <code>repeated .org.dpppt.backend.sdk.model.proto.ProtoExposee exposed = 1;</code>
+       * <code>repeated .org.dpppt.backend.sdk.model.proto.ProtoExposee exposed = 2;</code>
        */
       public java.util.List<org.dpppt.backend.sdk.model.proto.Exposed.ProtoExposee.Builder> 
            getExposedBuilderList() {
@@ -723,18 +801,20 @@ public final class Exposed {
           exposedBuilder_ = new com.google.protobuf.RepeatedFieldBuilderV3<
               org.dpppt.backend.sdk.model.proto.Exposed.ProtoExposee, org.dpppt.backend.sdk.model.proto.Exposed.ProtoExposee.Builder, org.dpppt.backend.sdk.model.proto.Exposed.ProtoExposeeOrBuilder>(
                   exposed_,
-                  ((bitField0_ & 0x00000001) == 0x00000001),
+                  ((bitField0_ & 0x00000002) != 0),
                   getParentForChildren(),
                   isClean());
           exposed_ = null;
         }
         return exposedBuilder_;
       }
+      @java.lang.Override
       public final Builder setUnknownFields(
           final com.google.protobuf.UnknownFieldSet unknownFields) {
         return super.setUnknownFields(unknownFields);
       }
 
+      @java.lang.Override
       public final Builder mergeUnknownFields(
           final com.google.protobuf.UnknownFieldSet unknownFields) {
         return super.mergeUnknownFields(unknownFields);
@@ -754,13 +834,14 @@ public final class Exposed {
       return DEFAULT_INSTANCE;
     }
 
-    @java.lang.Deprecated public static final com.google.protobuf.Parser<ProtoExposedList>
+    private static final com.google.protobuf.Parser<ProtoExposedList>
         PARSER = new com.google.protobuf.AbstractParser<ProtoExposedList>() {
+      @java.lang.Override
       public ProtoExposedList parsePartialFrom(
           com.google.protobuf.CodedInputStream input,
           com.google.protobuf.ExtensionRegistryLite extensionRegistry)
           throws com.google.protobuf.InvalidProtocolBufferException {
-          return new ProtoExposedList(input, extensionRegistry);
+        return new ProtoExposedList(input, extensionRegistry);
       }
     };
 
@@ -773,6 +854,7 @@ public final class Exposed {
       return PARSER;
     }
 
+    @java.lang.Override
     public org.dpppt.backend.sdk.model.proto.Exposed.ProtoExposedList getDefaultInstanceForType() {
       return DEFAULT_INSTANCE;
     }
@@ -784,20 +866,12 @@ public final class Exposed {
       com.google.protobuf.MessageOrBuilder {
 
     /**
-     * <code>required bytes key = 2;</code>
-     */
-    boolean hasKey();
-    /**
-     * <code>required bytes key = 2;</code>
+     * <code>bytes key = 2;</code>
      */
     com.google.protobuf.ByteString getKey();
 
     /**
-     * <code>required int64 onset = 3;</code>
-     */
-    boolean hasOnset();
-    /**
-     * <code>required int64 onset = 3;</code>
+     * <code>int64 onset = 3;</code>
      */
     long getOnset();
   }
@@ -808,13 +882,13 @@ public final class Exposed {
       com.google.protobuf.GeneratedMessageV3 implements
       // @@protoc_insertion_point(message_implements:org.dpppt.backend.sdk.model.proto.ProtoExposee)
       ProtoExposeeOrBuilder {
+  private static final long serialVersionUID = 0L;
     // Use ProtoExposee.newBuilder() to construct.
     private ProtoExposee(com.google.protobuf.GeneratedMessageV3.Builder<?> builder) {
       super(builder);
     }
     private ProtoExposee() {
       key_ = com.google.protobuf.ByteString.EMPTY;
-      onset_ = 0L;
     }
 
     @java.lang.Override
@@ -827,6 +901,9 @@ public final class Exposed {
         com.google.protobuf.ExtensionRegistryLite extensionRegistry)
         throws com.google.protobuf.InvalidProtocolBufferException {
       this();
+      if (extensionRegistry == null) {
+        throw new java.lang.NullPointerException();
+      }
       int mutable_bitField0_ = 0;
       com.google.protobuf.UnknownFieldSet.Builder unknownFields =
           com.google.protobuf.UnknownFieldSet.newBuilder();
@@ -838,21 +915,21 @@ public final class Exposed {
             case 0:
               done = true;
               break;
-            default: {
-              if (!parseUnknownField(input, unknownFields,
-                                     extensionRegistry, tag)) {
-                done = true;
-              }
-              break;
-            }
             case 18: {
-              bitField0_ |= 0x00000001;
+
               key_ = input.readBytes();
               break;
             }
             case 24: {
-              bitField0_ |= 0x00000002;
+
               onset_ = input.readInt64();
+              break;
+            }
+            default: {
+              if (!parseUnknownField(
+                  input, unknownFields, extensionRegistry, tag)) {
+                done = true;
+              }
               break;
             }
           }
@@ -869,27 +946,21 @@ public final class Exposed {
     }
     public static final com.google.protobuf.Descriptors.Descriptor
         getDescriptor() {
-      return org.dpppt.backend.sdk.model.proto.Exposed.internal_static_org_dpppt_android_sdk_internal_backend_proto_ProtoExposee_descriptor;
+      return org.dpppt.backend.sdk.model.proto.Exposed.internal_static_org_dpppt_backend_sdk_model_proto_ProtoExposee_descriptor;
     }
 
+    @java.lang.Override
     protected com.google.protobuf.GeneratedMessageV3.FieldAccessorTable
         internalGetFieldAccessorTable() {
-      return org.dpppt.backend.sdk.model.proto.Exposed.internal_static_org_dpppt_android_sdk_internal_backend_proto_ProtoExposee_fieldAccessorTable
+      return org.dpppt.backend.sdk.model.proto.Exposed.internal_static_org_dpppt_backend_sdk_model_proto_ProtoExposee_fieldAccessorTable
           .ensureFieldAccessorsInitialized(
               org.dpppt.backend.sdk.model.proto.Exposed.ProtoExposee.class, org.dpppt.backend.sdk.model.proto.Exposed.ProtoExposee.Builder.class);
     }
 
-    private int bitField0_;
     public static final int KEY_FIELD_NUMBER = 2;
     private com.google.protobuf.ByteString key_;
     /**
-     * <code>required bytes key = 2;</code>
-     */
-    public boolean hasKey() {
-      return ((bitField0_ & 0x00000001) == 0x00000001);
-    }
-    /**
-     * <code>required bytes key = 2;</code>
+     * <code>bytes key = 2;</code>
      */
     public com.google.protobuf.ByteString getKey() {
       return key_;
@@ -898,57 +969,46 @@ public final class Exposed {
     public static final int ONSET_FIELD_NUMBER = 3;
     private long onset_;
     /**
-     * <code>required int64 onset = 3;</code>
-     */
-    public boolean hasOnset() {
-      return ((bitField0_ & 0x00000002) == 0x00000002);
-    }
-    /**
-     * <code>required int64 onset = 3;</code>
+     * <code>int64 onset = 3;</code>
      */
     public long getOnset() {
       return onset_;
     }
 
     private byte memoizedIsInitialized = -1;
+    @java.lang.Override
     public final boolean isInitialized() {
       byte isInitialized = memoizedIsInitialized;
       if (isInitialized == 1) return true;
       if (isInitialized == 0) return false;
 
-      if (!hasKey()) {
-        memoizedIsInitialized = 0;
-        return false;
-      }
-      if (!hasOnset()) {
-        memoizedIsInitialized = 0;
-        return false;
-      }
       memoizedIsInitialized = 1;
       return true;
     }
 
+    @java.lang.Override
     public void writeTo(com.google.protobuf.CodedOutputStream output)
                         throws java.io.IOException {
-      if (((bitField0_ & 0x00000001) == 0x00000001)) {
+      if (!key_.isEmpty()) {
         output.writeBytes(2, key_);
       }
-      if (((bitField0_ & 0x00000002) == 0x00000002)) {
+      if (onset_ != 0L) {
         output.writeInt64(3, onset_);
       }
       unknownFields.writeTo(output);
     }
 
+    @java.lang.Override
     public int getSerializedSize() {
       int size = memoizedSize;
       if (size != -1) return size;
 
       size = 0;
-      if (((bitField0_ & 0x00000001) == 0x00000001)) {
+      if (!key_.isEmpty()) {
         size += com.google.protobuf.CodedOutputStream
           .computeBytesSize(2, key_);
       }
-      if (((bitField0_ & 0x00000002) == 0x00000002)) {
+      if (onset_ != 0L) {
         size += com.google.protobuf.CodedOutputStream
           .computeInt64Size(3, onset_);
       }
@@ -957,7 +1017,6 @@ public final class Exposed {
       return size;
     }
 
-    private static final long serialVersionUID = 0L;
     @java.lang.Override
     public boolean equals(final java.lang.Object obj) {
       if (obj == this) {
@@ -968,19 +1027,12 @@ public final class Exposed {
       }
       org.dpppt.backend.sdk.model.proto.Exposed.ProtoExposee other = (org.dpppt.backend.sdk.model.proto.Exposed.ProtoExposee) obj;
 
-      boolean result = true;
-      result = result && (hasKey() == other.hasKey());
-      if (hasKey()) {
-        result = result && getKey()
-            .equals(other.getKey());
-      }
-      result = result && (hasOnset() == other.hasOnset());
-      if (hasOnset()) {
-        result = result && (getOnset()
-            == other.getOnset());
-      }
-      result = result && unknownFields.equals(other.unknownFields);
-      return result;
+      if (!getKey()
+          .equals(other.getKey())) return false;
+      if (getOnset()
+          != other.getOnset()) return false;
+      if (!unknownFields.equals(other.unknownFields)) return false;
+      return true;
     }
 
     @java.lang.Override
@@ -990,15 +1042,11 @@ public final class Exposed {
       }
       int hash = 41;
       hash = (19 * hash) + getDescriptor().hashCode();
-      if (hasKey()) {
-        hash = (37 * hash) + KEY_FIELD_NUMBER;
-        hash = (53 * hash) + getKey().hashCode();
-      }
-      if (hasOnset()) {
-        hash = (37 * hash) + ONSET_FIELD_NUMBER;
-        hash = (53 * hash) + com.google.protobuf.Internal.hashLong(
-            getOnset());
-      }
+      hash = (37 * hash) + KEY_FIELD_NUMBER;
+      hash = (53 * hash) + getKey().hashCode();
+      hash = (37 * hash) + ONSET_FIELD_NUMBER;
+      hash = (53 * hash) + com.google.protobuf.Internal.hashLong(
+          getOnset());
       hash = (29 * hash) + unknownFields.hashCode();
       memoizedHashCode = hash;
       return hash;
@@ -1074,6 +1122,7 @@ public final class Exposed {
           .parseWithIOException(PARSER, input, extensionRegistry);
     }
 
+    @java.lang.Override
     public Builder newBuilderForType() { return newBuilder(); }
     public static Builder newBuilder() {
       return DEFAULT_INSTANCE.toBuilder();
@@ -1081,6 +1130,7 @@ public final class Exposed {
     public static Builder newBuilder(org.dpppt.backend.sdk.model.proto.Exposed.ProtoExposee prototype) {
       return DEFAULT_INSTANCE.toBuilder().mergeFrom(prototype);
     }
+    @java.lang.Override
     public Builder toBuilder() {
       return this == DEFAULT_INSTANCE
           ? new Builder() : new Builder().mergeFrom(this);
@@ -1101,12 +1151,13 @@ public final class Exposed {
         org.dpppt.backend.sdk.model.proto.Exposed.ProtoExposeeOrBuilder {
       public static final com.google.protobuf.Descriptors.Descriptor
           getDescriptor() {
-        return org.dpppt.backend.sdk.model.proto.Exposed.internal_static_org_dpppt_android_sdk_internal_backend_proto_ProtoExposee_descriptor;
+        return org.dpppt.backend.sdk.model.proto.Exposed.internal_static_org_dpppt_backend_sdk_model_proto_ProtoExposee_descriptor;
       }
 
+      @java.lang.Override
       protected com.google.protobuf.GeneratedMessageV3.FieldAccessorTable
           internalGetFieldAccessorTable() {
-        return org.dpppt.backend.sdk.model.proto.Exposed.internal_static_org_dpppt_android_sdk_internal_backend_proto_ProtoExposee_fieldAccessorTable
+        return org.dpppt.backend.sdk.model.proto.Exposed.internal_static_org_dpppt_backend_sdk_model_proto_ProtoExposee_fieldAccessorTable
             .ensureFieldAccessorsInitialized(
                 org.dpppt.backend.sdk.model.proto.Exposed.ProtoExposee.class, org.dpppt.backend.sdk.model.proto.Exposed.ProtoExposee.Builder.class);
       }
@@ -1126,24 +1177,28 @@ public final class Exposed {
                 .alwaysUseFieldBuilders) {
         }
       }
+      @java.lang.Override
       public Builder clear() {
         super.clear();
         key_ = com.google.protobuf.ByteString.EMPTY;
-        bitField0_ = (bitField0_ & ~0x00000001);
+
         onset_ = 0L;
-        bitField0_ = (bitField0_ & ~0x00000002);
+
         return this;
       }
 
+      @java.lang.Override
       public com.google.protobuf.Descriptors.Descriptor
           getDescriptorForType() {
-        return org.dpppt.backend.sdk.model.proto.Exposed.internal_static_org_dpppt_android_sdk_internal_backend_proto_ProtoExposee_descriptor;
+        return org.dpppt.backend.sdk.model.proto.Exposed.internal_static_org_dpppt_backend_sdk_model_proto_ProtoExposee_descriptor;
       }
 
+      @java.lang.Override
       public org.dpppt.backend.sdk.model.proto.Exposed.ProtoExposee getDefaultInstanceForType() {
         return org.dpppt.backend.sdk.model.proto.Exposed.ProtoExposee.getDefaultInstance();
       }
 
+      @java.lang.Override
       public org.dpppt.backend.sdk.model.proto.Exposed.ProtoExposee build() {
         org.dpppt.backend.sdk.model.proto.Exposed.ProtoExposee result = buildPartial();
         if (!result.isInitialized()) {
@@ -1152,49 +1207,48 @@ public final class Exposed {
         return result;
       }
 
+      @java.lang.Override
       public org.dpppt.backend.sdk.model.proto.Exposed.ProtoExposee buildPartial() {
         org.dpppt.backend.sdk.model.proto.Exposed.ProtoExposee result = new org.dpppt.backend.sdk.model.proto.Exposed.ProtoExposee(this);
-        int from_bitField0_ = bitField0_;
-        int to_bitField0_ = 0;
-        if (((from_bitField0_ & 0x00000001) == 0x00000001)) {
-          to_bitField0_ |= 0x00000001;
-        }
         result.key_ = key_;
-        if (((from_bitField0_ & 0x00000002) == 0x00000002)) {
-          to_bitField0_ |= 0x00000002;
-        }
         result.onset_ = onset_;
-        result.bitField0_ = to_bitField0_;
         onBuilt();
         return result;
       }
 
+      @java.lang.Override
       public Builder clone() {
-        return (Builder) super.clone();
+        return super.clone();
       }
+      @java.lang.Override
       public Builder setField(
           com.google.protobuf.Descriptors.FieldDescriptor field,
-          Object value) {
-        return (Builder) super.setField(field, value);
+          java.lang.Object value) {
+        return super.setField(field, value);
       }
+      @java.lang.Override
       public Builder clearField(
           com.google.protobuf.Descriptors.FieldDescriptor field) {
-        return (Builder) super.clearField(field);
+        return super.clearField(field);
       }
+      @java.lang.Override
       public Builder clearOneof(
           com.google.protobuf.Descriptors.OneofDescriptor oneof) {
-        return (Builder) super.clearOneof(oneof);
+        return super.clearOneof(oneof);
       }
+      @java.lang.Override
       public Builder setRepeatedField(
           com.google.protobuf.Descriptors.FieldDescriptor field,
-          int index, Object value) {
-        return (Builder) super.setRepeatedField(field, index, value);
+          int index, java.lang.Object value) {
+        return super.setRepeatedField(field, index, value);
       }
+      @java.lang.Override
       public Builder addRepeatedField(
           com.google.protobuf.Descriptors.FieldDescriptor field,
-          Object value) {
-        return (Builder) super.addRepeatedField(field, value);
+          java.lang.Object value) {
+        return super.addRepeatedField(field, value);
       }
+      @java.lang.Override
       public Builder mergeFrom(com.google.protobuf.Message other) {
         if (other instanceof org.dpppt.backend.sdk.model.proto.Exposed.ProtoExposee) {
           return mergeFrom((org.dpppt.backend.sdk.model.proto.Exposed.ProtoExposee)other);
@@ -1206,10 +1260,10 @@ public final class Exposed {
 
       public Builder mergeFrom(org.dpppt.backend.sdk.model.proto.Exposed.ProtoExposee other) {
         if (other == org.dpppt.backend.sdk.model.proto.Exposed.ProtoExposee.getDefaultInstance()) return this;
-        if (other.hasKey()) {
+        if (other.getKey() != com.google.protobuf.ByteString.EMPTY) {
           setKey(other.getKey());
         }
-        if (other.hasOnset()) {
+        if (other.getOnset() != 0L) {
           setOnset(other.getOnset());
         }
         this.mergeUnknownFields(other.unknownFields);
@@ -1217,16 +1271,12 @@ public final class Exposed {
         return this;
       }
 
+      @java.lang.Override
       public final boolean isInitialized() {
-        if (!hasKey()) {
-          return false;
-        }
-        if (!hasOnset()) {
-          return false;
-        }
         return true;
       }
 
+      @java.lang.Override
       public Builder mergeFrom(
           com.google.protobuf.CodedInputStream input,
           com.google.protobuf.ExtensionRegistryLite extensionRegistry)
@@ -1244,38 +1294,31 @@ public final class Exposed {
         }
         return this;
       }
-      private int bitField0_;
 
       private com.google.protobuf.ByteString key_ = com.google.protobuf.ByteString.EMPTY;
       /**
-       * <code>required bytes key = 2;</code>
-       */
-      public boolean hasKey() {
-        return ((bitField0_ & 0x00000001) == 0x00000001);
-      }
-      /**
-       * <code>required bytes key = 2;</code>
+       * <code>bytes key = 2;</code>
        */
       public com.google.protobuf.ByteString getKey() {
         return key_;
       }
       /**
-       * <code>required bytes key = 2;</code>
+       * <code>bytes key = 2;</code>
        */
       public Builder setKey(com.google.protobuf.ByteString value) {
         if (value == null) {
     throw new NullPointerException();
   }
-  bitField0_ |= 0x00000001;
+  
         key_ = value;
         onChanged();
         return this;
       }
       /**
-       * <code>required bytes key = 2;</code>
+       * <code>bytes key = 2;</code>
        */
       public Builder clearKey() {
-        bitField0_ = (bitField0_ & ~0x00000001);
+        
         key_ = getDefaultInstance().getKey();
         onChanged();
         return this;
@@ -1283,40 +1326,36 @@ public final class Exposed {
 
       private long onset_ ;
       /**
-       * <code>required int64 onset = 3;</code>
-       */
-      public boolean hasOnset() {
-        return ((bitField0_ & 0x00000002) == 0x00000002);
-      }
-      /**
-       * <code>required int64 onset = 3;</code>
+       * <code>int64 onset = 3;</code>
        */
       public long getOnset() {
         return onset_;
       }
       /**
-       * <code>required int64 onset = 3;</code>
+       * <code>int64 onset = 3;</code>
        */
       public Builder setOnset(long value) {
-        bitField0_ |= 0x00000002;
+        
         onset_ = value;
         onChanged();
         return this;
       }
       /**
-       * <code>required int64 onset = 3;</code>
+       * <code>int64 onset = 3;</code>
        */
       public Builder clearOnset() {
-        bitField0_ = (bitField0_ & ~0x00000002);
+        
         onset_ = 0L;
         onChanged();
         return this;
       }
+      @java.lang.Override
       public final Builder setUnknownFields(
           final com.google.protobuf.UnknownFieldSet unknownFields) {
         return super.setUnknownFields(unknownFields);
       }
 
+      @java.lang.Override
       public final Builder mergeUnknownFields(
           final com.google.protobuf.UnknownFieldSet unknownFields) {
         return super.mergeUnknownFields(unknownFields);
@@ -1336,13 +1375,14 @@ public final class Exposed {
       return DEFAULT_INSTANCE;
     }
 
-    @java.lang.Deprecated public static final com.google.protobuf.Parser<ProtoExposee>
+    private static final com.google.protobuf.Parser<ProtoExposee>
         PARSER = new com.google.protobuf.AbstractParser<ProtoExposee>() {
+      @java.lang.Override
       public ProtoExposee parsePartialFrom(
           com.google.protobuf.CodedInputStream input,
           com.google.protobuf.ExtensionRegistryLite extensionRegistry)
           throws com.google.protobuf.InvalidProtocolBufferException {
-          return new ProtoExposee(input, extensionRegistry);
+        return new ProtoExposee(input, extensionRegistry);
       }
     };
 
@@ -1355,6 +1395,7 @@ public final class Exposed {
       return PARSER;
     }
 
+    @java.lang.Override
     public org.dpppt.backend.sdk.model.proto.Exposed.ProtoExposee getDefaultInstanceForType() {
       return DEFAULT_INSTANCE;
     }
@@ -1362,15 +1403,15 @@ public final class Exposed {
   }
 
   private static final com.google.protobuf.Descriptors.Descriptor
-    internal_static_org_dpppt_android_sdk_internal_backend_proto_ProtoExposedList_descriptor;
+    internal_static_org_dpppt_backend_sdk_model_proto_ProtoExposedList_descriptor;
   private static final 
     com.google.protobuf.GeneratedMessageV3.FieldAccessorTable
-      internal_static_org_dpppt_android_sdk_internal_backend_proto_ProtoExposedList_fieldAccessorTable;
+      internal_static_org_dpppt_backend_sdk_model_proto_ProtoExposedList_fieldAccessorTable;
   private static final com.google.protobuf.Descriptors.Descriptor
-    internal_static_org_dpppt_android_sdk_internal_backend_proto_ProtoExposee_descriptor;
+    internal_static_org_dpppt_backend_sdk_model_proto_ProtoExposee_descriptor;
   private static final 
     com.google.protobuf.GeneratedMessageV3.FieldAccessorTable
-      internal_static_org_dpppt_android_sdk_internal_backend_proto_ProtoExposee_fieldAccessorTable;
+      internal_static_org_dpppt_backend_sdk_model_proto_ProtoExposee_fieldAccessorTable;
 
   public static com.google.protobuf.Descriptors.FileDescriptor
       getDescriptor() {
@@ -1380,12 +1421,12 @@ public final class Exposed {
       descriptor;
   static {
     java.lang.String[] descriptorData = {
-      "\n\rexposed.proto\022,org.dpppt.android.sdk.i" +
-      "nternal.backend.proto\"_\n\020ProtoExposedLis" +
-      "t\022K\n\007exposed\030\001 \003(\0132:.org.dpppt.android.s" +
-      "dk.internal.backend.proto.ProtoExposee\"*" +
-      "\n\014ProtoExposee\022\013\n\003key\030\002 \002(\014\022\r\n\005onset\030\003 \002" +
-      "(\003"
+      "\n\rexposed.proto\022!org.dpppt.backend.sdk.m" +
+      "odel.proto\"n\n\020ProtoExposedList\022\030\n\020batchR" +
+      "eleaseTime\030\001 \001(\003\022@\n\007exposed\030\002 \003(\0132/.org." +
+      "dpppt.backend.sdk.model.proto.ProtoExpos" +
+      "ee\"*\n\014ProtoExposee\022\013\n\003key\030\002 \001(\014\022\r\n\005onset" +
+      "\030\003 \001(\003b\006proto3"
     };
     com.google.protobuf.Descriptors.FileDescriptor.InternalDescriptorAssigner assigner =
         new com.google.protobuf.Descriptors.FileDescriptor.    InternalDescriptorAssigner() {
@@ -1399,17 +1440,17 @@ public final class Exposed {
       .internalBuildGeneratedFileFrom(descriptorData,
         new com.google.protobuf.Descriptors.FileDescriptor[] {
         }, assigner);
-    internal_static_org_dpppt_android_sdk_internal_backend_proto_ProtoExposedList_descriptor =
+    internal_static_org_dpppt_backend_sdk_model_proto_ProtoExposedList_descriptor =
       getDescriptor().getMessageTypes().get(0);
-    internal_static_org_dpppt_android_sdk_internal_backend_proto_ProtoExposedList_fieldAccessorTable = new
+    internal_static_org_dpppt_backend_sdk_model_proto_ProtoExposedList_fieldAccessorTable = new
       com.google.protobuf.GeneratedMessageV3.FieldAccessorTable(
-        internal_static_org_dpppt_android_sdk_internal_backend_proto_ProtoExposedList_descriptor,
-        new java.lang.String[] { "Exposed", });
-    internal_static_org_dpppt_android_sdk_internal_backend_proto_ProtoExposee_descriptor =
+        internal_static_org_dpppt_backend_sdk_model_proto_ProtoExposedList_descriptor,
+        new java.lang.String[] { "BatchReleaseTime", "Exposed", });
+    internal_static_org_dpppt_backend_sdk_model_proto_ProtoExposee_descriptor =
       getDescriptor().getMessageTypes().get(1);
-    internal_static_org_dpppt_android_sdk_internal_backend_proto_ProtoExposee_fieldAccessorTable = new
+    internal_static_org_dpppt_backend_sdk_model_proto_ProtoExposee_fieldAccessorTable = new
       com.google.protobuf.GeneratedMessageV3.FieldAccessorTable(
-        internal_static_org_dpppt_android_sdk_internal_backend_proto_ProtoExposee_descriptor,
+        internal_static_org_dpppt_backend_sdk_model_proto_ProtoExposee_descriptor,
         new java.lang.String[] { "Key", "Onset", });
   }
 

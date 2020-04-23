@@ -1,3 +1,9 @@
+/*
+ * Created by Ubique Innovation AG
+ * https://www.ubique.ch
+ * Copyright (c) 2020. All rights reserved.
+ */
+
 package org.dpppt.backend.sdk.ws.security;
 
 import org.dpppt.backend.sdk.data.DPPPTDataService;
@@ -10,7 +16,7 @@ import org.springframework.security.oauth2.jwt.Jwt;
 
 public class JWTValidator implements OAuth2TokenValidator<Jwt> {
 
-    public static final String UUID_CLAIM = "uuid";
+    public static final String UUID_CLAIM = "jti";
 
 
     private DPPPTDataService dataService;

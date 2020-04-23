@@ -41,7 +41,7 @@ public class WSDevConfig extends WSBaseConfig {
 
 	@Override
 	public void configureTasks(ScheduledTaskRegistrar taskRegistrar) {
-		
+
 	}
 
 }
