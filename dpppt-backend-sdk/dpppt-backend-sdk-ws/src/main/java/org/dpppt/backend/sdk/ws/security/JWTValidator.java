@@ -10,7 +10,7 @@ import org.springframework.security.oauth2.jwt.Jwt;
 
 public class JWTValidator implements OAuth2TokenValidator<Jwt> {
 
-    public static final String UUID_CLAIM = "sub";
+    public static final String UUID_CLAIM = "uuid";
 
 
     private DPPPTDataService dataService;

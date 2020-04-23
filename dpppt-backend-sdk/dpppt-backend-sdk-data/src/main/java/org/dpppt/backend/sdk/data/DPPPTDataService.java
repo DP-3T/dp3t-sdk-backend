@@ -47,4 +47,22 @@ public interface DPPPTDataService {
 	 */
 	boolean checkAndInsertPublishUUID(String uuid);
 
+	/**
+	 * Returns the maximum id of the stored exposed entries fo the given batch.
+	 * 
+	 * @param batchReleaseTime
+	 * @param batchLength
+	 * @return
+	 */
+	int getMaxExposedIdForBatchReleaseTime(Long batchReleaseTime, long batchLength);
+
+	/**
+	 * Returns all exposees for the given batch.
+	 * 
+	 * @param batchReleaseTime
+	 * @param batchLength
+	 * @return
+	 */
+	List<Exposee> getSortedExposedForBatchReleaseTime(Long batchReleaseTime, long batchLength);
+
 }
