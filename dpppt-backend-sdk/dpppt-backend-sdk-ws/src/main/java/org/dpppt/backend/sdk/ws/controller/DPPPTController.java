@@ -133,7 +133,7 @@ public class DPPPTController {
 	}
 
 	@CrossOrigin(origins = { "https://editor.swagger.io" })
-	@GetMapping(value = "/exposed/{batchReleaseTime}", produces = "application/json")
+	@GetMapping(value = "/exposedjson/{batchReleaseTime}", produces = "application/json")
 	public @ResponseBody ResponseEntity<ExposedOverview> getExposedByDayDate(@PathVariable Long batchReleaseTime,
 			WebRequest request) {
 		if (batchReleaseTime % batchLength != 0) {
