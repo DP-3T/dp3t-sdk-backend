@@ -108,8 +108,8 @@ public class SignatureResponseWrapper extends HttpServletResponseWrapper {
 		claims.put(CLAIM_CONTENT_HASH, Base64.getEncoder().encodeToString(theHash));
         claims.put(CLAIM_HASH_ALG, "sha-256");
         for(String header : protectedHeaders){
-            if(!this.containsHeader(header)) continue;
-            claims.put(header.toLowerCase(), this.getHeader(header));
+			if(!this.containsHeader(header)) continue;
+            claims.put(header.toLowerCase().replace("x-", ""), this.getHeader(header));
         }
 		claims.setIssuer(ISSUER_DP3T);
 		claims.setIssuedAt(DateTime.now().toDate());
