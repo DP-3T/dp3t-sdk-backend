@@ -94,4 +94,16 @@ public class JDBCDPPPTDataServiceImpl implements DPPPTDataService {
 			return true;
 		}
 	}
+
+	@Override
+	public int getMaxExposedIdForBatchReleaseTime(Long batchReleaseTime, long batchLength) {
+		// TODO Auto-generated method stub
+		return 0;
+	}
+
+	@Override
+	public List<Exposee> getSortedExposedForBatchReleaseTime(Long batchReleaseTime, long batchLength) {
+		// TODO Auto-generated method stub
+		return null;
+	}
 }
