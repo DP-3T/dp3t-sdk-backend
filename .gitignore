@@ -29,3 +29,5 @@ hs_err_pid*
 **/bin
 **/*.log.*
 **/.vscode
+
+**/*-local.properties
