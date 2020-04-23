@@ -60,7 +60,7 @@ public class DPPPTController {
 	@CrossOrigin(origins = { "https://editor.swagger.io" })
 	@GetMapping(value = "")
 	public @ResponseBody ResponseEntity<String> hello() {
-		return new ResponseEntity<>().header("Test", "blub").body("Hello from DP3T WS");
+		return ResponseEntity.ok().header("Test", "blub").body("Hello from DP3T WS");
 	}
 
 	@CrossOrigin(origins = { "https://editor.swagger.io" })
