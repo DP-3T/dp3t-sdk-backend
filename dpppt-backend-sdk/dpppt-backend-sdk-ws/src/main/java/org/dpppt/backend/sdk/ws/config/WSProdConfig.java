@@ -90,12 +90,11 @@ public class WSProdConfig extends WSBaseConfig {
 	}
 
 	@Override
-	protected KeyPair getKeyPair(SignatureAlgorithm algorithm) {
+	public KeyPair getKeyPair(SignatureAlgorithm algorithm) {
 		try {
 			return KeyPairGenerator.getInstance("RSA").generateKeyPair();
-		}
-		catch(Exception ex) {
-			return null;
+		} catch (Exception ex) {
+			throw new RuntimeException(ex);
 		}
 	}
 

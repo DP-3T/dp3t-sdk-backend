@@ -10,10 +10,10 @@ import java.security.KeyPair;
 
 import javax.sql.DataSource;
 
+import org.dpppt.backend.sdk.data.DPPPTDataService;
 import org.dpppt.backend.sdk.data.EtagGenerator;
 import org.dpppt.backend.sdk.data.EtagGeneratorInterface;
 import org.dpppt.backend.sdk.data.JDBCDPPPTDataServiceImpl;
-import org.dpppt.backend.sdk.data.DPPPTDataService;
 import org.dpppt.backend.sdk.ws.controller.DPPPTController;
 import org.dpppt.backend.sdk.ws.filter.ResponseWrapperFilter;
 import org.dpppt.backend.sdk.ws.security.NoValidateRequest;
@@ -30,6 +30,7 @@ import org.springframework.scheduling.annotation.SchedulingConfigurer;
 import org.springframework.web.servlet.config.annotation.WebMvcConfigurer;
 
 import io.jsonwebtoken.SignatureAlgorithm;
+
 @Configuration
 @EnableScheduling
 public abstract class WSBaseConfig implements SchedulingConfigurer, WebMvcConfigurer {
@@ -42,24 +43,31 @@ public abstract class WSBaseConfig implements SchedulingConfigurer, WebMvcConfig
 
 	public abstract String getDbType();
 
+	public abstract KeyPair getKeyPair(SignatureAlgorithm algorithm);
+
 	@Value("${ws.exposedlist.cachecontrol: 5}")
 	int exposedListCacheControl;
-	
+
+	@Value("${ws.retentiondays: 21}")
+	int retentionDays;
+
 	@Value("${ws.app.source}")
 	String appSource;
 
-	
+	@Autowired(required = false)
+	ValidateRequest requestValidator;
+
+	final SignatureAlgorithm algorithm = SignatureAlgorithm.ES256;
+
 	@Bean
 	public DPPPTController dppptSDKController() {
 		ValidateRequest theValidator = requestValidator;
-		if(theValidator == null) {
+		if (theValidator == null) {
 			theValidator = new NoValidateRequest();
 		}
-		return new DPPPTController(dppptSDKDataService(), etagGenerator(), appSource, exposedListCacheControl, theValidator);
+		return new DPPPTController(dppptSDKDataService(), etagGenerator(), appSource, exposedListCacheControl,
+				theValidator);
 	}
-	
-	@Autowired(required = false)
-	ValidateRequest requestValidator;
 
 	@Bean
 	public DPPPTDataService dppptSDKDataService() {
@@ -71,12 +79,9 @@ public abstract class WSBaseConfig implements SchedulingConfigurer, WebMvcConfig
 		return new EtagGenerator();
 	}
 
-	SignatureAlgorithm algorithm = SignatureAlgorithm.ES256;
-
 	@Bean
 	public ResponseWrapperFilter hashFilter() {
-		return new ResponseWrapperFilter(getKeyPair(algorithm));
+		return new ResponseWrapperFilter(getKeyPair(algorithm), retentionDays);
 	}
 
-	abstract protected KeyPair getKeyPair(SignatureAlgorithm algorithm); 
 }

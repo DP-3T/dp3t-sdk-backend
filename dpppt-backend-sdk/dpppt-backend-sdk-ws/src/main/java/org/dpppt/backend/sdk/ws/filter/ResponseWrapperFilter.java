@@ -15,21 +15,24 @@ import org.bouncycastle.jce.provider.BouncyCastleProvider;
 import org.dpppt.backend.sdk.ws.security.signature.SignatureResponseWrapper;
 
 public class ResponseWrapperFilter implements Filter {
-    private KeyPair pair;
 
-    public ResponseWrapperFilter(KeyPair pair) {
-        Security.addProvider(new BouncyCastleProvider());
-        Security.setProperty("crypto.policy", "unlimited");
-        this.pair = pair;
-    }
+	private final KeyPair pair;
+	private final int retentionDays;
 
-    @Override
-    public void doFilter(ServletRequest request, ServletResponse response, FilterChain chain)
-            throws IOException, ServletException {
-        HttpServletResponse httpResponse = (HttpServletResponse)response;
-        SignatureResponseWrapper wrapper = new SignatureResponseWrapper(httpResponse, pair);
-        chain.doFilter(request, wrapper);
-        wrapper.outputData(httpResponse.getOutputStream());
-    }
+	public ResponseWrapperFilter(KeyPair pair, int retentionDays) {
+		Security.addProvider(new BouncyCastleProvider());
+		Security.setProperty("crypto.policy", "unlimited");
+		this.pair = pair;
+		this.retentionDays = retentionDays;
+	}
+
+	@Override
+	public void doFilter(ServletRequest request, ServletResponse response, FilterChain chain)
+			throws IOException, ServletException {
+		HttpServletResponse httpResponse = (HttpServletResponse) response;
+		SignatureResponseWrapper wrapper = new SignatureResponseWrapper(httpResponse, pair, retentionDays);
+		chain.doFilter(request, wrapper);
+		wrapper.outputData(httpResponse.getOutputStream());
+	}
 
 }

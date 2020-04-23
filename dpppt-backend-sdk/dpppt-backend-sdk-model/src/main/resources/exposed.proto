@@ -1,0 +1,8 @@
+package org.dpppt.backend.sdk.model.proto;
+message ProtoExposedList {
+  repeated ProtoExposee exposed = 1;
+}
+message ProtoExposee{
+  required bytes key = 2;
+  required int64 onset = 3;
+}

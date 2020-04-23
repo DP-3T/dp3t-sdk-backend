@@ -46,7 +46,7 @@ public class WSCloudConfig extends WSBaseConfig {
 	}
 
 	@Override
-	protected KeyPair getKeyPair(SignatureAlgorithm algorithm) {
+	public KeyPair getKeyPair(SignatureAlgorithm algorithm) {
 		try {
 			return KeyPairGenerator.getInstance("RSA").generateKeyPair();
 		}

@@ -26,131 +26,137 @@ import io.jsonwebtoken.Jwts;
 
 public class SignatureResponseWrapper extends HttpServletResponseWrapper {
 
-    //after 21 days the list and hence the signature is invalid
-    public static final int RETENTION_PERIOD = 21;
+	// after number of days days the list and hence the signature is invalid
+	public final int retentionPeriod;
 
-    private MessageDigest digest;
-    private ByteArrayOutputStream output;
-    private HashStream stream;
-    private PrintWriter writer;
-    private KeyPair pair;
-    public SignatureResponseWrapper(HttpServletResponse response, KeyPair pair) {
-        super(response);
-        this.pair = pair;
-        try {
-            this.output = new ByteArrayOutputStream(response.getBufferSize());
-            this.digest = MessageDigest.getInstance("SHA-256");
-            this.stream = new HashStream(this.digest, this.output);
-        } catch (Exception ex) {
+	private final MessageDigest digest;
+	private final ByteArrayOutputStream output;
+	private final KeyPair pair;
 
-        }
-    }
+	private HashStream stream;
+	private PrintWriter writer;
 
-    @Override
-    public ServletOutputStream getOutputStream() throws IOException {
-        if(stream == null) {
-            stream = new HashStream(this.digest, this.output);
-        }
-        return stream;
-    }
+	private static final String HEADER_SIGNATURE = "Signature";
+	private static final String HEADER_PUBLIC_KEY = "Public-Key";
+	private static final String HEADER_DIGEST = "Digest";
+	private static final String ISSUER_DP3T = "dp3t";
+	private static final String CLAIM_HASH_ALG = "hash-alg";
+	private static final String CLAIM_CONTENT_HASH = "content-hash";
 
-    public byte[] getHash() throws IOException {
-        return this.stream.getHash();
-    }
+	public SignatureResponseWrapper(HttpServletResponse response, KeyPair pair, int retentionDays) {
+		super(response);
+		this.pair = pair;
+		try {
+			this.output = new ByteArrayOutputStream(response.getBufferSize());
+			this.digest = MessageDigest.getInstance("SHA-256");
+			this.stream = new HashStream(this.digest, this.output);
+			this.retentionPeriod = retentionDays;
+		} catch (Exception ex) {
+			throw new RuntimeException(ex);
+		}
+	}
 
-    @Override
-    public PrintWriter getWriter() throws IOException {
-        if (output != null) {
-            throw new IllegalStateException(
-                    "getOutputStream() has already been called on this response.");
-        }
+	@Override
+	public ServletOutputStream getOutputStream() throws IOException {
+		if (stream == null) {
+			stream = new HashStream(this.digest, this.output);
+		}
+		return stream;
+	}
 
-        if (writer == null) {
-            writer = new PrintWriter(new OutputStreamWriter(this.output,
-                    getCharacterEncoding()));
-        }
+	public byte[] getHash() throws IOException {
+		return this.stream.getHash();
+	}
 
-        return writer;
-    }
+	@Override
+	public PrintWriter getWriter() throws IOException {
+		if (output != null) {
+			throw new IllegalStateException("getOutputStream() has already been called on this response.");
+		}
 
-    @Override
-    public void flushBuffer() throws IOException {
-        this.setSignature();
-        super.flushBuffer();
-        if (writer != null) {
-            writer.flush();
-        } else if (output != null) {
-            output.flush();
-        }
-    }
+		if (writer == null) {
+			writer = new PrintWriter(new OutputStreamWriter(this.output, getCharacterEncoding()));
+		}
 
-    public void outputData(OutputStream httpOutput) throws IOException{
-        this.setSignature();
-        httpOutput.write(this.output.toByteArray());
-    }
+		return writer;
+	}
 
+	@Override
+	public void flushBuffer() throws IOException {
+		this.setSignature();
+		super.flushBuffer();
+		if (writer != null) {
+			writer.flush();
+		} else if (output != null) {
+			output.flush();
+		}
+	}
 
-    private void setSignature() throws IOException {
-        byte[] theHash = this.getHash();
-        
-        Claims claims = Jwts.claims();
-        claims.put("content-hash", Base64.getEncoder().encodeToString(theHash));
-        claims.put("hash-alg", "sha-256");
-        claims.setIssuer("d3pt");
-        claims.setIssuedAt(DateTime.now().toDate());
-        claims.setExpiration(DateTime.now().plusDays(RETENTION_PERIOD).toDate());
-        String signature = Jwts.builder()
-                .setClaims(claims)
-                .signWith(pair.getPrivate())
-            .compact();
+	public void outputData(OutputStream httpOutput) throws IOException {
+		this.setSignature();
+		httpOutput.write(this.output.toByteArray());
+	}
 
-        this.setHeader("Digest", "SHA-256:" + ByteArrayHelper.bytesToHex(theHash));
-        this.setHeader("Public-Key", getPublicKeyAsPEM());
-        this.setHeader("Signature", signature);
-       
-    }
+	private void setSignature() throws IOException {
+		byte[] theHash = this.getHash();
 
-    private String getPublicKeyAsPEM() throws IOException{
-        StringWriter writer = new StringWriter();
-        PemWriter pemWriter = new PemWriter(writer);
-        pemWriter.writeObject(new PemObject("PUBLIC KEY", pair.getPublic().getEncoded()));
-        pemWriter.flush();
-        pemWriter.close();
-        return Base64Utils.encodeToUrlSafeString(writer.toString().trim().getBytes());
-    }
-    
-    private class HashStream extends ServletOutputStream {
+		Claims claims = Jwts.claims();
+		claims.put(CLAIM_CONTENT_HASH, Base64.getEncoder().encodeToString(theHash));
+		claims.put(CLAIM_HASH_ALG, "sha-256");
+		claims.setIssuer(ISSUER_DP3T);
+		claims.setIssuedAt(DateTime.now().toDate());
+		claims.setExpiration(DateTime.now().plusDays(retentionPeriod).toDate());
+		String signature = Jwts.builder().setClaims(claims).signWith(pair.getPrivate()).compact();
 
-        private MessageDigest digest;
-        private ByteArrayOutputStream  output;
+		this.setHeader(HEADER_DIGEST, "SHA-256:" + ByteArrayHelper.bytesToHex(theHash));
+		this.setHeader(HEADER_PUBLIC_KEY, getPublicKeyAsPEM());
+		this.setHeader(HEADER_SIGNATURE, signature);
 
-        public HashStream(MessageDigest digest, ByteArrayOutputStream outputStream) {
-            this.digest = digest;
-            this.output  = outputStream;
-        }
-        @Override
-        public boolean isReady() {
-            return false;
-        }
+	}
 
-        @Override
-        public void setWriteListener(WriteListener listener) {
+	private String getPublicKeyAsPEM() throws IOException {
+		StringWriter writer = new StringWriter();
+		PemWriter pemWriter = new PemWriter(writer);
+		pemWriter.writeObject(new PemObject("PUBLIC KEY", pair.getPublic().getEncoded()));
+		pemWriter.flush();
+		pemWriter.close();
+		return Base64Utils.encodeToUrlSafeString(writer.toString().trim().getBytes());
+	}
 
-        }
+	private class HashStream extends ServletOutputStream {
 
-        @Override
-        public void write(int b) throws IOException {
-            this.digest.update((byte)b);
-            this.output.write(b);
-        }
+		private MessageDigest digest;
+		private ByteArrayOutputStream output;
 
-        @Override
-        public void close() throws IOException{
-            this.output.close();
-        }
-        public byte[] getHash() throws IOException{
-            return this.digest.digest();
-        }   
-    }
+		public HashStream(MessageDigest digest, ByteArrayOutputStream outputStream) {
+			this.digest = digest;
+			this.output = outputStream;
+		}
+
+		@Override
+		public boolean isReady() {
+			return false;
+		}
+
+		@Override
+		public void setWriteListener(WriteListener listener) {
+
+		}
+
+		@Override
+		public void write(int b) throws IOException {
+			this.digest.update((byte) b);
+			this.output.write(b);
+		}
+
+		@Override
+		public void close() throws IOException {
+			this.output.close();
+		}
+
+		public byte[] getHash() throws IOException {
+			return this.digest.digest();
+		}
+	}
 
 }
