@@ -58,7 +58,7 @@ public class JDBCDPPPTDataServiceImpl implements DPPPTDataService {
     @Transactional(readOnly = true)
     public List<Exposee> getSortedExposedForDay(DateTime day) {
         DateTime dayMidnight = day.withTimeAtStartOfDay();
-        String sql = "select pk_exposed_id, key, key_date as onset_string from t_exposed where received_at >= :dayMidnight and received_at < :nextDayMidnight order by pk_exposed_id desc";
+        String sql = "select pk_exposed_id, key, key_date from t_exposed where received_at >= :dayMidnight and received_at < :nextDayMidnight order by pk_exposed_id desc";
         MapSqlParameterSource params = new MapSqlParameterSource();
         params.addValue("dayMidnight", dayMidnight.toDate());
         params.addValue("nextDayMidnight", dayMidnight.plusDays(1).toDate());

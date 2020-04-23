@@ -48,7 +48,7 @@ public class PostgresDPPPTDataServiceTest {
 
         Exposee exposee = new Exposee();
         exposee.setKey("key1");
-        exposee.setOnset("2014-01-28");
+        exposee.setKeyDate(DateTime.parse("2014-01-28").withTimeAtStartOfDay().getMillis());
 
         // WHEN
         dppptDataService.upsertExposee(exposee, "test-app");
@@ -67,7 +67,7 @@ public class PostgresDPPPTDataServiceTest {
             Assertions.assertThat(resultSet.getString("key")).isEqualTo("key1");
             Assertions.assertThat(resultSet.getString("received_at")).isNotNull();
             Assertions.assertThat(resultSet.getString("app_source")).isEqualTo("test-app");
-            Assertions.assertThat(resultSet.getDate("onset")).isEqualTo(Date.valueOf(LocalDate.of(2014, 1, 28)));
+            Assertions.assertThat(resultSet.getDate("key_date")).isEqualTo(Date.valueOf(LocalDate.of(2014, 1, 28)));
         }
     }
 
@@ -78,7 +78,7 @@ public class PostgresDPPPTDataServiceTest {
         {
             Exposee exposee = new Exposee();
             exposee.setKey("key1");
-            exposee.setOnset("2014-01-28");
+            exposee.setKeyDate(DateTime.parse("2014-01-28").withTimeAtStartOfDay().getMillis());
 
             dppptDataService.upsertExposee(exposee, "test-app");
         }
@@ -86,7 +86,7 @@ public class PostgresDPPPTDataServiceTest {
         {
             Exposee exposee = new Exposee();
             exposee.setKey("key2");
-            exposee.setOnset("2014-01-29");
+            exposee.setKeyDate(DateTime.parse("2014-01-29").withTimeAtStartOfDay().getMillis());
 
             dppptDataService.upsertExposee(exposee, "test-app");
         }
@@ -117,7 +117,7 @@ public class PostgresDPPPTDataServiceTest {
         {
             Exposee exposee = new Exposee();
             exposee.setKey("key100");
-            exposee.setOnset("2014-01-28");
+            exposee.setKeyDate(DateTime.parse("2014-01-28").withTimeAtStartOfDay().getMillis());
 
             dppptDataService.upsertExposee(exposee, "test-app");
         }
@@ -125,7 +125,7 @@ public class PostgresDPPPTDataServiceTest {
         {
             Exposee exposee = new Exposee();
             exposee.setKey("key200");
-            exposee.setOnset("2014-01-29");
+            exposee.setKeyDate(DateTime.parse("2014-01-29").withTimeAtStartOfDay().getMillis());
 
             dppptDataService.upsertExposee(exposee, "test-app");
         }
