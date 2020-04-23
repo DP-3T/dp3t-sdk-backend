@@ -19,41 +19,14 @@ import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.Profile;
 import org.springframework.scheduling.config.ScheduledTaskRegistrar;
 
-import io.jsonwebtoken.SignatureAlgorithm;
-
 import com.zaxxer.hikari.HikariConfig;
 import com.zaxxer.hikari.HikariDataSource;
+
+import io.jsonwebtoken.SignatureAlgorithm;
 
 @Configuration
 @Profile("prod")
 public class WSProdConfig extends WSBaseConfig {
-
-	@Value("${datasource.username}")
-	String dataSourceUser;
-
-	@Value("${datasource.password}")
-	String dataSourcePassword;
-
-	@Value("${datasource.url}")
-	String dataSourceUrl;
-
-	@Value("${datasource.driverClassName}")
-	String dataSourceDriver;
-
-	@Value("${datasource.failFast}")
-	String dataSourceFailFast;
-
-	@Value("${datasource.maximumPoolSize}")
-	String dataSourceMaximumPoolSize;
-
-	@Value("${datasource.maxLifetime}")
-	String dataSourceMaxLifetime;
-
-	@Value("${datasource.idleTimeout}")
-	String dataSourceIdleTimeout;
-
-	@Value("${datasource.connectionTimeout}")
-	String dataSourceConnectionTimeout;
 
 	@Bean(destroyMethod = "close")
 	public DataSource dataSource() {

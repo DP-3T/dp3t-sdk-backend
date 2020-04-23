@@ -54,6 +54,33 @@ public abstract class WSBaseConfig implements SchedulingConfigurer, WebMvcConfig
 	@Value("${ws.app.source}")
 	String appSource;
 
+	@Value("${datasource.username}")
+	String dataSourceUser;
+
+	@Value("${datasource.password}")
+	String dataSourcePassword;
+
+	@Value("${datasource.url}")
+	String dataSourceUrl;
+
+	@Value("${datasource.driverClassName}")
+	String dataSourceDriver;
+
+	@Value("${datasource.failFast}")
+	String dataSourceFailFast;
+
+	@Value("${datasource.maximumPoolSize}")
+	String dataSourceMaximumPoolSize;
+
+	@Value("${datasource.maxLifetime}")
+	String dataSourceMaxLifetime;
+
+	@Value("${datasource.idleTimeout}")
+	String dataSourceIdleTimeout;
+
+	@Value("${datasource.connectionTimeout}")
+	String dataSourceConnectionTimeout;
+
 	@Autowired(required = false)
 	ValidateRequest requestValidator;
 
