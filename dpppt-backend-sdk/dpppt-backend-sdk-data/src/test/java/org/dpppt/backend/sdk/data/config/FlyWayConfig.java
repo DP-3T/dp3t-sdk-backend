@@ -21,4 +21,12 @@ public class FlyWayConfig {
 		flyWay.migrate();
 		return flyWay;
 	}
+
+	@Bean
+	@Profile("postgres")
+	public Flyway flywayPostgres() {
+		Flyway flyWay = Flyway.configure().dataSource(dataSource).locations("classpath:/db/migration/pgsql").load();
+		flyWay.migrate();
+		return flyWay;
+	}
 }

@@ -10,6 +10,10 @@
 	<artifactId>dpppt-backend-sdk-data</artifactId>
 	<name>DP3T Backend SDK Data</name>
 
+	<properties>
+		<org.testcontainers.version>1.12.5</org.testcontainers.version>
+	</properties>
+
 	<dependencies>
 
 		<!-- dp3t models -->
@@ -40,6 +44,12 @@
 		<dependency>
 			<groupId>org.flywaydb</groupId>
 			<artifactId>flyway-core</artifactId>
+		</dependency>
+		<dependency>
+			<groupId>org.testcontainers</groupId>
+			<artifactId>postgresql</artifactId>
+			<version>${org.testcontainers.version}</version>
+			<scope>test</scope>
 		</dependency>
 
 	</dependencies>
