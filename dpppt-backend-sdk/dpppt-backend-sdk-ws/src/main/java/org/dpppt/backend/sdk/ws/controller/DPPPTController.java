@@ -180,7 +180,7 @@ public class DPPPTController {
 			for (Exposee exposee : exposeeList) {
 				Exposed.ProtoExposee protoExposee = Exposed.ProtoExposee.newBuilder()
 						.setKey(ByteString.copyFrom(Base64.getDecoder().decode(exposee.getKey())))
-						.setOnset(DAY_DATE_FORMATTER.parseMillis(exposee.getOnset())).build();
+						.setKeyDate(DAY_DATE_FORMATTER.parseMillis(exposee.getOnset())).build();
 				exposees.add(protoExposee);
 			}
 			Exposed.ProtoExposedList protoExposee = Exposed.ProtoExposedList.newBuilder().addAllExposed(exposees)
