@@ -1,8 +1,20 @@
+/*
+ * Created by Ubique Innovation AG
+ * https://www.ubique.ch
+ * Copyright (c) 2020. All rights reserved.
+ */
+
 package org.dpppt.backend.sdk.ws.controller;
 
-import com.fasterxml.jackson.core.JsonProcessingException;
-import com.fasterxml.jackson.databind.ObjectMapper;
-import com.google.protobuf.ByteString;
+import java.security.MessageDigest;
+import java.security.NoSuchAlgorithmException;
+import java.time.Duration;
+import java.util.ArrayList;
+import java.util.Base64;
+import java.util.List;
+
+import javax.validation.Valid;
+
 import org.dpppt.backend.sdk.data.DPPPTDataService;
 import org.dpppt.backend.sdk.data.EtagGeneratorInterface;
 import org.dpppt.backend.sdk.model.ExposedOverview;
@@ -22,16 +34,21 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.stereotype.Controller;
-import org.springframework.web.bind.annotation.*;
+import org.springframework.web.bind.annotation.CrossOrigin;
+import org.springframework.web.bind.annotation.ExceptionHandler;
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.RequestHeader;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.ResponseBody;
+import org.springframework.web.bind.annotation.ResponseStatus;
 import org.springframework.web.context.request.WebRequest;
 
-import javax.validation.Valid;
-import java.security.MessageDigest;
-import java.security.NoSuchAlgorithmException;
-import java.time.Duration;
-import java.util.ArrayList;
-import java.util.Base64;
-import java.util.List;
+import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.databind.ObjectMapper;
+import com.google.protobuf.ByteString;
 
 @Controller
 @RequestMapping("/v1")
@@ -65,8 +82,8 @@ public class DPPPTController {
 
 	@CrossOrigin(origins = { "https://editor.swagger.io" })
 	@GetMapping(value = "")
-	public @ResponseBody String hello() {
-		return "Hello from DP3T WS";
+	public @ResponseBody ResponseEntity<String> hello() {
+		return ResponseEntity.ok().header("X-HELLO", "dp3t").body("Hello from DP3T WS");
 	}
 
 	@CrossOrigin(origins = { "https://editor.swagger.io" })
@@ -119,18 +136,26 @@ public class DPPPTController {
 	}
 
 	@CrossOrigin(origins = { "https://editor.swagger.io" })
-	@GetMapping(value = "/exposed/{dayDateStr}", produces = "application/json")
-	public @ResponseBody ResponseEntity<ExposedOverview> getExposedByDayDate(@PathVariable String dayDateStr,
+	@GetMapping(value = "/exposed/{batchReleaseTime}", produces = "application/json")
+	public @ResponseBody ResponseEntity<ExposedOverview> getExposedByDayDate(@PathVariable Long batchReleaseTime,
 			WebRequest request) {
-		DateTime dayDate = DAY_DATE_FORMATTER.parseDateTime(dayDateStr);
-		int max = dataService.getMaxExposedIdForDay(dayDate);
+		if (batchReleaseTime % batchLength != 0) {
+			return ResponseEntity.badRequest().build();
+		}
+		if (batchReleaseTime > System.currentTimeMillis()) {
+			return ResponseEntity.badRequest().build();
+		}
+
+		int max = dataService.getMaxExposedIdForBatchReleaseTime(batchReleaseTime, batchLength);
 		String etag = etagGenerator.getEtag(max);
 		if (request.checkNotModified(etag)) {
 			return ResponseEntity.status(HttpStatus.NOT_MODIFIED).build();
 		} else {
-			List<Exposee> exposeeList = dataService.getSortedExposedForDay(dayDate);
+			List<Exposee> exposeeList = dataService.getSortedExposedForBatchReleaseTime(batchReleaseTime, batchLength);
 			ExposedOverview overview = new ExposedOverview(exposeeList);
+			overview.setBatchReleaseTime(batchReleaseTime);
 			return ResponseEntity.ok().cacheControl(CacheControl.maxAge(Duration.ofMinutes(exposedListCacheContol)))
+					.header("X-BATCH-RELEASE-TIME", batchReleaseTime.toString())
 					.body(overview);
 		}
 	}
@@ -159,8 +184,11 @@ public class DPPPTController {
 				exposees.add(protoExposee);
 			}
 			Exposed.ProtoExposedList protoExposee = Exposed.ProtoExposedList.newBuilder().addAllExposed(exposees)
+					.setBatchReleaseTime(batchReleaseTime)
 					.build();
+			
 			return ResponseEntity.ok().cacheControl(CacheControl.maxAge(Duration.ofMinutes(exposedListCacheContol)))
+					.header("X-BATCH-RELEASE-TIME", batchReleaseTime.toString())
 					.body(protoExposee);
 		}
 	}

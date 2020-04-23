@@ -1,3 +1,9 @@
+/*
+ * Created by Ubique Innovation AG
+ * https://www.ubique.ch
+ * Copyright (c) 2020. All rights reserved.
+ */
+
 package org.dpppt.backend.sdk.ws.controller;
 
 import com.fasterxml.jackson.core.JsonFactory;
@@ -62,7 +68,8 @@ public abstract class BaseControllerTest {
 		this.objectMapper.registerModule(new JavaTimeModule());
 		this.objectMapper.registerModule(new JodaModule());
 	}
-	private void loadPrivateKey() throws Exception{
+
+	private void loadPrivateKey() throws Exception {
 		InputStream inputStream = new ClassPathResource("generated_private.pem").getInputStream();
 		String key = IOUtils.toString(inputStream);
 		PKCS8EncodedKeySpec keySpecX509 = new PKCS8EncodedKeySpec(Base64.getDecoder().decode(key));
@@ -77,29 +84,19 @@ public abstract class BaseControllerTest {
 	protected PublicKey publicKey;
 	protected PrivateKey privateKey;
 
-	protected String createToken(DateTime expiresAt){
+	protected String createToken(DateTime expiresAt) {
 		Claims claims = Jwts.claims();
 		claims.put("scope", "exposed");
 		claims.put("onset", "2020-04-20");
-		claims.put("uuid", UUID.randomUUID().toString());
-		return Jwts.builder()
-			.setClaims(claims)
-			.setSubject("test-subject" + DateTime.now().toString())
-			.setExpiration(expiresAt.toDate())
-			.setIssuedAt(DateTime.now().toDate())
-			.signWith(SignatureAlgorithm.RS256, (Key)privateKey)
-			.compact();
+		return Jwts.builder().setClaims(claims).setId(UUID.randomUUID().toString())
+				.setSubject("test-subject" + DateTime.now().toString()).setExpiration(expiresAt.toDate())
+				.setIssuedAt(DateTime.now().toDate()).signWith(SignatureAlgorithm.RS256, (Key) privateKey).compact();
 	}
 
-	protected String createToken(String subject, DateTime expiresAt){
+	protected String createToken(String subject, DateTime expiresAt) {
 		Claims claims = Jwts.claims();
 		claims.put("scope", "exposed");
-		claims.put("uuid", UUID.randomUUID().toString());
-		return Jwts.builder()
-			.setSubject(subject)
-			.setExpiration(expiresAt.toDate())
-			.setClaims(claims)
-			.signWith(SignatureAlgorithm.RS256, (Key)privateKey)
-			.compact();
+		return Jwts.builder().setSubject(subject).setExpiration(expiresAt.toDate()).setClaims(claims)
+				.setId(UUID.randomUUID().toString()).signWith(SignatureAlgorithm.RS256, (Key) privateKey).compact();
 	}
 }

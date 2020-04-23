@@ -1,21 +1,21 @@
+/*
+ * Created by Ubique Innovation AG
+ * https://www.ubique.ch
+ * Copyright (c) 2020. All rights reserved.
+ */
+
 package org.dpppt.backend.sdk.ws.controller;
 
-import org.junit.Test;
-import org.springframework.boot.test.context.SpringBootTest;
-import org.springframework.http.MediaType;
-import org.springframework.mock.web.MockHttpServletResponse;
-
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertNotNull;
-import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
-import java.net.URL;
 import java.util.Base64;
 
 import org.dpppt.backend.sdk.model.ExposeeAuthData;
 import org.dpppt.backend.sdk.model.ExposeeRequest;
+import org.junit.Test;
+import org.springframework.http.MediaType;
+import org.springframework.mock.web.MockHttpServletResponse;
 
 public class DPPPTControllerNoSecurityTest extends BaseControllerNoSecurityTest {
     @Test

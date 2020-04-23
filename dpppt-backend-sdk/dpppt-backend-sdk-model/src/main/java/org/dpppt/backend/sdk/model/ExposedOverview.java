@@ -11,9 +11,19 @@ import java.util.List;
 
 public class ExposedOverview {
 
+	private Long batchReleaseTime;
+
 	private List<Exposee> exposed = new ArrayList<>();
 
 	public ExposedOverview() {
+	}
+
+	public Long getBatchReleaseTime() {
+		return batchReleaseTime;
+	}
+
+	public void setBatchReleaseTime(Long batchReleaseTime) {
+		this.batchReleaseTime = batchReleaseTime;
 	}
 
 	public ExposedOverview(List<Exposee> exposed) {
