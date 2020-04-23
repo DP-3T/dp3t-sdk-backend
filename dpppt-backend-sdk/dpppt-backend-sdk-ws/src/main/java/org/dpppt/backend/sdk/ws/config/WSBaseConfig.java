@@ -6,12 +6,13 @@
 
 package org.dpppt.backend.sdk.ws.config;
 
-import java.security.KeyPair;
-
-import java.util.List;
-
-import javax.sql.DataSource;
-
+import com.fasterxml.jackson.annotation.JsonInclude;
+import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.databind.SerializationFeature;
+import com.fasterxml.jackson.datatype.jdk8.Jdk8Module;
+import com.hubspot.jackson.datatype.protobuf.ProtobufModule;
+import io.jsonwebtoken.SignatureAlgorithm;
+import io.jsonwebtoken.security.Keys;
 import org.dpppt.backend.sdk.data.DPPPTDataService;
 import org.dpppt.backend.sdk.data.EtagGenerator;
 import org.dpppt.backend.sdk.data.EtagGeneratorInterface;
@@ -32,16 +33,13 @@ import org.springframework.http.converter.json.MappingJackson2HttpMessageConvert
 import org.springframework.http.converter.protobuf.ProtobufHttpMessageConverter;
 import org.springframework.scheduling.annotation.EnableScheduling;
 import org.springframework.scheduling.annotation.SchedulingConfigurer;
+import org.springframework.scheduling.config.IntervalTask;
+import org.springframework.scheduling.config.ScheduledTaskRegistrar;
 import org.springframework.web.servlet.config.annotation.WebMvcConfigurer;
 
-import io.jsonwebtoken.SignatureAlgorithm;
-import io.jsonwebtoken.security.Keys;
-
-import com.fasterxml.jackson.annotation.JsonInclude;
-import com.fasterxml.jackson.databind.ObjectMapper;
-import com.fasterxml.jackson.databind.SerializationFeature;
-import com.fasterxml.jackson.datatype.jdk8.Jdk8Module;
-import com.hubspot.jackson.datatype.protobuf.ProtobufModule;
+import javax.sql.DataSource;
+import java.security.KeyPair;
+import java.util.List;
 
 @Configuration
 @EnableScheduling
@@ -146,4 +144,10 @@ public abstract class WSBaseConfig implements SchedulingConfigurer, WebMvcConfig
 		return Keys.keyPairFor(algorithm);
 	}
 
+	@Override
+	public void configureTasks(ScheduledTaskRegistrar taskRegistrar) {
+		taskRegistrar.addFixedRateTask(new IntervalTask(() -> {
+			dppptSDKDataService().cleanDB(retentionDays);
+		}, 60 * 60 * 1000L));
+	}
 }

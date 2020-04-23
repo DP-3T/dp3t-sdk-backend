@@ -65,4 +65,10 @@ public interface DPPPTDataService {
 	 */
 	List<Exposee> getSortedExposedForBatchReleaseTime(Long batchReleaseTime, long batchLength);
 
+	/**
+	 * deletes entries older than retentionDays
+	 * @param retentionDays
+	 */
+	void cleanDB(int retentionDays);
+
 }
