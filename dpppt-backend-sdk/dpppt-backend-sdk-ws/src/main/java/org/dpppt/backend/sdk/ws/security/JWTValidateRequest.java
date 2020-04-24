@@ -7,6 +7,7 @@
 package org.dpppt.backend.sdk.ws.security;
 
 import org.dpppt.backend.sdk.model.ExposeeRequest;
+import org.joda.time.DateTime;
 import org.joda.time.DateTimeZone;
 import org.joda.time.format.DateTimeFormat;
 import org.joda.time.format.DateTimeFormatter;
@@ -30,15 +31,17 @@ public class JWTValidateRequest implements ValidateRequest {
 	public long getKeyDate(Object authObject, Object others) {
 		if (authObject instanceof Jwt) {
 			Jwt token = (Jwt) authObject;
-			long timestamp = DAY_DATE_FORMATTER.parseMillis(token.getClaim("onset"));
-			if(others instanceof ExposeeRequest) {
-				ExposeeRequest request = (ExposeeRequest)others;
-				timestamp = Math.max(timestamp, request.getKeyDate());
-				if(timestamp > System.currentTimeMillis()){
-					timestamp = System.currentTimeMillis();
+			long jwtKeyDate = DAY_DATE_FORMATTER.parseMillis(token.getClaim("onset"));
+			if (others instanceof ExposeeRequest) {
+				ExposeeRequest request = (ExposeeRequest) others;
+				long maxKeyDate = Math.max(jwtKeyDate, request.getKeyDate());
+				if (maxKeyDate > System.currentTimeMillis()) {
+					// the maximum key date is the current day.
+					maxKeyDate = DateTime.now().withZone(DateTimeZone.UTC).withTimeAtStartOfDay().getMillis();
 				}
+				jwtKeyDate = maxKeyDate;
 			}
-			return timestamp;
+			return jwtKeyDate;
 		}
 		throw new IllegalArgumentException();
 	}

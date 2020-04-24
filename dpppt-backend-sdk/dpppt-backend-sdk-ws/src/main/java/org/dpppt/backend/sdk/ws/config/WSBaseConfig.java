@@ -41,7 +41,6 @@ import javax.sql.DataSource;
 import java.security.KeyPair;
 import java.util.List;
 
-
 @Configuration
 @EnableScheduling
 public abstract class WSBaseConfig implements SchedulingConfigurer, WebMvcConfigurer {
@@ -121,7 +120,9 @@ public abstract class WSBaseConfig implements SchedulingConfigurer, WebMvcConfig
 	@Override
 	public void configureTasks(ScheduledTaskRegistrar taskRegistrar) {
 		taskRegistrar.addFixedRateTask(new IntervalTask(() -> {
+			logger.info("Start DB cleanup");
 			dppptSDKDataService().cleanDB(retentionDays);
+			logger.info("DB cleanup up");
 		}, 60 * 60 * 1000L));
 	}
 }
