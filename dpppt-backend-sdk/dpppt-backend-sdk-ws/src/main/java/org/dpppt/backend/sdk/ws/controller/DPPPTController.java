@@ -144,7 +144,7 @@ public class DPPPTController {
 		}
 
 		int max = dataService.getMaxExposedIdForBatchReleaseTime(batchReleaseTime, batchLength);
-		String etag = etagGenerator.getEtag(max);
+		String etag = etagGenerator.getEtag(max, "json");
 		if (request.checkNotModified(etag)) {
 			return ResponseEntity.status(HttpStatus.NOT_MODIFIED).build();
 		} else {
@@ -167,7 +167,7 @@ public class DPPPTController {
 			return ResponseEntity.badRequest().build();
 		}
 		int max = dataService.getMaxExposedIdForBatchReleaseTime(batchReleaseTime, batchLength);
-		String etag = etagGenerator.getEtag(max);
+		String etag = etagGenerator.getEtag(max, "proto");
 		if (request.checkNotModified(etag)) {
 			return ResponseEntity.status(HttpStatus.NOT_MODIFIED).build();
 		} else {
