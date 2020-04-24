@@ -121,7 +121,9 @@ public class JDBCDPPPTDataServiceImpl implements DPPPTDataService {
 	@Override
 	@Transactional(readOnly = false)
 	public void cleanDB(int retentionDays) {
-		MapSqlParameterSource params = new MapSqlParameterSource("retention_time", DateTime.now().minusDays(retentionDays).toDate());
+		DateTime retentionTime = DateTime.now().minusDays(retentionDays);
+		logger.info("Cleanup DB entries before: " + retentionTime);
+		MapSqlParameterSource params = new MapSqlParameterSource("retention_time", retentionTime.toDate());
 		String sqlExposed = "delete from t_exposed where received_at < :retention_time";
 		jt.update(sqlExposed, params);
 		String sqlRedeem = "delete from t_redeem_uuid where received_at < :retention_time";
