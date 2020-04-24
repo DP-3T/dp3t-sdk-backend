@@ -117,4 +117,14 @@ public class JDBCDPPPTDataServiceImpl implements DPPPTDataService {
 		params.addValue("startBatch", new DateTime(batchReleaseTime - batchLength).toDate());
 		return jt.query(sql, params, new ExposeeRowMapper());
 	}
+
+	@Override
+	@Transactional(readOnly = false)
+	public void cleanDB(int retentionDays) {
+		MapSqlParameterSource params = new MapSqlParameterSource("retention_time", DateTime.now().minusDays(retentionDays).toDate());
+		String sqlExposed = "delete from t_exposed where received_at < :retention_time";
+		jt.update(sqlExposed, params);
+		String sqlRedeem = "delete from t_redeem_uuid where received_at < :retention_time";
+		jt.update(sqlRedeem, params);
+	}
 }
