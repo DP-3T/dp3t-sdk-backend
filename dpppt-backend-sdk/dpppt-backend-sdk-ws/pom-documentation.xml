@@ -157,7 +157,7 @@
                     </controllers>
                     <description>DP3T API</description>
                     <apiUrls>
-                        <apiUrl>https://demo-dpppt.ubique.ch</apiUrl>
+                        <apiUrl>https://demo.dpppt.org</apiUrl>
                     </apiUrls>
                     <title>DP3T API</title>
                 </configuration>
