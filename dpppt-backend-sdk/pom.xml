@@ -11,7 +11,7 @@
 	<name>DP3T Backend SDK</name>
 
 	<properties>
-		<java-version>1.8</java-version>
+		<java-version>11</java-version>
 		<project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
 		<spring-boot-version>2.2.6.RELEASE</spring-boot-version>
 		<itCoverageAgent></itCoverageAgent>
@@ -102,7 +102,7 @@
 		<repository>
 			<id>spring-snapshots</id>
 			<name>Spring Snapshots</name>
-			<url>http://repo.spring.io/snapshot</url>
+			<url>https://repo.spring.io/snapshot</url>
 			<snapshots>
 				<enabled>true</enabled>
 			</snapshots>
@@ -169,45 +169,6 @@
 						</goals>
 						<configuration>
 							<argLine>${itCoverageAgent}</argLine>
-						</configuration>
-					</execution>
-				</executions>
-			</plugin>
-			<plugin>
-				<groupId>org.jacoco</groupId>
-				<artifactId>jacoco-maven-plugin</artifactId>
-				<version>0.8.5</version>
-				<executions>
-					<!-- METHOD 1 -->
-					<!--<execution>-->
-					<!--<id>prepare-agent</id>-->
-					<!--<goals>-->
-					<!--<goal>prepare-agent</goal>-->
-					<!--</goals>-->
-					<!--</execution>-->
-					<!-- prepare agent for measuring unit tests -->
-
-					<!-- METHOD 2 -->
-					<execution>
-						<id>prepare-unit-tests</id>
-						<goals>
-							<goal>prepare-agent</goal>
-						</goals>
-						<!--<configuration>-->
-						<!--<destFile>${sonar.jacoco.reportPath}</destFile>-->
-						<!--</configuration>-->
-					</execution>
-
-					<!-- prepare agent for measuring integration tests -->
-					<execution>
-						<id>prepare-agent</id>
-						<goals>
-							<goal>prepare-agent</goal>
-						</goals>
-						<phase>pre-integration-test</phase>
-						<configuration>
-							<!--<destFile>${sonar.jacoco.itReportPath}</destFile>-->
-							<propertyName>itCoverageAgent</propertyName>
 						</configuration>
 					</execution>
 				</executions>
