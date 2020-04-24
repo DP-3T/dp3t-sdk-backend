@@ -131,7 +131,7 @@
 			<plugin>
                 <groupId>ch.ubique.openapi</groupId>
                 <artifactId>springboot-swagger-3</artifactId>
-                <version>1.2.1</version>
+                <version>1.2.2</version>
                 <configuration>
                     <apiVersion>1.0-develop</apiVersion>
                     <basePackages>
