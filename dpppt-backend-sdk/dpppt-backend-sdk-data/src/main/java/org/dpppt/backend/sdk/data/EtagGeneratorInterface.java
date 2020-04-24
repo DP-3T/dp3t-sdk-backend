@@ -7,5 +7,5 @@
 package org.dpppt.backend.sdk.data;
 
 public interface EtagGeneratorInterface {
-    public String getEtag(int primaryKey);
+    public String getEtag(int primaryKey, String contentType);
 }

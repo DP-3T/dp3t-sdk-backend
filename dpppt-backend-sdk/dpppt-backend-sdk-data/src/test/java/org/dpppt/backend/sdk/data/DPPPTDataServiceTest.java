@@ -55,4 +55,23 @@ public class DPPPTDataServiceTest {
 		actual = dppptDataService.checkAndInsertPublishUUID("1c444adb-0924-4dc4-a7eb-1f52aa6b9575");
 		assertTrue(actual);
 	}
+
+	@Test
+	public void cleanUp() {
+		Exposee expected = new Exposee();
+		expected.setKey("key");
+		DateTime now = DateTime.now();
+		expected.setKeyDate(now.withTimeAtStartOfDay().getMillis());
+
+		dppptDataService.upsertExposee(expected, "AppSource");
+		dppptDataService.cleanDB(21);
+
+		List<Exposee> sortedExposedForDay = dppptDataService.getSortedExposedForDay(now);
+		assertFalse(sortedExposedForDay.isEmpty());
+
+		dppptDataService.cleanDB(0);
+		sortedExposedForDay = dppptDataService.getSortedExposedForDay(now);
+		assertTrue(sortedExposedForDay.isEmpty());
+
+	}
 }

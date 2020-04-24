@@ -128,7 +128,36 @@
 					</execution>
 				</executions>
 			</plugin>
+			<plugin>
+                <groupId>ch.ubique.openapi</groupId>
+                <artifactId>springboot-swagger-3</artifactId>
+                <version>1.2.2</version>
+                <configuration>
+                    <apiVersion>1.0-develop</apiVersion>
+                    <basePackages>
+                       org.dpppt.backend.sdk.model
+                    </basePackages>
+                    <controllers>
+                        <controller>org.dpppt.backend.sdk.ws.controller.DPPPTController</controller>
+                    </controllers>
+                    <description>DP3T API</description>
+                    <apiUrls>
+                        <apiUrl>https://demo.dpppt.org</apiUrl>
+                    </apiUrls>
+                    <title>DP3T API</title>
+                </configuration>
+            </plugin>
 		</plugins>
 	</build>
+
+	<pluginRepositories>
+    <pluginRepository>
+        <id>github</id>
+          <name>GitHub OWNER Apache Maven Packages</name>
+          <url>https://maven.pkg.github.com/Ubique-OSS/springboot-swagger3</url>
+           <releases><enabled>true</enabled></releases>
+          <snapshots><enabled>true</enabled></snapshots>
+    </pluginRepository>
+    </pluginRepositories>
 
 </project>

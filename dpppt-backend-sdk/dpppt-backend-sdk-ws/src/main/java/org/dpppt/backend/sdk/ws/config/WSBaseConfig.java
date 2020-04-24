@@ -6,12 +6,13 @@
 
 package org.dpppt.backend.sdk.ws.config;
 
-import java.security.KeyPair;
-
-import java.util.List;
-
-import javax.sql.DataSource;
-
+import com.fasterxml.jackson.annotation.JsonInclude;
+import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.databind.SerializationFeature;
+import com.fasterxml.jackson.datatype.jdk8.Jdk8Module;
+import com.hubspot.jackson.datatype.protobuf.ProtobufModule;
+import io.jsonwebtoken.SignatureAlgorithm;
+import io.jsonwebtoken.security.Keys;
 import org.dpppt.backend.sdk.data.DPPPTDataService;
 import org.dpppt.backend.sdk.data.EtagGenerator;
 import org.dpppt.backend.sdk.data.EtagGeneratorInterface;
@@ -32,16 +33,13 @@ import org.springframework.http.converter.json.MappingJackson2HttpMessageConvert
 import org.springframework.http.converter.protobuf.ProtobufHttpMessageConverter;
 import org.springframework.scheduling.annotation.EnableScheduling;
 import org.springframework.scheduling.annotation.SchedulingConfigurer;
+import org.springframework.scheduling.config.IntervalTask;
+import org.springframework.scheduling.config.ScheduledTaskRegistrar;
 import org.springframework.web.servlet.config.annotation.WebMvcConfigurer;
 
-import io.jsonwebtoken.SignatureAlgorithm;
-import io.jsonwebtoken.security.Keys;
-
-import com.fasterxml.jackson.annotation.JsonInclude;
-import com.fasterxml.jackson.databind.ObjectMapper;
-import com.fasterxml.jackson.databind.SerializationFeature;
-import com.fasterxml.jackson.datatype.jdk8.Jdk8Module;
-import com.hubspot.jackson.datatype.protobuf.ProtobufModule;
+import javax.sql.DataSource;
+import java.security.KeyPair;
+import java.util.List;
 
 @Configuration
 @EnableScheduling
@@ -54,33 +52,6 @@ public abstract class WSBaseConfig implements SchedulingConfigurer, WebMvcConfig
 	public abstract Flyway flyway();
 
 	public abstract String getDbType();
-
-	@Value("${datasource.username}")
-	String dataSourceUser;
-
-	@Value("${datasource.password}")
-	String dataSourcePassword;
-
-	@Value("${datasource.url}")
-	String dataSourceUrl;
-
-	@Value("${datasource.driverClassName}")
-	String dataSourceDriver;
-
-	@Value("${datasource.failFast}")
-	String dataSourceFailFast;
-
-	@Value("${datasource.maximumPoolSize}")
-	String dataSourceMaximumPoolSize;
-
-	@Value("${datasource.maxLifetime}")
-	String dataSourceMaxLifetime;
-
-	@Value("${datasource.idleTimeout}")
-	String dataSourceIdleTimeout;
-
-	@Value("${datasource.connectionTimeout}")
-	String dataSourceConnectionTimeout;
 
 	@Value("${ws.exposedlist.cachecontrol: 5}")
 	int exposedListCacheControl;
@@ -146,4 +117,12 @@ public abstract class WSBaseConfig implements SchedulingConfigurer, WebMvcConfig
 		return Keys.keyPairFor(algorithm);
 	}
 
+	@Override
+	public void configureTasks(ScheduledTaskRegistrar taskRegistrar) {
+		taskRegistrar.addFixedRateTask(new IntervalTask(() -> {
+			logger.info("Start DB cleanup");
+			dppptSDKDataService().cleanDB(retentionDays);
+			logger.info("DB cleanup up");
+		}, 60 * 60 * 1000L));
+	}
 }
