@@ -28,7 +28,9 @@ jobs:
         servers: '[{"id": "github", "username": "${{ github.actor }}", "password": "${{ github.token}}"}, {"id": "github-annotation", "username": "${{ github.actor }}", "password": "${{ github.token }}"}]'
         repositories: '[{"id" : "github", "url" : "https://maven.pkg.github.com/Ubique-OSS/springboot-swagger3"}, {"id" : "github-annotation", "url" : "https://maven.pkg.github.com/Ubique-OSS/springboot-swagger3-annotations"}]'
     - name: Build with Maven
-      run: mvn -B package --file dpppt-backend-sdk/pom.xml
+      run: |
+        mvn install --file dpppt-backend-sdk/pom.xml; 
+        mvn springboot-swagger-3:springboot-swagger-3 -f dpppt-backend-sdk/dpppt-backend-sdk-ws/pom.xml
       env:
         GITHUB_TOKEN: ${{ github.token }}
     - name: Echo the current ref
@@ -45,7 +47,7 @@ jobs:
       with:
         name: Snapshot Release ${{ github.ref }}
         tag: SNAPSHOT
-        artifacts: "dpppt-backend-sdk/dpppt-backend-sdk-ws/target/dpppt-backend-sdk-ws-*-SNAPSHOT.jar"
+        artifacts: "dpppt-backend-sdk/dpppt-backend-sdk-ws/target/dpppt-backend-sdk-ws-*-SNAPSHOT.jar,dpppt-backend-sdk/dpppt-backend-sdk-ws/generated/swagger/swagger.yaml"
         body: |
             Changes in this Release
             - Snapshot release
