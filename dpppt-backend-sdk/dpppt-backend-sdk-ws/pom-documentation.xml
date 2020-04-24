@@ -95,13 +95,6 @@
             <artifactId>jackson-datatype-protobuf</artifactId>
             <version>0.9.11-jackson2.9</version>
         </dependency>
-
-         <dependency>
-            <groupId>ch.ubique.openapi</groupId>
-            <artifactId>doc-annotations</artifactId>
-            <version>0.0.5</version>
-        </dependency>
-
     </dependencies>
 
 
@@ -137,7 +130,7 @@
             <plugin>
                 <groupId>ch.ubique.openapi</groupId>
                 <artifactId>springboot-swagger-3</artifactId>
-                <version>1.2.0</version>
+                <version>1.2.1</version>
 
                 <executions>
                     <execution>
