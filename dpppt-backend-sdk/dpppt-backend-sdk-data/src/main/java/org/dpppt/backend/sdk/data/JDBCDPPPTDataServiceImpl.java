@@ -22,111 +22,111 @@ import org.springframework.transaction.annotation.Transactional;
 
 public class JDBCDPPPTDataServiceImpl implements DPPPTDataService {
 
-    private static final Logger logger = LoggerFactory.getLogger(JDBCDPPPTDataServiceImpl.class);
-    private static final String PGSQL = "pgsql";
-    private final String dbType;
-    private final NamedParameterJdbcTemplate jt;
-    private final SimpleJdbcInsert reedemUUIDInsert;
+	private static final Logger logger = LoggerFactory.getLogger(JDBCDPPPTDataServiceImpl.class);
+	private static final String PGSQL = "pgsql";
+	private final String dbType;
+	private final NamedParameterJdbcTemplate jt;
+	private final SimpleJdbcInsert reedemUUIDInsert;
 
-    public JDBCDPPPTDataServiceImpl(String dbType, DataSource dataSource) {
-        this.dbType = dbType;
-        this.jt = new NamedParameterJdbcTemplate(dataSource);
-        this.reedemUUIDInsert = new SimpleJdbcInsert(dataSource).withTableName("t_redeem_uuid")
-            .usingGeneratedKeyColumns("pk_redeem_uuid_id");
-    }
+	public JDBCDPPPTDataServiceImpl(String dbType, DataSource dataSource) {
+		this.dbType = dbType;
+		this.jt = new NamedParameterJdbcTemplate(dataSource);
+		this.reedemUUIDInsert = new SimpleJdbcInsert(dataSource).withTableName("t_redeem_uuid")
+				.usingGeneratedKeyColumns("pk_redeem_uuid_id");
+	}
 
-    @Override
-    @Transactional(readOnly = false)
-    public void upsertExposee(Exposee exposee, String appSource) {
-        String sql = null;
-        if (dbType.equals(PGSQL)) {
-			sql = "insert into t_exposed (key, key_date, app_source) values (:key, to_date(:key_date, 'yyyy-MM-dd'), :app_source)"
-                + " on conflict on constraint key do nothing";
-        } else {
+	@Override
+	@Transactional(readOnly = false)
+	public void upsertExposee(Exposee exposee, String appSource) {
+		String sql = null;
+		if (dbType.equals(PGSQL)) {
+			sql = "insert into t_exposed (key, key_date, app_source) values (:key, :key_date, :app_source)"
+					+ " on conflict on constraint key do nothing";
+		} else {
 			sql = "merge into t_exposed using (values(cast(:key as varchar(10000)), cast(:key_date as date), cast(:app_source as varchar(50))))"
 					+ " as vals(key, key_date, app_source) on t_exposed.key = vals.key"
 					+ " when not matched then insert (key, key_date, app_source) values (vals.key, vals.key_date, vals.app_source)";
-        }
-        MapSqlParameterSource params = new MapSqlParameterSource();
-        params.addValue("key", exposee.getKey());
-        params.addValue("app_source", appSource);
+		}
+		MapSqlParameterSource params = new MapSqlParameterSource();
+		params.addValue("key", exposee.getKey());
+		params.addValue("app_source", appSource);
 		params.addValue("key_date", new Date(exposee.getKeyDate()));
-        jt.update(sql, params);
-    }
+		jt.update(sql, params);
+	}
 
-    @Override
-    @Transactional(readOnly = true)
-    public List<Exposee> getSortedExposedForDay(DateTime day) {
-        DateTime dayMidnight = day.withTimeAtStartOfDay();
-        String sql = "select pk_exposed_id, key, key_date from t_exposed where received_at >= :dayMidnight and received_at < :nextDayMidnight order by pk_exposed_id desc";
-        MapSqlParameterSource params = new MapSqlParameterSource();
-        params.addValue("dayMidnight", dayMidnight.toDate());
-        params.addValue("nextDayMidnight", dayMidnight.plusDays(1).toDate());
-        return jt.query(sql, params, new ExposeeRowMapper());
-    }
+	@Override
+	@Transactional(readOnly = true)
+	public List<Exposee> getSortedExposedForDay(DateTime day) {
+		DateTime dayMidnight = day.withTimeAtStartOfDay();
+		String sql = "select pk_exposed_id, key, key_date from t_exposed where received_at >= :dayMidnight and received_at < :nextDayMidnight order by pk_exposed_id desc";
+		MapSqlParameterSource params = new MapSqlParameterSource();
+		params.addValue("dayMidnight", dayMidnight.toDate());
+		params.addValue("nextDayMidnight", dayMidnight.plusDays(1).toDate());
+		return jt.query(sql, params, new ExposeeRowMapper());
+	}
 
-    @Override
-    @Transactional(readOnly = true)
-    public Integer getMaxExposedIdForDay(DateTime day) {
-        DateTime dayMidnight = day.withTimeAtStartOfDay();
-        MapSqlParameterSource params = new MapSqlParameterSource();
-        params.addValue("dayMidnight", dayMidnight.toDate());
-        params.addValue("nextDayMidnight", dayMidnight.plusDays(1).toDate());
-        String sql = "select max(pk_exposed_id) from t_exposed where received_at >= :dayMidnight and received_at < :nextDayMidnight";
-        Integer maxId = jt.queryForObject(sql, params, Integer.class);
-        if (maxId == null) {
-            return 0;
-        } else {
-            return maxId;
-        }
-    }
+	@Override
+	@Transactional(readOnly = true)
+	public Integer getMaxExposedIdForDay(DateTime day) {
+		DateTime dayMidnight = day.withTimeAtStartOfDay();
+		MapSqlParameterSource params = new MapSqlParameterSource();
+		params.addValue("dayMidnight", dayMidnight.toDate());
+		params.addValue("nextDayMidnight", dayMidnight.plusDays(1).toDate());
+		String sql = "select max(pk_exposed_id) from t_exposed where received_at >= :dayMidnight and received_at < :nextDayMidnight";
+		Integer maxId = jt.queryForObject(sql, params, Integer.class);
+		if (maxId == null) {
+			return 0;
+		} else {
+			return maxId;
+		}
+	}
 
-    @Override
-    public boolean checkAndInsertPublishUUID(String uuid) {
-        String sql = "select count(1) from t_redeem_uuid where uuid = :uuid";
-        MapSqlParameterSource params = new MapSqlParameterSource("uuid", uuid);
-        Integer count = jt.queryForObject(sql, params, Integer.class);
-        if (count > 0) {
-            return false;
-        } else {
-            params.addValue("received_at", new Date());
-            reedemUUIDInsert.execute(params);
-            return true;
-        }
-    }
+	@Override
+	public boolean checkAndInsertPublishUUID(String uuid) {
+		String sql = "select count(1) from t_redeem_uuid where uuid = :uuid";
+		MapSqlParameterSource params = new MapSqlParameterSource("uuid", uuid);
+		Integer count = jt.queryForObject(sql, params, Integer.class);
+		if (count > 0) {
+			return false;
+		} else {
+			params.addValue("received_at", new Date());
+			reedemUUIDInsert.execute(params);
+			return true;
+		}
+	}
 
-    @Override
-    public int getMaxExposedIdForBatchReleaseTime(Long batchReleaseTime, long batchLength) {
-        MapSqlParameterSource params = new MapSqlParameterSource();
-        params.addValue("batchReleaseTime", new DateTime(batchReleaseTime).toDate());
-        params.addValue("startBatch", new DateTime(batchReleaseTime - batchLength).toDate());
-        String sql = "select max(pk_exposed_id) from t_exposed where received_at >= :startBatch and received_at < :batchReleaseTime";
-        Integer maxId = jt.queryForObject(sql, params, Integer.class);
-        if (maxId == null) {
-            return 0;
-        } else {
-            return maxId;
-        }
-    }
+	@Override
+	public int getMaxExposedIdForBatchReleaseTime(Long batchReleaseTime, long batchLength) {
+		MapSqlParameterSource params = new MapSqlParameterSource();
+		params.addValue("batchReleaseTime", new DateTime(batchReleaseTime).toDate());
+		params.addValue("startBatch", new DateTime(batchReleaseTime - batchLength).toDate());
+		String sql = "select max(pk_exposed_id) from t_exposed where received_at >= :startBatch and received_at < :batchReleaseTime";
+		Integer maxId = jt.queryForObject(sql, params, Integer.class);
+		if (maxId == null) {
+			return 0;
+		} else {
+			return maxId;
+		}
+	}
 
-    @Override
-    public List<Exposee> getSortedExposedForBatchReleaseTime(Long batchReleaseTime, long batchLength) {
+	@Override
+	public List<Exposee> getSortedExposedForBatchReleaseTime(Long batchReleaseTime, long batchLength) {
 		String sql = "select pk_exposed_id, key, key_date from t_exposed where received_at >= :startBatch and received_at < :batchReleaseTime order by pk_exposed_id desc";
-        MapSqlParameterSource params = new MapSqlParameterSource();
-        params.addValue("batchReleaseTime", new DateTime(batchReleaseTime).toDate());
-        params.addValue("startBatch", new DateTime(batchReleaseTime - batchLength).toDate());
-        return jt.query(sql, params, new ExposeeRowMapper());
-	  }
+		MapSqlParameterSource params = new MapSqlParameterSource();
+		params.addValue("batchReleaseTime", new DateTime(batchReleaseTime).toDate());
+		params.addValue("startBatch", new DateTime(batchReleaseTime - batchLength).toDate());
+		return jt.query(sql, params, new ExposeeRowMapper());
+	}
 
-    @Override
-    @Transactional(readOnly = false)
-    public void cleanDB(int retentionDays) {
-        DateTime retentionTime = DateTime.now().minusDays(retentionDays);
-        logger.info("Cleanup DB entries before: " + retentionTime);
-        MapSqlParameterSource params = new MapSqlParameterSource("retention_time", retentionTime.toDate());
-        String sqlExposed = "delete from t_exposed where received_at < :retention_time";
-        jt.update(sqlExposed, params);
-        String sqlRedeem = "delete from t_redeem_uuid where received_at < :retention_time";
-        jt.update(sqlRedeem, params);
-    }
+	@Override
+	@Transactional(readOnly = false)
+	public void cleanDB(int retentionDays) {
+		DateTime retentionTime = DateTime.now().minusDays(retentionDays);
+		logger.info("Cleanup DB entries before: " + retentionTime);
+		MapSqlParameterSource params = new MapSqlParameterSource("retention_time", retentionTime.toDate());
+		String sqlExposed = "delete from t_exposed where received_at < :retention_time";
+		jt.update(sqlExposed, params);
+		String sqlRedeem = "delete from t_redeem_uuid where received_at < :retention_time";
+		jt.update(sqlRedeem, params);
+	}
 }
