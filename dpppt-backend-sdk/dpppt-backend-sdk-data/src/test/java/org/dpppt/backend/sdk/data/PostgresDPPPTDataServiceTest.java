@@ -33,6 +33,7 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
 public class PostgresDPPPTDataServiceTest {
 
     private static final String APP_SOURCE = "test-app";
+    private static final long BATCH_LENGTH = 2 * 60 * 60 * 1000L;
     @Autowired
     private DPPPTDataService dppptDataService;
 
@@ -182,12 +183,14 @@ public class PostgresDPPPTDataServiceTest {
         String key = "key555";
         insertExposeeWithReceivedAt(receivedAt, key);
 
-        List<Exposee> sortedExposedForBatchReleaseTime = dppptDataService.getSortedExposedForBatchReleaseTime(DateTime.parse("2020-04-23T02:00").getMillis(), 2 * 60 * 60 * 1000L);
+        long batchTime = DateTime.parse("2020-04-23T02:00").getMillis();
+        List<Exposee> sortedExposedForBatchReleaseTime = dppptDataService.getSortedExposedForBatchReleaseTime(batchTime, BATCH_LENGTH);
         assertEquals(1, sortedExposedForBatchReleaseTime.size());
         Exposee actual = sortedExposedForBatchReleaseTime.get(0);
         assertEquals(actual.getKey(), key);
-
-        int maxExposedIdForBatchReleaseTime = dppptDataService.getMaxExposedIdForBatchReleaseTime(receivedAt.getMillis(), 2 * 60 * 60 * 1000L);
+        int maxExposedIdForBatchReleaseTime = dppptDataService.getMaxExposedIdForBatchReleaseTime(batchTime, BATCH_LENGTH);
+        assertEquals(1, maxExposedIdForBatchReleaseTime);
+        maxExposedIdForBatchReleaseTime = dppptDataService.getMaxExposedIdForBatchReleaseTime(receivedAt.getMillis(), PostgresDPPPTDataServiceTest.BATCH_LENGTH);
         assertEquals(0, maxExposedIdForBatchReleaseTime);
     }
 
