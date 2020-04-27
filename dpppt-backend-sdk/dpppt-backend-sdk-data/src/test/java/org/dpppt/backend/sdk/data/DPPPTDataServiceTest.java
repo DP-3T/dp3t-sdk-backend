@@ -12,6 +12,7 @@ import org.dpppt.backend.sdk.data.config.FlyWayConfig;
 import org.dpppt.backend.sdk.data.config.StandaloneDataConfig;
 import org.dpppt.backend.sdk.model.Exposee;
 import org.joda.time.DateTime;
+import org.joda.time.DateTimeZone;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -33,7 +34,7 @@ public class DPPPTDataServiceTest {
 	public void testUpsertupsertExposee() {
 		Exposee expected = new Exposee();
 		expected.setKey("key");
-		DateTime now = DateTime.now();
+		DateTime now = DateTime.now().withZone(DateTimeZone.UTC);
 		expected.setKeyDate(now.withTimeAtStartOfDay().getMillis());
 
 		dppptDataService.upsertExposee(expected, "AppSource");
