@@ -3,7 +3,6 @@
  * https://www.ubique.ch
  * Copyright (c) 2020. All rights reserved.
  */
-
 package org.dpppt.backend.sdk.ws.config;
 
 import java.security.KeyFactory;
@@ -21,39 +20,37 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.Profile;
+import org.springframework.jdbc.datasource.embedded.EmbeddedDatabaseBuilder;
+import org.springframework.jdbc.datasource.embedded.EmbeddedDatabaseType;
 import org.springframework.scheduling.config.ScheduledTaskRegistrar;
 
 import io.jsonwebtoken.SignatureAlgorithm;
 
 @Configuration
-@Profile("cloud")
-public class WSCloudConfig extends WSBaseConfig {
+@Profile("devcloud")
+public class WSCloudDevConfig  extends WSBaseConfig{
 
-	@Autowired
-	private DataSource dataSource;
 
-	@Autowired
-	private String privateKey;
-	@Autowired
-	public String publicKey;
+	private String privateKey = "MIGTAgEAMBMGByqGSM49AgEGCCqGSM49AwEHBHkwdwIBAQQgx18xx3XadMzGCunnoUjpiCt1rZ81I4XAJbRaQi0eZbKgCgYIKoZIzj0DAQehRANCAARzqfUU3PpGfA140z0f4rFo9ySsHGApTv32/4NPLyK9zVkzecPJernNTYAVe+C8sXNbFT3P0UJwM8ZNw3ty87Jf";
 
+	public String publicKey = "MFkwEwYHKoZIzj0CAQYIKoZIzj0DAQcDQgAEc6n1FNz6RnwNeNM9H+KxaPckrBxgKU799v+DTy8ivc1ZM3nDyXq5zU2AFXvgvLFzWxU9z9FCcDPGTcN7cvOyXw==";
+	@Bean
 	@Override
 	public DataSource dataSource() {
-		return dataSource;
+		return new EmbeddedDatabaseBuilder().setType(EmbeddedDatabaseType.HSQL).build();
 	}
 
 	@Bean
 	@Override
 	public Flyway flyway() {
-		Flyway flyWay = Flyway.configure().dataSource(dataSource()).locations("classpath:/db/migration/pgsql_cluster").load();
+		Flyway flyWay = Flyway.configure().dataSource(dataSource()).locations("classpath:/db/migration/hsqldb").load();
 		flyWay.migrate();
 		return flyWay;
-
 	}
 
 	@Override
 	public String getDbType() {
-		return "pgsql";
+		return "hsqldb";
 	}
 
 	@Override
