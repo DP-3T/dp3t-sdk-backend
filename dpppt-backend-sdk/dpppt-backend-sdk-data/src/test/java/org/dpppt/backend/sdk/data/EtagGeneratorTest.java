@@ -1,36 +1,32 @@
 package org.dpppt.backend.sdk.data;
 
-import org.junit.Test;
+import org.junit.Assert;
+import org.junit.jupiter.api.Test;
 
-import java.util.HashSet;
-import java.util.Set;
+import java.io.BufferedReader;
+import java.io.IOException;
+import java.io.InputStreamReader;
+import java.util.Iterator;
+import java.util.concurrent.atomic.AtomicInteger;
 
-import static org.junit.Assert.*;
+import static org.junit.Assert.assertEquals;
 
-public class EtagGeneratorTest {
+class EtagGeneratorTest {
 
-    @Test
-    public void testEtagZero() {
-        EtagGenerator etagGenerator = new EtagGenerator();
-        String etag = etagGenerator.getEtag(0, "application/json");
-        assertEquals("application/json8321c313574929d220a72029837c1085", etag);
-    }
-
-    @Test
-    public void testEtagOne() {
-        EtagGenerator etagGenerator = new EtagGenerator();
-        String etag = etagGenerator.getEtag(1, "application/json");
-        assertEquals("application/json6bd26b412635ad2a7bdbe07b9f2f6e8b", etag);
-    }
+    private EtagGeneratorInterface etagGenerator = new EtagGenerator();
 
     @Test
-    public void testEtagNotTheSame() {
-        EtagGenerator etagGenerator = new EtagGenerator();
-        Set<String> etags = new HashSet<>();
-        int numberOfEtags = 100000;
-        for (int i = 0; i < numberOfEtags; i++) {
-            etags.add(etagGenerator.getEtag(i, "application/json"));
+    void getEtag() throws IOException {
+        try (BufferedReader reader = new BufferedReader(new InputStreamReader(getClass().getResourceAsStream("/expected_etags_first_thousand_with_default_salt")))) {
+
+            Iterable<String> lines = () -> reader.lines().iterator();
+
+            int i = 0;
+
+            for (String line: lines) {
+                final String etag = etagGenerator.getEtag(i++, "");
+                Assert.assertEquals(line, etag);
+            }
         }
-        assertEquals(numberOfEtags, etags.size());
     }
 }

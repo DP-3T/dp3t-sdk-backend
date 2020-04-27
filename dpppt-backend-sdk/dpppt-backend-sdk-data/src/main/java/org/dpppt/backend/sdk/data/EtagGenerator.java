@@ -7,15 +7,30 @@
 package org.dpppt.backend.sdk.data;
 
 import java.nio.ByteBuffer;
-
-import org.springframework.util.DigestUtils;
+import java.security.MessageDigest;
+import java.security.NoSuchAlgorithmException;
+import java.util.Base64;
 
 public class EtagGenerator implements EtagGeneratorInterface {
+
     private byte secret[] = new byte[]{'s', 'e', 'c', 'r', 'e', 't'};
+
     @Override
     public String getEtag(int primaryKey, String contentType) {
-        String hash = DigestUtils.md5DigestAsHex(ByteBuffer.allocate(10).putInt(primaryKey).put(secret).array());
-        return contentType +  hash;
-    }
+        try {
+            MessageDigest messageDigest = MessageDigest.getInstance("SHA-256");
 
+            ByteBuffer byteBuffer = ByteBuffer.allocate(secret.length + Integer.BYTES);
+            byteBuffer.put(secret);
+            byteBuffer.putInt(primaryKey);
+
+            final byte[] saltedPayload = byteBuffer.array();
+
+            final byte[] sha256Hash = messageDigest.digest(saltedPayload);
+
+            return contentType + Base64.getEncoder().encodeToString(sha256Hash);
+        } catch (NoSuchAlgorithmException e) {
+            throw new RuntimeException(e);
+        }
+    }
 }
