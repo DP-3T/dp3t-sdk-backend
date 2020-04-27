@@ -21,6 +21,7 @@ import java.sql.*;
 import java.time.LocalDate;
 import java.util.List;
 
+import static org.junit.Assert.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
@@ -162,6 +163,26 @@ public class PostgresDPPPTDataServiceTest {
         assertFalse(actual);
         actual = dppptDataService.checkAndInsertPublishUUID("1c444adb-0924-4dc4-a7eb-1f52aa6b9575");
         assertTrue(actual);
+    }
+
+    @Test
+    public void cleanup() throws SQLException {
+        DateTime now = DateTime.now();
+        DateTime old = now.minusDays(21);
+        Connection connection = dataSource.getConnection();
+        String sql = "into t_exposed (pk_exposed_id, key, received_at, key_date, app_source) values (1, 'someKey', ?, now(), 'appsource')";
+        PreparedStatement preparedStatement = connection.prepareStatement("insert " + sql);
+        preparedStatement.setTimestamp(1, new Timestamp(old.getMillis()));
+        preparedStatement.execute();
+
+        Integer maxExposedIdForOld = dppptDataService.getMaxExposedIdForDay(old);
+        assertEquals(1, maxExposedIdForOld.intValue());
+
+        dppptDataService.cleanDB(21);
+
+        maxExposedIdForOld = dppptDataService.getMaxExposedIdForDay(old);
+        assertEquals(0, maxExposedIdForOld.intValue());
+
     }
 
     private long getExposeeCount() throws SQLException {
