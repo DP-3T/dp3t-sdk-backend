@@ -6,10 +6,11 @@
 
 package org.dpppt.backend.sdk.data;
 
+import java.time.OffsetDateTime;
 import java.util.List;
 
 import org.dpppt.backend.sdk.model.Exposee;
-import org.joda.time.DateTime;
+
 
 public interface DPPPTDataService {
 
@@ -27,7 +28,7 @@ public interface DPPPTDataService {
 	 * @param day the day for which exposees are requested
 	 * @return exposee list
 	 */
-	List<Exposee> getSortedExposedForDay(DateTime day);
+	List<Exposee> getSortedExposedForDay(OffsetDateTime day);
 
 	/**
 	 * Returns the maximum id of the stored exposed entries for the given day date
@@ -36,7 +37,7 @@ public interface DPPPTDataService {
 	 * 
 	 * @return the max id or 0
 	 */
-	Integer getMaxExposedIdForDay(DateTime day);
+	Integer getMaxExposedIdForDay(OffsetDateTime day);
 
 	/**
 	 * Checks and inserts a publish uuid.

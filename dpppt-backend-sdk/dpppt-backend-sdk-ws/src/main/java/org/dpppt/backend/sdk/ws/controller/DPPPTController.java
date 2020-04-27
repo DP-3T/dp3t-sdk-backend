@@ -9,6 +9,10 @@ package org.dpppt.backend.sdk.ws.controller;
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
 import java.time.Duration;
+import java.time.LocalDate;
+import java.time.OffsetDateTime;
+import java.time.ZoneOffset;
+
 import java.util.ArrayList;
 import java.util.Base64;
 import java.util.List;
@@ -22,12 +26,6 @@ import org.dpppt.backend.sdk.model.Exposee;
 import org.dpppt.backend.sdk.model.ExposeeRequest;
 import org.dpppt.backend.sdk.model.proto.Exposed;
 import org.dpppt.backend.sdk.ws.security.ValidateRequest;
-import org.joda.time.DateTime;
-import org.joda.time.DateTimeZone;
-import org.joda.time.format.DateTimeFormat;
-import org.joda.time.format.DateTimeFormatter;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.CacheControl;
 import org.springframework.http.HttpStatus;
@@ -65,10 +63,6 @@ public class DPPPTController {
 	@Autowired
 	private ObjectMapper jacksonObjectMapper;
 
-	private static final DateTimeFormatter DAY_DATE_FORMATTER = DateTimeFormat.forPattern("yyyy-MM-dd")
-			.withZone(DateTimeZone.UTC);
-
-	private static final Logger logger = LoggerFactory.getLogger(DPPPTController.class);
 
 	public DPPPTController(DPPPTDataService dataService, EtagGeneratorInterface etagGenerator, String appSource,
 			int exposedListCacheControl, ValidateRequest validateRequest, long batchLength) {
@@ -111,7 +105,7 @@ public class DPPPTController {
 	@GetMapping(value = "/hashtest/{dayDateStr}")
 	public @ResponseBody ResponseEntity<ExposedOverview> getExposed(@PathVariable String dayDateStr)
 			throws NoSuchAlgorithmException, JsonProcessingException {
-		DateTime dayDate = DAY_DATE_FORMATTER.parseDateTime(dayDateStr);
+		OffsetDateTime dayDate = LocalDate.parse(dayDateStr).atStartOfDay().atOffset(ZoneOffset.UTC);
 		MessageDigest digest = MessageDigest.getInstance("SHA-256");
 		List<Exposee> exposeeList = dataService.getSortedExposedForDay(dayDate);
 

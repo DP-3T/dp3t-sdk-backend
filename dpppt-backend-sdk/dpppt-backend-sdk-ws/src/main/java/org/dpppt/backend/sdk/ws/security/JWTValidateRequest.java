@@ -6,17 +6,12 @@
 
 package org.dpppt.backend.sdk.ws.security;
 
+import java.time.LocalDate;
+import java.time.ZoneOffset;
 import org.dpppt.backend.sdk.model.ExposeeRequest;
-import org.joda.time.DateTime;
-import org.joda.time.DateTimeZone;
-import org.joda.time.format.DateTimeFormat;
-import org.joda.time.format.DateTimeFormatter;
 import org.springframework.security.oauth2.jwt.Jwt;
 
 public class JWTValidateRequest implements ValidateRequest {
-
-	private static final DateTimeFormatter DAY_DATE_FORMATTER = DateTimeFormat.forPattern("yyyy-MM-dd")
-			.withZone(DateTimeZone.UTC);
 
 	@Override
 	public boolean isValid(Object authObject) {
@@ -31,13 +26,14 @@ public class JWTValidateRequest implements ValidateRequest {
 	public long getKeyDate(Object authObject, Object others) {
 		if (authObject instanceof Jwt) {
 			Jwt token = (Jwt) authObject;
-			long jwtKeyDate = DAY_DATE_FORMATTER.parseMillis(token.getClaim("onset"));
+			
+			long jwtKeyDate = LocalDate.parse(token.getClaim("onset")).atStartOfDay().atOffset(ZoneOffset.UTC).toInstant().toEpochMilli();
 			if (others instanceof ExposeeRequest) {
 				ExposeeRequest request = (ExposeeRequest) others;
 				long maxKeyDate = Math.max(jwtKeyDate, request.getKeyDate());
 				if (maxKeyDate > System.currentTimeMillis()) {
 					// the maximum key date is the current day.
-					maxKeyDate = DateTime.now().withZone(DateTimeZone.UTC).withTimeAtStartOfDay().getMillis();
+					maxKeyDate = LocalDate.now().atStartOfDay().atOffset(ZoneOffset.UTC).toInstant().toEpochMilli();
 				}
 				jwtKeyDate = maxKeyDate;
 			}
