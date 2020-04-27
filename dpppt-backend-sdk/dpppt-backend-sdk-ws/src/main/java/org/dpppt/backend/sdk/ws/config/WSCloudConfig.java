@@ -73,7 +73,7 @@ public class WSCloudConfig extends WSBaseConfig {
 		}
 		catch (Exception ex) {
 			ex.printStackTrace();
-			return null;
+			throw new RuntimeException();
 		}
 	}
 
@@ -85,7 +85,7 @@ public class WSCloudConfig extends WSBaseConfig {
 		}
 		catch (Exception ex) {
 			ex.printStackTrace();
-			return null;
+			throw new RuntimeException();
 		}
 	}
 }
