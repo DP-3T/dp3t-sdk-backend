@@ -19,6 +19,7 @@ import java.util.List;
 
 import javax.validation.Valid;
 
+import org.apache.commons.codec.binary.Hex;
 import org.dpppt.backend.sdk.data.DPPPTDataService;
 import org.dpppt.backend.sdk.data.EtagGeneratorInterface;
 import org.dpppt.backend.sdk.model.ExposedOverview;
@@ -112,18 +113,7 @@ public class DPPPTController {
 		ExposedOverview overview = new ExposedOverview(exposeeList);
 		byte[] hash = digest.digest(jacksonObjectMapper.writeValueAsString(overview).getBytes());
 
-		return ResponseEntity.ok().header("JSON-Sha256-Hash", bytesToHex(hash)).body(overview);
-	}
-
-	private static String bytesToHex(byte[] hash) {
-		StringBuffer hexString = new StringBuffer();
-		for (int i = 0; i < hash.length; i++) {
-			String hex = Integer.toHexString(0xff & hash[i]);
-			if (hex.length() == 1)
-				hexString.append('0');
-			hexString.append(hex);
-		}
-		return hexString.toString();
+		return ResponseEntity.ok().header("JSON-Sha256-Hash", Hex.encodeHexString(hash)).body(overview);
 	}
 
 	@CrossOrigin(origins = { "https://editor.swagger.io" })

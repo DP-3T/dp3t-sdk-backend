@@ -6,7 +6,7 @@ import io.jsonwebtoken.Jwts;
 import io.jsonwebtoken.SignatureAlgorithm;
 import io.jsonwebtoken.security.Keys;
 import io.jsonwebtoken.security.SignatureException;
-import org.dpppt.backend.sdk.ws.util.ByteArrayHelper;
+import org.apache.commons.codec.binary.Hex;
 import org.junit.Test;
 import org.springframework.mock.web.MockHttpServletResponse;
 
@@ -41,7 +41,7 @@ public class SignatureResponseWrapperTest {
         String digest = response.getHeader("Digest");
         String rawJWT = response.getHeader("Signature");
         assertNotNull(digest);
-        String expected = "sha-256=" + ByteArrayHelper.bytesToHex(MessageDigest.getInstance("SHA-256").digest("TEST".getBytes()));
+        String expected = "sha-256=" + Hex.encodeHexString(MessageDigest.getInstance("SHA-256").digest("TEST".getBytes()));
         assertEquals(expected, digest);
         JwtParser jwtParser = Jwts.parserBuilder().setSigningKey(keyPair.getPublic()).build();
         Jwt jwt = jwtParser.parse(rawJWT);
