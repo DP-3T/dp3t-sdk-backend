@@ -173,6 +173,45 @@
 					</execution>
 				</executions>
 			</plugin>
+			<plugin>
+				<groupId>org.jacoco</groupId>
+				<artifactId>jacoco-maven-plugin</artifactId>
+				<version>0.8.5</version>
+				<executions>
+					<!-- METHOD 1 -->
+					<!--<execution>-->
+					<!--<id>prepare-agent</id>-->
+					<!--<goals>-->
+					<!--<goal>prepare-agent</goal>-->
+					<!--</goals>-->
+					<!--</execution>-->
+					<!-- prepare agent for measuring unit tests -->
+
+					<!-- METHOD 2 -->
+					<execution>
+						<id>prepare-unit-tests</id>
+						<goals>
+							<goal>prepare-agent</goal>
+						</goals>
+						<!--<configuration>-->
+						<!--<destFile>${sonar.jacoco.reportPath}</destFile>-->
+						<!--</configuration>-->
+					</execution>
+
+					<!-- prepare agent for measuring integration tests -->
+					<execution>
+						<id>prepare-agent</id>
+						<goals>
+							<goal>prepare-agent</goal>
+						</goals>
+						<phase>pre-integration-test</phase>
+						<configuration>
+							<!--<destFile>${sonar.jacoco.itReportPath}</destFile>-->
+							<propertyName>itCoverageAgent</propertyName>
+						</configuration>
+					</execution>
+				</executions>
+			</plugin>
 		</plugins>
 		<pluginManagement>
 			<plugins>
