@@ -5,7 +5,6 @@ import org.dpppt.backend.sdk.data.config.DPPPTDataServiceConfig;
 import org.dpppt.backend.sdk.data.config.FlyWayConfig;
 import org.dpppt.backend.sdk.data.config.PostgresDataConfig;
 import org.dpppt.backend.sdk.model.Exposee;
-import org.joda.time.DateTime;
 import org.junit.After;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -19,6 +18,9 @@ import javax.sql.DataSource;
 
 import java.sql.*;
 import java.time.LocalDate;
+import java.time.OffsetDateTime;
+import java.time.ZoneOffset;
+
 import java.util.List;
 
 import static org.junit.Assert.assertEquals;
@@ -49,7 +51,7 @@ public class PostgresDPPPTDataServiceTest {
 
         Exposee exposee = new Exposee();
         exposee.setKey("key1");
-        exposee.setKeyDate(DateTime.parse("2014-01-28").withTimeAtStartOfDay().getMillis());
+        exposee.setKeyDate(LocalDate.parse("2014-01-28").atStartOfDay().atOffset(ZoneOffset.UTC).toInstant().toEpochMilli());
 
         // WHEN
         dppptDataService.upsertExposee(exposee, "test-app");
@@ -79,7 +81,7 @@ public class PostgresDPPPTDataServiceTest {
         {
             Exposee exposee = new Exposee();
             exposee.setKey("key1");
-            exposee.setKeyDate(DateTime.parse("2014-01-28").withTimeAtStartOfDay().getMillis());
+            exposee.setKeyDate(LocalDate.parse("2014-01-28").atStartOfDay().atOffset(ZoneOffset.UTC).toInstant().toEpochMilli());
 
             dppptDataService.upsertExposee(exposee, "test-app");
         }
@@ -87,13 +89,13 @@ public class PostgresDPPPTDataServiceTest {
         {
             Exposee exposee = new Exposee();
             exposee.setKey("key2");
-            exposee.setKeyDate(DateTime.parse("2014-01-29").withTimeAtStartOfDay().getMillis());
+            exposee.setKeyDate(LocalDate.parse("2014-01-29").atStartOfDay().atOffset(ZoneOffset.UTC).toInstant().toEpochMilli());
 
             dppptDataService.upsertExposee(exposee, "test-app");
         }
 
         // WHEN
-        final List<Exposee> sortedExposedForDay = dppptDataService.getSortedExposedForDay(DateTime.now());
+        final List<Exposee> sortedExposedForDay = dppptDataService.getSortedExposedForDay(OffsetDateTime.now().withOffsetSameInstant(ZoneOffset.UTC));
 
         // THEN
         Assertions.assertThat(sortedExposedForDay).hasSize(2);
@@ -105,7 +107,7 @@ public class PostgresDPPPTDataServiceTest {
     public void shouldReturnEmptyListForGetSortedExposedForDay() {
 
         // WHEN
-        final List<Exposee> sortedExposedForDay = dppptDataService.getSortedExposedForDay(DateTime.now());
+        final List<Exposee> sortedExposedForDay = dppptDataService.getSortedExposedForDay(OffsetDateTime.now().withOffsetSameInstant(ZoneOffset.UTC));
 
         // THEN
         Assertions.assertThat(sortedExposedForDay).isEmpty();
@@ -118,7 +120,7 @@ public class PostgresDPPPTDataServiceTest {
         {
             Exposee exposee = new Exposee();
             exposee.setKey("key100");
-            exposee.setKeyDate(DateTime.parse("2014-01-28").withTimeAtStartOfDay().getMillis());
+            exposee.setKeyDate(LocalDate.parse("2014-01-28").atStartOfDay().atOffset(ZoneOffset.UTC).toInstant().toEpochMilli());
 
             dppptDataService.upsertExposee(exposee, "test-app");
         }
@@ -126,13 +128,13 @@ public class PostgresDPPPTDataServiceTest {
         {
             Exposee exposee = new Exposee();
             exposee.setKey("key200");
-            exposee.setKeyDate(DateTime.parse("2014-01-29").withTimeAtStartOfDay().getMillis());
+            exposee.setKeyDate(LocalDate.parse("2014-01-29").atStartOfDay().atOffset(ZoneOffset.UTC).toInstant().toEpochMilli());
 
             dppptDataService.upsertExposee(exposee, "test-app");
         }
 
         // WHEN
-        final Integer maxExposedIdForDay = dppptDataService.getMaxExposedIdForDay(DateTime.now());
+        final Integer maxExposedIdForDay = dppptDataService.getMaxExposedIdForDay(OffsetDateTime.now().withOffsetSameInstant(ZoneOffset.UTC));
 
         // THEN
         try (
@@ -149,7 +151,7 @@ public class PostgresDPPPTDataServiceTest {
     public void shouldGetZeroForGetMaxExposedIdForDay() {
 
         // WHEN
-        final Integer maxExposedIdForDay = dppptDataService.getMaxExposedIdForDay(DateTime.now());
+        final Integer maxExposedIdForDay = dppptDataService.getMaxExposedIdForDay(OffsetDateTime.now().withOffsetSameInstant(ZoneOffset.UTC));
 
         // THEN
         Assertions.assertThat(maxExposedIdForDay).isEqualTo(0);
@@ -167,12 +169,12 @@ public class PostgresDPPPTDataServiceTest {
 
     @Test
     public void cleanup() throws SQLException {
-        DateTime now = DateTime.now();
-        DateTime old = now.minusDays(21);
+        OffsetDateTime now = OffsetDateTime.now().withOffsetSameInstant(ZoneOffset.UTC);
+        OffsetDateTime old = now.minusDays(21);
         Connection connection = dataSource.getConnection();
         String sql = "into t_exposed (pk_exposed_id, key, received_at, key_date, app_source) values (1, 'someKey', ?, now(), 'appsource')";
         PreparedStatement preparedStatement = connection.prepareStatement("insert " + sql);
-        preparedStatement.setTimestamp(1, new Timestamp(old.getMillis()));
+        preparedStatement.setTimestamp(1, new Timestamp(old.toInstant().toEpochMilli()));
         preparedStatement.execute();
 
         Integer maxExposedIdForOld = dppptDataService.getMaxExposedIdForDay(old);

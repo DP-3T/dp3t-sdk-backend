@@ -5,14 +5,14 @@ import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
+import java.time.OffsetDateTime;
+import java.time.ZoneOffset;
 import java.util.List;
 
 import org.dpppt.backend.sdk.data.config.DPPPTDataServiceConfig;
 import org.dpppt.backend.sdk.data.config.FlyWayConfig;
 import org.dpppt.backend.sdk.data.config.StandaloneDataConfig;
 import org.dpppt.backend.sdk.model.Exposee;
-import org.joda.time.DateTime;
-import org.joda.time.DateTimeZone;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -34,8 +34,8 @@ public class DPPPTDataServiceTest {
 	public void testUpsertupsertExposee() {
 		Exposee expected = new Exposee();
 		expected.setKey("key");
-		DateTime now = DateTime.now().withZone(DateTimeZone.UTC);
-		expected.setKeyDate(now.withTimeAtStartOfDay().getMillis());
+		OffsetDateTime now = OffsetDateTime.now().withOffsetSameInstant(ZoneOffset.UTC);
+		expected.setKeyDate(now.toLocalDate().atStartOfDay().atOffset(ZoneOffset.UTC).toInstant().toEpochMilli());
 
 		dppptDataService.upsertExposee(expected, "AppSource");
 
@@ -61,8 +61,8 @@ public class DPPPTDataServiceTest {
 	public void cleanUp() {
 		Exposee expected = new Exposee();
 		expected.setKey("key");
-		DateTime now = DateTime.now();
-		expected.setKeyDate(now.withTimeAtStartOfDay().getMillis());
+		OffsetDateTime now = OffsetDateTime.now().withOffsetSameInstant(ZoneOffset.UTC);
+		expected.setKeyDate(now.toLocalDate().atStartOfDay().atOffset(ZoneOffset.UTC).toInstant().toEpochMilli());
 
 		dppptDataService.upsertExposee(expected, "AppSource");
 		dppptDataService.cleanDB(21);
