@@ -1,13 +1,11 @@
 package org.dpppt.backend.sdk.data;
 
-import com.sun.jna.platform.win32.WinReg;
 import org.assertj.core.api.Assertions;
 import org.dpppt.backend.sdk.data.config.DPPPTDataServiceConfig;
 import org.dpppt.backend.sdk.data.config.FlyWayConfig;
 import org.dpppt.backend.sdk.data.config.PostgresDataConfig;
 import org.dpppt.backend.sdk.model.Exposee;
 import org.jetbrains.annotations.NotNull;
-import org.joda.time.DateTime;
 import org.junit.After;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -18,9 +16,8 @@ import org.springframework.test.context.junit4.SpringJUnit4ClassRunner;
 import org.springframework.test.context.support.AnnotationConfigContextLoader;
 
 import javax.sql.DataSource;
-
 import java.sql.*;
-import java.time.LocalDate;
+import java.time.*;
 import java.util.List;
 
 import static org.junit.Assert.assertEquals;
@@ -91,7 +88,7 @@ public class PostgresDPPPTDataServiceTest {
         }
 
         // WHEN
-        final List<Exposee> sortedExposedForDay = dppptDataService.getSortedExposedForDay(DateTime.now());
+        final List<Exposee> sortedExposedForDay = dppptDataService.getSortedExposedForDay(OffsetDateTime.now().withOffsetSameInstant(ZoneOffset.UTC));
 
         // THEN
         Assertions.assertThat(sortedExposedForDay).hasSize(2);
@@ -103,7 +100,7 @@ public class PostgresDPPPTDataServiceTest {
     public void shouldReturnEmptyListForGetSortedExposedForDay() {
 
         // WHEN
-        final List<Exposee> sortedExposedForDay = dppptDataService.getSortedExposedForDay(DateTime.now());
+        final List<Exposee> sortedExposedForDay = dppptDataService.getSortedExposedForDay(OffsetDateTime.now().withOffsetSameInstant(ZoneOffset.UTC));
 
         // THEN
         Assertions.assertThat(sortedExposedForDay).isEmpty();
@@ -128,7 +125,7 @@ public class PostgresDPPPTDataServiceTest {
         }
 
         // WHEN
-        final Integer maxExposedIdForDay = dppptDataService.getMaxExposedIdForDay(DateTime.now());
+        final Integer maxExposedIdForDay = dppptDataService.getMaxExposedIdForDay(OffsetDateTime.now().withOffsetSameInstant(ZoneOffset.UTC));
 
         // THEN
         try (
@@ -145,7 +142,7 @@ public class PostgresDPPPTDataServiceTest {
     public void shouldGetZeroForGetMaxExposedIdForDay() {
 
         // WHEN
-        final Integer maxExposedIdForDay = dppptDataService.getMaxExposedIdForDay(DateTime.now());
+        final Integer maxExposedIdForDay = dppptDataService.getMaxExposedIdForDay(OffsetDateTime.now().withOffsetSameInstant(ZoneOffset.UTC));
 
         // THEN
         Assertions.assertThat(maxExposedIdForDay).isEqualTo(0);
@@ -163,9 +160,11 @@ public class PostgresDPPPTDataServiceTest {
 
     @Test
     public void cleanup() throws SQLException {
-        DateTime receivedAt = DateTime.now().minusDays(21);
+        OffsetDateTime now = OffsetDateTime.now().withOffsetSameInstant(ZoneOffset.UTC);
+        OffsetDateTime receivedAt = now.minusDays(21);
+        Connection connection = dataSource.getConnection();
         String key = "someKey";
-        insertExposeeWithReceivedAt(receivedAt, key);
+        insertExposeeWithReceivedAt(receivedAt.toInstant(), key);
 
         Integer maxExposedIdForOld = dppptDataService.getMaxExposedIdForDay(receivedAt);
         assertEquals(1, maxExposedIdForOld.intValue());
@@ -179,28 +178,28 @@ public class PostgresDPPPTDataServiceTest {
 
     @Test
     public void testBatchReleaseTime() throws SQLException {
-        DateTime receivedAt = DateTime.parse("2020-04-23T00:00");
+        Instant receivedAt = LocalDateTime.parse("2014-01-28T00:00:00").toInstant(ZoneOffset.UTC);
         String key = "key555";
         insertExposeeWithReceivedAt(receivedAt, key);
 
-        long batchTime = DateTime.parse("2020-04-23T02:00").getMillis();
+        long batchTime = LocalDateTime.parse("2014-01-28T02:00:00").toInstant(ZoneOffset.UTC).toEpochMilli();
         List<Exposee> sortedExposedForBatchReleaseTime = dppptDataService.getSortedExposedForBatchReleaseTime(batchTime, BATCH_LENGTH);
         assertEquals(1, sortedExposedForBatchReleaseTime.size());
         Exposee actual = sortedExposedForBatchReleaseTime.get(0);
         assertEquals(actual.getKey(), key);
         int maxExposedIdForBatchReleaseTime = dppptDataService.getMaxExposedIdForBatchReleaseTime(batchTime, BATCH_LENGTH);
         assertEquals(1, maxExposedIdForBatchReleaseTime);
-        maxExposedIdForBatchReleaseTime = dppptDataService.getMaxExposedIdForBatchReleaseTime(receivedAt.getMillis(), PostgresDPPPTDataServiceTest.BATCH_LENGTH);
+        maxExposedIdForBatchReleaseTime = dppptDataService.getMaxExposedIdForBatchReleaseTime(receivedAt.toEpochMilli(), PostgresDPPPTDataServiceTest.BATCH_LENGTH);
         assertEquals(0, maxExposedIdForBatchReleaseTime);
     }
 
 
-    private void insertExposeeWithReceivedAt(DateTime receivedAt, String key) throws SQLException {
+    private void insertExposeeWithReceivedAt(Instant receivedAt, String key) throws SQLException {
         Connection connection = dataSource.getConnection();
         String sql = "into t_exposed (pk_exposed_id, key, received_at, key_date, app_source) values (1, ?, ?, now(), 'appsource')";
         PreparedStatement preparedStatement = connection.prepareStatement("insert " + sql);
         preparedStatement.setString(1, key);
-        preparedStatement.setTimestamp(2, new Timestamp(receivedAt.getMillis()));
+        preparedStatement.setTimestamp(2, new Timestamp(receivedAt.toEpochMilli()));
         preparedStatement.execute();
     }
 
@@ -208,15 +207,15 @@ public class PostgresDPPPTDataServiceTest {
     private Exposee createExposee(String key, String keyDate) {
         Exposee exposee = new Exposee();
         exposee.setKey(key);
-        exposee.setKeyDate(DateTime.parse(keyDate).withTimeAtStartOfDay().getMillis());
+        exposee.setKeyDate(LocalDate.parse("2014-01-28").atStartOfDay().atOffset(ZoneOffset.UTC).toInstant().toEpochMilli());
         return exposee;
     }
 
     private long getExposeeCount() throws SQLException {
         try (
-            final Connection connection = dataSource.getConnection();
-            final PreparedStatement preparedStatement = connection.prepareStatement("select count(*) from t_exposed");
-            final ResultSet resultSet = preparedStatement.executeQuery()) {
+                final Connection connection = dataSource.getConnection();
+                final PreparedStatement preparedStatement = connection.prepareStatement("select count(*) from t_exposed");
+                final ResultSet resultSet = preparedStatement.executeQuery()) {
             resultSet.next();
             return resultSet.getLong(1);
         }

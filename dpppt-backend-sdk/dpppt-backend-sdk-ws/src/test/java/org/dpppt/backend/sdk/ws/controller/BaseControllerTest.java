@@ -8,12 +8,9 @@ package org.dpppt.backend.sdk.ws.controller;
 
 import com.fasterxml.jackson.core.JsonFactory;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import com.fasterxml.jackson.databind.ser.impl.SimpleFilterProvider;
-import com.fasterxml.jackson.datatype.joda.JodaModule;
 import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
 
 import org.apache.commons.io.IOUtils;
-import org.joda.time.DateTime;
 import org.junit.Before;
 import org.junit.runner.RunWith;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -28,22 +25,20 @@ import org.springframework.web.context.WebApplicationContext;
 
 import io.jsonwebtoken.Claims;
 import io.jsonwebtoken.Jwts;
-import io.jsonwebtoken.SignatureAlgorithm;
 
 import static org.springframework.security.test.web.servlet.setup.SecurityMockMvcConfigurers.*;
 
-import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.security.Key;
 import java.security.KeyFactory;
-import java.security.KeyPair;
-import java.security.KeyPairGenerator;
 import java.security.PrivateKey;
 import java.security.PublicKey;
 import java.security.spec.PKCS8EncodedKeySpec;
-import java.security.spec.X509EncodedKeySpec;
+import java.time.OffsetDateTime;
+import java.time.ZoneOffset;
 import java.util.Base64;
+import java.util.Date;
 import java.util.UUID;
 
 @RunWith(SpringRunner.class)
@@ -66,7 +61,6 @@ public abstract class BaseControllerTest {
 		this.mockMvc = MockMvcBuilders.webAppContextSetup(webApplicationContext).apply(springSecurity()).build();
 		this.objectMapper = new ObjectMapper(new JsonFactory());
 		this.objectMapper.registerModule(new JavaTimeModule());
-		this.objectMapper.registerModule(new JodaModule());
 	}
 
 	private void loadPrivateKey() throws Exception {
@@ -84,19 +78,19 @@ public abstract class BaseControllerTest {
 	protected PublicKey publicKey;
 	protected PrivateKey privateKey;
 
-	protected String createToken(DateTime expiresAt) {
+	protected String createToken(OffsetDateTime expiresAt) {
 		Claims claims = Jwts.claims();
 		claims.put("scope", "exposed");
 		claims.put("onset", "2020-04-20");
 		return Jwts.builder().setClaims(claims).setId(UUID.randomUUID().toString())
-				.setSubject("test-subject" + DateTime.now().toString()).setExpiration(expiresAt.toDate())
-				.setIssuedAt(DateTime.now().toDate()).signWith(SignatureAlgorithm.RS256, (Key) privateKey).compact();
+				.setSubject("test-subject" + OffsetDateTime.now().withOffsetSameInstant(ZoneOffset.UTC).toString()).setExpiration(Date.from(expiresAt.toInstant()))
+				.setIssuedAt(Date.from(OffsetDateTime.now().withOffsetSameInstant(ZoneOffset.UTC).toInstant())).signWith((Key) privateKey).compact();
 	}
 
-	protected String createToken(String subject, DateTime expiresAt) {
+	protected String createToken(String subject, OffsetDateTime expiresAt) {
 		Claims claims = Jwts.claims();
 		claims.put("scope", "exposed");
-		return Jwts.builder().setSubject(subject).setExpiration(expiresAt.toDate()).setClaims(claims)
-				.setId(UUID.randomUUID().toString()).signWith(SignatureAlgorithm.RS256, (Key) privateKey).compact();
+		return Jwts.builder().setSubject(subject).setExpiration(Date.from(expiresAt.toInstant())).setClaims(claims)
+				.setId(UUID.randomUUID().toString()).signWith((Key) privateKey).compact();
 	}
 }

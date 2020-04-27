@@ -12,11 +12,13 @@ import static org.springframework.test.web.servlet.request.MockMvcRequestBuilder
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
+import java.time.LocalDate;
+import java.time.OffsetDateTime;
+import java.time.ZoneOffset;
 import java.util.Base64;
 
 import org.dpppt.backend.sdk.model.ExposeeAuthData;
 import org.dpppt.backend.sdk.model.ExposeeRequest;
-import org.joda.time.DateTime;
 import org.junit.Test;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.http.MediaType;
@@ -41,12 +43,12 @@ public class DPPPTControllerTest extends BaseControllerTest {
     public void testJWT() throws Exception {
         ExposeeRequest exposeeRequest = new ExposeeRequest();
         exposeeRequest.setAuthData(new ExposeeAuthData());
-        exposeeRequest.setKeyDate(DateTime.parse("2020-04-10").getMillis());
+        exposeeRequest.setKeyDate(LocalDate.parse("2020-04-10").atStartOfDay().atOffset(ZoneOffset.UTC).toInstant().toEpochMilli());
         exposeeRequest.setKey(Base64.getEncoder().encodeToString("test".getBytes("UTF-8")));
-        String token = createToken(DateTime.now().plusMinutes(5));
+        String token = createToken(OffsetDateTime.now().withOffsetSameInstant(ZoneOffset.UTC).plusMinutes(5));
         MockHttpServletResponse response = mockMvc.perform(post("/v1/exposed")
                                                             .contentType(MediaType.APPLICATION_JSON)
-                                                            .header("Authorization", "Bearer " + createToken(DateTime.now().plusMinutes(5)))
+                                                            .header("Authorization", "Bearer " + createToken(OffsetDateTime.now().withOffsetSameInstant(ZoneOffset.UTC).plusMinutes(5)))
                                                             .header("User-Agent", "MockMVC")
                                                             .content(json(exposeeRequest)))
                 .andExpect(status().is2xxSuccessful()).andReturn().getResponse();
@@ -62,9 +64,9 @@ public class DPPPTControllerTest extends BaseControllerTest {
     public void cannotUseSameTokenTwice() throws Exception {
         ExposeeRequest exposeeRequest = new ExposeeRequest();
         exposeeRequest.setAuthData(new ExposeeAuthData());
-        exposeeRequest.setKeyDate(DateTime.parse("2020-04-10").getMillis());
+        exposeeRequest.setKeyDate(LocalDate.parse("2020-04-10").atStartOfDay().atOffset(ZoneOffset.UTC).toInstant().toEpochMilli());
         exposeeRequest.setKey(Base64.getEncoder().encodeToString("test".getBytes("UTF-8")));
-        String token = createToken(DateTime.now().plusMinutes(5));
+        String token = createToken(OffsetDateTime.now().withOffsetSameInstant(ZoneOffset.UTC).plusMinutes(5));
 
         MockHttpServletResponse response = mockMvc.perform(post("/v1/exposed")
                     .contentType(MediaType.APPLICATION_JSON)
@@ -85,9 +87,9 @@ public class DPPPTControllerTest extends BaseControllerTest {
     public void cannotUseExpiredToken() throws Exception {
         ExposeeRequest exposeeRequest = new ExposeeRequest();
         exposeeRequest.setAuthData(new ExposeeAuthData());
-        exposeeRequest.setKeyDate(DateTime.parse("2020-04-10").getMillis());
+        exposeeRequest.setKeyDate(LocalDate.parse("2020-04-10").atStartOfDay().atOffset(ZoneOffset.UTC).toInstant().toEpochMilli());
         exposeeRequest.setKey(Base64.getEncoder().encodeToString("test".getBytes("UTF-8")));
-        String token = createToken(DateTime.now().minusMinutes(5));
+        String token = createToken(OffsetDateTime.now().withOffsetSameInstant(ZoneOffset.UTC).minusMinutes(5));
 
         MockHttpServletResponse response = mockMvc.perform(post("/v1/exposed")
                 .contentType(MediaType.APPLICATION_JSON)
