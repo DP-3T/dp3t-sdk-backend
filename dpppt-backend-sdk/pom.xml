@@ -11,7 +11,7 @@
 	<name>DP3T Backend SDK</name>
 
 	<properties>
-		<java-version>1.8</java-version>
+		<java-version>11</java-version>
 		<project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
 		<spring-boot-version>2.2.6.RELEASE</spring-boot-version>
 		<itCoverageAgent></itCoverageAgent>
@@ -98,7 +98,7 @@
 		<repository>
 			<id>spring-snapshots</id>
 			<name>Spring Snapshots</name>
-			<url>http://repo.spring.io/snapshot</url>
+			<url>https://repo.spring.io/snapshot</url>
 			<snapshots>
 				<enabled>true</enabled>
 			</snapshots>
