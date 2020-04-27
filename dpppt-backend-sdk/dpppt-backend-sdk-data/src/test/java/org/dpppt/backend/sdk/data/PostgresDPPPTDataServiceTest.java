@@ -1,10 +1,12 @@
 package org.dpppt.backend.sdk.data;
 
+import com.sun.jna.platform.win32.WinReg;
 import org.assertj.core.api.Assertions;
 import org.dpppt.backend.sdk.data.config.DPPPTDataServiceConfig;
 import org.dpppt.backend.sdk.data.config.FlyWayConfig;
 import org.dpppt.backend.sdk.data.config.PostgresDataConfig;
 import org.dpppt.backend.sdk.model.Exposee;
+import org.jetbrains.annotations.NotNull;
 import org.joda.time.DateTime;
 import org.junit.After;
 import org.junit.Test;
@@ -30,6 +32,8 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
 @ActiveProfiles("postgres")
 public class PostgresDPPPTDataServiceTest {
 
+    private static final String APP_SOURCE = "test-app";
+    private static final long BATCH_LENGTH = 2 * 60 * 60 * 1000L;
     @Autowired
     private DPPPTDataService dppptDataService;
 
@@ -47,9 +51,7 @@ public class PostgresDPPPTDataServiceTest {
         // GIVEN
         final long exposeeCountBefore = getExposeeCount();
 
-        Exposee exposee = new Exposee();
-        exposee.setKey("key1");
-        exposee.setKeyDate(DateTime.parse("2014-01-28").withTimeAtStartOfDay().getMillis());
+        Exposee exposee = createExposee("key1", "2014-01-28");
 
         // WHEN
         dppptDataService.upsertExposee(exposee, "test-app");
@@ -67,7 +69,7 @@ public class PostgresDPPPTDataServiceTest {
             Assertions.assertThat(resultSet.getInt("pk_exposed_id")).isPositive();
             Assertions.assertThat(resultSet.getString("key")).isEqualTo("key1");
             Assertions.assertThat(resultSet.getString("received_at")).isNotNull();
-            Assertions.assertThat(resultSet.getString("app_source")).isEqualTo("test-app");
+            Assertions.assertThat(resultSet.getString("app_source")).isEqualTo(APP_SOURCE);
             Assertions.assertThat(resultSet.getDate("key_date")).isEqualTo(Date.valueOf(LocalDate.of(2014, 1, 28)));
         }
     }
@@ -77,19 +79,15 @@ public class PostgresDPPPTDataServiceTest {
 
         // GIVEN
         {
-            Exposee exposee = new Exposee();
-            exposee.setKey("key1");
-            exposee.setKeyDate(DateTime.parse("2014-01-28").withTimeAtStartOfDay().getMillis());
+            Exposee exposee = createExposee("key1", "2014-01-28");
 
-            dppptDataService.upsertExposee(exposee, "test-app");
+            dppptDataService.upsertExposee(exposee, APP_SOURCE);
         }
 
         {
-            Exposee exposee = new Exposee();
-            exposee.setKey("key2");
-            exposee.setKeyDate(DateTime.parse("2014-01-29").withTimeAtStartOfDay().getMillis());
+            Exposee exposee = createExposee("key2", "2014-01-29");
 
-            dppptDataService.upsertExposee(exposee, "test-app");
+            dppptDataService.upsertExposee(exposee, APP_SOURCE);
         }
 
         // WHEN
@@ -116,19 +114,17 @@ public class PostgresDPPPTDataServiceTest {
 
         // GIVEN
         {
-            Exposee exposee = new Exposee();
-            exposee.setKey("key100");
-            exposee.setKeyDate(DateTime.parse("2014-01-28").withTimeAtStartOfDay().getMillis());
+            Exposee exposee = createExposee("key100", "2014-01-28");
 
-            dppptDataService.upsertExposee(exposee, "test-app");
+            dppptDataService.upsertExposee(exposee, APP_SOURCE);
         }
 
         {
-            Exposee exposee = new Exposee();
-            exposee.setKey("key200");
-            exposee.setKeyDate(DateTime.parse("2014-01-29").withTimeAtStartOfDay().getMillis());
+            String key = "key200";
+            String keyDate = "2014-01-29";
+            Exposee exposee = createExposee(key, keyDate);
 
-            dppptDataService.upsertExposee(exposee, "test-app");
+            dppptDataService.upsertExposee(exposee, APP_SOURCE);
         }
 
         // WHEN
@@ -167,22 +163,53 @@ public class PostgresDPPPTDataServiceTest {
 
     @Test
     public void cleanup() throws SQLException {
-        DateTime now = DateTime.now();
-        DateTime old = now.minusDays(21);
-        Connection connection = dataSource.getConnection();
-        String sql = "into t_exposed (pk_exposed_id, key, received_at, key_date, app_source) values (1, 'someKey', ?, now(), 'appsource')";
-        PreparedStatement preparedStatement = connection.prepareStatement("insert " + sql);
-        preparedStatement.setTimestamp(1, new Timestamp(old.getMillis()));
-        preparedStatement.execute();
+        DateTime receivedAt = DateTime.now().minusDays(21);
+        String key = "someKey";
+        insertExposeeWithReceivedAt(receivedAt, key);
 
-        Integer maxExposedIdForOld = dppptDataService.getMaxExposedIdForDay(old);
+        Integer maxExposedIdForOld = dppptDataService.getMaxExposedIdForDay(receivedAt);
         assertEquals(1, maxExposedIdForOld.intValue());
 
         dppptDataService.cleanDB(21);
 
-        maxExposedIdForOld = dppptDataService.getMaxExposedIdForDay(old);
+        maxExposedIdForOld = dppptDataService.getMaxExposedIdForDay(receivedAt);
         assertEquals(0, maxExposedIdForOld.intValue());
 
+    }
+
+    @Test
+    public void testBatchReleaseTime() throws SQLException {
+        DateTime receivedAt = DateTime.parse("2020-04-23T00:00");
+        String key = "key555";
+        insertExposeeWithReceivedAt(receivedAt, key);
+
+        long batchTime = DateTime.parse("2020-04-23T02:00").getMillis();
+        List<Exposee> sortedExposedForBatchReleaseTime = dppptDataService.getSortedExposedForBatchReleaseTime(batchTime, BATCH_LENGTH);
+        assertEquals(1, sortedExposedForBatchReleaseTime.size());
+        Exposee actual = sortedExposedForBatchReleaseTime.get(0);
+        assertEquals(actual.getKey(), key);
+        int maxExposedIdForBatchReleaseTime = dppptDataService.getMaxExposedIdForBatchReleaseTime(batchTime, BATCH_LENGTH);
+        assertEquals(1, maxExposedIdForBatchReleaseTime);
+        maxExposedIdForBatchReleaseTime = dppptDataService.getMaxExposedIdForBatchReleaseTime(receivedAt.getMillis(), PostgresDPPPTDataServiceTest.BATCH_LENGTH);
+        assertEquals(0, maxExposedIdForBatchReleaseTime);
+    }
+
+
+    private void insertExposeeWithReceivedAt(DateTime receivedAt, String key) throws SQLException {
+        Connection connection = dataSource.getConnection();
+        String sql = "into t_exposed (pk_exposed_id, key, received_at, key_date, app_source) values (1, ?, ?, now(), 'appsource')";
+        PreparedStatement preparedStatement = connection.prepareStatement("insert " + sql);
+        preparedStatement.setString(1, key);
+        preparedStatement.setTimestamp(2, new Timestamp(receivedAt.getMillis()));
+        preparedStatement.execute();
+    }
+
+    @NotNull
+    private Exposee createExposee(String key, String keyDate) {
+        Exposee exposee = new Exposee();
+        exposee.setKey(key);
+        exposee.setKeyDate(DateTime.parse(keyDate).withTimeAtStartOfDay().getMillis());
+        return exposee;
     }
 
     private long getExposeeCount() throws SQLException {
