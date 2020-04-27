@@ -6,8 +6,11 @@
 
 package org.dpppt.backend.sdk.model;
 
+import lombok.Data;
+
 import javax.validation.constraints.NotNull;
 
+@Data
 public class ExposeeRequest {
 
 	@NotNull
@@ -17,28 +20,4 @@ public class ExposeeRequest {
 	private long keyDate;
 
 	private ExposeeAuthData authData;
-
-	public String getKey() {
-		return key;
-	}
-
-	public void setKey(String key) {
-		this.key = key;
-	}
-
-	public ExposeeAuthData getAuthData() {
-		return authData;
-	}
-
-	public void setAuthData(ExposeeAuthData authData) {
-		this.authData = authData;
-	}
-
-	public long getKeyDate() {
-		return keyDate;
-	}
-
-	public void setKeyDate(long keyDate) {
-		this.keyDate = keyDate;
-	}
 }

@@ -6,35 +6,21 @@
 
 package org.dpppt.backend.sdk.model;
 
+import lombok.Data;
+import lombok.NoArgsConstructor;
+
 import java.util.ArrayList;
 import java.util.List;
 
+@Data
+@NoArgsConstructor
 public class ExposedOverview {
 
 	private Long batchReleaseTime;
 
 	private List<Exposee> exposed = new ArrayList<>();
 
-	public ExposedOverview() {
-	}
-
-	public Long getBatchReleaseTime() {
-		return batchReleaseTime;
-	}
-
-	public void setBatchReleaseTime(Long batchReleaseTime) {
-		this.batchReleaseTime = batchReleaseTime;
-	}
-
 	public ExposedOverview(List<Exposee> exposed) {
-		this.exposed = exposed;
-	}
-
-	public List<Exposee> getExposed() {
-		return exposed;
-	}
-
-	public void setExposed(List<Exposee> exposed) {
 		this.exposed = exposed;
 	}
 }

@@ -6,8 +6,11 @@
 
 package org.dpppt.backend.sdk.model;
 
+import lombok.Data;
+
 import javax.validation.constraints.NotNull;
 
+@Data
 public class Application {
 
 	@NotNull
@@ -22,53 +25,4 @@ public class Application {
 	private String bleGattGuid;
 	@NotNull
 	private String contact;
-
-	public String getAppId() {
-		return appId;
-	}
-
-	public void setAppId(String appId) {
-		this.appId = appId;
-	}
-
-	public String getDescription() {
-		return description;
-	}
-
-	public void setDescription(String description) {
-		this.description = description;
-	}
-
-	public String getBackendBaseUrl() {
-		return backendBaseUrl;
-	}
-
-	public void setBackendBaseUrl(String backendBaseUrl) {
-		this.backendBaseUrl = backendBaseUrl;
-	}
-
-	public String getListBaseUrl() {
-		return listBaseUrl;
-	}
-
-	public void setListBaseUrl(String listBaseUrl) {
-		this.listBaseUrl = listBaseUrl;
-	}
-
-	public String getBleGattGuid() {
-		return bleGattGuid;
-	}
-
-	public void setBleGattGuid(String bleGattGuid) {
-		this.bleGattGuid = bleGattGuid;
-	}
-
-	public String getContact() {
-		return contact;
-	}
-
-	public void setContact(String contact) {
-		this.contact = contact;
-	}
-
 }

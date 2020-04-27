@@ -6,15 +6,9 @@
 
 package org.dpppt.backend.sdk.model;
 
+import lombok.Data;
+
+@Data
 public class ExposeeAuthData {
-
 	private String value;
-
-	public String getValue() {
-		return value;
-	}
-
-	public void setValue(String value) {
-		this.value = value;
-	}
 }
