@@ -47,10 +47,14 @@ public class JWTValidateRequest implements ValidateRequest {
 
 	@Override
 	public boolean isFakeRequest(Object authObject, Object others) {
-		if (authObject instanceof Jwt) {
+		if (authObject instanceof Jwt && others instanceof ExposeeRequest) {
 			Jwt token = (Jwt) authObject;
+			ExposeeRequest request = (ExposeeRequest) others;
 			boolean fake = false;
 			if (token.getClaimAsString("fake").equals("1")) {
+				fake = true;
+			}
+			if (request.isFake() == 1) {
 				fake = true;
 			}
 			return fake;
