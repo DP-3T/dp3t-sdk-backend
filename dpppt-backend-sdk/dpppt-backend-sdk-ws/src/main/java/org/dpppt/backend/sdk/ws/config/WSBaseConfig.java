@@ -65,6 +65,9 @@ public abstract class WSBaseConfig implements SchedulingConfigurer, WebMvcConfig
 	@Value("${ws.exposedlist.batchlength: 7200000}")
 	long batchLength;
 
+	@Value("${ws.exposedlist.requestTime: 1500}")
+	long requestTime;
+
 	@Value("${ws.app.source}")
 	String appSource;
 
@@ -80,7 +83,7 @@ public abstract class WSBaseConfig implements SchedulingConfigurer, WebMvcConfig
 			theValidator = new NoValidateRequest();
 		}
 		return new DPPPTController(dppptSDKDataService(), etagGenerator(), appSource, exposedListCacheControl,
-				theValidator, batchLength, retentionDays);
+				theValidator, batchLength, retentionDays, requestTime);
 	}
 
 	@Bean

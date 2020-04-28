@@ -14,6 +14,8 @@ public interface ValidateRequest {
 	// others can be any object (currently it is the ExposeeRequest, since we want
 	// to allow no auth without the jwt profile)
 	public long getKeyDate(Object authObject, Object others) throws InvalidDateException;
+
+	public boolean isFakeRequest(Object authObject, Object others);
 	
 	public class InvalidDateException extends Exception {}
 }

@@ -64,12 +64,13 @@ public class DPPPTController {
 
 	private final long batchLength;
 
+	private final long requestTime;
 	@Autowired
 	private ObjectMapper jacksonObjectMapper;
 
 
 	public DPPPTController(DPPPTDataService dataService, EtagGeneratorInterface etagGenerator, String appSource,
-			int exposedListCacheControl, ValidateRequest validateRequest, long batchLength, int retentionDays) {
+			int exposedListCacheControl, ValidateRequest validateRequest, long batchLength, int retentionDays, long requestTime) {
 		this.dataService = dataService;
 		this.appSource = appSource;
 		this.etagGenerator = etagGenerator;
@@ -77,6 +78,7 @@ public class DPPPTController {
 		this.validateRequest = validateRequest;
 		this.batchLength = batchLength;
 		this.retentionDays = retentionDays;
+		this.requestTime = requestTime;
 	}
 
 	@CrossOrigin(origins = { "https://editor.swagger.io" })
@@ -90,6 +92,7 @@ public class DPPPTController {
 	public @ResponseBody ResponseEntity<String> addExposee(@Valid @RequestBody ExposeeRequest exposeeRequest,
 			@RequestHeader(value = "User-Agent", required = true) String userAgent,
 			@AuthenticationPrincipal Object principal) throws InvalidDateException {
+		long now = System.currentTimeMillis();
 		if (!isValidBase64(exposeeRequest.getKey())) {
 			return new ResponseEntity<>("No valid base64 key", HttpStatus.BAD_REQUEST);
 		}
@@ -102,7 +105,18 @@ public class DPPPTController {
 		long keyDate = this.validateRequest.getKeyDate(principal, exposeeRequest);
 
 		exposee.setKeyDate(keyDate);
-		dataService.upsertExposee(exposee, appSource);
+		if(!this.validateRequest.isFakeRequest(principal, exposeeRequest)) {
+			dataService.upsertExposee(exposee, appSource);
+		} 
+		
+		long after = System.currentTimeMillis();
+		long duration = after - now;
+		try{
+			Thread.sleep(this.requestTime - duration);
+		}
+		catch (Exception ex) {
+			
+		}
 		return ResponseEntity.ok().build();
 	}
 
