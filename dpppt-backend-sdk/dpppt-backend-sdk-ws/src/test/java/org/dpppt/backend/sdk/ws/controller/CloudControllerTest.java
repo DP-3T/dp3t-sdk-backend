@@ -65,7 +65,7 @@ import org.springframework.http.MediaType;
 
 @RunWith(SpringRunner.class)
 @SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT)
-@ActiveProfiles({ "devcloud" })
+@ActiveProfiles({ "test-cloud" })
 @TestPropertySource(properties = { "ws.app.source=org.dpppt.demo", })
 public class CloudControllerTest {
     protected MockMvc mockMvc;
