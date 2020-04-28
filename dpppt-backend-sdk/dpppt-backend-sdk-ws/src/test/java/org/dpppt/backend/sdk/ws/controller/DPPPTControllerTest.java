@@ -43,7 +43,7 @@ public class DPPPTControllerTest extends BaseControllerTest {
     public void testJWT() throws Exception {
         ExposeeRequest exposeeRequest = new ExposeeRequest();
         exposeeRequest.setAuthData(new ExposeeAuthData());
-        exposeeRequest.setKeyDate(LocalDate.parse("2020-04-10").atStartOfDay().atOffset(ZoneOffset.UTC).toInstant().toEpochMilli());
+        exposeeRequest.setKeyDate(OffsetDateTime.now().withOffsetSameInstant(ZoneOffset.UTC).toInstant().toEpochMilli());
         exposeeRequest.setKey(Base64.getEncoder().encodeToString("test".getBytes("UTF-8")));
         String token = createToken(OffsetDateTime.now().withOffsetSameInstant(ZoneOffset.UTC).plusMinutes(5));
         MockHttpServletResponse response = mockMvc.perform(post("/v1/exposed")
@@ -64,7 +64,7 @@ public class DPPPTControllerTest extends BaseControllerTest {
     public void cannotUseSameTokenTwice() throws Exception {
         ExposeeRequest exposeeRequest = new ExposeeRequest();
         exposeeRequest.setAuthData(new ExposeeAuthData());
-        exposeeRequest.setKeyDate(LocalDate.parse("2020-04-10").atStartOfDay().atOffset(ZoneOffset.UTC).toInstant().toEpochMilli());
+        exposeeRequest.setKeyDate(OffsetDateTime.now().withOffsetSameInstant(ZoneOffset.UTC).toInstant().toEpochMilli());
         exposeeRequest.setKey(Base64.getEncoder().encodeToString("test".getBytes("UTF-8")));
         String token = createToken(OffsetDateTime.now().withOffsetSameInstant(ZoneOffset.UTC).plusMinutes(5));
 
@@ -87,7 +87,7 @@ public class DPPPTControllerTest extends BaseControllerTest {
     public void cannotUseExpiredToken() throws Exception {
         ExposeeRequest exposeeRequest = new ExposeeRequest();
         exposeeRequest.setAuthData(new ExposeeAuthData());
-        exposeeRequest.setKeyDate(LocalDate.parse("2020-04-10").atStartOfDay().atOffset(ZoneOffset.UTC).toInstant().toEpochMilli());
+        exposeeRequest.setKeyDate(OffsetDateTime.now().withOffsetSameInstant(ZoneOffset.UTC).toInstant().toEpochMilli());
         exposeeRequest.setKey(Base64.getEncoder().encodeToString("test".getBytes("UTF-8")));
         String token = createToken(OffsetDateTime.now().withOffsetSameInstant(ZoneOffset.UTC).minusMinutes(5));
 
@@ -97,5 +97,35 @@ public class DPPPTControllerTest extends BaseControllerTest {
                 .header("User-Agent", "MockMVC")
                 .content(json(exposeeRequest)))
         .andExpect(status().is4xxClientError()).andReturn().getResponse();
+    }
+    @Test
+    public void cannotUseKeyDateInFuture() throws Exception {
+        ExposeeRequest exposeeRequest = new ExposeeRequest();
+        exposeeRequest.setAuthData(new ExposeeAuthData());
+        exposeeRequest.setKeyDate(OffsetDateTime.now().plusDays(2).withOffsetSameInstant(ZoneOffset.UTC).toInstant().toEpochMilli());
+        exposeeRequest.setKey(Base64.getEncoder().encodeToString("test".getBytes("UTF-8")));
+        String token = createToken(OffsetDateTime.now().withOffsetSameInstant(ZoneOffset.UTC).plusMinutes(5));
+
+        MockHttpServletResponse response = mockMvc.perform(post("/v1/exposed")
+                    .contentType(MediaType.APPLICATION_JSON)
+                    .header("Authorization", "Bearer " + token)
+                    .header("User-Agent", "MockMVC")
+                    .content(json(exposeeRequest)))
+            .andExpect(status().is4xxClientError()).andReturn().getResponse();
+    }
+    @Test
+    public void keyDateNotOlderThan21Days() throws Exception {
+        ExposeeRequest exposeeRequest = new ExposeeRequest();
+        exposeeRequest.setAuthData(new ExposeeAuthData());
+        exposeeRequest.setKeyDate(OffsetDateTime.now().withOffsetSameInstant(ZoneOffset.UTC).minusDays(22).toInstant().toEpochMilli());
+        exposeeRequest.setKey(Base64.getEncoder().encodeToString("test".getBytes("UTF-8")));
+        String token = createToken(OffsetDateTime.now().withOffsetSameInstant(ZoneOffset.UTC).plusMinutes(5), "2020-01-01");
+
+        MockHttpServletResponse response = mockMvc.perform(post("/v1/exposed")
+                    .contentType(MediaType.APPLICATION_JSON)
+                    .header("Authorization", "Bearer " + token)
+                    .header("User-Agent", "MockMVC")
+                    .content(json(exposeeRequest)))
+            .andExpect(status().is4xxClientError()).andReturn().getResponse();
     }
 }

@@ -7,6 +7,7 @@
 package org.dpppt.backend.sdk.ws.security;
 
 import java.time.LocalDate;
+import java.time.OffsetDateTime;
 import java.time.ZoneOffset;
 import org.dpppt.backend.sdk.model.ExposeeRequest;
 import org.springframework.security.oauth2.jwt.Jwt;
@@ -23,19 +24,21 @@ public class JWTValidateRequest implements ValidateRequest {
 	}
 
 	@Override
-	public long getKeyDate(Object authObject, Object others) {
+	public long getKeyDate(Object authObject, Object others) throws InvalidDateException {
 		if (authObject instanceof Jwt) {
 			Jwt token = (Jwt) authObject;
-			
 			long jwtKeyDate = LocalDate.parse(token.getClaim("onset")).atStartOfDay().atOffset(ZoneOffset.UTC).toInstant().toEpochMilli();
 			if (others instanceof ExposeeRequest) {
 				ExposeeRequest request = (ExposeeRequest) others;
-				long maxKeyDate = Math.max(jwtKeyDate, request.getKeyDate());
-				if (maxKeyDate > System.currentTimeMillis()) {
-					// the maximum key date is the current day.
-					maxKeyDate = LocalDate.now().atStartOfDay().atOffset(ZoneOffset.UTC).toInstant().toEpochMilli();
+				if (request.getKeyDate() > System.currentTimeMillis()) {
+					throw new InvalidDateException();
+				} else if (request.getKeyDate() < jwtKeyDate) {
+					throw new InvalidDateException();
+				} 
+				else if(request.getKeyDate() < OffsetDateTime.now().minusDays(21).toInstant().toEpochMilli()) {
+					throw new InvalidDateException();
 				}
-				jwtKeyDate = maxKeyDate;
+				jwtKeyDate = request.getKeyDate();
 			}
 			return jwtKeyDate;
 		}
