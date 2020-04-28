@@ -86,6 +86,14 @@ public abstract class BaseControllerTest {
 				.setSubject("test-subject" + OffsetDateTime.now().withOffsetSameInstant(ZoneOffset.UTC).toString()).setExpiration(Date.from(expiresAt.toInstant()))
 				.setIssuedAt(Date.from(OffsetDateTime.now().withOffsetSameInstant(ZoneOffset.UTC).toInstant())).signWith((Key) privateKey).compact();
 	}
+	protected String createToken(OffsetDateTime expiresAt, String onset) {
+		Claims claims = Jwts.claims();
+		claims.put("scope", "exposed");
+		claims.put("onset", onset);
+		return Jwts.builder().setClaims(claims).setId(UUID.randomUUID().toString())
+				.setSubject("test-subject" + OffsetDateTime.now().withOffsetSameInstant(ZoneOffset.UTC).toString()).setExpiration(Date.from(expiresAt.toInstant()))
+				.setIssuedAt(Date.from(OffsetDateTime.now().withOffsetSameInstant(ZoneOffset.UTC).toInstant())).signWith((Key) privateKey).compact();
+	}
 
 	protected String createToken(String subject, OffsetDateTime expiresAt) {
 		Claims claims = Jwts.claims();

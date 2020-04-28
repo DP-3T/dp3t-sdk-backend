@@ -27,6 +27,7 @@ import org.dpppt.backend.sdk.model.Exposee;
 import org.dpppt.backend.sdk.model.ExposeeRequest;
 import org.dpppt.backend.sdk.model.proto.Exposed;
 import org.dpppt.backend.sdk.ws.security.ValidateRequest;
+import org.dpppt.backend.sdk.ws.security.ValidateRequest.InvalidDateException;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.CacheControl;
 import org.springframework.http.HttpStatus;
@@ -87,7 +88,7 @@ public class DPPPTController {
 	@PostMapping(value = "/exposed")
 	public @ResponseBody ResponseEntity<String> addExposee(@Valid @RequestBody ExposeeRequest exposeeRequest,
 			@RequestHeader(value = "User-Agent", required = true) String userAgent,
-			@AuthenticationPrincipal Object principal) {
+			@AuthenticationPrincipal Object principal) throws InvalidDateException {
 		if (!isValidBase64(exposeeRequest.getKey())) {
 			return new ResponseEntity<>("No valid base64 key", HttpStatus.BAD_REQUEST);
 		}
@@ -179,6 +180,12 @@ public class DPPPTController {
 	@ExceptionHandler(IllegalArgumentException.class)
 	@ResponseStatus(HttpStatus.BAD_REQUEST)
 	public ResponseEntity<Object> invalidArguments() {
+		return ResponseEntity.badRequest().build();
+	}
+
+	@ExceptionHandler(InvalidDateException.class)
+	@ResponseStatus(HttpStatus.BAD_REQUEST)
+	public ResponseEntity<Object> invalidDate() {
 		return ResponseEntity.badRequest().build();
 	}
 
