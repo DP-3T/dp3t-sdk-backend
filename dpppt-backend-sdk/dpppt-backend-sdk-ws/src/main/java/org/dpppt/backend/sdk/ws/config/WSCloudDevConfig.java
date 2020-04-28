@@ -1,5 +1,7 @@
 package org.dpppt.backend.sdk.ws.config;
 
+import java.util.Base64;
+
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.Profile;
@@ -14,10 +16,10 @@ public class WSCloudDevConfig extends WSCloudBaseConfig {
     
     @Override
     String getPrivateKey() {
-        return privateKey;
+        return new String(Base64.getDecoder().decode(privateKey));
     }
     @Override
     String getPublicKey() {
-        return publicKey;
+        return new String(Base64.getDecoder().decode(publicKey));
     }
 }
