@@ -66,7 +66,12 @@ import org.springframework.http.MediaType;
 @RunWith(SpringRunner.class)
 @SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT)
 @ActiveProfiles({ "test-cloud" })
-@TestPropertySource(properties = { "ws.app.source=org.dpppt.demo", })
+@TestPropertySource(properties = 
+{ 
+    "ws.app.source=org.dpppt.demo",
+    "vcap.services.ecdsa_dev.credentials.publicKey=MFkwEwYHKoZIzj0CAQYIKoZIzj0DAQcDQgAEc6n1FNz6RnwNeNM9H+KxaPckrBxgKU799v+DTy8ivc1ZM3nDyXq5zU2AFXvgvLFzWxU9z9FCcDPGTcN7cvOyXw==",
+    "vcap.services.ecdsa_dev.credentials.privateKey=MIGTAgEAMBMGByqGSM49AgEGCCqGSM49AwEHBHkwdwIBAQQgx18xx3XadMzGCunnoUjpiCt1rZ81I4XAJbRaQi0eZbKgCgYIKoZIzj0DAQehRANCAARzqfUU3PpGfA140z0f4rFo9ySsHGApTv32/4NPLyK9zVkzecPJernNTYAVe+C8sXNbFT3P0UJwM8ZNw3ty87Jf"
+})
 public class CloudControllerTest {
     protected MockMvc mockMvc;
 	@Autowired
