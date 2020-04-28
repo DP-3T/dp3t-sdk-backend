@@ -32,4 +32,13 @@ public class NoValidateRequest implements ValidateRequest {
 		throw new IllegalArgumentException();
 	}
 
+	@Override
+	public boolean isFakeRequest(Object authObject, Object others) {
+		if (others instanceof ExposeeRequest) {
+			ExposeeRequest request = ((ExposeeRequest) others);
+			return request.isFake();
+		}
+		throw new IllegalArgumentException();
+	}
+
 }

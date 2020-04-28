@@ -6,6 +6,10 @@
 
 package org.dpppt.backend.sdk.ws.security;
 
+import java.time.LocalDate;
+import java.time.OffsetDateTime;
+import java.time.ZoneOffset;
+
 import org.dpppt.backend.sdk.data.DPPPTDataService;
 import org.springframework.security.oauth2.core.OAuth2Error;
 import org.springframework.security.oauth2.core.OAuth2ErrorCodes;
@@ -26,6 +30,10 @@ public class JWTValidator implements OAuth2TokenValidator<Jwt> {
 
     @Override
     public OAuth2TokenValidatorResult validate(Jwt token) {
+        if(token.getClaimAsString("fake") == "1"){
+            //it is a fakte token, but we still assume it is valid
+            return OAuth2TokenValidatorResult.success();
+        }
         if(this.dataService.checkAndInsertPublishUUID(token.getClaim(UUID_CLAIM))) {
             return OAuth2TokenValidatorResult.success();
         }

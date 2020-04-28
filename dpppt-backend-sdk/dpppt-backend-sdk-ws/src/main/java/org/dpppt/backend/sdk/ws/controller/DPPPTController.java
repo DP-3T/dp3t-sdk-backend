@@ -16,6 +16,7 @@ import java.time.ZoneOffset;
 import java.util.ArrayList;
 import java.util.Base64;
 import java.util.List;
+import java.util.Random;
 
 import javax.validation.Valid;
 
@@ -66,6 +67,7 @@ public class DPPPTController {
 
 	@Autowired
 	private ObjectMapper jacksonObjectMapper;
+	private final Random random;
 
 
 	public DPPPTController(DPPPTDataService dataService, EtagGeneratorInterface etagGenerator, String appSource,
@@ -77,6 +79,7 @@ public class DPPPTController {
 		this.validateRequest = validateRequest;
 		this.batchLength = batchLength;
 		this.retentionDays = retentionDays;
+		this.random = new Random();
 	}
 
 	@CrossOrigin(origins = { "https://editor.swagger.io" })
@@ -102,7 +105,15 @@ public class DPPPTController {
 		long keyDate = this.validateRequest.getKeyDate(principal, exposeeRequest);
 
 		exposee.setKeyDate(keyDate);
-		dataService.upsertExposee(exposee, appSource);
+		if(!this.validateRequest.isFakeRequest(principal, exposeeRequest)) {
+			dataService.upsertExposee(exposee, appSource);
+		} 
+		try{
+			Thread.sleep(random.nextInt(600));
+		}
+		catch (Exception ex) {
+			
+		}
 		return ResponseEntity.ok().build();
 	}
 

@@ -82,6 +82,7 @@ public abstract class BaseControllerTest {
 		Claims claims = Jwts.claims();
 		claims.put("scope", "exposed");
 		claims.put("onset", "2020-04-20");
+		claims.put("fake", "0");
 		return Jwts.builder().setClaims(claims).setId(UUID.randomUUID().toString())
 				.setSubject("test-subject" + OffsetDateTime.now().withOffsetSameInstant(ZoneOffset.UTC).toString()).setExpiration(Date.from(expiresAt.toInstant()))
 				.setIssuedAt(Date.from(OffsetDateTime.now().withOffsetSameInstant(ZoneOffset.UTC).toInstant())).signWith((Key) privateKey).compact();
@@ -89,6 +90,7 @@ public abstract class BaseControllerTest {
 	protected String createToken(OffsetDateTime expiresAt, String onset) {
 		Claims claims = Jwts.claims();
 		claims.put("scope", "exposed");
+		claims.put("fake", "0");
 		claims.put("onset", onset);
 		return Jwts.builder().setClaims(claims).setId(UUID.randomUUID().toString())
 				.setSubject("test-subject" + OffsetDateTime.now().withOffsetSameInstant(ZoneOffset.UTC).toString()).setExpiration(Date.from(expiresAt.toInstant()))
@@ -98,7 +100,19 @@ public abstract class BaseControllerTest {
 	protected String createToken(String subject, OffsetDateTime expiresAt) {
 		Claims claims = Jwts.claims();
 		claims.put("scope", "exposed");
+		claims.put("fake", "0");
 		return Jwts.builder().setSubject(subject).setExpiration(Date.from(expiresAt.toInstant())).setClaims(claims)
 				.setId(UUID.randomUUID().toString()).signWith((Key) privateKey).compact();
 	}
+
+	protected String createToken(boolean fake, OffsetDateTime expiresAt) {
+		Claims claims = Jwts.claims();
+		claims.put("scope", "exposed");
+		claims.put("onset", "2020-04-20");
+		claims.put("fake", fake? "1": "0");
+		return Jwts.builder().setClaims(claims).setId(UUID.randomUUID().toString())
+				.setSubject("test-subject" + OffsetDateTime.now().withOffsetSameInstant(ZoneOffset.UTC).toString()).setExpiration(Date.from(expiresAt.toInstant()))
+				.setIssuedAt(Date.from(OffsetDateTime.now().withOffsetSameInstant(ZoneOffset.UTC).toInstant())).signWith((Key) privateKey).compact();
+	}
+
 }
