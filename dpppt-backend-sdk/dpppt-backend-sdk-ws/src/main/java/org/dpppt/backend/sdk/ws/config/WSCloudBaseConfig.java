@@ -10,32 +10,30 @@ import java.security.KeyFactory;
 import java.security.KeyPair;
 import java.security.PrivateKey;
 import java.security.PublicKey;
+import java.security.Security;
 import java.security.spec.PKCS8EncodedKeySpec;
 import java.security.spec.X509EncodedKeySpec;
 import java.util.Base64;
 
 import javax.sql.DataSource;
 
+import org.bouncycastle.jce.provider.BouncyCastleProvider;
 import org.flywaydb.core.Flyway;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
-import org.springframework.context.annotation.Profile;
 import org.springframework.scheduling.config.ScheduledTaskRegistrar;
 
 import io.jsonwebtoken.SignatureAlgorithm;
 
 @Configuration
-@Profile("cloud")
-public class WSCloudConfig extends WSBaseConfig {
+public abstract class WSCloudBaseConfig extends WSBaseConfig {
 
 	@Autowired
 	private DataSource dataSource;
 
-	@Autowired
-	private String privateKey;
-	@Autowired
-	public String publicKey;
+	abstract String getPublicKey();
+	abstract String getPrivateKey();
 
 	@Override
 	public DataSource dataSource() {
@@ -62,11 +60,13 @@ public class WSCloudConfig extends WSBaseConfig {
 	}
 	@Override
 	public KeyPair getKeyPair(SignatureAlgorithm algorithm) {
+		Security.addProvider(new BouncyCastleProvider());
+		Security.setProperty("crypto.policy", "unlimited");
 		return new KeyPair(loadPublicKeyFromString(),loadPrivateKeyFromString());
 	}
 
 	private PrivateKey loadPrivateKeyFromString() {
-		PKCS8EncodedKeySpec pkcs8KeySpec = new PKCS8EncodedKeySpec(Base64.getDecoder().decode(privateKey));
+		PKCS8EncodedKeySpec pkcs8KeySpec = new PKCS8EncodedKeySpec(Base64.getDecoder().decode(getPrivateKey()));
 		try {
 			KeyFactory kf = KeyFactory.getInstance("ECDSA", "BC");
 			return (PrivateKey) kf.generatePrivate(pkcs8KeySpec);
@@ -78,7 +78,7 @@ public class WSCloudConfig extends WSBaseConfig {
 	}
 
 	private PublicKey loadPublicKeyFromString() {
-		X509EncodedKeySpec keySpecX509 = new X509EncodedKeySpec(Base64.getDecoder().decode(publicKey));
+		X509EncodedKeySpec keySpecX509 = new X509EncodedKeySpec(Base64.getDecoder().decode(getPublicKey()));
 		try {
 			KeyFactory kf = KeyFactory.getInstance("ECDSA", "BC");
 			return (PublicKey) kf.generatePublic(keySpecX509);
