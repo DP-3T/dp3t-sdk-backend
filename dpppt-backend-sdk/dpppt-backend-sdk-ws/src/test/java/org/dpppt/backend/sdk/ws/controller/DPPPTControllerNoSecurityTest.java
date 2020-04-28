@@ -28,7 +28,7 @@ public class DPPPTControllerNoSecurityTest extends BaseControllerNoSecurityTest 
         exposeeRequest.setAuthData(new ExposeeAuthData());
         exposeeRequest.setKeyDate(LocalDate.parse("2020-04-10").atStartOfDay().atOffset(ZoneOffset.UTC).toInstant().toEpochMilli());
         exposeeRequest.setKey(Base64.getEncoder().encodeToString("test".getBytes("UTF-8")));
-        exposeeRequest.setIsFake(false);
+        exposeeRequest.setIsFake(0);
         MockHttpServletResponse response = mockMvc.perform(post("/v1/exposed")
                                                             .contentType(MediaType.APPLICATION_JSON)
                                                             .header("User-Agent", "MockMVC")
@@ -41,7 +41,7 @@ public class DPPPTControllerNoSecurityTest extends BaseControllerNoSecurityTest 
         exposeeRequest.setAuthData(new ExposeeAuthData());
         exposeeRequest.setKeyDate(LocalDate.parse("2020-04-10").atStartOfDay().atOffset(ZoneOffset.UTC).toInstant().toEpochMilli());
         exposeeRequest.setKey(Base64.getEncoder().encodeToString("test".getBytes("UTF-8")));
-        exposeeRequest.setIsFake(true);
+        exposeeRequest.setIsFake(1);
         MockHttpServletResponse response = mockMvc.perform(post("/v1/exposed")
                                                             .contentType(MediaType.APPLICATION_JSON)
                                                             .header("User-Agent", "MockMVC")

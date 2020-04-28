@@ -30,7 +30,7 @@ public class JWTValidator implements OAuth2TokenValidator<Jwt> {
 
     @Override
     public OAuth2TokenValidatorResult validate(Jwt token) {
-        if(token.getClaimAsString("fake") == "1"){
+        if(token.getClaimAsString("fake").equals("1")){
             //it is a fakte token, but we still assume it is valid
             return OAuth2TokenValidatorResult.success();
         }
