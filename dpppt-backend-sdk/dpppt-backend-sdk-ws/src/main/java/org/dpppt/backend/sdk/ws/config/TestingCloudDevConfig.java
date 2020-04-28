@@ -36,14 +36,14 @@ public class TestingCloudDevConfig  extends WSCloudBaseConfig{
 	@Value("${vcap.services.ecdsa_dev.credentials.publicKey}")
     public String publicKey;
     
-    @Override
+	@Override
     String getPrivateKey() {
-        return privateKey;
+        return new String(Base64.getDecoder().decode(privateKey));
     }
     @Override
     String getPublicKey() {
-        return publicKey;
-	}
+        return new String(Base64.getDecoder().decode(publicKey));
+    }
 
 	@Bean
 	DataSource hsqlSource() {
