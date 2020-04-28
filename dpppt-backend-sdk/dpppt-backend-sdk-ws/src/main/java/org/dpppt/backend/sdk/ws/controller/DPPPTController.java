@@ -58,6 +58,7 @@ public class DPPPTController {
 	private final String appSource;
 	private final int exposedListCacheContol;
 	private final ValidateRequest validateRequest;
+	private final int retentionDays;
 
 	private final long batchLength;
 
@@ -66,13 +67,14 @@ public class DPPPTController {
 
 
 	public DPPPTController(DPPPTDataService dataService, EtagGeneratorInterface etagGenerator, String appSource,
-			int exposedListCacheControl, ValidateRequest validateRequest, long batchLength) {
+			int exposedListCacheControl, ValidateRequest validateRequest, long batchLength, int retentionDays) {
 		this.dataService = dataService;
 		this.appSource = appSource;
 		this.etagGenerator = etagGenerator;
 		this.exposedListCacheContol = exposedListCacheControl;
 		this.validateRequest = validateRequest;
 		this.batchLength = batchLength;
+		this.retentionDays = retentionDays;
 	}
 
 	@CrossOrigin(origins = { "https://editor.swagger.io" })
@@ -147,8 +149,11 @@ public class DPPPTController {
 		if (batchReleaseTime % batchLength != 0) {
 			return ResponseEntity.badRequest().build();
 		}
-		if (batchReleaseTime > System.currentTimeMillis()) {
-			return ResponseEntity.badRequest().build();
+		if (batchReleaseTime > OffsetDateTime.now().withOffsetSameInstant(ZoneOffset.UTC).toInstant().toEpochMilli()) {
+			return ResponseEntity.notFound().build();
+		}
+		if (batchReleaseTime < OffsetDateTime.now().withOffsetSameInstant(ZoneOffset.UTC).minusDays(retentionDays).toInstant().toEpochMilli()){
+			return ResponseEntity.notFound().build();
 		}
 		int max = dataService.getMaxExposedIdForBatchReleaseTime(batchReleaseTime, batchLength);
 		String etag = etagGenerator.getEtag(max, "proto");
