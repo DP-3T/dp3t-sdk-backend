@@ -8,6 +8,7 @@ package org.dpppt.backend.sdk.ws.controller;
 
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
+import java.security.SecureRandom;
 import java.time.Duration;
 import java.time.LocalDate;
 import java.time.OffsetDateTime;
@@ -16,7 +17,6 @@ import java.time.ZoneOffset;
 import java.util.ArrayList;
 import java.util.Base64;
 import java.util.List;
-import java.util.Random;
 
 import javax.validation.Valid;
 
@@ -67,7 +67,7 @@ public class DPPPTController {
 
 	@Autowired
 	private ObjectMapper jacksonObjectMapper;
-	private final Random random;
+	private final SecureRandom random;
 
 
 	public DPPPTController(DPPPTDataService dataService, EtagGeneratorInterface etagGenerator, String appSource,
@@ -79,7 +79,7 @@ public class DPPPTController {
 		this.validateRequest = validateRequest;
 		this.batchLength = batchLength;
 		this.retentionDays = retentionDays;
-		this.random = new Random();
+		this.random = new SecureRandom();
 	}
 
 	@CrossOrigin(origins = { "https://editor.swagger.io" })
