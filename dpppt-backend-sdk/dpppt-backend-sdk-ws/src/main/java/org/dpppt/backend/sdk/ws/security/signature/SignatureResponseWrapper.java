@@ -26,9 +26,9 @@ import javax.servlet.WriteListener;
 import javax.servlet.http.HttpServletResponse;
 import javax.servlet.http.HttpServletResponseWrapper;
 
+import org.apache.commons.codec.binary.Hex;
 import org.bouncycastle.util.io.pem.PemObject;
 import org.bouncycastle.util.io.pem.PemWriter;
-import org.dpppt.backend.sdk.ws.util.ByteArrayHelper;
 import org.springframework.util.Base64Utils;
 
 import io.jsonwebtoken.Claims;
@@ -136,7 +136,7 @@ public class SignatureResponseWrapper extends HttpServletResponseWrapper {
 		}
 		String signature = Jwts.builder().setClaims(claims).signWith(pair.getPrivate()).compact();
 
-		this.setHeader(HEADER_DIGEST, "sha-256=" + ByteArrayHelper.bytesToHex(theHash));
+		this.setHeader(HEADER_DIGEST, "sha-256=" + Hex.encodeHexString(theHash));
 		this.setHeader(HEADER_PUBLIC_KEY, getPublicKeyAsPEM());
 		this.setHeader(HEADER_SIGNATURE, signature);
 
