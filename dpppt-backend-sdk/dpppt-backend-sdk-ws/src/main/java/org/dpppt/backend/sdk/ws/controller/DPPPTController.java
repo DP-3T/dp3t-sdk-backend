@@ -22,6 +22,7 @@ import javax.validation.Valid;
 import org.apache.commons.codec.binary.Hex;
 import org.dpppt.backend.sdk.data.DPPPTDataService;
 import org.dpppt.backend.sdk.data.EtagGeneratorInterface;
+import org.dpppt.backend.sdk.model.BucketList;
 import org.dpppt.backend.sdk.model.ExposedOverview;
 import org.dpppt.backend.sdk.model.Exposee;
 import org.dpppt.backend.sdk.model.ExposeeRequest;
@@ -176,6 +177,23 @@ public class DPPPTController {
 					.header("X-BATCH-RELEASE-TIME", batchReleaseTime.toString()).body(protoExposee);
 		}
 	}
+
+	@CrossOrigin(origins = { "https://editor.swagger.io" })
+	@GetMapping(value = "/buckets/{dayDateStr}", produces = "application/json")
+	public @ResponseBody ResponseEntity<BucketList> getListOfBuckets(@PathVariable String dayDateStr) {
+		OffsetDateTime day = LocalDate.parse(dayDateStr).atStartOfDay().atOffset(ZoneOffset.UTC);
+		OffsetDateTime currentBucket = day;
+		OffsetDateTime now = OffsetDateTime.now().withOffsetSameInstant(ZoneOffset.UTC);
+		List<Long> bucketList = new ArrayList<>();
+		while(currentBucket.toInstant().toEpochMilli() < Math.min(day.plusDays(1).toInstant().toEpochMilli(), now.toInstant().toEpochMilli())) {
+			bucketList.add(currentBucket.toInstant().toEpochMilli());
+			currentBucket = currentBucket.plusSeconds(batchLength/1000);
+		}
+		BucketList list = new BucketList();
+		list.setBuckets(bucketList);
+		return ResponseEntity.ok(list);
+	}
+
 
 	@ExceptionHandler(IllegalArgumentException.class)
 	@ResponseStatus(HttpStatus.BAD_REQUEST)
