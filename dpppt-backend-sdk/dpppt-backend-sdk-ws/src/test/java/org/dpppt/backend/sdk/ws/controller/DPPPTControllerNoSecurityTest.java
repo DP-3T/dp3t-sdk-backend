@@ -29,14 +29,8 @@ public class DPPPTControllerNoSecurityTest extends BaseControllerNoSecurityTest 
         exposeeRequest.setKey(Base64.getEncoder().encodeToString("test".getBytes("UTF-8")));
         MockHttpServletResponse response = mockMvc.perform(post("/v1/exposed")
                                                             .contentType(MediaType.APPLICATION_JSON)
-                                                            .header("Authorization", "Bearer " + jwtToken)
                                                             .header("User-Agent", "MockMVC")
                                                             .content(json(exposeeRequest)))
-                .andExpect(status().is2xxSuccessful()).andReturn().getResponse();
-        response = mockMvc.perform(post("/v1/exposed")
-                        .contentType(MediaType.APPLICATION_JSON)
-                        .header("User-Agent", "MockMVC")
-                        .content(json(exposeeRequest)))
                 .andExpect(status().is2xxSuccessful()).andReturn().getResponse();
     }
 }
