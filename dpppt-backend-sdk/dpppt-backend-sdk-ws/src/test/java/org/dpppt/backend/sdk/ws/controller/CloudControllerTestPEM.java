@@ -8,17 +8,14 @@ package org.dpppt.backend.sdk.ws.controller;
 
 import com.fasterxml.jackson.core.JsonFactory;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import com.fasterxml.jackson.databind.ser.impl.SimpleFilterProvider;
 import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
 
-import org.apache.commons.io.IOUtils;
 import org.dpppt.backend.sdk.model.ExposeeRequest;
 import org.dpppt.backend.sdk.ws.filter.ResponseWrapperFilter;
 import org.junit.Before;
 import org.junit.runner.RunWith;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
-import org.springframework.core.io.ClassPathResource;
 import org.springframework.mock.web.MockHttpServletResponse;
 import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.context.TestPropertySource;
@@ -30,28 +27,16 @@ import org.springframework.web.context.WebApplicationContext;
 import io.jsonwebtoken.Claims;
 import io.jsonwebtoken.Jwt;
 import io.jsonwebtoken.Jwts;
-import io.jsonwebtoken.SignatureAlgorithm;
 
-import static org.springframework.security.test.web.servlet.setup.SecurityMockMvcConfigurers.*;
-
-import java.io.FileOutputStream;
 import java.io.IOException;
-import java.io.InputStream;
-import java.security.Key;
-import java.security.KeyFactory;
-import java.security.KeyPair;
-import java.security.KeyPairGenerator;
-import java.security.PrivateKey;
 import java.security.PublicKey;
-import java.security.spec.PKCS8EncodedKeySpec;
-import java.security.spec.X509EncodedKeySpec;
+
 import java.time.LocalDate;
 import java.time.ZoneOffset;
 import java.util.Base64;
-import java.util.UUID;
+
 
 import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertNotNull;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
@@ -69,10 +54,10 @@ import org.springframework.http.MediaType;
 @TestPropertySource(properties = 
 { 
     "ws.app.source=org.dpppt.demo",
-    "vcap.services.ecdsa_dev.credentials.publicKey=MFkwEwYHKoZIzj0CAQYIKoZIzj0DAQcDQgAEc6n1FNz6RnwNeNM9H+KxaPckrBxgKU799v+DTy8ivc1ZM3nDyXq5zU2AFXvgvLFzWxU9z9FCcDPGTcN7cvOyXw==",
-    "vcap.services.ecdsa_dev.credentials.privateKey=MIGTAgEAMBMGByqGSM49AgEGCCqGSM49AwEHBHkwdwIBAQQgx18xx3XadMzGCunnoUjpiCt1rZ81I4XAJbRaQi0eZbKgCgYIKoZIzj0DAQehRANCAARzqfUU3PpGfA140z0f4rFo9ySsHGApTv32/4NPLyK9zVkzecPJernNTYAVe+C8sXNbFT3P0UJwM8ZNw3ty87Jf"
+    "vcap.services.ecdsa_dev.credentials.publicKey=-----BEGIN CERTIFICATE-----\\nMIICTDCCAfGgAwIBAgIUVtcQNpj/y1HxuvzmSTIKGxWo83swCgYIKoZIzj0EAwIw\\nezELMAkGA1UEBhMCQ0gxDTALBgNVBAgMBEJlcm4xDTALBgNVBAcMBEJlcm4xDDAK\\nBgNVBAoMA0JJVDEMMAoGA1UECwwDRVdKMQ0wCwYDVQQDDAREUDNUMSMwIQYJKoZI\\nhvcNAQkBFhRzdXBwb3J0QGJpdC5hZG1pbi5jaDAeFw0yMDA0MjgxMzE4NDhaFw0z\\nMDA0MjYxMzE4NDhaMHsxCzAJBgNVBAYTAkNIMQ0wCwYDVQQIDARCZXJuMQ0wCwYD\\nVQQHDARCZXJuMQwwCgYDVQQKDANCSVQxDDAKBgNVBAsMA0VXSjENMAsGA1UEAwwE\\nRFAzVDEjMCEGCSqGSIb3DQEJARYUc3VwcG9ydEBiaXQuYWRtaW4uY2gwWTATBgcq\\nhkjOPQIBBggqhkjOPQMBBwNCAATp9S2pd4Ib0oSr+CvkEnsXc8lwXUmwBV6GOfws\\nbBGQSt7T90WnySONeNiRZqW0NkV3DesJPhTPv2oZmuvfJKWbo1MwUTAdBgNVHQ4E\\nFgQUrY3JNpWDqtAiLdpcFDNKJXqkNv4wHwYDVR0jBBgwFoAUrY3JNpWDqtAiLdpc\\nFDNKJXqkNv4wDwYDVR0TAQH/BAUwAwEB/zAKBggqhkjOPQQDAgNJADBGAiEA9sVT\\ntBJIa2ufdTNGOcgKxexDC/ZBYCQ7Oj/qO7npuwYCIQCITgWqlPpG2Eepi/FzdtqN\\nuEWUpgNAIYoHR4dvutCsDQ==\\n-----END CERTIFICATE-----\\n",
+    "vcap.services.ecdsa_dev.credentials.privateKey=-----BEGIN PRIVATE KEY-----\\nMIGHAgEAMBMGByqGSM49AgEGCCqGSM49AwEHBG0wawIBAQQgWA4n+zROVUV/vaCR\\nlpq/Iqi7Cl7h+ZdEf/c/kMlN0jqhRANCAATp9S2pd4Ib0oSr+CvkEnsXc8lwXUmw\\nBV6GOfwsbBGQSt7T90WnySONeNiRZqW0NkV3DesJPhTPv2oZmuvfJKWb\\n-----END PRIVATE KEY-----\\n"
 })
-public class CloudControllerTest {
+public class CloudControllerTestPEM {
     protected MockMvc mockMvc;
 	@Autowired
 	private WebApplicationContext webApplicationContext;
@@ -80,10 +65,11 @@ public class CloudControllerTest {
 
     @Autowired
     private ResponseWrapperFilter filter;
-    private  String publicKey = "MFkwEwYHKoZIzj0CAQYIKoZIzj0DAQcDQgAEc6n1FNz6RnwNeNM9H+KxaPckrBxgKU799v+DTy8ivc1ZM3nDyXq5zU2AFXvgvLFzWxU9z9FCcDPGTcN7cvOyXw==";
-
+    //private  String publicKey = "MFkwEwYHKoZIzj0CAQYIKoZIzj0DAQcDQgAEc6n1FNz6RnwNeNM9H+KxaPckrBxgKU799v+DTy8ivc1ZM3nDyXq5zU2AFXvgvLFzWxU9z9FCcDPGTcN7cvOyXw==";
+    private PublicKey publicKey;
 	@Before
 	public void setup() throws Exception {
+        this.publicKey = filter.getPublicKey();
 		this.mockMvc = MockMvcBuilders.webAppContextSetup(webApplicationContext).addFilter(filter, "/*").build();
 		this.objectMapper = new ObjectMapper(new JsonFactory());
 		this.objectMapper.registerModule(new JavaTimeModule());
@@ -107,7 +93,7 @@ public class CloudControllerTest {
         assertEquals("Hello from DP3T WS",content);
         assertEquals("dp3t", response.getHeader("X-HELLO"));
         String signature = response.getHeader("Signature");
-        Jwt jwt = Jwts.parserBuilder().setSigningKey(loadPublicKeyFromString()).build().parse(signature);
+        Jwt jwt = Jwts.parserBuilder().setSigningKey(publicKey).build().parse(signature);
         Claims claims = (Claims)jwt.getBody();
         assertEquals("dp3t", claims.get("iss"));
     }
@@ -115,18 +101,4 @@ public class CloudControllerTest {
 	protected String json(Object o) throws IOException {
 		return objectMapper.writeValueAsString(o);
     }
-    
-    private PublicKey loadPublicKeyFromString() {
-		X509EncodedKeySpec keySpecX509 = new X509EncodedKeySpec(Base64.getDecoder().decode(publicKey));
-		try {
-			KeyFactory kf = KeyFactory.getInstance("ECDSA", "BC");
-			return (PublicKey) kf.generatePublic(keySpecX509);
-		}
-		catch (Exception ex) {
-			ex.printStackTrace();
-			return null;
-		}
-	}
-	
-    
 }

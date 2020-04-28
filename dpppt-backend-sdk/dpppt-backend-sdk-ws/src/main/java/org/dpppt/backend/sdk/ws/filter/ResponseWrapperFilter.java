@@ -8,6 +8,7 @@ package org.dpppt.backend.sdk.ws.filter;
 
 import java.io.IOException;
 import java.security.KeyPair;
+import java.security.PublicKey;
 import java.security.Security;
 import java.util.List;
 
@@ -25,7 +26,11 @@ public class ResponseWrapperFilter implements Filter {
 
 	private final KeyPair pair;
 	private final int retentionDays;
-    private final List<String> protectedHeaders;
+	private final List<String> protectedHeaders;
+	
+	public PublicKey getPublicKey() {
+		return pair.getPublic();
+	}
 
 	public ResponseWrapperFilter(KeyPair pair, int retentionDays, List<String> protectedHeaders) {
 		Security.addProvider(new BouncyCastleProvider());

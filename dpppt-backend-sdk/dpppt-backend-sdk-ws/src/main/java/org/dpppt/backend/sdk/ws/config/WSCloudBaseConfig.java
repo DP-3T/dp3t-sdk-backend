@@ -6,18 +6,22 @@
 
 package org.dpppt.backend.sdk.ws.config;
 
+import java.io.ByteArrayInputStream;
+import java.io.Reader;
+import java.io.StringReader;
 import java.security.KeyFactory;
 import java.security.KeyPair;
 import java.security.PrivateKey;
 import java.security.PublicKey;
 import java.security.Security;
+import java.security.cert.CertificateFactory;
 import java.security.spec.PKCS8EncodedKeySpec;
-import java.security.spec.X509EncodedKeySpec;
-import java.util.Base64;
 
 import javax.sql.DataSource;
 
 import org.bouncycastle.jce.provider.BouncyCastleProvider;
+import org.bouncycastle.util.io.pem.PemObject;
+import org.bouncycastle.util.io.pem.PemReader;
 import org.flywaydb.core.Flyway;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
@@ -66,8 +70,12 @@ public abstract class WSCloudBaseConfig extends WSBaseConfig {
 	}
 
 	private PrivateKey loadPrivateKeyFromString() {
-		PKCS8EncodedKeySpec pkcs8KeySpec = new PKCS8EncodedKeySpec(Base64.getDecoder().decode(getPrivateKey()));
 		try {
+			String privateKey = getPrivateKey();
+			Reader reader = new StringReader(privateKey);
+			PemReader readerPem = new PemReader(reader);
+			PemObject obj = readerPem.readPemObject();
+			PKCS8EncodedKeySpec pkcs8KeySpec = new PKCS8EncodedKeySpec(obj.getContent());
 			KeyFactory kf = KeyFactory.getInstance("ECDSA", "BC");
 			return (PrivateKey) kf.generatePrivate(pkcs8KeySpec);
 		}
@@ -78,10 +86,11 @@ public abstract class WSCloudBaseConfig extends WSBaseConfig {
 	}
 
 	private PublicKey loadPublicKeyFromString() {
-		X509EncodedKeySpec keySpecX509 = new X509EncodedKeySpec(Base64.getDecoder().decode(getPublicKey()));
 		try {
-			KeyFactory kf = KeyFactory.getInstance("ECDSA", "BC");
-			return (PublicKey) kf.generatePublic(keySpecX509);
+			return CertificateFactory
+			.getInstance("X.509")
+			.generateCertificate(new ByteArrayInputStream(getPublicKey().getBytes()))
+			.getPublicKey();
 		}
 		catch (Exception ex) {
 			ex.printStackTrace();
