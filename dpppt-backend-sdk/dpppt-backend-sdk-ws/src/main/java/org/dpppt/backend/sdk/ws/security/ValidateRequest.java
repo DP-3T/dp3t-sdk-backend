@@ -13,6 +13,7 @@ public interface ValidateRequest {
 	// authObject is the Principal, given from Springboot
 	// others can be any object (currently it is the ExposeeRequest, since we want
 	// to allow no auth without the jwt profile)
-	public long getKeyDate(Object authObject, Object others);
+	public long getKeyDate(Object authObject, Object others) throws InvalidDateException;
 	
+	public class InvalidDateException extends Exception {}
 }

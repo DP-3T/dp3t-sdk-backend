@@ -6,6 +6,8 @@
 
 package org.dpppt.backend.sdk.ws.security;
 
+import java.time.OffsetDateTime;
+
 import org.dpppt.backend.sdk.model.ExposeeRequest;
 
 public class NoValidateRequest implements ValidateRequest {
@@ -16,9 +18,13 @@ public class NoValidateRequest implements ValidateRequest {
 	}
 
 	@Override
-	public long getKeyDate(Object authObject, Object others) {
+	public long getKeyDate(Object authObject, Object others) throws InvalidDateException {
 		if (others instanceof ExposeeRequest) {
-			return ((ExposeeRequest) others).getKeyDate();
+			ExposeeRequest request = ((ExposeeRequest) others);
+			if(request.getKeyDate() < OffsetDateTime.now().minusDays(21).toInstant().toEpochMilli()) {
+				throw new InvalidDateException();
+			}
+			return request.getKeyDate();
 		}
 		throw new IllegalArgumentException();
 	}

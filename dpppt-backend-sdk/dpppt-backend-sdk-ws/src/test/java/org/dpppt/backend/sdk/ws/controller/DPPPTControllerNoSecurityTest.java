@@ -10,6 +10,7 @@ import static org.springframework.test.web.servlet.request.MockMvcRequestBuilder
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
 import java.time.LocalDate;
+import java.time.OffsetDateTime;
 import java.time.ZoneOffset;
 import java.util.Base64;
 
@@ -32,5 +33,18 @@ public class DPPPTControllerNoSecurityTest extends BaseControllerNoSecurityTest 
                                                             .header("User-Agent", "MockMVC")
                                                             .content(json(exposeeRequest)))
                 .andExpect(status().is2xxSuccessful()).andReturn().getResponse();
+    }
+    @Test
+    public void keyDateNotOlderThan21Days() throws Exception {
+        ExposeeRequest exposeeRequest = new ExposeeRequest();
+        exposeeRequest.setAuthData(new ExposeeAuthData());
+        exposeeRequest.setKeyDate(OffsetDateTime.now().withOffsetSameInstant(ZoneOffset.UTC).minusDays(22).toInstant().toEpochMilli());
+        exposeeRequest.setKey(Base64.getEncoder().encodeToString("test".getBytes("UTF-8")));
+
+        MockHttpServletResponse response = mockMvc.perform(post("/v1/exposed")
+                    .contentType(MediaType.APPLICATION_JSON)
+                    .header("User-Agent", "MockMVC")
+                    .content(json(exposeeRequest)))
+            .andExpect(status().is4xxClientError()).andReturn().getResponse();
     }
 }
