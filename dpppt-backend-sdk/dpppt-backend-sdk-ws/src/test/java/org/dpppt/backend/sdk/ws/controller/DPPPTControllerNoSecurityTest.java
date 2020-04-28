@@ -47,4 +47,30 @@ public class DPPPTControllerNoSecurityTest extends BaseControllerNoSecurityTest 
                     .content(json(exposeeRequest)))
             .andExpect(status().is4xxClientError()).andReturn().getResponse();
     }
+    @Test
+    public void keyDateNotInTheFuture() throws Exception {
+        ExposeeRequest exposeeRequest = new ExposeeRequest();
+        exposeeRequest.setAuthData(new ExposeeAuthData());
+        exposeeRequest.setKeyDate(OffsetDateTime.now().withOffsetSameInstant(ZoneOffset.UTC).plusMinutes(1).toInstant().toEpochMilli());
+        exposeeRequest.setKey(Base64.getEncoder().encodeToString("test".getBytes("UTF-8")));
+
+        MockHttpServletResponse response = mockMvc.perform(post("/v1/exposed")
+                    .contentType(MediaType.APPLICATION_JSON)
+                    .header("User-Agent", "MockMVC")
+                    .content(json(exposeeRequest)))
+            .andExpect(status().is4xxClientError()).andReturn().getResponse();
+    }
+    @Test
+    public void justNowShouldBeFine() throws Exception {
+        ExposeeRequest exposeeRequest = new ExposeeRequest();
+        exposeeRequest.setAuthData(new ExposeeAuthData());
+        exposeeRequest.setKeyDate(OffsetDateTime.now().withOffsetSameInstant(ZoneOffset.UTC).toInstant().toEpochMilli());
+        exposeeRequest.setKey(Base64.getEncoder().encodeToString("test".getBytes("UTF-8")));
+
+        MockHttpServletResponse response = mockMvc.perform(post("/v1/exposed")
+                    .contentType(MediaType.APPLICATION_JSON)
+                    .header("User-Agent", "MockMVC")
+                    .content(json(exposeeRequest)))
+            .andExpect(status().is2xxSuccessful()).andReturn().getResponse();
+    }
 }
