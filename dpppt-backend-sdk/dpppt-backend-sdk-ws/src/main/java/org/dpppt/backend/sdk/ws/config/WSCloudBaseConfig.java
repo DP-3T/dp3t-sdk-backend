@@ -16,8 +16,6 @@ import java.security.PublicKey;
 import java.security.Security;
 import java.security.cert.CertificateFactory;
 import java.security.spec.PKCS8EncodedKeySpec;
-import java.security.spec.X509EncodedKeySpec;
-import java.util.Base64;
 
 import javax.sql.DataSource;
 
@@ -68,7 +66,6 @@ public abstract class WSCloudBaseConfig extends WSBaseConfig {
 	public KeyPair getKeyPair(SignatureAlgorithm algorithm) {
 		Security.addProvider(new BouncyCastleProvider());
 		Security.setProperty("crypto.policy", "unlimited");
-		PrivateKey privateKey = loadPrivateKeyFromString();
 		return new KeyPair(loadPublicKeyFromString(),loadPrivateKeyFromString());
 	}
 
