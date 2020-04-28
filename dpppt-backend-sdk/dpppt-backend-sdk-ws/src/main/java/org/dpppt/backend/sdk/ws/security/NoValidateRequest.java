@@ -7,6 +7,7 @@
 package org.dpppt.backend.sdk.ws.security;
 
 import java.time.OffsetDateTime;
+import java.time.ZoneOffset;
 
 import org.dpppt.backend.sdk.model.ExposeeRequest;
 
@@ -22,6 +23,8 @@ public class NoValidateRequest implements ValidateRequest {
 		if (others instanceof ExposeeRequest) {
 			ExposeeRequest request = ((ExposeeRequest) others);
 			if(request.getKeyDate() < OffsetDateTime.now().minusDays(21).toInstant().toEpochMilli()) {
+				throw new InvalidDateException();
+			} else if (request.getKeyDate() > OffsetDateTime.now().withOffsetSameInstant(ZoneOffset.UTC).toInstant().toEpochMilli()) {
 				throw new InvalidDateException();
 			}
 			return request.getKeyDate();
