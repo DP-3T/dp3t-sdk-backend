@@ -26,16 +26,13 @@ import org.springframework.scheduling.config.ScheduledTaskRegistrar;
 import io.jsonwebtoken.SignatureAlgorithm;
 
 @Configuration
-@Profile("cloud")
-public class WSCloudConfig extends WSBaseConfig {
+public abstract class WSCloudBaseConfig extends WSBaseConfig {
 
 	@Autowired
 	private DataSource dataSource;
 
-	@Autowired
-	private String privateKey;
-	@Autowired
-	public String publicKey;
+	abstract String getPublicKey();
+	abstract String getPrivateKey();
 
 	@Override
 	public DataSource dataSource() {
@@ -66,7 +63,7 @@ public class WSCloudConfig extends WSBaseConfig {
 	}
 
 	private PrivateKey loadPrivateKeyFromString() {
-		PKCS8EncodedKeySpec pkcs8KeySpec = new PKCS8EncodedKeySpec(Base64.getDecoder().decode(privateKey));
+		PKCS8EncodedKeySpec pkcs8KeySpec = new PKCS8EncodedKeySpec(Base64.getDecoder().decode(getPrivateKey()));
 		try {
 			KeyFactory kf = KeyFactory.getInstance("ECDSA", "BC");
 			return (PrivateKey) kf.generatePrivate(pkcs8KeySpec);
@@ -78,7 +75,7 @@ public class WSCloudConfig extends WSBaseConfig {
 	}
 
 	private PublicKey loadPublicKeyFromString() {
-		X509EncodedKeySpec keySpecX509 = new X509EncodedKeySpec(Base64.getDecoder().decode(publicKey));
+		X509EncodedKeySpec keySpecX509 = new X509EncodedKeySpec(Base64.getDecoder().decode(getPublicKey()));
 		try {
 			KeyFactory kf = KeyFactory.getInstance("ECDSA", "BC");
 			return (PublicKey) kf.generatePublic(keySpecX509);
