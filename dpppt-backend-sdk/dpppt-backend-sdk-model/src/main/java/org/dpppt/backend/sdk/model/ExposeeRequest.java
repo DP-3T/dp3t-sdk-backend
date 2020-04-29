@@ -10,8 +10,7 @@ import javax.validation.constraints.NotNull;
 
 public class ExposeeRequest {
 
-	@NotNull
-	private int fake;
+	private Integer fake;
 
 	@NotNull
 	private String key;
@@ -44,11 +43,12 @@ public class ExposeeRequest {
 	public void setKeyDate(long keyDate) {
 		this.keyDate = keyDate;
 	}
-	public int isFake() {
+	
+	public Integer isFake() {
 		return fake;
 	}
 
-	public void setIsFake(int fake) {
+	public void setIsFake(Integer fake) {
 		this.fake = fake;
 	}
 }
