@@ -10,7 +10,7 @@ import javax.validation.constraints.NotNull;
 
 public class ExposeeRequest {
 
-	private Integer fake;
+	private Integer fake = 0;
 
 	@NotNull
 	private String key;
