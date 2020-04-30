@@ -112,7 +112,7 @@ public class DPPPTController {
 		long after = System.currentTimeMillis();
 		long duration = after - now;
 		try{
-			Thread.sleep(Math.min(this.requestTime - duration,0));
+			Thread.sleep(Math.max(this.requestTime - duration,0));
 		}
 		catch (Exception ex) {
 			
