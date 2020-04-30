@@ -121,28 +121,17 @@ public class DPPPTController {
 	}
 
 	@CrossOrigin(origins = { "https://editor.swagger.io" })
-	@GetMapping(value = "/hashtest/{dayDateStr}")
-	public @ResponseBody ResponseEntity<ExposedOverview> getExposed(@PathVariable String dayDateStr)
-			throws NoSuchAlgorithmException, JsonProcessingException {
-		OffsetDateTime dayDate = LocalDate.parse(dayDateStr).atStartOfDay().atOffset(ZoneOffset.UTC);
-		MessageDigest digest = MessageDigest.getInstance("SHA-256");
-		List<Exposee> exposeeList = dataService.getSortedExposedForDay(dayDate);
-
-		ExposedOverview overview = new ExposedOverview(exposeeList);
-		byte[] hash = digest.digest(jacksonObjectMapper.writeValueAsString(overview).getBytes());
-
-		return ResponseEntity.ok().header("JSON-Sha256-Hash", Hex.encodeHexString(hash)).body(overview);
-	}
-
-	@CrossOrigin(origins = { "https://editor.swagger.io" })
 	@GetMapping(value = "/exposedjson/{batchReleaseTime}", produces = "application/json")
 	public @ResponseBody ResponseEntity<ExposedOverview> getExposedByDayDate(@PathVariable Long batchReleaseTime,
 			WebRequest request) {
 		if (batchReleaseTime % batchLength != 0) {
 			return ResponseEntity.badRequest().build();
 		}
-		if (batchReleaseTime > System.currentTimeMillis()) {
-			return ResponseEntity.badRequest().build();
+		if (batchReleaseTime > OffsetDateTime.now().withOffsetSameInstant(ZoneOffset.UTC).toInstant().toEpochMilli()) {
+			return ResponseEntity.notFound().build();
+		}
+		if (batchReleaseTime < OffsetDateTime.now().withOffsetSameInstant(ZoneOffset.UTC).minusDays(retentionDays).toInstant().toEpochMilli()){
+			return ResponseEntity.notFound().build();
 		}
 
 		int max = dataService.getMaxExposedIdForBatchReleaseTime(batchReleaseTime, batchLength);

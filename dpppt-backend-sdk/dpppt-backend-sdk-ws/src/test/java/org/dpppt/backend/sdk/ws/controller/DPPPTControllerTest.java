@@ -66,6 +66,21 @@ public class DPPPTControllerTest extends BaseControllerTest {
        
     }
     @Test
+    public void keyNeedsToBeBase64() throws Exception {
+        ExposeeRequest exposeeRequest = new ExposeeRequest();
+        exposeeRequest.setAuthData(new ExposeeAuthData());
+        exposeeRequest.setKeyDate(OffsetDateTime.now().withOffsetSameInstant(ZoneOffset.UTC).toInstant().toEpochMilli());
+        exposeeRequest.setKey("~ö$%^a#@");
+        exposeeRequest.setIsFake(1);
+        String token = createToken(true, OffsetDateTime.now().withOffsetSameInstant(ZoneOffset.UTC).plusMinutes(5));
+        MockHttpServletResponse response  = mockMvc.perform(post("/v1/exposed")
+                                .contentType(MediaType.APPLICATION_JSON)
+                                .header("Authorization", "Bearer " + token)
+                                .header("User-Agent", "MockMVC")
+                                .content(json(exposeeRequest)))
+                .andExpect(status().is(400)).andReturn().getResponse();
+    }
+    @Test
     public void testJWTFake() throws Exception {
         ExposeeRequest exposeeRequest = new ExposeeRequest();
         exposeeRequest.setAuthData(new ExposeeAuthData());
