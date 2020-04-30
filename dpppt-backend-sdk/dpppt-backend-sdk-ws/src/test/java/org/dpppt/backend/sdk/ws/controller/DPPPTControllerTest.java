@@ -10,9 +10,9 @@ import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.content;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
-import java.time.LocalDate;
 import java.time.OffsetDateTime;
 import java.time.ZoneOffset;
 import java.util.Base64;
@@ -58,7 +58,9 @@ public class DPPPTControllerTest extends BaseControllerTest {
                                 .header("Authorization", "Bearer " + jwtToken)
                                 .header("User-Agent", "MockMVC")
                                 .content(json(exposeeRequest)))
-                .andExpect(status().is4xxClientError()).andReturn().getResponse();
+                .andExpect(status().is(401))
+                .andExpect(content().string(""))
+                .andReturn().getResponse();
 
        
     }
@@ -81,7 +83,9 @@ public class DPPPTControllerTest extends BaseControllerTest {
                 .header("Authorization", "Bearer " + jwtToken)
                 .header("User-Agent", "MockMVC")
                 .content(json(exposeeRequest)))
-        .andExpect(status().is4xxClientError()).andReturn().getResponse();
+        .andExpect(status().is(401))
+        .andExpect(content().string(""))
+        .andReturn().getResponse();
     }
 
     @Test
@@ -98,16 +102,17 @@ public class DPPPTControllerTest extends BaseControllerTest {
                     .header("Authorization", "Bearer " + token)
                     .header("User-Agent", "MockMVC")
                     .content(json(exposeeRequest)))
-            .andExpect(status().is2xxSuccessful()).andReturn().getResponse();
+            .andExpect(status().is2xxSuccessful())
+            .andReturn().getResponse();
 
         response = mockMvc.perform(post("/v1/exposed")
                 .contentType(MediaType.APPLICATION_JSON)
                 .header("Authorization", "Bearer " + token)
                 .header("User-Agent", "MockMVC")
                 .content(json(exposeeRequest)))
-        .andExpect(status().is4xxClientError()).andReturn().getResponse();
-
-
+        .andExpect(status().is(401))
+        .andExpect(content().string(""))
+        .andReturn().getResponse();
     }
 
     @Test
@@ -184,4 +189,34 @@ public class DPPPTControllerTest extends BaseControllerTest {
                     .content(json(exposeeRequest)))
             .andExpect(status().is4xxClientError()).andReturn().getResponse();
     }
+
+    @Test
+    public void cannotUseTokenWithWrongScope() throws Exception {
+        ExposeeRequest exposeeRequest = new ExposeeRequest();
+        exposeeRequest.setAuthData(new ExposeeAuthData());
+        exposeeRequest.setKeyDate(OffsetDateTime.now().withOffsetSameInstant(ZoneOffset.UTC).toInstant().toEpochMilli());
+        exposeeRequest.setKey(Base64.getEncoder().encodeToString("test".getBytes("UTF-8")));
+        exposeeRequest.setIsFake(0);
+        String token = createTokenWithScope(OffsetDateTime.now().withOffsetSameInstant(ZoneOffset.UTC).plusMinutes(5), "not-exposed");
+
+        MockHttpServletResponse response = mockMvc.perform(post("/v1/exposed")
+                    .contentType(MediaType.APPLICATION_JSON)
+                    .header("Authorization", "Bearer " + token)
+                    .header("User-Agent", "MockMVC")
+                    .content(json(exposeeRequest)))
+            .andExpect(status().is(403))
+            .andExpect(content().string(""))
+            .andReturn().getResponse();
+
+        // Also for a 403 response, the token cannot be used a 2nd time
+        response = mockMvc.perform(post("/v1/exposed")
+                .contentType(MediaType.APPLICATION_JSON)
+                .header("Authorization", "Bearer " + token)
+                .header("User-Agent", "MockMVC")
+                .content(json(exposeeRequest)))
+        .andExpect(status().is(401))
+        .andExpect(content().string(""))
+        .andReturn().getResponse();
+    }
+
 }
