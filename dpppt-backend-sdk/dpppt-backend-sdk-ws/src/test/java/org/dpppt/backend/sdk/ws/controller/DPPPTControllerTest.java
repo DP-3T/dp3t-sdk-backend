@@ -13,6 +13,7 @@ import static org.springframework.test.web.servlet.request.MockMvcRequestBuilder
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.content;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
+import java.time.LocalDate;
 import java.time.OffsetDateTime;
 import java.time.ZoneOffset;
 import java.util.Base64;
@@ -86,6 +87,22 @@ public class DPPPTControllerTest extends BaseControllerTest {
         .andExpect(status().is(401))
         .andExpect(content().string(""))
         .andReturn().getResponse();
+    }
+
+    @Test
+    public void cannotUseKeyDateBeforeOnset() throws Exception {
+        ExposeeRequest exposeeRequest = new ExposeeRequest();
+        exposeeRequest.setAuthData(new ExposeeAuthData());
+        exposeeRequest.setKeyDate(LocalDate.parse("2020-04-28").atStartOfDay().atOffset(ZoneOffset.UTC).toInstant().toEpochMilli());
+        exposeeRequest.setKey(Base64.getEncoder().encodeToString("test".getBytes("UTF-8")));
+        exposeeRequest.setIsFake(1);
+        String token = createToken(OffsetDateTime.now().withOffsetSameInstant(ZoneOffset.UTC).plusMinutes(5), "2020-04-30");
+        MockHttpServletResponse response  = mockMvc.perform(post("/v1/exposed")
+                                .contentType(MediaType.APPLICATION_JSON)
+                                .header("Authorization", "Bearer " + token)
+                                .header("User-Agent", "MockMVC")
+                                .content(json(exposeeRequest)))
+                .andExpect(status().is(400)).andReturn().getResponse();
     }
 
     @Test
