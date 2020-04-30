@@ -115,4 +115,14 @@ public abstract class BaseControllerTest {
 				.setIssuedAt(Date.from(OffsetDateTime.now().withOffsetSameInstant(ZoneOffset.UTC).toInstant())).signWith((Key) privateKey).compact();
 	}
 
+	protected String createTokenWithScope(OffsetDateTime expiresAt, String scope) {
+		Claims claims = Jwts.claims();
+		claims.put("scope", scope);
+		claims.put("fake", "0");
+		claims.put("onset", "2020-04-20");
+		return Jwts.builder().setClaims(claims).setId(UUID.randomUUID().toString())
+				.setSubject("test-subject" + OffsetDateTime.now().withOffsetSameInstant(ZoneOffset.UTC).toString()).setExpiration(Date.from(expiresAt.toInstant()))
+				.setIssuedAt(Date.from(OffsetDateTime.now().withOffsetSameInstant(ZoneOffset.UTC).toInstant())).signWith((Key) privateKey).compact();
+	}
+
 }

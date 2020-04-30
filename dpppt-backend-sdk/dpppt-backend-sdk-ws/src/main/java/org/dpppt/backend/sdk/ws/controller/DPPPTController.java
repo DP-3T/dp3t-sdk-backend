@@ -93,13 +93,13 @@ public class DPPPTController {
 			@RequestHeader(value = "User-Agent", required = true) String userAgent,
 			@AuthenticationPrincipal Object principal) throws InvalidDateException {
 		long now = System.currentTimeMillis();
+		if (!this.validateRequest.isValid(principal)) {
+			return ResponseEntity.status(HttpStatus.FORBIDDEN).build();
+		}
 		if (!isValidBase64(exposeeRequest.getKey())) {
 			return new ResponseEntity<>("No valid base64 key", HttpStatus.BAD_REQUEST);
 		}
 		// TODO: should we give that information?
-		if (!this.validateRequest.isValid(principal)) {
-			return new ResponseEntity<>("Invalid authentication", HttpStatus.BAD_REQUEST);
-		}
 		Exposee exposee = new Exposee();
 		exposee.setKey(exposeeRequest.getKey());
 		long keyDate = this.validateRequest.getKeyDate(principal, exposeeRequest);
