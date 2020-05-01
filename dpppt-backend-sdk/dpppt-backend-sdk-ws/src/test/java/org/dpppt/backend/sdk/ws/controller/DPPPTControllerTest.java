@@ -16,6 +16,7 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 import java.time.LocalDate;
 import java.time.OffsetDateTime;
 import java.time.ZoneOffset;
+import java.time.format.DateTimeFormatter;
 import java.util.Base64;
 
 import org.dpppt.backend.sdk.model.ExposeeAuthData;
@@ -108,10 +109,10 @@ public class DPPPTControllerTest extends BaseControllerTest {
     public void cannotUseKeyDateBeforeOnset() throws Exception {
         ExposeeRequest exposeeRequest = new ExposeeRequest();
         exposeeRequest.setAuthData(new ExposeeAuthData());
-        exposeeRequest.setKeyDate(LocalDate.parse("2020-04-28").atStartOfDay().atOffset(ZoneOffset.UTC).toInstant().toEpochMilli());
+        exposeeRequest.setKeyDate(LocalDate.now().minusDays(2).atStartOfDay().atOffset(ZoneOffset.UTC).toInstant().toEpochMilli());
         exposeeRequest.setKey(Base64.getEncoder().encodeToString("test".getBytes("UTF-8")));
         exposeeRequest.setIsFake(1);
-        String token = createToken(OffsetDateTime.now().withOffsetSameInstant(ZoneOffset.UTC).plusMinutes(5), "2020-04-30");
+        String token = createToken(OffsetDateTime.now().withOffsetSameInstant(ZoneOffset.UTC).plusMinutes(5), LocalDate.now().format(DateTimeFormatter.ISO_DATE));
         MockHttpServletResponse response  = mockMvc.perform(post("/v1/exposed")
                                 .contentType(MediaType.APPLICATION_JSON)
                                 .header("Authorization", "Bearer " + token)
