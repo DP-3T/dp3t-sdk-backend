@@ -13,8 +13,10 @@ import static org.springframework.test.web.servlet.request.MockMvcRequestBuilder
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.content;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
+import java.time.LocalDate;
 import java.time.OffsetDateTime;
 import java.time.ZoneOffset;
+import java.time.format.DateTimeFormatter;
 import java.util.Base64;
 
 import org.dpppt.backend.sdk.model.ExposeeAuthData;
@@ -65,6 +67,21 @@ public class DPPPTControllerTest extends BaseControllerTest {
        
     }
     @Test
+    public void keyNeedsToBeBase64() throws Exception {
+        ExposeeRequest exposeeRequest = new ExposeeRequest();
+        exposeeRequest.setAuthData(new ExposeeAuthData());
+        exposeeRequest.setKeyDate(OffsetDateTime.now().withOffsetSameInstant(ZoneOffset.UTC).toInstant().toEpochMilli());
+        exposeeRequest.setKey("~ö$%^a#@");
+        exposeeRequest.setIsFake(1);
+        String token = createToken(true, OffsetDateTime.now().withOffsetSameInstant(ZoneOffset.UTC).plusMinutes(5));
+        MockHttpServletResponse response  = mockMvc.perform(post("/v1/exposed")
+                                .contentType(MediaType.APPLICATION_JSON)
+                                .header("Authorization", "Bearer " + token)
+                                .header("User-Agent", "MockMVC")
+                                .content(json(exposeeRequest)))
+                .andExpect(status().is(400)).andReturn().getResponse();
+    }
+    @Test
     public void testJWTFake() throws Exception {
         ExposeeRequest exposeeRequest = new ExposeeRequest();
         exposeeRequest.setAuthData(new ExposeeAuthData());
@@ -86,6 +103,22 @@ public class DPPPTControllerTest extends BaseControllerTest {
         .andExpect(status().is(401))
         .andExpect(content().string(""))
         .andReturn().getResponse();
+    }
+
+    @Test
+    public void cannotUseKeyDateBeforeOnset() throws Exception {
+        ExposeeRequest exposeeRequest = new ExposeeRequest();
+        exposeeRequest.setAuthData(new ExposeeAuthData());
+        exposeeRequest.setKeyDate(LocalDate.now().minusDays(2).atStartOfDay().atOffset(ZoneOffset.UTC).toInstant().toEpochMilli());
+        exposeeRequest.setKey(Base64.getEncoder().encodeToString("test".getBytes("UTF-8")));
+        exposeeRequest.setIsFake(1);
+        String token = createToken(OffsetDateTime.now().withOffsetSameInstant(ZoneOffset.UTC).plusMinutes(5), LocalDate.now().format(DateTimeFormatter.ISO_DATE));
+        MockHttpServletResponse response  = mockMvc.perform(post("/v1/exposed")
+                                .contentType(MediaType.APPLICATION_JSON)
+                                .header("Authorization", "Bearer " + token)
+                                .header("User-Agent", "MockMVC")
+                                .content(json(exposeeRequest)))
+                .andExpect(status().is(400)).andReturn().getResponse();
     }
 
     @Test
