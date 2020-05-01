@@ -97,6 +97,11 @@ To build the docker image run
 make docker-build
 ```
 
+### Scanning for vulnerabilities
+
+OWAS dependency check is included in the `mvn verify` command.
+
+`make scan-dependencies` and `make show-vulnerabilities-report` are the shortcuts to it.
 
 
 ## License
