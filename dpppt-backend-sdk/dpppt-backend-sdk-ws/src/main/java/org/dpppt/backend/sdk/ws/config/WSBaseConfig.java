@@ -13,14 +13,21 @@ import com.fasterxml.jackson.datatype.jdk8.Jdk8Module;
 import com.hubspot.jackson.datatype.protobuf.ProtobufModule;
 import io.jsonwebtoken.SignatureAlgorithm;
 import io.jsonwebtoken.security.Keys;
+import org.apache.commons.io.IOUtils;
+import org.bouncycastle.crypto.params.RSAKeyParameters;
+import org.bouncycastle.crypto.params.RSAPrivateCrtKeyParameters;
+import org.bouncycastle.crypto.util.PrivateKeyFactory;
+import org.bouncycastle.crypto.util.PublicKeyFactory;
 import org.dpppt.backend.sdk.data.DPPPTDataService;
 import org.dpppt.backend.sdk.data.EtagGenerator;
 import org.dpppt.backend.sdk.data.EtagGeneratorInterface;
 import org.dpppt.backend.sdk.data.JDBCDPPPTDataServiceImpl;
+import org.dpppt.backend.sdk.ws.controller.AuthorityController;
 import org.dpppt.backend.sdk.ws.controller.DPPPTController;
 import org.dpppt.backend.sdk.ws.filter.ResponseWrapperFilter;
 import org.dpppt.backend.sdk.ws.security.NoValidateRequest;
 import org.dpppt.backend.sdk.ws.security.ValidateRequest;
+import org.dpppt.backend.sdk.ws.util.AuthorizationCodeHelper;
 import org.flywaydb.core.Flyway;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -28,6 +35,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.core.io.ClassPathResource;
 import org.springframework.http.converter.HttpMessageConverter;
 import org.springframework.http.converter.json.MappingJackson2HttpMessageConverter;
 import org.springframework.http.converter.protobuf.ProtobufHttpMessageConverter;
@@ -38,7 +46,12 @@ import org.springframework.scheduling.config.ScheduledTaskRegistrar;
 import org.springframework.web.servlet.config.annotation.WebMvcConfigurer;
 
 import javax.sql.DataSource;
+import java.io.FileInputStream;
+import java.io.IOException;
+import java.io.InputStream;
 import java.security.KeyPair;
+import java.security.SecureRandom;
+import java.util.Base64;
 import java.util.List;
 
 @Configuration
@@ -77,13 +90,31 @@ public abstract class WSBaseConfig implements SchedulingConfigurer, WebMvcConfig
 	final SignatureAlgorithm algorithm = SignatureAlgorithm.ES256;
 
 	@Bean
-	public DPPPTController dppptSDKController() {
+	public DPPPTController dppptSDKController(@Value("${ws.app.authority.infection.signing.rsa.public.key}") String publicKey) throws IOException {
 		ValidateRequest theValidator = requestValidator;
 		if (theValidator == null) {
 			theValidator = new NoValidateRequest();
 		}
+		RSAKeyParameters p = (RSAKeyParameters) PublicKeyFactory.createKey(loadKey(publicKey));
 		return new DPPPTController(dppptSDKDataService(), etagGenerator(), appSource, exposedListCacheControl,
-				theValidator, batchLength, retentionDays, requestTime);
+				theValidator, batchLength, retentionDays, requestTime, p);
+	}
+
+	/**
+	 * Override the method in order to use a persistent salt value.
+	 */
+	@Bean
+	public byte[] signingAuthorizationCodeScryptSalt() {
+		byte[] result = new byte[AuthorizationCodeHelper.SCRYPT_SALT_LENGTH];
+		new SecureRandom().nextBytes(result);
+		return result;
+	}
+
+	@Bean
+	public AuthorityController authorityController(@Value("#{signingAuthorizationCodeScryptSalt}") byte[] signingAuthorizationCodeScryptSalt,
+												   @Value("${ws.app.authority.infection.signing.rsa.private.key}") String infectionSigningRSAPrivateKey) throws IOException {
+		RSAPrivateCrtKeyParameters p = (RSAPrivateCrtKeyParameters) PrivateKeyFactory.createKey(loadKey(infectionSigningRSAPrivateKey));
+		return new AuthorityController(dppptSDKDataService(), signingAuthorizationCodeScryptSalt, p);
 	}
 
 	@Bean
@@ -127,5 +158,16 @@ public abstract class WSBaseConfig implements SchedulingConfigurer, WebMvcConfig
 			dppptSDKDataService().cleanDB(retentionDays);
 			logger.info("DB cleanup up");
 		}, 60 * 60 * 1000L));
+	}
+
+	protected byte[] loadKey(String key) throws IOException {
+		if (key.startsWith("classpath:/")) {
+			InputStream inputStream = new ClassPathResource(key.substring(11)).getInputStream();
+			key = IOUtils.toString(inputStream);
+		} else if (key.startsWith("file:/")) {
+			InputStream inputStream = new FileInputStream(key);
+			key = IOUtils.toString(inputStream);
+		}
+		return Base64.getDecoder().decode(key);
 	}
 }

@@ -6,18 +6,17 @@
 
 package org.dpppt.backend.sdk.data;
 
-import java.time.Instant;
-import java.time.LocalDate;
-import java.time.OffsetDateTime;
-import java.time.ZoneOffset;
+import java.time.*;
 import java.util.Date;
 import java.util.List;
 
 import javax.sql.DataSource;
 
 import org.dpppt.backend.sdk.model.Exposee;
+import org.dpppt.backend.sdk.model.HealthCondition;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.dao.DuplicateKeyException;
 import org.springframework.jdbc.core.namedparam.MapSqlParameterSource;
 import org.springframework.jdbc.core.namedparam.NamedParameterJdbcTemplate;
 import org.springframework.jdbc.core.simple.SimpleJdbcInsert;
@@ -27,15 +26,24 @@ public class JDBCDPPPTDataServiceImpl implements DPPPTDataService {
 
 	private static final Logger logger = LoggerFactory.getLogger(JDBCDPPPTDataServiceImpl.class);
 	private static final String PGSQL = "pgsql";
+
 	private final String dbType;
 	private final NamedParameterJdbcTemplate jt;
 	private final SimpleJdbcInsert reedemUUIDInsert;
+	private final SimpleJdbcInsert signingAuthroizationCodeInsert;
+	private final SimpleJdbcInsert blindSignatureIdInsert;
 
 	public JDBCDPPPTDataServiceImpl(String dbType, DataSource dataSource) {
 		this.dbType = dbType;
 		this.jt = new NamedParameterJdbcTemplate(dataSource);
 		this.reedemUUIDInsert = new SimpleJdbcInsert(dataSource).withTableName("t_redeem_uuid")
 				.usingGeneratedKeyColumns("pk_redeem_uuid_id");
+		this.signingAuthroizationCodeInsert = new SimpleJdbcInsert(dataSource)
+				.withTableName("t_signing_authorization_code")
+				.usingGeneratedKeyColumns("pk_signing_authorization_code_id");
+		this.blindSignatureIdInsert = new SimpleJdbcInsert(dataSource)
+				.withTableName("t_blind_signature_id")
+				.usingGeneratedKeyColumns("pk_blind_signature_id_id");
 	}
 
 	@Override
@@ -55,6 +63,68 @@ public class JDBCDPPPTDataServiceImpl implements DPPPTDataService {
 		params.addValue("app_source", appSource);
 		params.addValue("key_date", new Date(exposee.getKeyDate()));
 		jt.update(sql, params);
+	}
+
+	@Override
+	public boolean insertSigningAuthorizationCode(byte[] scryptedAuthorizationCode, HealthCondition healthCondition) {
+		assert scryptedAuthorizationCode != null && scryptedAuthorizationCode.length > 0;
+		assert healthCondition != null;
+
+		try {
+			MapSqlParameterSource parameters = new MapSqlParameterSource()
+					.addValue("scrypt_code", scryptedAuthorizationCode)
+					.addValue("scrypt_code_version", 0)
+					.addValue("health_condition", healthCondition.value)
+					.addValue("generated_at", LocalDateTime.now());
+			int rowsAffected = signingAuthroizationCodeInsert.execute(parameters);
+
+			assert rowsAffected == 1;
+
+			return rowsAffected == 1;
+		} catch (DuplicateKeyException e) {
+			// Scrypted authorization code collision. Try again.
+			return false;
+		}
+	}
+
+	@Override
+	public boolean updateSigningAuthorizationCode(byte[] scryptedAuthorizationCode, HealthCondition healthCondition,
+												  LocalDateTime generatedNotLaterThan) {
+		assert scryptedAuthorizationCode != null && scryptedAuthorizationCode.length > 0;
+		assert healthCondition != null;
+		assert generatedNotLaterThan != null;
+
+		MapSqlParameterSource parameters = new MapSqlParameterSource()
+				.addValue("redeemed_at", LocalDateTime.now())
+				.addValue("scrypt_code", scryptedAuthorizationCode)
+				.addValue("health_condition", healthCondition.value)
+				.addValue("generated_at_not_later_than", generatedNotLaterThan);
+		String sql = "UPDATE t_signing_authorization_code SET redeemed_at = :redeemed_at "
+				+ "WHERE scrypt_code = :scrypt_code AND scrypt_code_version = 0 AND health_condition = :health_condition AND redeemed_at is null AND generated_at > :generated_at_not_later_than";
+		int rowsAffected = jt.update(sql, parameters);
+
+		assert rowsAffected == 1 || rowsAffected == 0;
+
+		return rowsAffected == 1;
+	}
+
+	@Override
+	public boolean insertBlindSignatureId(byte[] blindSignatureId) {
+		assert blindSignatureId != null && blindSignatureId.length > 0;
+
+		try {
+			MapSqlParameterSource parameters = new MapSqlParameterSource()
+					.addValue("blind_signature_id", blindSignatureId)
+					.addValue("redeemed_at", LocalDateTime.now());
+			int rowsAffected = blindSignatureIdInsert.execute(parameters);
+
+			assert rowsAffected == 1;
+
+			return rowsAffected == 1;
+		} catch (DuplicateKeyException e) {
+			// Blind signature id collision. Start over.
+			return false;
+		}
 	}
 
 	@Override

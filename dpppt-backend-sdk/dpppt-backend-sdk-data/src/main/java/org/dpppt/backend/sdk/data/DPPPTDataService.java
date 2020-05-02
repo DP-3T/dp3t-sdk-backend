@@ -6,11 +6,12 @@
 
 package org.dpppt.backend.sdk.data;
 
+import java.time.LocalDateTime;
 import java.time.OffsetDateTime;
 import java.util.List;
 
 import org.dpppt.backend.sdk.model.Exposee;
-
+import org.dpppt.backend.sdk.model.HealthCondition;
 
 public interface DPPPTDataService {
 
@@ -21,6 +22,13 @@ public interface DPPPTDataService {
 	 * @param appSource the app name
 	 */
 	void upsertExposee(Exposee exposee, String appSource);
+
+	boolean insertSigningAuthorizationCode(byte[] scryptedAuthorizationCode, HealthCondition healthCondition);
+
+	boolean updateSigningAuthorizationCode(byte[] scryptedAuthorizationCode, HealthCondition healthCondition,
+										   LocalDateTime generatedNotLaterThan);
+
+	boolean insertBlindSignatureId(byte[] blindSignatureId);
 
 	/**
 	 * Returns all exposees for the given day [day: 00:00, day+1: 00:00] ordered by id

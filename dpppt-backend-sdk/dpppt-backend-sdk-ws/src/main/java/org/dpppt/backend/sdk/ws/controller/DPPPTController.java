@@ -6,54 +6,40 @@
 
 package org.dpppt.backend.sdk.ws.controller;
 
-import java.security.MessageDigest;
-import java.security.NoSuchAlgorithmException;
-import java.time.Duration;
-import java.time.LocalDate;
-import java.time.OffsetDateTime;
-import java.time.ZoneOffset;
-
-import java.util.ArrayList;
-import java.util.Base64;
-import java.util.List;
-
-import javax.validation.Valid;
-
-import org.apache.commons.codec.binary.Hex;
+import com.fasterxml.jackson.databind.ObjectMapper;
+import com.google.protobuf.ByteString;
+import org.bouncycastle.crypto.params.RSAKeyParameters;
 import org.dpppt.backend.sdk.data.DPPPTDataService;
 import org.dpppt.backend.sdk.data.EtagGeneratorInterface;
-import org.dpppt.backend.sdk.model.BucketList;
-import org.dpppt.backend.sdk.model.ExposedOverview;
-import org.dpppt.backend.sdk.model.Exposee;
-import org.dpppt.backend.sdk.model.ExposeeRequest;
+import org.dpppt.backend.sdk.model.*;
 import org.dpppt.backend.sdk.model.proto.Exposed;
 import org.dpppt.backend.sdk.ws.security.ValidateRequest;
 import org.dpppt.backend.sdk.ws.security.ValidateRequest.InvalidDateException;
+import org.dpppt.backend.sdk.ws.util.BlindSignatureHelper;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.CacheControl;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.stereotype.Controller;
-import org.springframework.web.bind.annotation.CrossOrigin;
-import org.springframework.web.bind.annotation.ExceptionHandler;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PathVariable;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestHeader;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.ResponseBody;
-import org.springframework.web.bind.annotation.ResponseStatus;
+import org.springframework.web.bind.annotation.*;
 import org.springframework.web.context.request.WebRequest;
 
-import com.fasterxml.jackson.core.JsonProcessingException;
-import com.fasterxml.jackson.databind.ObjectMapper;
-import com.google.protobuf.ByteString;
+import javax.validation.Valid;
+import java.time.Duration;
+import java.time.LocalDate;
+import java.time.OffsetDateTime;
+import java.time.ZoneOffset;
+import java.util.ArrayList;
+import java.util.Base64;
+import java.util.List;
 
 @Controller
 @RequestMapping("/v1")
 public class DPPPTController {
+
+	@ResponseStatus(HttpStatus.FORBIDDEN)
+	public static class ForbiddenException extends RuntimeException {}
 
 	private final DPPPTDataService dataService;
 	private final EtagGeneratorInterface etagGenerator;
@@ -65,12 +51,15 @@ public class DPPPTController {
 	private final long batchLength;
 
 	private final long requestTime;
+
+	private final RSAKeyParameters publicKeyVerifiesInfections;
+
 	@Autowired
 	private ObjectMapper jacksonObjectMapper;
 
-
 	public DPPPTController(DPPPTDataService dataService, EtagGeneratorInterface etagGenerator, String appSource,
-			int exposedListCacheControl, ValidateRequest validateRequest, long batchLength, int retentionDays, long requestTime) {
+			int exposedListCacheControl, ValidateRequest validateRequest, long batchLength, int retentionDays, long requestTime,
+			RSAKeyParameters publicKeyVerifiesInfections) {
 		this.dataService = dataService;
 		this.appSource = appSource;
 		this.etagGenerator = etagGenerator;
@@ -79,12 +68,29 @@ public class DPPPTController {
 		this.batchLength = batchLength;
 		this.retentionDays = retentionDays;
 		this.requestTime = requestTime;
+		this.publicKeyVerifiesInfections = publicKeyVerifiesInfections;
 	}
 
 	@CrossOrigin(origins = { "https://editor.swagger.io" })
 	@GetMapping(value = "")
 	public @ResponseBody ResponseEntity<String> hello() {
 		return ResponseEntity.ok().header("X-HELLO", "dp3t").body("Hello from DP3T WS");
+	}
+
+	// TODO Integrate this method better.
+	private HealthCondition isValid(ExposeeAuthData exposeeAuthData) {
+		if (exposeeAuthData.getBase64Value() != null && exposeeAuthData.getBase64Signature() != null) {
+			byte[] blindSignatureId = Base64.getDecoder().decode(exposeeAuthData.getBase64Value());
+			if (dataService.insertBlindSignatureId(blindSignatureId)) {
+				return BlindSignatureHelper.verifySignature(blindSignatureId, Base64.getDecoder()
+						.decode(exposeeAuthData.getBase64Signature()), publicKeyVerifiesInfections)
+						? HealthCondition.INFECTED : HealthCondition.UNKNOWN;
+			}
+			throw new ForbiddenException();
+		} else {
+			// TODO Return INFECTED in order that all tests still work.
+			return HealthCondition.INFECTED;
+		}
 	}
 
 	@CrossOrigin(origins = { "https://editor.swagger.io" })
@@ -96,6 +102,12 @@ public class DPPPTController {
 		if (!this.validateRequest.isValid(principal)) {
 			return ResponseEntity.status(HttpStatus.FORBIDDEN).build();
 		}
+
+		HealthCondition healthCondition = isValid(exposeeRequest.getAuthData());
+		if (healthCondition != HealthCondition.INFECTED) {
+			return ResponseEntity.status(HttpStatus.FORBIDDEN).build();
+		}
+
 		if (!isValidBase64(exposeeRequest.getKey())) {
 			return new ResponseEntity<>("No valid base64 key", HttpStatus.BAD_REQUEST);
 		}

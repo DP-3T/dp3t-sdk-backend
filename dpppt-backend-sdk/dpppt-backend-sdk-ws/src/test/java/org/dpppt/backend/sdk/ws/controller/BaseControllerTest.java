@@ -9,7 +9,8 @@ package org.dpppt.backend.sdk.ws.controller;
 import com.fasterxml.jackson.core.JsonFactory;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
-
+import io.jsonwebtoken.Claims;
+import io.jsonwebtoken.Jwts;
 import org.apache.commons.io.IOUtils;
 import org.junit.Before;
 import org.junit.runner.RunWith;
@@ -23,23 +24,18 @@ import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.setup.MockMvcBuilders;
 import org.springframework.web.context.WebApplicationContext;
 
-import io.jsonwebtoken.Claims;
-import io.jsonwebtoken.Jwts;
-
-import static org.springframework.security.test.web.servlet.setup.SecurityMockMvcConfigurers.*;
-
 import java.io.IOException;
 import java.io.InputStream;
-import java.security.Key;
-import java.security.KeyFactory;
-import java.security.PrivateKey;
-import java.security.PublicKey;
+import java.security.*;
+import java.security.spec.InvalidKeySpecException;
 import java.security.spec.PKCS8EncodedKeySpec;
 import java.time.OffsetDateTime;
 import java.time.ZoneOffset;
 import java.util.Base64;
 import java.util.Date;
 import java.util.UUID;
+
+import static org.springframework.security.test.web.servlet.setup.SecurityMockMvcConfigurers.springSecurity;
 
 @RunWith(SpringRunner.class)
 @SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT)
@@ -63,16 +59,20 @@ public abstract class BaseControllerTest {
 		this.objectMapper.registerModule(new JavaTimeModule());
 	}
 
-	private void loadPrivateKey() throws Exception {
+	private void loadPrivateKey() throws IOException, NoSuchAlgorithmException, InvalidKeySpecException {
 		InputStream inputStream = new ClassPathResource("generated_private.pem").getInputStream();
 		String key = IOUtils.toString(inputStream);
 		PKCS8EncodedKeySpec keySpecX509 = new PKCS8EncodedKeySpec(Base64.getDecoder().decode(key));
 		KeyFactory kf = KeyFactory.getInstance("RSA");
-		privateKey = (PrivateKey) kf.generatePrivate(keySpecX509);
+		privateKey = kf.generatePrivate(keySpecX509);
 	}
 
 	protected String json(Object o) throws IOException {
 		return objectMapper.writeValueAsString(o);
+	}
+
+	protected <T> T object(String json, Class<T> clazz) throws IOException {
+		return objectMapper.readValue(json, clazz);
 	}
 
 	protected PublicKey publicKey;
@@ -87,6 +87,7 @@ public abstract class BaseControllerTest {
 				.setSubject("test-subject" + OffsetDateTime.now().withOffsetSameInstant(ZoneOffset.UTC).toString()).setExpiration(Date.from(expiresAt.toInstant()))
 				.setIssuedAt(Date.from(OffsetDateTime.now().withOffsetSameInstant(ZoneOffset.UTC).toInstant())).signWith((Key) privateKey).compact();
 	}
+
 	protected String createToken(OffsetDateTime expiresAt, String onset) {
 		Claims claims = Jwts.claims();
 		claims.put("scope", "exposed");

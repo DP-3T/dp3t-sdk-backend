@@ -26,11 +26,15 @@ import org.dpppt.backend.sdk.model.ExposeeRequest;
 
 import org.junit.Test;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.http.MediaType;
 import org.springframework.mock.web.MockHttpServletResponse;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
+@SpringBootTest(properties = {
+        "ws.app.authority.infection.signing.rsa.public.key=classpath://generated_pub.pem",
+        "ws.app.authority.infection.signing.rsa.private.key=classpath://generated_private.pem"})
 public class DPPPTControllerNoSecurityTest extends BaseControllerNoSecurityTest {
     @Test
     public void testJWT() throws Exception {
