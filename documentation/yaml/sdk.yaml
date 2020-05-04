@@ -161,10 +161,6 @@ components:
           type: array
           items:
             $ref: '#/components/schemas/org.dpppt.backend.sdk.model.proto.Exposed.ProtoExposee'
-        memoizedIsInitialized:
-          $ref: '#/components/schemas/byte'
-        unknownFields:
-          $ref: '#/components/schemas/com.google.protobuf.UnknownFieldSet'
         memoizedSize:
           type: integer
         memoizedHashCode:
@@ -172,15 +168,9 @@ components:
     org.dpppt.backend.sdk.model.proto.Exposed.ProtoExposee:
       type: object
       properties:
-        key_:
-          $ref: '#/components/schemas/com.google.protobuf.ByteString'
         keyDate_:
           type: integer
           format: long
-        memoizedIsInitialized:
-          $ref: '#/components/schemas/byte'
-        unknownFields:
-          $ref: '#/components/schemas/com.google.protobuf.UnknownFieldSet'
         memoizedSize:
           type: integer
         memoizedHashCode:
