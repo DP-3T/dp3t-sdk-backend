@@ -43,24 +43,6 @@ paths:
         required: true
         schema:
           type: string
-  /v1/hashtest/{dayDateStr}:
-    get:
-      summary: getExposed
-      description: getExposed
-      responses:
-        '200':
-          description: ''
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/org.dpppt.backend.sdk.model.ExposedOverview'
-      parameters:
-      - name: dayDateStr
-        in: path
-        description: ''
-        required: true
-        schema:
-          type: string
   /v1/exposedjson/{batchReleaseTime}:
     get:
       summary: getExposedByDayDate
@@ -99,8 +81,33 @@ paths:
         schema:
           type: integer
           format: long
+  /v1/buckets/{dayDateStr}:
+    get:
+      summary: getListOfBuckets
+      description: getListOfBuckets
+      responses:
+        '200':
+          description: ''
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/org.dpppt.backend.sdk.model.BucketList'
+      parameters:
+      - name: dayDateStr
+        in: path
+        description: ''
+        required: true
+        schema:
+          type: string
 components:
   schemas:
+    org.dpppt.backend.sdk.model.BucketList:
+      type: object
+      properties:
+        buckets:
+          type: array
+          items:
+            type: integer
     org.dpppt.backend.sdk.model.ExposedOverview:
       type: object
       properties:
@@ -133,6 +140,8 @@ components:
       - key
       - keyDate
       properties:
+        fake:
+          type: integer
         key:
           type: string
         keyDate:
