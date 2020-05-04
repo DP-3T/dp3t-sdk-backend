@@ -36,4 +36,5 @@ hs_err_pid*
 *.iml
 
 # maven
-target
+**/target
+**/generated
