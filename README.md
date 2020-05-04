@@ -13,6 +13,15 @@ This is the first implementation of the DP-3T "low bandwidth" protocol. The curr
 
 Our immediate roadmap is: to support the Apple/Google wire protocol, to be forward-compatible, and to support the actual Apple/Google API as soon as it is released to iOS and Android devices.
 
+## Contribution Guide
+The DP3T backend is not yet complete. It has not yet been reviewed or audited for security and compatibility. We are both continuing the development and have started a security review. This project is truly open-source and we welcome any feedback on the code regarding both the implementation and security aspects.
+
+Bugs or potential problems should be reported using Github issues. We welcome all pull requests that improve the quality the source code.
+
+If you provide new extensions and need to adjust the config files try to add new profiles. Like that we can keep providing a highly modular backend solution. Since every country resp. implementation has different needs, we try not to enforce a certain way.
+
+If you have contributions, which include design changes of the currently accepted white paper, please start a discussion there. Since we try to release a first best effort version soon, we currently cannot accept any PRs, which include non approved design changes.
+
 ## Repositories
 * Android SDK & Calibration app: [dp3t-sdk-android](https://github.com/DP-3T/dp3t-sdk-android)
 * iOS SDK & Calibration app: [dp3t-sdk-ios](https://github.com/DP-3T/dp3t-sdk-ios)
@@ -44,25 +53,110 @@ This repository contains a backend implementation (webservice) written with Spri
 * Spring Boot 2.2.6
 * Java 8 (or higher)
 * Logback
-* [Springboot-Swagger-3](https://github.com/Ubique-OSS/springboot-swagger3) (Github Package)
-* [Springboot-Swagger-3-Annotations](https://github.com/Ubique-OSS/springboot-swagger3-annotations) (Github Package)
+* [Springboot-Swagger-3](https://github.com/Ubique-OSS/springboot-swagger3) (Github Package, plugin dependency)
 
 ### Database
 For development purposes an hsqldb can be used to run the webservice locally. For production systems we recommend connecting to a PostgreSQL dabatase (cluster if possible). The simple database schema is described in the following diagram:
 ![](documentation/img/dp3t-backend-dbschema.svg)
 
 ### API
+> Note that we currently cannot automatically generate the documentation. Hence, the generated swagger might not be up-to-date. If you checkout the repo, you can use the `make doc` command to generate a new swagger file (though without any documenation strings).
+
 The backend API specification is documented here:
 * [PDF](/documentation/documentation.pdf)
 * [Swagger Editor](https://editor.swagger.io/?url=https://raw.githubusercontent.com/DP-3T/dp3t-sdk-backend/develop/documentation/yaml/sdk.yaml)
 
+### Configurations
+To control different behaviours we use SprintBoot profiles. The idea is to provide an abstract base class, which defines everything needed. Such properties can be defined as abstract, and their implementation can be provided in an extended class.
+
+#### WSCloud*Config/WSProdConfig/WSDevConfig
+Currently we provide three non abstract configs (`dev`, `abn` and `prod`), which are used in our current version of the backend. Those are the CloudConfigs and they are optimized to work with an environment using KeyCloak and CloudFoundry. 
+
+Further we provide two non abstract configs (`dev`, `prod`), which provide a basic configuration, which should work out-of-the-box. It generates new key pairs, used to sign the payload, each time the web service is started. For an example on how to persist the keys across startup, have a look at the cloud configs.
+
+> Note that the `dev` config uses a HSQLDB, which is non-persistant, whereas `prod` needs a running instance of PostgreSQL (either in a docker or native).
+
+If you plan to provide new extensions or make adjustments and want to provide those to the general public, we recommend adding a new configuration for your specific case. This can be e.g. an abstract class (e.g. WSCloudBaseConfig), which extends the base class providing certain needed keys or functions. If you provide an abstract class, please make sure to add at least one non-abstract class showing the implementation needed.
+
+#### WSJWTConfig
+We also provide a possible extension to the base web service. The JWT config is intended to provide a possibility to authorize the post requests used to publish the secret keys from the clients. We use JWTs which are signed by a health authority. We provide an interface, which can be used to define the behavior of authorization (c.f. the `ValidateRequest` class and its implementation in `NoValidateRequest` and `JWTValidator`). 
+
+
+### Public/Private KeyPairs
+There are multiple ways of generating and using key pairs. In the cloud configs we read the publickey from a certificate provided via SpringBoot value injection. The private key is a PKCS8-PEM encoded private key. In the default configs, the key pairs are generated via helper functions from the JWT-library used.
+
+There are two files, `GenerateKeyPair.java` and `GenerateKeyPairEC.java` to give an idea on how to generate them by yourselves. In order to load the keys generated by those files, you can directly use the Java provided `X509EncodedKeySpec` (resp. `PKCS8EncodedKeySpec`) classes. To load the keys as they are generated by the files, generate a new config and override the methods like this:
+
+```java
+@Override
+public KeyPair getKeyPair(SignatureAlgorithm algorithm) {
+    return new KeyPair(loadPublicKeyFromString(),loadPrivateKeyFromString());
+}
+
+private PrivateKey loadPrivateKeyFromString() {
+    PKCS8EncodedKeySpec pkcs8KeySpec = new PKCS8EncodedKeySpec(Base64.getDecoder().decode(privateKey));
+    try {
+        KeyFactory kf = KeyFactory.getInstance("ECDSA", "BC");
+        return (PrivateKey) kf.generatePrivate(pkcs8KeySpec);
+    }
+    catch (Exception ex) {
+        ex.printStackTrace();
+        throw new RuntimeException();
+    }
+}
+
+private PublicKey loadPublicKeyFromString() {
+    X509EncodedKeySpec keySpecX509 = new X509EncodedKeySpec(Base64.getDecoder().decode(publicKey));
+    try {
+        KeyFactory kf = KeyFactory.getInstance("ECDSA", "BC");
+        return (PublicKey) kf.generatePublic(keySpecX509);
+    }
+    catch (Exception ex) {
+        ex.printStackTrace();
+        throw new RuntimeException();
+    }
+}
+```
+
+Depending on the key-size and algorithm used, you may need to add [`BouncyCastle`](https://www.bouncycastle.org/) (c.f. [Export/Import regulations](https://crypto.stackexchange.com/questions/20524/why-are-there-limitations-on-using-encryption-with-keys-beyond-certain-length)).
+
+> Note that the `KeyFactory` class provides a `getInstance(String algorithm)` overload as well. You can essentially exchange `ECDSA` and `RSA` whenever you like. For production use, please make sure that you double check the key specifications. The two files provided just use the default parameters, which might or might not be sufficient for your use case.
 ### Build
+We switched to the `maven-toolchains-plugin` plugin to provide the maven compiler with the correct toolchain. So you may need to add a `toolchains.xml` file to your `~/.m2` maven config folder. Here an example for a mac environment. Make sure to replace `<jdkHome>` with the path to your `JAVA_HOME`.
+
+```xml
+<toolchains>
+<toolchain>
+    <type>jdk</type>
+    <provides>
+      <id>Java11</id>
+      <version>11</version>
+    </provides>
+    <configuration>
+      <jdkHome>/Library/Java/JavaVirtualMachines/jdk-11.0.2.jdk/Contents/Home</jdkHome>
+    </configuration>
+  </toolchain>
+  <toolchain>
+    <type>jdk</type>
+    <provides>
+      <id>Java8</id>
+      <version>8</version>
+    </provides>
+    <configuration>
+      <jdkHome>/Library/Java/JavaVirtualMachines/jdk1.8.0_201.jdk/Contents/Home</jdkHome>
+    </configuration>
+  </toolchain>
+</toolchains>
+```
+
 To build you need to install Maven.
 
 ```bash
 cd dpppt-backend-sdk
 mvn install
 ```
+
+> Note to run the PostgreSQL unit tests, `dockerd` is needed. If you want to skip those tests add `-DskipTests` to the build command. 
 ### Run
 ```bash
 java -jar dpppt-backend-sdk-ws/target/dpppt-backend-sdk-ws-*.jar
@@ -96,8 +190,6 @@ To build the docker image run
 ```bash
 make docker-build
 ```
-
-
 
 ## License
 This project is licensed under the terms of the MPL 2 license. See the [LICENSE](LICENSE) file.
