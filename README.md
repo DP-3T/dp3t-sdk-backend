@@ -56,34 +56,34 @@ This repository contains a backend implementation (webservice) written with Spri
 * [Springboot-Swagger-3](https://github.com/Ubique-OSS/springboot-swagger3) (Github Package, plugin dependency)
 
 ### Database
-For development purposes an hsqldb can be used to run the webservice locally. For production systems we recommend connecting to a PostgreSQL dabatase (cluster if possible). The simple database schema is described in the following diagram:
+For development purposes an hsqldb can be used to run the webservice locally. For production systems it is recommended connecting to a PostgreSQL dabatase (cluster if possible). The simple database schema is described in the following diagram:
 ![](documentation/img/dp3t-backend-dbschema.svg)
 
 ### API
-> Note that we currently cannot automatically generate the documentation. Hence, the generated swagger might not be up-to-date. If you checkout the repo, you can use the `make doc` command to generate a new swagger file (though without any documenation strings).
+> Note that currently documentation cannot be generated automatically. Hence, the generated swagger might not be up-to-date. If you checkout the repo, you can use the `make doc` command to generate a new swagger file (though without any documentaion strings).
 
 The backend API specification is documented here:
 * [PDF](/documentation/documentation.pdf)
 * [Swagger Editor](https://editor.swagger.io/?url=https://raw.githubusercontent.com/DP-3T/dp3t-sdk-backend/develop/documentation/yaml/sdk.yaml)
 
 ### Configurations
-To control different behaviours we use SprintBoot profiles. The idea is to provide an abstract base class, which defines everything needed. Such properties can be defined as abstract, and their implementation can be provided in an extended class.
+To control different behaviors, use SpringBoot profiles are used. The idea is to provide an abstract base class, which defines everything needed. Such properties can be defined as abstract, and their implementation can be provided in an extended class.
 
 #### WSCloud*Config/WSProdConfig/WSDevConfig
-Currently we provide three non abstract configs (`dev`, `abn` and `prod`), which are used in our current version of the backend. Those are the CloudConfigs and they are optimized to work with an environment using KeyCloak and CloudFoundry. 
+Currently three non abstract configs (`dev`, `abn` and `prod`) are provided, which are used in the current deployed version of the backend. Those are the CloudConfigs and they are optimized to work with an environment using KeyCloak and CloudFoundry. 
 
-Further we provide two non abstract configs (`dev`, `prod`), which provide a basic configuration, which should work out-of-the-box. It generates new key pairs, used to sign the payload, each time the web service is started. For an example on how to persist the keys across startup, have a look at the cloud configs.
+Further, there are two non abstract configs (`dev`, `prod`) provided, which implement a basic configuration, which should work out-of-the-box. It generates new key pairs, used to sign the payload, each time the web service is started. For an example on how to persist the keys across startup, have a look at the cloud configs.
 
 > Note that the `dev` config uses a HSQLDB, which is non-persistant, whereas `prod` needs a running instance of PostgreSQL (either in a docker or native).
 
-If you plan to provide new extensions or make adjustments and want to provide those to the general public, we recommend adding a new configuration for your specific case. This can be e.g. an abstract class (e.g. WSCloudBaseConfig), which extends the base class providing certain needed keys or functions. If you provide an abstract class, please make sure to add at least one non-abstract class showing the implementation needed.
+If you plan to provide new extensions or make adjustments and want to provide those to the general public, it is recommended to add a new configuration for your specific case. This can be e.g. an abstract class (e.g. WSCloudBaseConfig), which extends the base class providing certain needed keys or functions. If you provide an abstract class, please make sure to add at least one non-abstract class showing the implementation needed.
 
 #### WSJWTConfig
-We also provide a possible extension to the base web service. The JWT config is intended to provide a possibility to authorize the post requests used to publish the secret keys from the clients. We use JWTs which are signed by a health authority. We provide an interface, which can be used to define the behavior of authorization (c.f. the `ValidateRequest` class and its implementation in `NoValidateRequest` and `JWTValidator`). 
+There is also a possible extension to the base web service provided. The JWT config is intended to implement a possibility to authorize the post requests used to publish the secret keys from the clients. JWTs which are signed by a health authority are used. There is an interface provided, which can be used to define the behavior of authorization (c.f. the `ValidateRequest` class and its implementation in `NoValidateRequest` and `JWTValidator`). 
 
 
 ### Public/Private KeyPairs
-There are multiple ways of generating and using key pairs. In the cloud configs we read the publickey from a certificate provided via SpringBoot value injection. The private key is a PKCS8-PEM encoded private key. In the default configs, the key pairs are generated via helper functions from the JWT-library used.
+There are multiple ways of generating and using key pairs. In the cloud configs the publickey is read from a certificate provided via SpringBoot value injection. The private key is a PKCS8-PEM encoded private key. In the default configs, the key pairs are generated via helper functions from the JWT-library used.
 
 There are two files, `GenerateKeyPair.java` and `GenerateKeyPairEC.java` to give an idea on how to generate them by yourselves. In order to load the keys generated by those files, you can directly use the Java provided `X509EncodedKeySpec` (resp. `PKCS8EncodedKeySpec`) classes. To load the keys as they are generated by the files, generate a new config and override the methods like this:
 
@@ -122,7 +122,7 @@ Depending on the key-size and algorithm used, you may need to add [`BouncyCastle
 
 > Note that the `KeyFactory` class provides a `getInstance(String algorithm)` overload as well. You can essentially exchange `ECDSA` and `RSA` whenever you like. For production use, please make sure that you double check the key specifications. The two files provided just use the default parameters, which might or might not be sufficient for your use case.
 ### Build
-We switched to the `maven-toolchains-plugin` plugin to provide the maven compiler with the correct toolchain. So you may need to add a `toolchains.xml` file to your `~/.m2` maven config folder. Here an example for a mac environment. Make sure to replace `<jdkHome>` with the path to your `JAVA_HOME`.
+The `maven-toolchains-plugin` is used to provide the maven compiler with the correct toolchain. So you may need to add a `toolchains.xml` file to your `~/.m2` maven config folder (or remove the plugin from the `pom.xml`). Here is an example for a mac environment. Make sure to replace `<jdkHome>` with the path to your `JAVA_HOME`.
 
 ```xml
 <toolchains>
@@ -157,6 +157,7 @@ mvn install
 ```
 
 > Note to run the PostgreSQL unit tests, `dockerd` is needed. If you want to skip those tests add `-DskipTests` to the build command. 
+
 ### Run
 ```bash
 java -jar dpppt-backend-sdk-ws/target/dpppt-backend-sdk-ws-*.jar
