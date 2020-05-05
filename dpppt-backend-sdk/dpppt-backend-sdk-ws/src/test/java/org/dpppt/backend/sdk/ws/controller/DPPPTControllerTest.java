@@ -256,4 +256,22 @@ public class DPPPTControllerTest extends BaseControllerTest {
         .andReturn().getResponse();
     }
 
+    @Test
+    public void cannotUsedLongLivedToken() throws Exception {
+        ExposeeRequest exposeeRequest = new ExposeeRequest();
+        exposeeRequest.setAuthData(new ExposeeAuthData());
+        exposeeRequest.setKeyDate(OffsetDateTime.now().withOffsetSameInstant(ZoneOffset.UTC).toInstant().toEpochMilli());
+        exposeeRequest.setKey(Base64.getEncoder().encodeToString("test".getBytes("UTF-8")));
+        exposeeRequest.setIsFake(0);
+        String token = createToken(OffsetDateTime.now(ZoneOffset.UTC).plusDays(90)); // very late expiration date
+        MockHttpServletResponse response = mockMvc.perform(post("/v1/exposed")
+                                                            .contentType(MediaType.APPLICATION_JSON)
+                                                            .header("Authorization", "Bearer " + token)
+                                                            .header("User-Agent", "MockMVC")
+                                                            .content(json(exposeeRequest)))
+                .andExpect(status().is(401))
+                .andExpect(content().string(""))
+                .andReturn().getResponse();
+    }
+
 }
