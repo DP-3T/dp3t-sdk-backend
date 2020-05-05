@@ -10,6 +10,18 @@
 
 package org.dpppt.backend.sdk.ws.config;
 
+import io.jsonwebtoken.SignatureAlgorithm;
+import org.bouncycastle.jce.provider.BouncyCastleProvider;
+import org.bouncycastle.util.io.pem.PemObject;
+import org.bouncycastle.util.io.pem.PemReader;
+import org.flywaydb.core.Flyway;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
+import org.springframework.context.annotation.Bean;
+import org.springframework.context.annotation.Configuration;
+import org.springframework.scheduling.config.ScheduledTaskRegistrar;
+
+import javax.sql.DataSource;
 import java.io.ByteArrayInputStream;
 import java.io.Reader;
 import java.io.StringReader;
@@ -20,19 +32,7 @@ import java.security.PublicKey;
 import java.security.Security;
 import java.security.cert.CertificateFactory;
 import java.security.spec.PKCS8EncodedKeySpec;
-
-import javax.sql.DataSource;
-
-import org.bouncycastle.jce.provider.BouncyCastleProvider;
-import org.bouncycastle.util.io.pem.PemObject;
-import org.bouncycastle.util.io.pem.PemReader;
-import org.flywaydb.core.Flyway;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.context.annotation.Bean;
-import org.springframework.context.annotation.Configuration;
-import org.springframework.scheduling.config.ScheduledTaskRegistrar;
-
-import io.jsonwebtoken.SignatureAlgorithm;
+import java.security.spec.X509EncodedKeySpec;
 
 @Configuration
 public abstract class WSCloudBaseConfig extends WSBaseConfig {
@@ -42,6 +42,9 @@ public abstract class WSCloudBaseConfig extends WSBaseConfig {
 
 	abstract String getPublicKey();
 	abstract String getPrivateKey();
+
+	@Value("${ws.cloud.base.config.publicKey.fromCertificate:true}")
+	private boolean publicKeyFromCertificate;
 
 	@Override
 	public DataSource dataSource() {
@@ -91,10 +94,19 @@ public abstract class WSCloudBaseConfig extends WSBaseConfig {
 
 	private PublicKey loadPublicKeyFromString() {
 		try {
-			return CertificateFactory
-			.getInstance("X.509")
-			.generateCertificate(new ByteArrayInputStream(getPublicKey().getBytes()))
-			.getPublicKey();
+			if(publicKeyFromCertificate) {
+				return CertificateFactory
+						.getInstance("X.509")
+						.generateCertificate(new ByteArrayInputStream(getPublicKey().getBytes()))
+						.getPublicKey();
+			} else {
+				Reader reader = new StringReader(getPublicKey());
+				PemReader readerPem = new PemReader(reader);
+				PemObject obj = readerPem.readPemObject();
+				return KeyFactory.getInstance("EC").generatePublic(
+						new X509EncodedKeySpec(obj.getContent())
+				);
+			}
 		}
 		catch (Exception ex) {
 			ex.printStackTrace();
