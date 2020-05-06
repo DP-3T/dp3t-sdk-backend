@@ -10,6 +10,8 @@
 
 package org.dpppt.backend.sdk.ws.security;
 
+import java.time.Duration;
+import java.time.Instant;
 import java.time.LocalDate;
 import java.time.OffsetDateTime;
 import java.time.ZoneOffset;
@@ -28,8 +30,11 @@ public class JWTValidator implements OAuth2TokenValidator<Jwt> {
 
 
     private DPPPTDataService dataService;
-    public JWTValidator(DPPPTDataService dataService) {
+    private Duration maxJwtValidity;
+
+    public JWTValidator(DPPPTDataService dataService, Duration maxJwtValidity) {
         this.dataService = dataService;
+        this.maxJwtValidity = maxJwtValidity;
     }
 
     @Override
@@ -38,7 +43,10 @@ public class JWTValidator implements OAuth2TokenValidator<Jwt> {
             //it is a fakte token, but we still assume it is valid
             return OAuth2TokenValidatorResult.success();
         }
-        if(this.dataService.checkAndInsertPublishUUID(token.getClaim(UUID_CLAIM))) {
+        if (token.getExpiresAt() == null || Instant.now().plus(maxJwtValidity).isBefore(token.getExpiresAt())) {
+            return OAuth2TokenValidatorResult.failure(new OAuth2Error(OAuth2ErrorCodes.INVALID_REQUEST));
+        }
+        if(token.containsClaim(UUID_CLAIM) && this.dataService.checkAndInsertPublishUUID(token.getClaim(UUID_CLAIM))) {
             return OAuth2TokenValidatorResult.success();
         }
         return OAuth2TokenValidatorResult.failure(new OAuth2Error(OAuth2ErrorCodes.INVALID_SCOPE));

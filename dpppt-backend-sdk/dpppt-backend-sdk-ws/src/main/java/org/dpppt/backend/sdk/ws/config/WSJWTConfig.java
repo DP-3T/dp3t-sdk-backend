@@ -18,6 +18,7 @@ import java.security.NoSuchAlgorithmException;
 import java.security.interfaces.RSAPublicKey;
 import java.security.spec.InvalidKeySpecException;
 import java.security.spec.X509EncodedKeySpec;
+import java.time.Duration;
 import java.util.Base64;
 
 import org.apache.commons.io.IOUtils;
@@ -52,6 +53,9 @@ public class WSJWTConfig extends WebSecurityConfigurerAdapter {
 
 	@Value("${ws.app.jwt.publickey}")
 	String publicKey;
+
+	@Value("${ws.app.jwt.maxValidityMinutes: 60}")
+	int maxValidityMinutes;
 
 	@Autowired
 	@Lazy
@@ -88,7 +92,7 @@ public class WSJWTConfig extends WebSecurityConfigurerAdapter {
 
 	@Bean
 	public JWTValidator jwtValidator() {
-		return new JWTValidator(dataService);
+		return new JWTValidator(dataService, Duration.ofMinutes(maxValidityMinutes));
 	}
 
 	@Bean
