@@ -135,17 +135,17 @@ public class DPPPTController {
 			return ResponseEntity.status(HttpStatus.FORBIDDEN).build();
 		}
 		List<Exposee> exposees = new ArrayList<>();
-		for(var exposeeRequest : exposeeRequests.getExposeeRequests()) {
-			if (!isValidBase64(exposeeRequest.getKey())) {
+		for(var exposedKey : exposeeRequests.getExposedKeys()) {
+			if (!isValidBase64(exposedKey.getKey())) {
 				return new ResponseEntity<>("No valid base64 key", HttpStatus.BAD_REQUEST);
 			}
-			
+
 			Exposee exposee = new Exposee();
-			exposee.setKey(exposeeRequest.getKey());
-			long keyDate = this.validateRequest.getKeyDate(principal, exposeeRequest);
+			exposee.setKey(exposedKey.getKey());
+			long keyDate = this.validateRequest.getKeyDate(principal, exposedKey);
 
 			exposee.setKeyDate(keyDate);
-			if(!this.validateRequest.isFakeRequest(principal, exposeeRequest)) {
+			if(!this.validateRequest.isFakeRequest(principal, exposeeRequests)) {
 				
 				exposees.add(exposee);
 			} 

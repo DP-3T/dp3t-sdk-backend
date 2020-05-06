@@ -3,12 +3,23 @@ package org.dpppt.backend.sdk.model;
 import java.util.List;
 
 public class ExposeeRequestList {
-    List<ExposeeRequest> exposeeRequests;
+    List<ExposedKey> exposedKeys;
 
-    public List<ExposeeRequest> getExposeeRequests() {
-        return exposeeRequests;
+    private Integer fake = 0;
+
+    public List<ExposedKey> getExposedKeys() {
+        return exposedKeys;
     }
-    public void setExposeeRequests(List<ExposeeRequest> exposeeRequests) {
-        this.exposeeRequests = exposeeRequests;
+
+    public Integer isFake() {
+        return fake;
+    }
+
+    public void setFake(Integer fake) {
+        this.fake = fake;
+    }
+
+    public void setExposedKeys(List<ExposedKey> exposedKeys) {
+        this.exposedKeys = exposedKeys;
     }
 }
