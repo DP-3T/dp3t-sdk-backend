@@ -22,9 +22,12 @@ import java.time.OffsetDateTime;
 import java.time.ZoneOffset;
 import java.time.format.DateTimeFormatter;
 import java.util.Base64;
+import java.util.List;
 
+import org.dpppt.backend.sdk.model.ExposedKey;
 import org.dpppt.backend.sdk.model.ExposeeAuthData;
 import org.dpppt.backend.sdk.model.ExposeeRequest;
+import org.dpppt.backend.sdk.model.ExposeeRequestList;
 import org.junit.Test;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.http.MediaType;
@@ -69,6 +72,62 @@ public class DPPPTControllerTest extends BaseControllerTest {
                 .andReturn().getResponse();
 
        
+    }
+    @Test
+    public void testMultipleKeyUpload() throws Exception {
+        var requestList = new ExposeeRequestList();
+        var exposedKey1 = new ExposedKey();
+        exposedKey1.setKeyDate(OffsetDateTime.now(ZoneOffset.UTC).toInstant().toEpochMilli());
+        exposedKey1.setKey(Base64.getEncoder().encodeToString("test".getBytes("UTF-8")));
+        var exposedKey2 = new ExposedKey();
+        exposedKey2.setKeyDate(OffsetDateTime.now(ZoneOffset.UTC).minusDays(1).toInstant().toEpochMilli());
+        exposedKey2.setKey(Base64.getEncoder().encodeToString("test".getBytes("UTF-8")));
+        List<ExposedKey> exposedKeys = List.of(exposedKey1, exposedKey2);
+        requestList.setExposedKeys(exposedKeys);
+        requestList.setFake(0);
+        String token = createToken(OffsetDateTime.now().withOffsetSameInstant(ZoneOffset.UTC).plusMinutes(5));
+        MockHttpServletResponse response = mockMvc.perform(post("/v1/exposedlist")
+                                                            .contentType(MediaType.APPLICATION_JSON)
+                                                            .header("Authorization", "Bearer " + token)
+                                                            .header("User-Agent", "MockMVC")
+                                                            .content(json(requestList)))
+                .andExpect(status().is2xxSuccessful()).andReturn().getResponse();
+        response = mockMvc.perform(post("/v1/exposedlist")
+                                .contentType(MediaType.APPLICATION_JSON)
+                                .header("Authorization", "Bearer " + jwtToken)
+                                .header("User-Agent", "MockMVC")
+                                .content(json(requestList)))
+                .andExpect(status().is(401))
+                .andExpect(content().string(""))
+                .andReturn().getResponse();
+    }
+    @Test
+    public void testMultipleKeyFakeUpload() throws Exception {
+        var requestList = new ExposeeRequestList();
+        var exposedKey1 = new ExposedKey();
+        exposedKey1.setKeyDate(OffsetDateTime.now(ZoneOffset.UTC).toInstant().toEpochMilli());
+        exposedKey1.setKey(Base64.getEncoder().encodeToString("test".getBytes("UTF-8")));
+        var exposedKey2 = new ExposedKey();
+        exposedKey2.setKeyDate(OffsetDateTime.now(ZoneOffset.UTC).minusDays(1).toInstant().toEpochMilli());
+        exposedKey2.setKey(Base64.getEncoder().encodeToString("test".getBytes("UTF-8")));
+        List<ExposedKey> exposedKeys = List.of(exposedKey1, exposedKey2);
+        requestList.setExposedKeys(exposedKeys);
+        requestList.setFake(1);
+        String token = createToken(OffsetDateTime.now().withOffsetSameInstant(ZoneOffset.UTC).plusMinutes(5));
+        MockHttpServletResponse response = mockMvc.perform(post("/v1/exposedlist")
+                                                            .contentType(MediaType.APPLICATION_JSON)
+                                                            .header("Authorization", "Bearer " + token)
+                                                            .header("User-Agent", "MockMVC")
+                                                            .content(json(requestList)))
+                .andExpect(status().is2xxSuccessful()).andReturn().getResponse();
+        response = mockMvc.perform(post("/v1/exposedlist")
+                                .contentType(MediaType.APPLICATION_JSON)
+                                .header("Authorization", "Bearer " + jwtToken)
+                                .header("User-Agent", "MockMVC")
+                                .content(json(requestList)))
+                .andExpect(status().is(401))
+                .andExpect(content().string(""))
+                .andReturn().getResponse();
     }
     @Test
     public void keyNeedsToBeBase64() throws Exception {
