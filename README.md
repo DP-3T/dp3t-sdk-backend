@@ -96,7 +96,7 @@ public KeyPair getKeyPair(SignatureAlgorithm algorithm) {
 private PrivateKey loadPrivateKeyFromString() {
     PKCS8EncodedKeySpec pkcs8KeySpec = new PKCS8EncodedKeySpec(Base64.getDecoder().decode(privateKey));
     try {
-        KeyFactory kf = KeyFactory.getInstance("ECDSA");
+        KeyFactory kf = KeyFactory.getInstance("EC");
         return (PrivateKey) kf.generatePrivate(pkcs8KeySpec);
     }
     catch (Exception ex) {
@@ -108,7 +108,7 @@ private PrivateKey loadPrivateKeyFromString() {
 private PublicKey loadPublicKeyFromString() {
     X509EncodedKeySpec keySpecX509 = new X509EncodedKeySpec(Base64.getDecoder().decode(publicKey));
     try {
-        KeyFactory kf = KeyFactory.getInstance("ECDSA");
+        KeyFactory kf = KeyFactory.getInstance("EC");
         return (PublicKey) kf.generatePublic(keySpecX509);
     }
     catch (Exception ex) {
@@ -135,7 +135,7 @@ or like that (for PEM keys `GenerateKeyPairEC.java`):
 			PemReader readerPem = new PemReader(reader);
 			PemObject obj = readerPem.readPemObject();
 			PKCS8EncodedKeySpec pkcs8KeySpec = new PKCS8EncodedKeySpec(obj.getContent());
-			KeyFactory kf = KeyFactory.getInstance("ECDSA");
+			KeyFactory kf = KeyFactory.getInstance("EC");
 			return (PrivateKey) kf.generatePrivate(pkcs8KeySpec);
 		}
 		catch (Exception ex) {
