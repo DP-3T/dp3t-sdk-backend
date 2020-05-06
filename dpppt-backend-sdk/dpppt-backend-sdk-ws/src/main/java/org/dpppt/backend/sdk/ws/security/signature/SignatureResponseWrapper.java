@@ -47,6 +47,7 @@ public class SignatureResponseWrapper extends HttpServletResponseWrapper {
 	private final ByteArrayOutputStream output;
 	private final KeyPair pair;
 	private final List<String> protectedHeaders;
+	private final boolean setDebugHeaders;
 
 	private HashStream stream;
 	private PrintWriter writer;
@@ -59,10 +60,11 @@ public class SignatureResponseWrapper extends HttpServletResponseWrapper {
 	private static final String CLAIM_CONTENT_HASH = "content-hash";
 
 	public SignatureResponseWrapper(HttpServletResponse response, KeyPair pair, int retentionDays,
-			List<String> protectedHeaders) {
+			List<String> protectedHeaders, boolean setDebugHeaders) {
 		super(response);
 		this.pair = pair;
 		this.protectedHeaders = protectedHeaders;
+		this.setDebugHeaders = setDebugHeaders;
 		try {
 			this.output = new ByteArrayOutputStream(response.getBufferSize());
 			this.digest = MessageDigest.getInstance("SHA-256");
@@ -123,7 +125,8 @@ public class SignatureResponseWrapper extends HttpServletResponseWrapper {
 
 		claims.setIssuer(ISSUER_DP3T);
 		claims.setIssuedAt(Date.from(OffsetDateTime.now().withOffsetSameInstant(ZoneOffset.UTC).toInstant()));
-		claims.setExpiration(Date.from(OffsetDateTime.now().withOffsetSameInstant(ZoneOffset.UTC).plusDays(retentionPeriod).toInstant()));
+		claims.setExpiration(Date.from(
+				OffsetDateTime.now().withOffsetSameInstant(ZoneOffset.UTC).plusDays(retentionPeriod).toInstant()));
 		for (String header : protectedHeaders) {
 			if (!this.containsHeader(header)) {
 				continue;
@@ -133,15 +136,18 @@ public class SignatureResponseWrapper extends HttpServletResponseWrapper {
 			String headerValue = this.getHeader(header);
 			claims.put(normalizedHeader, headerValue);
 			if (normalizedHeader.equals("batch-release-time")) {
-				OffsetDateTime issueDate = OffsetDateTime.ofInstant(Instant.ofEpochMilli(Long.parseLong(headerValue)), ZoneOffset.UTC);
+				OffsetDateTime issueDate = OffsetDateTime.ofInstant(Instant.ofEpochMilli(Long.parseLong(headerValue)),
+						ZoneOffset.UTC);
 				claims.setIssuedAt(Date.from(issueDate.toInstant()));
 				claims.setExpiration(Date.from(issueDate.plusDays(retentionPeriod).toInstant()));
 			}
 		}
 		String signature = Jwts.builder().setClaims(claims).signWith(pair.getPrivate()).compact();
 
-		this.setHeader(HEADER_DIGEST, "sha-256=" + Hex.encodeHexString(theHash));
-		this.setHeader(HEADER_PUBLIC_KEY, getPublicKeyAsPEM());
+		if (this.setDebugHeaders) {
+			this.setHeader(HEADER_DIGEST, "sha-256=" + Hex.encodeHexString(theHash));
+			this.setHeader(HEADER_PUBLIC_KEY, getPublicKeyAsPEM());
+		}
 		this.setHeader(HEADER_SIGNATURE, signature);
 
 	}

@@ -10,13 +10,11 @@
 
 package org.dpppt.backend.sdk.ws.config;
 
-import com.fasterxml.jackson.annotation.JsonInclude;
-import com.fasterxml.jackson.databind.ObjectMapper;
-import com.fasterxml.jackson.databind.SerializationFeature;
-import com.fasterxml.jackson.datatype.jdk8.Jdk8Module;
-import com.hubspot.jackson.datatype.protobuf.ProtobufModule;
-import io.jsonwebtoken.SignatureAlgorithm;
-import io.jsonwebtoken.security.Keys;
+import java.security.KeyPair;
+import java.util.List;
+
+import javax.sql.DataSource;
+
 import org.dpppt.backend.sdk.data.DPPPTDataService;
 import org.dpppt.backend.sdk.data.EtagGenerator;
 import org.dpppt.backend.sdk.data.EtagGeneratorInterface;
@@ -41,9 +39,14 @@ import org.springframework.scheduling.config.IntervalTask;
 import org.springframework.scheduling.config.ScheduledTaskRegistrar;
 import org.springframework.web.servlet.config.annotation.WebMvcConfigurer;
 
-import javax.sql.DataSource;
-import java.security.KeyPair;
-import java.util.List;
+import com.fasterxml.jackson.annotation.JsonInclude;
+import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.databind.SerializationFeature;
+import com.fasterxml.jackson.datatype.jdk8.Jdk8Module;
+import com.hubspot.jackson.datatype.protobuf.ProtobufModule;
+
+import io.jsonwebtoken.SignatureAlgorithm;
+import io.jsonwebtoken.security.Keys;
 
 @Configuration
 @EnableScheduling
@@ -62,6 +65,9 @@ public abstract class WSBaseConfig implements SchedulingConfigurer, WebMvcConfig
 
 	@Value("${ws.headers.protected:}")
 	List<String> protectedHeaders;
+
+	@Value("${ws.headers.debug: false}")
+	boolean setDebugHeaders;
 
 	@Value("${ws.retentiondays: 21}")
 	int retentionDays;
@@ -116,7 +122,7 @@ public abstract class WSBaseConfig implements SchedulingConfigurer, WebMvcConfig
 
 	@Bean
 	public ResponseWrapperFilter hashFilter() {
-		return new ResponseWrapperFilter(getKeyPair(algorithm), retentionDays, protectedHeaders);
+		return new ResponseWrapperFilter(getKeyPair(algorithm), retentionDays, protectedHeaders, setDebugHeaders);
 	}
 
 	public KeyPair getKeyPair(SignatureAlgorithm algorithm) {
