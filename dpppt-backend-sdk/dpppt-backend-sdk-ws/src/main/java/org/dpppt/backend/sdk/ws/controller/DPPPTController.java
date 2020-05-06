@@ -30,6 +30,7 @@ import org.dpppt.backend.sdk.model.BucketList;
 import org.dpppt.backend.sdk.model.ExposedOverview;
 import org.dpppt.backend.sdk.model.Exposee;
 import org.dpppt.backend.sdk.model.ExposeeRequest;
+import org.dpppt.backend.sdk.model.ExposeeRequestList;
 import org.dpppt.backend.sdk.model.proto.Exposed;
 import org.dpppt.backend.sdk.ws.security.ValidateRequest;
 import org.dpppt.backend.sdk.ws.security.ValidateRequest.InvalidDateException;
@@ -113,6 +114,44 @@ public class DPPPTController {
 			dataService.upsertExposee(exposee, appSource);
 		} 
 		
+		long after = System.currentTimeMillis();
+		long duration = after - now;
+		try{
+			Thread.sleep(Math.max(this.requestTime - duration,0));
+		}
+		catch (Exception ex) {
+			
+		}
+		return ResponseEntity.ok().build();
+	}
+
+	@CrossOrigin(origins = { "https://editor.swagger.io" })
+	@PostMapping(value = "/exposedlist")
+	public @ResponseBody ResponseEntity<String> addExposee(@Valid @RequestBody ExposeeRequestList exposeeRequests,
+			@RequestHeader(value = "User-Agent", required = true) String userAgent,
+			@AuthenticationPrincipal Object principal) throws InvalidDateException {
+		long now = System.currentTimeMillis();
+		if (!this.validateRequest.isValid(principal)) {
+			return ResponseEntity.status(HttpStatus.FORBIDDEN).build();
+		}
+		List<Exposee> exposees = new ArrayList<>();
+		for(var exposeeRequest : exposeeRequests.getExposeeRequests()) {
+			if (!isValidBase64(exposeeRequest.getKey())) {
+				return new ResponseEntity<>("No valid base64 key", HttpStatus.BAD_REQUEST);
+			}
+			
+			Exposee exposee = new Exposee();
+			exposee.setKey(exposeeRequest.getKey());
+			long keyDate = this.validateRequest.getKeyDate(principal, exposeeRequest);
+
+			exposee.setKeyDate(keyDate);
+			if(!this.validateRequest.isFakeRequest(principal, exposeeRequest)) {
+				
+				exposees.add(exposee);
+			} 
+		}
+		dataService.upsertExposees(exposees, appSource);
+
 		long after = System.currentTimeMillis();
 		long duration = after - now;
 		try{

@@ -27,6 +27,14 @@ public interface DPPPTDataService {
 	void upsertExposee(Exposee exposee, String appSource);
 
 	/**
+	 * Upserts the given exposees (if keys cannot be derived from one master key)
+	 * 
+	 * @param exposeex the list of exposees to upsert
+	 * @param appSource the app name
+	 */
+	void upsertExposees(List<Exposee> exposees, String appSource);
+
+	/**
 	 * Returns all exposees for the given day [day: 00:00, day+1: 00:00] ordered by id
 	 * 
 	 * @param day the day for which exposees are requested
