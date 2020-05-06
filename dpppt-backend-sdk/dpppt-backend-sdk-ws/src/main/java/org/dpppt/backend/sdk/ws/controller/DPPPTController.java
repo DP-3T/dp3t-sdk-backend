@@ -134,10 +134,7 @@ public class DPPPTController {
 		if (!this.validateRequest.isValid(principal)) {
 			return ResponseEntity.status(HttpStatus.FORBIDDEN).build();
 		}
-		if(!this.validateRequest.isFakeRequest(principal, exposeeRequests)) {
-				
-			
-		} 
+
 		List<Exposee> exposees = new ArrayList<>();
 		for(var exposedKey : exposeeRequests.getExposedKeys()) {
 			if (!isValidBase64(exposedKey.getKey())) {
@@ -151,7 +148,7 @@ public class DPPPTController {
 			exposee.setKeyDate(keyDate);
 			exposees.add(exposee);
 		}
-		
+
 		if(!this.validateRequest.isFakeRequest(principal, exposeeRequests)) {	
 			dataService.upsertExposees(exposees, appSource);
 		} 
