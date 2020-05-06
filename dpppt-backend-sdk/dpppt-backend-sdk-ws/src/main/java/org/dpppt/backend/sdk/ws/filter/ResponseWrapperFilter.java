@@ -31,24 +31,28 @@ public class ResponseWrapperFilter implements Filter {
 	private final KeyPair pair;
 	private final int retentionDays;
 	private final List<String> protectedHeaders;
-	
+	private final boolean setDebugHeaders;
+
 	public PublicKey getPublicKey() {
 		return pair.getPublic();
 	}
 
-	public ResponseWrapperFilter(KeyPair pair, int retentionDays, List<String> protectedHeaders) {
+	public ResponseWrapperFilter(KeyPair pair, int retentionDays, List<String> protectedHeaders,
+			boolean setDebugHeaders) {
 		Security.addProvider(new BouncyCastleProvider());
 		Security.setProperty("crypto.policy", "unlimited");
 		this.pair = pair;
-        this.retentionDays = retentionDays;
-        this.protectedHeaders = protectedHeaders;
+		this.retentionDays = retentionDays;
+		this.protectedHeaders = protectedHeaders;
+		this.setDebugHeaders = setDebugHeaders;
 	}
 
 	@Override
 	public void doFilter(ServletRequest request, ServletResponse response, FilterChain chain)
 			throws IOException, ServletException {
 		HttpServletResponse httpResponse = (HttpServletResponse) response;
-		SignatureResponseWrapper wrapper = new SignatureResponseWrapper(httpResponse, pair, retentionDays, protectedHeaders);
+		SignatureResponseWrapper wrapper = new SignatureResponseWrapper(httpResponse, pair, retentionDays,
+				protectedHeaders, setDebugHeaders);
 		chain.doFilter(request, wrapper);
 		wrapper.outputData(httpResponse.getOutputStream());
 	}
