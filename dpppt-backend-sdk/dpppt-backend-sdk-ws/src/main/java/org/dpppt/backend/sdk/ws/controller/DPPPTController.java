@@ -10,20 +10,16 @@
 
 package org.dpppt.backend.sdk.ws.controller;
 
-import java.security.MessageDigest;
-import java.security.NoSuchAlgorithmException;
 import java.time.Duration;
 import java.time.LocalDate;
 import java.time.OffsetDateTime;
 import java.time.ZoneOffset;
-
 import java.util.ArrayList;
 import java.util.Base64;
 import java.util.List;
 
 import javax.validation.Valid;
 
-import org.apache.commons.codec.binary.Hex;
 import org.dpppt.backend.sdk.data.DPPPTDataService;
 import org.dpppt.backend.sdk.data.EtagGeneratorInterface;
 import org.dpppt.backend.sdk.model.BucketList;
@@ -34,7 +30,6 @@ import org.dpppt.backend.sdk.model.ExposeeRequestList;
 import org.dpppt.backend.sdk.model.proto.Exposed;
 import org.dpppt.backend.sdk.ws.security.ValidateRequest;
 import org.dpppt.backend.sdk.ws.security.ValidateRequest.InvalidDateException;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.CacheControl;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -52,8 +47,6 @@ import org.springframework.web.bind.annotation.ResponseBody;
 import org.springframework.web.bind.annotation.ResponseStatus;
 import org.springframework.web.context.request.WebRequest;
 
-import com.fasterxml.jackson.core.JsonProcessingException;
-import com.fasterxml.jackson.databind.ObjectMapper;
 import com.google.protobuf.ByteString;
 
 @Controller
@@ -70,9 +63,6 @@ public class DPPPTController {
 	private final long batchLength;
 
 	private final long requestTime;
-	@Autowired
-	private ObjectMapper jacksonObjectMapper;
-
 
 	public DPPPTController(DPPPTDataService dataService, EtagGeneratorInterface etagGenerator, String appSource,
 			int exposedListCacheControl, ValidateRequest validateRequest, long batchLength, int retentionDays, long requestTime) {
