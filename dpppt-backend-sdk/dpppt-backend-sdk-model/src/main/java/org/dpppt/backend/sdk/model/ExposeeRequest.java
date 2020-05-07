@@ -11,12 +11,14 @@
 package org.dpppt.backend.sdk.model;
 
 import javax.validation.constraints.NotNull;
+import javax.validation.constraints.Size;
 
 public class ExposeeRequest {
 
 	private Integer fake = 0;
 
 	@NotNull
+	@Size(min = 24, max = 24)
 	private String key;
 
 	@NotNull
