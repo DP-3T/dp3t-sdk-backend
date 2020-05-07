@@ -4,8 +4,8 @@ import javax.validation.constraints.NotNull;
 import javax.validation.constraints.Size;
 
 public class ExposedKey {
-    @NotNull
-    @Size(min = 24, max = 24)
+  @NotNull
+  @Size(min = 24, max = 24)
 	private String key;
 
 	@NotNull

@@ -109,6 +109,7 @@ public class DPPPTControllerTest extends BaseControllerTest {
         var requestList = new ExposeeRequestList();
         var exposedKey1 = new ExposedKey();
         exposedKey1.setKeyDate(OffsetDateTime.now(ZoneOffset.UTC).toInstant().toEpochMilli());
+
         exposedKey1.setKey(Base64.getEncoder().encodeToString("123456789abcdef.".getBytes("UTF-8")));
         var exposedKey2 = new ExposedKey();
         exposedKey2.setKeyDate(OffsetDateTime.now(ZoneOffset.UTC).minusDays(1).toInstant().toEpochMilli());
