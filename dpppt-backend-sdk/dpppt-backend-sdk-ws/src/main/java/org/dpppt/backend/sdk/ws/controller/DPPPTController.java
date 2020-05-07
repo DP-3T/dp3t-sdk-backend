@@ -10,30 +10,26 @@
 
 package org.dpppt.backend.sdk.ws.controller;
 
-import java.security.MessageDigest;
-import java.security.NoSuchAlgorithmException;
 import java.time.Duration;
 import java.time.LocalDate;
 import java.time.OffsetDateTime;
 import java.time.ZoneOffset;
-
 import java.util.ArrayList;
 import java.util.Base64;
 import java.util.List;
 
 import javax.validation.Valid;
 
-import org.apache.commons.codec.binary.Hex;
 import org.dpppt.backend.sdk.data.DPPPTDataService;
 import org.dpppt.backend.sdk.data.EtagGeneratorInterface;
 import org.dpppt.backend.sdk.model.BucketList;
 import org.dpppt.backend.sdk.model.ExposedOverview;
 import org.dpppt.backend.sdk.model.Exposee;
 import org.dpppt.backend.sdk.model.ExposeeRequest;
+import org.dpppt.backend.sdk.model.ExposeeRequestList;
 import org.dpppt.backend.sdk.model.proto.Exposed;
 import org.dpppt.backend.sdk.ws.security.ValidateRequest;
 import org.dpppt.backend.sdk.ws.security.ValidateRequest.InvalidDateException;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.CacheControl;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -51,8 +47,6 @@ import org.springframework.web.bind.annotation.ResponseBody;
 import org.springframework.web.bind.annotation.ResponseStatus;
 import org.springframework.web.context.request.WebRequest;
 
-import com.fasterxml.jackson.core.JsonProcessingException;
-import com.fasterxml.jackson.databind.ObjectMapper;
 import com.google.protobuf.ByteString;
 
 @Controller
@@ -69,9 +63,6 @@ public class DPPPTController {
 	private final long batchLength;
 
 	private final long requestTime;
-	@Autowired
-	private ObjectMapper jacksonObjectMapper;
-
 
 	public DPPPTController(DPPPTDataService dataService, EtagGeneratorInterface etagGenerator, String appSource,
 			int exposedListCacheControl, ValidateRequest validateRequest, long batchLength, int retentionDays, long requestTime) {
@@ -113,6 +104,45 @@ public class DPPPTController {
 			dataService.upsertExposee(exposee, appSource);
 		} 
 		
+		long after = System.currentTimeMillis();
+		long duration = after - now;
+		try{
+			Thread.sleep(Math.max(this.requestTime - duration,0));
+		}
+		catch (Exception ex) {
+			
+		}
+		return ResponseEntity.ok().build();
+	}
+
+	@CrossOrigin(origins = { "https://editor.swagger.io" })
+	@PostMapping(value = "/exposedlist")
+	public @ResponseBody ResponseEntity<String> addExposee(@Valid @RequestBody ExposeeRequestList exposeeRequests,
+			@RequestHeader(value = "User-Agent", required = true) String userAgent,
+			@AuthenticationPrincipal Object principal) throws InvalidDateException {
+		long now = System.currentTimeMillis();
+		if (!this.validateRequest.isValid(principal)) {
+			return ResponseEntity.status(HttpStatus.FORBIDDEN).build();
+		}
+
+		List<Exposee> exposees = new ArrayList<>();
+		for(var exposedKey : exposeeRequests.getExposedKeys()) {
+			if (!isValidBase64(exposedKey.getKey())) {
+				return new ResponseEntity<>("No valid base64 key", HttpStatus.BAD_REQUEST);
+			}
+
+			Exposee exposee = new Exposee();
+			exposee.setKey(exposedKey.getKey());
+			long keyDate = this.validateRequest.getKeyDate(principal, exposedKey);
+
+			exposee.setKeyDate(keyDate);
+			exposees.add(exposee);
+		}
+
+		if(!this.validateRequest.isFakeRequest(principal, exposeeRequests)) {	
+			dataService.upsertExposees(exposees, appSource);
+		} 
+
 		long after = System.currentTimeMillis();
 		long duration = after - now;
 		try{

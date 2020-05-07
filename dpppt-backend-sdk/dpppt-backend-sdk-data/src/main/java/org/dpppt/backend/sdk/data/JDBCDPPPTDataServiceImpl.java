@@ -11,9 +11,9 @@
 package org.dpppt.backend.sdk.data;
 
 import java.time.Instant;
-import java.time.LocalDate;
 import java.time.OffsetDateTime;
 import java.time.ZoneOffset;
+import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
 
@@ -59,6 +59,28 @@ public class JDBCDPPPTDataServiceImpl implements DPPPTDataService {
 		params.addValue("app_source", appSource);
 		params.addValue("key_date", new Date(exposee.getKeyDate()));
 		jt.update(sql, params);
+	}
+	@Override
+	@Transactional(readOnly = false)
+	public void upsertExposees(List<Exposee> exposees, String appSource) {
+		String sql = null;
+		if (dbType.equals(PGSQL)) {
+			sql = "insert into t_exposed (key, key_date, app_source) values (:key, :key_date, :app_source)"
+					+ " on conflict on constraint key do nothing";
+		} else {
+			sql = "merge into t_exposed using (values(cast(:key as varchar(10000)), cast(:key_date as date), cast(:app_source as varchar(50))))"
+					+ " as vals(key, key_date, app_source) on t_exposed.key = vals.key"
+					+ " when not matched then insert (key, key_date, app_source) values (vals.key, vals.key_date, vals.app_source)";
+		}
+		var parameterList = new ArrayList<MapSqlParameterSource>();
+		for(var exposee : exposees) {
+			MapSqlParameterSource params = new MapSqlParameterSource();
+			params.addValue("key", exposee.getKey());
+			params.addValue("app_source", appSource);
+			params.addValue("key_date", new Date(exposee.getKeyDate()));
+			parameterList.add(params);
+		}
+		jt.batchUpdate(sql, parameterList.toArray(new MapSqlParameterSource[0]));
 	}
 
 	@Override

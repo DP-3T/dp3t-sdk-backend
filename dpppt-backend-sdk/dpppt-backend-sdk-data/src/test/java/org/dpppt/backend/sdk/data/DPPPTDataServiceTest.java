@@ -15,8 +15,10 @@ import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
+import java.time.LocalDate;
 import java.time.OffsetDateTime;
 import java.time.ZoneOffset;
+import java.util.ArrayList;
 import java.util.List;
 
 import org.dpppt.backend.sdk.data.config.DPPPTDataServiceConfig;
@@ -55,6 +57,39 @@ public class DPPPTDataServiceTest {
 		assertEquals(expected.getKey(), actual.getKey());
 		assertEquals(expected.getKeyDate(), actual.getKeyDate());
 		assertNotNull(actual.getId());
+	}
+
+	@Test
+	//depends on sorting of dbservice (in our case descsending with respect to id -> last inserted is first in list)
+	public void testUpsertExposees() {
+		var expected = new ArrayList<Exposee>();
+		var exposee1 = new Exposee();
+		var exposee2 = new Exposee();
+		exposee1.setKey("key1");
+		exposee2.setKey("key2");
+
+		OffsetDateTime now = LocalDate.now().atStartOfDay().atOffset(ZoneOffset.UTC);
+		OffsetDateTime yesterday = LocalDate.now().atStartOfDay().atOffset(ZoneOffset.UTC).minusDays(1);
+		exposee1.setKeyDate(now.toInstant().toEpochMilli());
+		exposee2.setKeyDate(yesterday.toInstant().toEpochMilli());
+
+		expected.add(exposee1);
+		expected.add(exposee2);
+
+		dppptDataService.upsertExposees(expected, "AppSource");
+
+		List<Exposee> sortedExposedForDay = dppptDataService.getSortedExposedForDay(OffsetDateTime.now(ZoneOffset.UTC));
+		assertFalse(sortedExposedForDay.isEmpty());
+		
+		Exposee actual = sortedExposedForDay.get(1);
+		assertEquals(expected.get(0).getKey(), actual.getKey());
+		assertEquals(expected.get(0).getKeyDate(), actual.getKeyDate());
+		assertNotNull(actual.getId());
+
+		Exposee actualYesterday = sortedExposedForDay.get(0);
+		assertEquals(expected.get(1).getKey(), actualYesterday.getKey());
+		assertEquals(expected.get(1).getKeyDate(), actualYesterday.getKeyDate());
+		assertNotNull(actualYesterday.getId());
 	}
 
 	@Test
