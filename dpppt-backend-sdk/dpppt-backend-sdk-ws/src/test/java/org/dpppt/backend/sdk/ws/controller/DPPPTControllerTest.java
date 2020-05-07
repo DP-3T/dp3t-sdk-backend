@@ -21,6 +21,7 @@ import java.time.LocalDate;
 import java.time.OffsetDateTime;
 import java.time.ZoneOffset;
 import java.time.format.DateTimeFormatter;
+import java.util.ArrayList;
 import java.util.Base64;
 import java.util.List;
 
@@ -120,6 +121,49 @@ public class DPPPTControllerTest extends BaseControllerTest {
                                                             .header("User-Agent", "MockMVC")
                                                             .content(json(requestList)))
                 .andExpect(status().is2xxSuccessful()).andReturn().getResponse();
+        response = mockMvc.perform(post("/v1/exposedlist")
+                                .contentType(MediaType.APPLICATION_JSON)
+                                .header("Authorization", "Bearer " + jwtToken)
+                                .header("User-Agent", "MockMVC")
+                                .content(json(requestList)))
+                .andExpect(status().is(401))
+                .andExpect(content().string(""))
+                .andReturn().getResponse();
+    }
+    @Test
+    public void testMultipleKeyNonEmptyUpload() throws Exception {
+        var requestList = new ExposeeRequestList();
+        List<ExposedKey> exposedKeys = new ArrayList<ExposedKey>();
+        requestList.setExposedKeys(exposedKeys);
+        requestList.setFake(0);
+        String token = createToken(OffsetDateTime.now().withOffsetSameInstant(ZoneOffset.UTC).plusMinutes(5));
+        MockHttpServletResponse response = mockMvc.perform(post("/v1/exposedlist")
+                                                            .contentType(MediaType.APPLICATION_JSON)
+                                                            .header("Authorization", "Bearer " + token)
+                                                            .header("User-Agent", "MockMVC")
+                                                            .content(json(requestList)))
+                .andExpect(status().is(400)).andReturn().getResponse();
+        response = mockMvc.perform(post("/v1/exposedlist")
+                                .contentType(MediaType.APPLICATION_JSON)
+                                .header("Authorization", "Bearer " + jwtToken)
+                                .header("User-Agent", "MockMVC")
+                                .content(json(requestList)))
+                .andExpect(status().is(401))
+                .andExpect(content().string(""))
+                .andReturn().getResponse();
+    }
+    @Test
+    public void testMultipleKeyNonNullUpload() throws Exception {
+        var requestList = new ExposeeRequestList();
+        List<ExposedKey> exposedKeys = new ArrayList<ExposedKey>();
+        requestList.setFake(0);
+        String token = createToken(OffsetDateTime.now().withOffsetSameInstant(ZoneOffset.UTC).plusMinutes(5));
+        MockHttpServletResponse response = mockMvc.perform(post("/v1/exposedlist")
+                                                            .contentType(MediaType.APPLICATION_JSON)
+                                                            .header("Authorization", "Bearer " + token)
+                                                            .header("User-Agent", "MockMVC")
+                                                            .content(json(requestList)))
+                .andExpect(status().is(400)).andReturn().getResponse();
         response = mockMvc.perform(post("/v1/exposedlist")
                                 .contentType(MediaType.APPLICATION_JSON)
                                 .header("Authorization", "Bearer " + jwtToken)

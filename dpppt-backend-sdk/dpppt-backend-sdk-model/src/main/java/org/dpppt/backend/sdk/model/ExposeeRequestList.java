@@ -2,7 +2,12 @@ package org.dpppt.backend.sdk.model;
 
 import java.util.List;
 
+import javax.validation.constraints.NotEmpty;
+import javax.validation.constraints.NotNull;
+
 public class ExposeeRequestList {
+    @NotNull
+    @NotEmpty
     List<ExposedKey> exposedKeys;
 
     private Integer fake = 0;
