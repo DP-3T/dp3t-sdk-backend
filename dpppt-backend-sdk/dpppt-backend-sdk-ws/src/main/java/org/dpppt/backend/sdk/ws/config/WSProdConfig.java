@@ -10,16 +10,29 @@
 
 package org.dpppt.backend.sdk.ws.config;
 
+import java.io.StringReader;
+import java.security.KeyFactory;
+import java.security.KeyPair;
+import java.security.PrivateKey;
+import java.security.PublicKey;
+import java.security.Security;
+import java.security.spec.PKCS8EncodedKeySpec;
+import java.security.spec.X509EncodedKeySpec;
+import java.util.Base64;
 import java.util.Properties;
 
 import javax.sql.DataSource;
 
+import org.bouncycastle.jce.provider.BouncyCastleProvider;
+import org.bouncycastle.util.io.pem.PemReader;
 import org.flywaydb.core.Flyway;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.Profile;
 import org.springframework.scheduling.config.ScheduledTaskRegistrar;
+
+import io.jsonwebtoken.SignatureAlgorithm;
 
 import com.zaxxer.hikari.HikariConfig;
 import com.zaxxer.hikari.HikariDataSource;
@@ -55,6 +68,12 @@ public class WSProdConfig extends WSBaseConfig {
 	@Value("${datasource.connectionTimeout}")
 	String dataSourceConnectionTimeout;
 
+	@Value("${ws.ecdsa.credentials.privateKey:}")
+	private String privateKey;
+	
+	@Value("${ws.ecdsa.credentials.publicKey:}")
+    public String publicKey;
+
 	@Bean(destroyMethod = "close")
 	public DataSource dataSource() {
 		HikariConfig config = new HikariConfig();
@@ -88,5 +107,53 @@ public class WSProdConfig extends WSBaseConfig {
 	public void configureTasks(ScheduledTaskRegistrar taskRegistrar) {
 
 	}
+
+	@Override
+	public KeyPair getKeyPair(SignatureAlgorithm algorithm) {
+		Security.setProperty("crypto.policy", "unlimited");
+		if(privateKey.isEmpty() || publicKey.isEmpty()) {
+			return super.getKeyPair(algorithm);
+		}
+ 		return new KeyPair(loadPublicKeyFromString(),loadPrivateKeyFromString());
+	}
+
+	private PrivateKey loadPrivateKeyFromString() {
+		try {
+			String privateKey = getPrivateKey();
+			var reader = new StringReader(privateKey);
+			var readerPem = new PemReader(reader);
+			var obj = readerPem.readPemObject();
+			var pkcs8KeySpec = new PKCS8EncodedKeySpec(obj.getContent());
+			var kf = KeyFactory.getInstance("EC");
+			return (PrivateKey) kf.generatePrivate(pkcs8KeySpec);
+		}
+		catch (Exception ex) {
+			ex.printStackTrace();
+			throw new RuntimeException();
+		}
+	}
+
+	private PublicKey loadPublicKeyFromString() {
+		try {
+			var reader = new StringReader(getPublicKey());
+			var readerPem = new PemReader(reader);
+			var obj = readerPem.readPemObject();
+			return KeyFactory.getInstance("EC").generatePublic(
+					new X509EncodedKeySpec(obj.getContent())
+			);
+		}
+		catch (Exception ex) {
+			ex.printStackTrace();
+			throw new RuntimeException();
+		}
+	}
+
+    String getPrivateKey() {
+        return new String(Base64.getDecoder().decode(privateKey));
+    }
+
+    String getPublicKey() {
+        return new String(Base64.getDecoder().decode(publicKey));
+    }
 
 }
