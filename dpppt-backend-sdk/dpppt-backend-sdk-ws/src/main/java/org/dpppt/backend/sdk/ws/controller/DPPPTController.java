@@ -52,6 +52,9 @@ import com.google.protobuf.ByteString;
 @Controller
 @RequestMapping("/v1")
 public class DPPPTController {
+	private static final int KEY_LENGTH_BYTES_GOOGLE_APPLE = 16;
+	private static final int KEY_LENGTH_BYTES_DP3T = 32;
+	private static final int MAX_KEY_LENGTH_BASE_64 = 44;
 
 	private final DPPPTDataService dataService;
 	private final EtagGeneratorInterface etagGenerator;
@@ -59,13 +62,12 @@ public class DPPPTController {
 	private final int exposedListCacheContol;
 	private final ValidateRequest validateRequest;
 	private final int retentionDays;
-
 	private final long batchLength;
-
 	private final long requestTime;
 
 	public DPPPTController(DPPPTDataService dataService, EtagGeneratorInterface etagGenerator, String appSource,
-			int exposedListCacheControl, ValidateRequest validateRequest, long batchLength, int retentionDays, long requestTime) {
+			int exposedListCacheControl, ValidateRequest validateRequest, long batchLength, int retentionDays,
+			long requestTime) {
 		this.dataService = dataService;
 		this.appSource = appSource;
 		this.etagGenerator = etagGenerator;
@@ -91,7 +93,7 @@ public class DPPPTController {
 		if (!this.validateRequest.isValid(principal)) {
 			return ResponseEntity.status(HttpStatus.FORBIDDEN).build();
 		}
-		if (!isValidBase64(exposeeRequest.getKey())) {
+		if (!isValidBase64Key(exposeeRequest.getKey())) {
 			return new ResponseEntity<>("No valid base64 key", HttpStatus.BAD_REQUEST);
 		}
 		// TODO: should we give that information?
@@ -100,17 +102,16 @@ public class DPPPTController {
 		long keyDate = this.validateRequest.getKeyDate(principal, exposeeRequest);
 
 		exposee.setKeyDate(keyDate);
-		if(!this.validateRequest.isFakeRequest(principal, exposeeRequest)) {
+		if (!this.validateRequest.isFakeRequest(principal, exposeeRequest)) {
 			dataService.upsertExposee(exposee, appSource);
-		} 
-		
+		}
+
 		long after = System.currentTimeMillis();
 		long duration = after - now;
-		try{
-			Thread.sleep(Math.max(this.requestTime - duration,0));
-		}
-		catch (Exception ex) {
-			
+		try {
+			Thread.sleep(Math.max(this.requestTime - duration, 0));
+		} catch (Exception ex) {
+
 		}
 		return ResponseEntity.ok().build();
 	}
@@ -126,8 +127,8 @@ public class DPPPTController {
 		}
 
 		List<Exposee> exposees = new ArrayList<>();
-		for(var exposedKey : exposeeRequests.getExposedKeys()) {
-			if (!isValidBase64(exposedKey.getKey())) {
+		for (var exposedKey : exposeeRequests.getExposedKeys()) {
+			if (!isValidBase64Key(exposedKey.getKey())) {
 				return new ResponseEntity<>("No valid base64 key", HttpStatus.BAD_REQUEST);
 			}
 
@@ -139,17 +140,16 @@ public class DPPPTController {
 			exposees.add(exposee);
 		}
 
-		if(!this.validateRequest.isFakeRequest(principal, exposeeRequests)) {	
+		if (!this.validateRequest.isFakeRequest(principal, exposeeRequests)) {
 			dataService.upsertExposees(exposees, appSource);
-		} 
+		}
 
 		long after = System.currentTimeMillis();
 		long duration = after - now;
-		try{
-			Thread.sleep(Math.max(this.requestTime - duration,0));
-		}
-		catch (Exception ex) {
-			
+		try {
+			Thread.sleep(Math.max(this.requestTime - duration, 0));
+		} catch (Exception ex) {
+
 		}
 		return ResponseEntity.ok().build();
 	}
@@ -164,7 +164,8 @@ public class DPPPTController {
 		if (batchReleaseTime > OffsetDateTime.now().withOffsetSameInstant(ZoneOffset.UTC).toInstant().toEpochMilli()) {
 			return ResponseEntity.notFound().build();
 		}
-		if (batchReleaseTime < OffsetDateTime.now().withOffsetSameInstant(ZoneOffset.UTC).minusDays(retentionDays).toInstant().toEpochMilli()){
+		if (batchReleaseTime < OffsetDateTime.now().withOffsetSameInstant(ZoneOffset.UTC).minusDays(retentionDays)
+				.toInstant().toEpochMilli()) {
 			return ResponseEntity.notFound().build();
 		}
 
@@ -191,7 +192,8 @@ public class DPPPTController {
 		if (batchReleaseTime > OffsetDateTime.now().withOffsetSameInstant(ZoneOffset.UTC).toInstant().toEpochMilli()) {
 			return ResponseEntity.notFound().build();
 		}
-		if (batchReleaseTime < OffsetDateTime.now().withOffsetSameInstant(ZoneOffset.UTC).minusDays(retentionDays).toInstant().toEpochMilli()){
+		if (batchReleaseTime < OffsetDateTime.now().withOffsetSameInstant(ZoneOffset.UTC).minusDays(retentionDays)
+				.toInstant().toEpochMilli()) {
 			return ResponseEntity.notFound().build();
 		}
 		int max = dataService.getMaxExposedIdForBatchReleaseTime(batchReleaseTime, batchLength);
@@ -222,15 +224,15 @@ public class DPPPTController {
 		OffsetDateTime currentBucket = day;
 		OffsetDateTime now = OffsetDateTime.now().withOffsetSameInstant(ZoneOffset.UTC);
 		List<Long> bucketList = new ArrayList<>();
-		while(currentBucket.toInstant().toEpochMilli() < Math.min(day.plusDays(1).toInstant().toEpochMilli(), now.toInstant().toEpochMilli())) {
+		while (currentBucket.toInstant().toEpochMilli() < Math.min(day.plusDays(1).toInstant().toEpochMilli(),
+				now.toInstant().toEpochMilli())) {
 			bucketList.add(currentBucket.toInstant().toEpochMilli());
-			currentBucket = currentBucket.plusSeconds(batchLength/1000);
+			currentBucket = currentBucket.plusSeconds(batchLength / 1000);
 		}
 		BucketList list = new BucketList();
 		list.setBuckets(bucketList);
 		return ResponseEntity.ok(list);
 	}
-
 
 	@ExceptionHandler(IllegalArgumentException.class)
 	@ResponseStatus(HttpStatus.BAD_REQUEST)
@@ -244,9 +246,15 @@ public class DPPPTController {
 		return ResponseEntity.badRequest().build();
 	}
 
-	private boolean isValidBase64(String value) {
+	private boolean isValidBase64Key(String value) {
 		try {
-			Base64.getDecoder().decode(value);
+			if (value.length() > MAX_KEY_LENGTH_BASE_64) {
+				return false;
+			}
+			byte[] key = Base64.getDecoder().decode(value);
+			if (key.length != KEY_LENGTH_BYTES_DP3T && key.length != KEY_LENGTH_BYTES_GOOGLE_APPLE) {
+				return false;
+			}
 			return true;
 		} catch (Exception e) {
 			return false;
