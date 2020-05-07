@@ -302,7 +302,7 @@ public class DPPPTControllerTest extends BaseControllerTest {
 		exposeeRequest.setAuthData(new ExposeeAuthData());
 		exposeeRequest
 				.setKeyDate(OffsetDateTime.now().withOffsetSameInstant(ZoneOffset.UTC).toInstant().toEpochMilli());
-		exposeeRequest.setKey(Base64.getEncoder().encodeToString("test".getBytes("UTF-8")));
+		exposeeRequest.setKey(Base64.getEncoder().encodeToString("testKey16Bytes--".getBytes("UTF-8")));
 		exposeeRequest.setIsFake(0);
 		String token = createTokenWithScope(OffsetDateTime.now().withOffsetSameInstant(ZoneOffset.UTC).plusMinutes(5),
 				"not-exposed");

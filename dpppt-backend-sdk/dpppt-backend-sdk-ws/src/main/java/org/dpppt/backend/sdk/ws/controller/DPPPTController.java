@@ -54,7 +54,6 @@ import com.google.protobuf.ByteString;
 public class DPPPTController {
 	private static final int KEY_LENGTH_BYTES_GOOGLE_APPLE = 16;
 	private static final int KEY_LENGTH_BYTES_DP3T = 32;
-	private static final int MAX_KEY_LENGTH_BASE_64 = 44;
 
 	private final DPPPTDataService dataService;
 	private final EtagGeneratorInterface etagGenerator;
@@ -248,9 +247,6 @@ public class DPPPTController {
 
 	private boolean isValidBase64Key(String value) {
 		try {
-			if (value.length() > MAX_KEY_LENGTH_BASE_64) {
-				return false;
-			}
 			byte[] key = Base64.getDecoder().decode(value);
 			if (key.length != KEY_LENGTH_BYTES_DP3T && key.length != KEY_LENGTH_BYTES_GOOGLE_APPLE) {
 				return false;
