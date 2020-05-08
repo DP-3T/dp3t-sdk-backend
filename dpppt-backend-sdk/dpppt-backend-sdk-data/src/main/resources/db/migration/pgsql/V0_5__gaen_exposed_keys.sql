@@ -7,8 +7,8 @@
 CREATE TABLE t_gaen_exposed(
  pk_exposed_id Serial NOT NULL,
  key VARCHAR(24) NOT NULL,
- rolling_start_number BigInt NOT NULL,
- rolling_period BigInt NOT NULL,
+ rolling_start_number Int NOT NULL,
+ rolling_period Int NOT NULL,
  transmission_risk_level Int NOT NULL,
  received_at Timestamp with time zone DEFAULT now() NOT NULL
 );
