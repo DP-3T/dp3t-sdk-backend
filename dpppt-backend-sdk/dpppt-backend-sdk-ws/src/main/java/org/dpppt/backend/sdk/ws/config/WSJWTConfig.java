@@ -23,6 +23,7 @@ import java.util.Base64;
 
 import org.apache.commons.io.IOUtils;
 import org.dpppt.backend.sdk.data.DPPPTDataService;
+import org.dpppt.backend.sdk.data.RedeemDataService;
 import org.dpppt.backend.sdk.ws.security.JWTClaimSetConverter;
 import org.dpppt.backend.sdk.ws.security.JWTValidateRequest;
 import org.dpppt.backend.sdk.ws.security.JWTValidator;
@@ -60,6 +61,10 @@ public class WSJWTConfig extends WebSecurityConfigurerAdapter {
 	@Autowired
 	@Lazy
 	DPPPTDataService dataService;
+	
+	@Autowired
+	@Lazy
+	RedeemDataService redeemDataService;
 
 	@Override
 	protected void configure(HttpSecurity http) throws Exception {
@@ -92,7 +97,7 @@ public class WSJWTConfig extends WebSecurityConfigurerAdapter {
 
 	@Bean
 	public JWTValidator jwtValidator() {
-		return new JWTValidator(dataService, Duration.ofMinutes(maxValidityMinutes));
+		return new JWTValidator(redeemDataService, Duration.ofMinutes(maxValidityMinutes));
 	}
 
 	@Bean

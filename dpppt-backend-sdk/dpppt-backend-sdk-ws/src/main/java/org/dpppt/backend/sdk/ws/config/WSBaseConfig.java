@@ -20,6 +20,10 @@ import org.dpppt.backend.sdk.data.DPPPTDataService;
 import org.dpppt.backend.sdk.data.EtagGenerator;
 import org.dpppt.backend.sdk.data.EtagGeneratorInterface;
 import org.dpppt.backend.sdk.data.JDBCDPPPTDataServiceImpl;
+import org.dpppt.backend.sdk.data.JDBCRedeemDataServiceImpl;
+import org.dpppt.backend.sdk.data.RedeemDataService;
+import org.dpppt.backend.sdk.data.gaen.GAENDataService;
+import org.dpppt.backend.sdk.data.gaen.JDBCGAENDataServiceImpl;
 import org.dpppt.backend.sdk.ws.controller.DPPPTController;
 import org.dpppt.backend.sdk.ws.controller.GaenController;
 import org.dpppt.backend.sdk.ws.filter.ResponseWrapperFilter;
@@ -110,6 +114,16 @@ public abstract class WSBaseConfig implements SchedulingConfigurer, WebMvcConfig
 	public DPPPTDataService dppptSDKDataService() {
 		return new JDBCDPPPTDataServiceImpl(getDbType(), dataSource());
 	}
+	
+	@Bean
+	public GAENDataService gaenDataService() {
+		return new JDBCGAENDataServiceImpl(getDbType(), dataSource());
+	}
+	
+	@Bean
+	public RedeemDataService redeemDataService() {
+		return new JDBCRedeemDataServiceImpl(dataSource());
+	}
 
 	@Bean
 	public MappingJackson2HttpMessageConverter converter() {
@@ -144,7 +158,9 @@ public abstract class WSBaseConfig implements SchedulingConfigurer, WebMvcConfig
 	public void configureTasks(ScheduledTaskRegistrar taskRegistrar) {
 		taskRegistrar.addFixedRateTask(new IntervalTask(() -> {
 			logger.info("Start DB cleanup");
-			dppptSDKDataService().cleanDB(retentionDays);
+			dppptSDKDataService().cleanDB(Duration.ofDays(retentionDays));
+			gaenDataService().cleanDB(Duration.ofDays(retentionDays));
+			redeemDataService().cleanDB(Duration.ofDays(1));
 			logger.info("DB cleanup up");
 		}, 60 * 60 * 1000L));
 	}

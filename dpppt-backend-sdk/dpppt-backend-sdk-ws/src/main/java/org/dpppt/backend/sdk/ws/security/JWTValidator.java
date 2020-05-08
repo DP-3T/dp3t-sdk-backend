@@ -12,11 +12,8 @@ package org.dpppt.backend.sdk.ws.security;
 
 import java.time.Duration;
 import java.time.Instant;
-import java.time.LocalDate;
-import java.time.OffsetDateTime;
-import java.time.ZoneOffset;
 
-import org.dpppt.backend.sdk.data.DPPPTDataService;
+import org.dpppt.backend.sdk.data.RedeemDataService;
 import org.springframework.security.oauth2.core.OAuth2Error;
 import org.springframework.security.oauth2.core.OAuth2ErrorCodes;
 import org.springframework.security.oauth2.core.OAuth2TokenValidator;
@@ -29,10 +26,10 @@ public class JWTValidator implements OAuth2TokenValidator<Jwt> {
     public static final String UUID_CLAIM = "jti";
 
 
-    private DPPPTDataService dataService;
+    private RedeemDataService dataService;
     private Duration maxJwtValidity;
 
-    public JWTValidator(DPPPTDataService dataService, Duration maxJwtValidity) {
+    public JWTValidator(RedeemDataService dataService, Duration maxJwtValidity) {
         this.dataService = dataService;
         this.maxJwtValidity = maxJwtValidity;
     }
