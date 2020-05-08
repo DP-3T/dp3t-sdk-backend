@@ -49,8 +49,8 @@ public class JDBCGAENDataServiceImpl implements GAENDataService {
 					+ " on conflict on constraint key do nothing";
 		} else {
 			sql = "merge into t_gaen_exposed using (values(cast(:key as varchar(24)), :rolling_start_number, :rolling_period, :transmission_risk_level))"
-					+ " as vals(key, key_date, app_source) on t_exposed.key = vals.key"
-					+ " when not matched then insert (key, key_date, app_source) values (vals.key, vals.key_date, vals.app_source)";
+					+ " as vals(key, rolling_start_number, rolling_period, transmission_risk_level) on t_gaen_exposed.key = vals.key"
+					+ " when not matched then insert (key, rolling_start_number, rolling_period, transmission_risk_level) values (vals.key, vals.rolling_start_number, vals.rolling_period, transmission_risk_level)";
 		}
 		var parameterList = new ArrayList<MapSqlParameterSource>();
 		for(var gaenKey : gaenKeys) {
@@ -82,7 +82,7 @@ public class JDBCGAENDataServiceImpl implements GAENDataService {
 	@Override
 	@Transactional(readOnly = true)
 	public List<GaenKey> getSortedExposedForBatchReleaseTime(Long batchReleaseTime, long batchLength) {
-		String sql = "select pk_exposed_id, key, rolling_start_period, rolling_period, transmission_risk_level from t_gaen_exposed where received_at >= :startBatch and received_at < :batchReleaseTime order by pk_exposed_id desc";
+		String sql = "select pk_exposed_id, key, rolling_start_number, rolling_period, transmission_risk_level from t_gaen_exposed where received_at >= :startBatch and received_at < :batchReleaseTime order by pk_exposed_id desc";
 		MapSqlParameterSource params = new MapSqlParameterSource();
 		params.addValue("batchReleaseTime", Date.from(Instant.ofEpochMilli(batchReleaseTime)));
 		params.addValue("startBatch", Date.from(Instant.ofEpochMilli(batchReleaseTime - batchLength)));
