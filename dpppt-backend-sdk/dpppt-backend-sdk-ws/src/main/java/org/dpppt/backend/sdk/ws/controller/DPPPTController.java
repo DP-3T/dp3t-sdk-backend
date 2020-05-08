@@ -31,6 +31,7 @@ import org.dpppt.backend.sdk.model.proto.Exposed;
 import org.dpppt.backend.sdk.ws.security.ValidateRequest;
 import org.dpppt.backend.sdk.ws.security.ValidateRequest.InvalidDateException;
 import org.dpppt.backend.sdk.ws.util.ValidationUtils;
+import org.dpppt.backend.sdk.ws.util.ValidationUtils.BadBatchReleaseTimeException;
 import org.springframework.http.CacheControl;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -158,15 +159,8 @@ public class DPPPTController {
 	@CrossOrigin(origins = { "https://editor.swagger.io" })
 	@GetMapping(value = "/exposedjson/{batchReleaseTime}", produces = "application/json")
 	public @ResponseBody ResponseEntity<ExposedOverview> getExposedByDayDate(@PathVariable Long batchReleaseTime,
-			WebRequest request) {
-		if (batchReleaseTime % batchLength != 0) {
-			return ResponseEntity.badRequest().build();
-		}
-		if (batchReleaseTime > OffsetDateTime.now().withOffsetSameInstant(ZoneOffset.UTC).toInstant().toEpochMilli()) {
-			return ResponseEntity.notFound().build();
-		}
-		if (batchReleaseTime < OffsetDateTime.now().withOffsetSameInstant(ZoneOffset.UTC).minusDays(retentionDays)
-				.toInstant().toEpochMilli()) {
+			WebRequest request) throws BadBatchReleaseTimeException{
+		if(!validationUtils.isValidBatchReleaseTime(batchReleaseTime)) {
 			return ResponseEntity.notFound().build();
 		}
 
@@ -186,17 +180,11 @@ public class DPPPTController {
 	@CrossOrigin(origins = { "https://editor.swagger.io" })
 	@GetMapping(value = "/exposed/{batchReleaseTime}", produces = "application/x-protobuf")
 	public @ResponseBody ResponseEntity<Exposed.ProtoExposedList> getExposedByBatch(@PathVariable Long batchReleaseTime,
-			WebRequest request) {
-		if (batchReleaseTime % batchLength != 0) {
-			return ResponseEntity.badRequest().build();
-		}
-		if (batchReleaseTime > OffsetDateTime.now().withOffsetSameInstant(ZoneOffset.UTC).toInstant().toEpochMilli()) {
+			WebRequest request) throws BadBatchReleaseTimeException {
+		if(!validationUtils.isValidBatchReleaseTime(batchReleaseTime)) {
 			return ResponseEntity.notFound().build();
 		}
-		if (batchReleaseTime < OffsetDateTime.now().withOffsetSameInstant(ZoneOffset.UTC).minusDays(retentionDays)
-				.toInstant().toEpochMilli()) {
-			return ResponseEntity.notFound().build();
-		}
+		
 		int max = dataService.getMaxExposedIdForBatchReleaseTime(batchReleaseTime, batchLength);
 		String etag = etagGenerator.getEtag(max, "proto");
 		if (request.checkNotModified(etag)) {
@@ -244,6 +232,11 @@ public class DPPPTController {
 	@ExceptionHandler(InvalidDateException.class)
 	@ResponseStatus(HttpStatus.BAD_REQUEST)
 	public ResponseEntity<Object> invalidDate() {
+		return ResponseEntity.badRequest().build();
+	}
+	@ExceptionHandler(BadBatchReleaseTimeException.class)
+	@ResponseStatus(HttpStatus.BAD_REQUEST)
+	public ResponseEntity<Object> invalidBatchReleaseTime() {
 		return ResponseEntity.badRequest().build();
 	}
 

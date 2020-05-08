@@ -9,9 +9,11 @@ import java.util.Base64;
 public class ValidationUtils {
     private final int KEY_LENGTH_BYTES;
     private final Duration retentionPeriod;
-    public ValidationUtils(int keyLengthBytes, Duration retentionPeriod) {
+    private final Long batchLength;
+    public ValidationUtils(int keyLengthBytes, Duration retentionPeriod, Long batchLength) {
         this.KEY_LENGTH_BYTES = keyLengthBytes;
         this.retentionPeriod = retentionPeriod;
+        this.batchLength = batchLength;
     }
     public boolean isValidBase64Key(String value) {
 		try {
@@ -33,5 +35,22 @@ public class ValidationUtils {
             return false;
         }
         return true;
+    }
+    public boolean isValidBatchReleaseTime(Long batchReleaseTime) throws BadBatchReleaseTimeException {
+        if (batchReleaseTime % batchLength != 0) {
+			throw new BadBatchReleaseTimeException();
+		}
+		if (batchReleaseTime > OffsetDateTime.now().withOffsetSameInstant(ZoneOffset.UTC).toInstant().toEpochMilli()) {
+			return false;
+		}
+		if (batchReleaseTime < OffsetDateTime.now().withOffsetSameInstant(ZoneOffset.UTC).minus(retentionPeriod)
+				.toInstant().toEpochMilli()) {
+			return false;
+        }
+        return true;
+    }
+
+    public class BadBatchReleaseTimeException extends Exception {
+    
     }
 }

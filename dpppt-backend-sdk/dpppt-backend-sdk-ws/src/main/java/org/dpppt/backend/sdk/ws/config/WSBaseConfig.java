@@ -111,7 +111,7 @@ public abstract class WSBaseConfig implements SchedulingConfigurer, WebMvcConfig
 			theValidator = new NoValidateRequest();
 		}
 		return new DPPPTController(dppptSDKDataService(), etagGenerator(), appSource, exposedListCacheControl,
-				theValidator, new ValidationUtils(keySizeBytes, Duration.ofDays(retentionDays)), batchLength, retentionDays, requestTime);
+				theValidator, new ValidationUtils(keySizeBytes, Duration.ofDays(retentionDays), batchLength), batchLength, retentionDays, requestTime);
 	}
 
 	@Bean
@@ -120,7 +120,7 @@ public abstract class WSBaseConfig implements SchedulingConfigurer, WebMvcConfig
 		if (theValidator == null) {
 			theValidator = new NoValidateRequest();
 		}
-		return new GaenController(theValidator,new ValidationUtils(gaenKeySizeBytes, Duration.ofDays(retentionDays)), retentionDays, Duration.ofMillis(batchLength), Duration.ofMillis(requestTime));
+		return new GaenController(etagGenerator(), theValidator,new ValidationUtils(gaenKeySizeBytes, Duration.ofDays(retentionDays), batchLength), retentionDays, Duration.ofMillis(batchLength), Duration.ofMillis(requestTime));
 	}
 
 	@Bean
