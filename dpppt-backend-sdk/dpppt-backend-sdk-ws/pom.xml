@@ -141,14 +141,21 @@
 			<plugin>
                 <groupId>ch.ubique.openapi</groupId>
                 <artifactId>springboot-swagger-3</artifactId>
-                <version>1.2.2</version>
+                <version>1.2.4</version>
                 <configuration>
-                    <apiVersion>1.0-develop</apiVersion>
+                    <apiVersion>1.0-gapple</apiVersion>
                     <basePackages>
                        org.dpppt.backend.sdk.model
                     </basePackages>
+					<blackListedPackages>
+						<blackListedPackage>com.google.protobuf</blackListedPackage>
+					</blackListedPackages>
+					<ignoredTypes>
+						<ignoredType>byte</ignoredType>
+					</ignoredTypes>
                     <controllers>
                         <controller>org.dpppt.backend.sdk.ws.controller.DPPPTController</controller>
+						<controller> org.dpppt.backend.sdk.ws.controller.GaenController</controller>
                     </controllers>
                     <description>DP3T API</description>
                     <apiUrls>

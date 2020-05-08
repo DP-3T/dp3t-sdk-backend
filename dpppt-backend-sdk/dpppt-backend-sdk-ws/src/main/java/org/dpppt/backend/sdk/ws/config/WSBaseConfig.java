@@ -11,6 +11,7 @@
 package org.dpppt.backend.sdk.ws.config;
 
 import java.security.KeyPair;
+import java.time.Duration;
 import java.util.List;
 
 import javax.sql.DataSource;
@@ -20,6 +21,7 @@ import org.dpppt.backend.sdk.data.EtagGenerator;
 import org.dpppt.backend.sdk.data.EtagGeneratorInterface;
 import org.dpppt.backend.sdk.data.JDBCDPPPTDataServiceImpl;
 import org.dpppt.backend.sdk.ws.controller.DPPPTController;
+import org.dpppt.backend.sdk.ws.controller.GaenController;
 import org.dpppt.backend.sdk.ws.filter.ResponseWrapperFilter;
 import org.dpppt.backend.sdk.ws.security.NoValidateRequest;
 import org.dpppt.backend.sdk.ws.security.ValidateRequest;
@@ -94,6 +96,11 @@ public abstract class WSBaseConfig implements SchedulingConfigurer, WebMvcConfig
 		}
 		return new DPPPTController(dppptSDKDataService(), etagGenerator(), appSource, exposedListCacheControl,
 				theValidator, batchLength, retentionDays, requestTime);
+	}
+
+	@Bean
+	public GaenController gaenController(){
+		return new GaenController(retentionDays, Duration.ofMillis(batchLength));
 	}
 
 	@Bean
