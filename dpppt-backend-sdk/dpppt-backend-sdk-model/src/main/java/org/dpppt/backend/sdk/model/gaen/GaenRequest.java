@@ -2,12 +2,14 @@ package org.dpppt.backend.sdk.model.gaen;
 
 import java.util.List;
 
+import javax.validation.Valid;
 import javax.validation.constraints.NotEmpty;
 import javax.validation.constraints.NotNull;
 
 public class GaenRequest {
     @NotNull
     @NotEmpty
+    @Valid
     List<GaenKey> gaenKeys;
 
     Integer fake = 0;
