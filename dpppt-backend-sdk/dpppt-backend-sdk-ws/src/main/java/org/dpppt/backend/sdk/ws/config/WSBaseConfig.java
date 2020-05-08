@@ -83,6 +83,9 @@ public abstract class WSBaseConfig implements SchedulingConfigurer, WebMvcConfig
 	@Value("${ws.app.source}")
 	String appSource;
 
+	@Value("${ws.app.gaen.region: ch}")
+	String gaenRegion;
+
 	@Autowired(required = false)
 	ValidateRequest requestValidator;
 
