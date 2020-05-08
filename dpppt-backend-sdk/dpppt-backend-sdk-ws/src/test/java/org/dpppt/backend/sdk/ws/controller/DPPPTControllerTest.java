@@ -268,6 +268,7 @@ public class DPPPTControllerTest extends BaseControllerTest {
 		exposeeRequest.setKeyDate(
 				OffsetDateTime.now().plusDays(2).withOffsetSameInstant(ZoneOffset.UTC).toInstant().toEpochMilli());
 		exposeeRequest.setKey(Base64.getEncoder().encodeToString("testKey32Bytes--testKey32Bytes--".getBytes("UTF-8")));
+
 		exposeeRequest.setIsFake(0);
 		String token = createToken(OffsetDateTime.now().withOffsetSameInstant(ZoneOffset.UTC).plusMinutes(5));
 
@@ -284,6 +285,7 @@ public class DPPPTControllerTest extends BaseControllerTest {
 		exposeeRequest.setAuthData(new ExposeeAuthData());
 		exposeeRequest.setKeyDate(
 				OffsetDateTime.now().withOffsetSameInstant(ZoneOffset.UTC).minusDays(22).toInstant().toEpochMilli());
+
 		exposeeRequest.setKey(Base64.getEncoder().encodeToString("testKey32Bytes--testKey32Bytes--".getBytes("UTF-8")));
 		exposeeRequest.setIsFake(0);
 		String token = createToken(OffsetDateTime.now().withOffsetSameInstant(ZoneOffset.UTC).plusMinutes(5),

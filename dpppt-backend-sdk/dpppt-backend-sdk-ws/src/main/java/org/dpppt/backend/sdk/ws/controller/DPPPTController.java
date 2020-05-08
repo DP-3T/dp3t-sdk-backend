@@ -54,6 +54,8 @@ import com.google.protobuf.ByteString;
 @Controller
 @RequestMapping("/v1")
 public class DPPPTController {
+	private static final int KEY_LENGTH_BYTES_GOOGLE_APPLE = 16;
+	private static final int KEY_LENGTH_BYTES_DP3T = 32;
 
 	private final DPPPTDataService dataService;
 	private final EtagGeneratorInterface etagGenerator;
