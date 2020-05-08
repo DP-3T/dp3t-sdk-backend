@@ -43,7 +43,25 @@ public class JDBCGAENDataServiceImpl implements GAENDataService {
 	@Override
 	@Transactional(readOnly = false)
 	public void upsertExposees(List<GaenKey> gaenKeys) {
-		// TODO Auto-generated method stub
+		String sql = null;
+		if (dbType.equals(PGSQL)) {
+			sql = "insert into t_gaen_exposed (key, rolling_start_number, rolling_period, transmission_risk_level) values (:key, :rolling_start_number, :rolling_period, :transmission_risk_level)"
+					+ " on conflict on constraint key do nothing";
+		} else {
+			sql = "merge into t_gaen_exposed using (values(cast(:key as varchar(24)), :rolling_start_number, :rolling_period, :transmission_risk_level))"
+					+ " as vals(key, key_date, app_source) on t_exposed.key = vals.key"
+					+ " when not matched then insert (key, key_date, app_source) values (vals.key, vals.key_date, vals.app_source)";
+		}
+		var parameterList = new ArrayList<MapSqlParameterSource>();
+		for(var gaenKey : gaenKeys) {
+			MapSqlParameterSource params = new MapSqlParameterSource();
+			params.addValue("key", gaenKey.getKeyData());
+			params.addValue("rolling_start_number", gaenKey.getRollingStartNumber());
+			params.addValue("rolling_period", gaenKey.getRollingPeriod());
+			params.addValue("transmission_risk_level", gaenKey.getTransmissionRiskLevel());
+			parameterList.add(params);
+		}
+		jt.batchUpdate(sql, parameterList.toArray(new MapSqlParameterSource[0]));
 	}
 
 	@Override
@@ -64,8 +82,11 @@ public class JDBCGAENDataServiceImpl implements GAENDataService {
 	@Override
 	@Transactional(readOnly = true)
 	public List<GaenKey> getSortedExposedForBatchReleaseTime(Long batchReleaseTime, long batchLength) {
-		// TODO Auto-generated method stub
-		return new ArrayList<>();
+		String sql = "select pk_exposed_id, key, rolling_start_period, rolling_period, transmission_risk_level from t_gaen_exposed where received_at >= :startBatch and received_at < :batchReleaseTime order by pk_exposed_id desc";
+		MapSqlParameterSource params = new MapSqlParameterSource();
+		params.addValue("batchReleaseTime", Date.from(Instant.ofEpochMilli(batchReleaseTime)));
+		params.addValue("startBatch", Date.from(Instant.ofEpochMilli(batchReleaseTime - batchLength)));
+		return jt.query(sql, params, new GaenKeyRowMapper());
 	}
 
 	@Override
