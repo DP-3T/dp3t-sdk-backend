@@ -92,7 +92,7 @@ public class GaenController {
             return ResponseEntity.notFound().build();
         }
 
-        int max = dataService.getMaxExposedIdForBatchReleaseTime(batchReleaseTime, batchLength);
+        int max = dataService.getMaxExposedIdForBatchReleaseTime(batchReleaseTime, bucketLength.toMillis());
         String etag = etagGenerator.getEtag(max, "proto");
         
         if (request.checkNotModified(etag)) {
