@@ -16,6 +16,7 @@ import org.dpppt.backend.sdk.model.gaen.GaenKey;
 import org.dpppt.backend.sdk.model.gaen.GaenRequest;
 import org.dpppt.backend.sdk.model.gaen.proto.FileProto;
 import org.dpppt.backend.sdk.ws.security.ValidateRequest;
+import org.dpppt.backend.sdk.ws.util.ValidationUtils;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
@@ -38,12 +39,14 @@ public class GaenController {
     private final Duration bucketLength;
     private final Duration requestTime;
     private final ValidateRequest validateRequest;
+    private final ValidationUtils validationUtils;
 
-    public GaenController(ValidateRequest validateRequest, Integer retentionPeriod, Duration bucketLength, Duration requestTime) {
+    public GaenController(ValidateRequest validateRequest, ValidationUtils validationUtils, Integer retentionPeriod, Duration bucketLength, Duration requestTime) {
         this.retentionPeriod = retentionPeriod;
         this.bucketLength = bucketLength;
         this.validateRequest = validateRequest;
         this.requestTime = requestTime;
+        this.validationUtils = validationUtils;
     }
 
     @PostMapping(value = "/exposed")
@@ -55,7 +58,7 @@ public class GaenController {
             return ResponseEntity.status(HttpStatus.FORBIDDEN).build();
         }
         for(var key : gaenRequest.getGaenKeys()) {
-            if(!isValidBase64Key(key.getKeyData())) {
+            if(!validationUtils.isValidBase64Key(key.getKeyData())) {
                 return new ResponseEntity<>("No valid base64 key", HttpStatus.BAD_REQUEST);
             }
             this.validateRequest.getKeyDate(principal, key);
@@ -94,7 +97,7 @@ public class GaenController {
     public @ResponseBody ResponseEntity<DayBuckets> getBuckets(@PathVariable String dayDateStr) {
         var timestamp = LocalDate.parse(dayDateStr).atStartOfDay().toInstant(ZoneOffset.UTC).atOffset(ZoneOffset.UTC);
         var now = Instant.now().atOffset(ZoneOffset.UTC);
-        if (!isInRange(timestamp)) {
+        if (!validationUtils.isDateInRange(timestamp)) {
             return ResponseEntity.notFound().build();
         }
         var relativeUrls = new ArrayList<String>();
@@ -110,15 +113,5 @@ public class GaenController {
         }
 
         return ResponseEntity.ok(dayBuckets);
-    }
-
-    private boolean isInRange(OffsetDateTime timestamp) {
-        if (timestamp.isAfter(Instant.now().atOffset(ZoneOffset.UTC))) {
-            return false;
-        }
-        if (timestamp.isBefore(Instant.now().atOffset(ZoneOffset.UTC).minusDays(retentionPeriod))) {
-            return false;
-        }
-        return true;
     }
 }

@@ -30,6 +30,7 @@ import org.dpppt.backend.sdk.model.ExposeeRequestList;
 import org.dpppt.backend.sdk.model.proto.Exposed;
 import org.dpppt.backend.sdk.ws.security.ValidateRequest;
 import org.dpppt.backend.sdk.ws.security.ValidateRequest.InvalidDateException;
+import org.dpppt.backend.sdk.ws.util.ValidationUtils;
 import org.springframework.http.CacheControl;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -52,26 +53,27 @@ import com.google.protobuf.ByteString;
 @Controller
 @RequestMapping("/v1")
 public class DPPPTController {
-	private static final int KEY_LENGTH_BYTES_GOOGLE_APPLE = 16;
-	private static final int KEY_LENGTH_BYTES_DP3T = 32;
 
 	private final DPPPTDataService dataService;
 	private final EtagGeneratorInterface etagGenerator;
 	private final String appSource;
 	private final int exposedListCacheContol;
 	private final ValidateRequest validateRequest;
+	private final ValidationUtils validationUtils;
 	private final int retentionDays;
 	private final long batchLength;
 	private final long requestTime;
 
+
 	public DPPPTController(DPPPTDataService dataService, EtagGeneratorInterface etagGenerator, String appSource,
-			int exposedListCacheControl, ValidateRequest validateRequest, long batchLength, int retentionDays,
+			int exposedListCacheControl, ValidateRequest validateRequest, ValidationUtils validationUtils, long batchLength, int retentionDays,
 			long requestTime) {
 		this.dataService = dataService;
 		this.appSource = appSource;
 		this.etagGenerator = etagGenerator;
 		this.exposedListCacheContol = exposedListCacheControl;
 		this.validateRequest = validateRequest;
+		this.validationUtils = validationUtils;
 		this.batchLength = batchLength;
 		this.retentionDays = retentionDays;
 		this.requestTime = requestTime;
@@ -92,7 +94,7 @@ public class DPPPTController {
 		if (!this.validateRequest.isValid(principal)) {
 			return ResponseEntity.status(HttpStatus.FORBIDDEN).build();
 		}
-		if (!isValidBase64Key(exposeeRequest.getKey())) {
+		if (!validationUtils.isValidBase64Key(exposeeRequest.getKey())) {
 			return new ResponseEntity<>("No valid base64 key", HttpStatus.BAD_REQUEST);
 		}
 		// TODO: should we give that information?
@@ -127,7 +129,7 @@ public class DPPPTController {
 
 		List<Exposee> exposees = new ArrayList<>();
 		for (var exposedKey : exposeeRequests.getExposedKeys()) {
-			if (!isValidBase64Key(exposedKey.getKey())) {
+			if (!validationUtils.isValidBase64Key(exposedKey.getKey())) {
 				return new ResponseEntity<>("No valid base64 key", HttpStatus.BAD_REQUEST);
 			}
 
@@ -243,18 +245,6 @@ public class DPPPTController {
 	@ResponseStatus(HttpStatus.BAD_REQUEST)
 	public ResponseEntity<Object> invalidDate() {
 		return ResponseEntity.badRequest().build();
-	}
-
-	private boolean isValidBase64Key(String value) {
-		try {
-			byte[] key = Base64.getDecoder().decode(value);
-			if (key.length != KEY_LENGTH_BYTES_DP3T && key.length != KEY_LENGTH_BYTES_GOOGLE_APPLE) {
-				return false;
-			}
-			return true;
-		} catch (Exception e) {
-			return false;
-		}
 	}
 
 }

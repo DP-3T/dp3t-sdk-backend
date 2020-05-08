@@ -29,6 +29,7 @@ import org.dpppt.backend.sdk.ws.controller.GaenController;
 import org.dpppt.backend.sdk.ws.filter.ResponseWrapperFilter;
 import org.dpppt.backend.sdk.ws.security.NoValidateRequest;
 import org.dpppt.backend.sdk.ws.security.ValidateRequest;
+import org.dpppt.backend.sdk.ws.util.ValidationUtils;
 import org.flywaydb.core.Flyway;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -90,8 +91,16 @@ public abstract class WSBaseConfig implements SchedulingConfigurer, WebMvcConfig
 	@Value("${ws.app.gaen.region: ch}")
 	String gaenRegion;
 
+	@Value("${ws.app.gaen.key_size: 16}")
+	int gaenKeySizeBytes;
+	@Value("${ws.app.key_size: 32}")
+	int keySizeBytes;
+
 	@Autowired(required = false)
 	ValidateRequest requestValidator;
+
+	@Autowired(required = false)
+	ValidateRequest gaenRequestValidator;
 
 	final SignatureAlgorithm algorithm = SignatureAlgorithm.ES256;
 
@@ -102,12 +111,16 @@ public abstract class WSBaseConfig implements SchedulingConfigurer, WebMvcConfig
 			theValidator = new NoValidateRequest();
 		}
 		return new DPPPTController(dppptSDKDataService(), etagGenerator(), appSource, exposedListCacheControl,
-				theValidator, batchLength, retentionDays, requestTime);
+				theValidator, new ValidationUtils(keySizeBytes, Duration.ofDays(retentionDays)), batchLength, retentionDays, requestTime);
 	}
 
 	@Bean
 	public GaenController gaenController(){
-		return new GaenController(retentionDays, Duration.ofMillis(batchLength));
+		ValidateRequest theValidator = gaenRequestValidator;
+		if (theValidator == null) {
+			theValidator = new NoValidateRequest();
+		}
+		return new GaenController(theValidator,new ValidationUtils(gaenKeySizeBytes, Duration.ofDays(retentionDays)), retentionDays, Duration.ofMillis(batchLength), Duration.ofMillis(requestTime));
 	}
 
 	@Bean
