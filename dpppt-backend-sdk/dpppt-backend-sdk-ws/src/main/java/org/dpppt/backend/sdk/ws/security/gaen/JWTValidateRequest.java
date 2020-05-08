@@ -42,7 +42,7 @@ public class JWTValidateRequest implements ValidateRequest {
 			long jwtKeyDate = LocalDate.parse(token.getClaim("onset")).atStartOfDay().atOffset(ZoneOffset.UTC).toInstant().toEpochMilli();
 			if (others instanceof GaenKey) {
                 GaenKey request = (GaenKey) others;
-                var keyDate = Duration.of(request.getRollingStartNumber(), GaenUnit.TenMinutes) ;
+                var keyDate = Duration.of(request.getRollingStartNumber(), GaenUnit.TenMinutes);
 				if (keyDate.toMillis() > System.currentTimeMillis()) {
 					throw new InvalidDateException();
 				} else if (keyDate.toMillis() < jwtKeyDate) {
