@@ -120,7 +120,7 @@ public abstract class WSBaseConfig implements SchedulingConfigurer, WebMvcConfig
 		if (theValidator == null) {
 			theValidator = new NoValidateRequest();
 		}
-		return new GaenController(etagGenerator(), theValidator,new ValidationUtils(gaenKeySizeBytes, Duration.ofDays(retentionDays), batchLength), retentionDays, Duration.ofMillis(batchLength), Duration.ofMillis(requestTime));
+		return new GaenController(gaenDataService(), etagGenerator(), theValidator,new ValidationUtils(gaenKeySizeBytes, Duration.ofDays(retentionDays), batchLength), retentionDays, Duration.ofMillis(batchLength), Duration.ofMillis(requestTime), Duration.ofMinutes(exposedListCacheControl));
 	}
 
 	@Bean

@@ -6,21 +6,27 @@ import java.time.LocalDate;
 import java.time.OffsetDateTime;
 import java.time.ZoneOffset;
 import java.util.ArrayList;
+import java.util.Base64;
 import java.util.List;
 
 import javax.validation.Valid;
 
+import com.google.protobuf.ByteString;
+
 import org.dpppt.backend.sdk.data.EtagGenerator;
 import org.dpppt.backend.sdk.data.EtagGeneratorInterface;
+import org.dpppt.backend.sdk.data.gaen.GAENDataService;
 import org.dpppt.backend.sdk.model.gaen.DayBuckets;
 import org.dpppt.backend.sdk.model.gaen.File;
 import org.dpppt.backend.sdk.model.gaen.GaenKey;
 import org.dpppt.backend.sdk.model.gaen.GaenRequest;
+import org.dpppt.backend.sdk.model.gaen.Header;
 import org.dpppt.backend.sdk.model.gaen.proto.FileProto;
 import org.dpppt.backend.sdk.ws.security.ValidateRequest;
 import org.dpppt.backend.sdk.ws.security.ValidateRequest.InvalidDateException;
 import org.dpppt.backend.sdk.ws.util.ValidationUtils;
 import org.dpppt.backend.sdk.ws.util.ValidationUtils.BadBatchReleaseTimeException;
+import org.springframework.http.CacheControl;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
@@ -47,21 +53,24 @@ public class GaenController {
     private final ValidateRequest validateRequest;
     private final ValidationUtils validationUtils;
     private final EtagGeneratorInterface etagGenerator;
+    private final GAENDataService dataService;
+    private final Duration exposedListCacheContol;
 
-    public GaenController(EtagGeneratorInterface etagGenerator, ValidateRequest validateRequest, ValidationUtils validationUtils, Integer retentionPeriod,
-            Duration bucketLength, Duration requestTime) {
+    public GaenController(GAENDataService dataService, EtagGeneratorInterface etagGenerator, ValidateRequest validateRequest, ValidationUtils validationUtils, Integer retentionPeriod, Duration bucketLength, Duration requestTime, Duration exposedListCacheContol) {
+        this.dataService = dataService;
         this.retentionPeriod = retentionPeriod;
         this.bucketLength = bucketLength;
         this.validateRequest = validateRequest;
         this.requestTime = requestTime;
         this.validationUtils = validationUtils;
         this.etagGenerator = etagGenerator;
+        this.exposedListCacheContol = exposedListCacheContol;
     }
 
     @PostMapping(value = "/exposed")
     public @ResponseBody ResponseEntity<String> addExposed(@Valid @RequestBody GaenRequest gaenRequest,
             @RequestHeader(value = "User-Agent", required = true) String userAgent,
-            @AuthenticationPrincipal Object principal) {
+            @AuthenticationPrincipal Object principal) throws InvalidDateException {
         var now = Instant.now().toEpochMilli(); 
         if(!this.validateRequest.isValid(principal)){
             return ResponseEntity.status(HttpStatus.FORBIDDEN).build();
@@ -88,32 +97,60 @@ public class GaenController {
     @GetMapping(value = "/exposed/{batchReleaseTime}", produces = "application/x-protobuf")
     public @ResponseBody ResponseEntity<FileProto.File> getExposedKeys(@PathVariable Long batchReleaseTime,
             WebRequest request) throws BadBatchReleaseTimeException {
-        if(!validationUtils.isValidBatchReleaseTime(batchReleaseTime)) {
+        
+        var batchReleaseTimeDuration = Duration.ofMillis(batchReleaseTime);
+
+        if(!validationUtils.isValidBatchReleaseTime(batchReleaseTimeDuration.toMillis())) {
             return ResponseEntity.notFound().build();
         }
 
-        int max = dataService.getMaxExposedIdForBatchReleaseTime(batchReleaseTime, bucketLength.toMillis());
+        int max = dataService.getMaxExposedIdForBatchReleaseTime(batchReleaseTimeDuration.toMillis(), bucketLength.toMillis());
         String etag = etagGenerator.getEtag(max, "proto");
         
         if (request.checkNotModified(etag)) {
 			return ResponseEntity.status(HttpStatus.NOT_MODIFIED).build();
-		}
-
-        var file = FileProto.File.getDefaultInstance();
-
-        return ResponseEntity.ok(file);
+        }
+       var file = FileProto.File.newBuilder();
+        var exposedKeys = dataService.getSortedExposedForBatchReleaseTime(batchReleaseTimeDuration.toMillis(), bucketLength.toMillis());
+        for(var key : exposedKeys) {
+            var protoKey = FileProto.Key.newBuilder()
+                .setKeyData(ByteString.copyFrom(Base64.getDecoder().decode(key.getKeyData())))
+                .setRollingPeriod(key.getRollingPeriod())
+                .setRollingStartNumber(key.getRollingStartNumber())
+                .setTransmissionRiskLevel(key.getTransmissionRiskLevel()).build();
+            file.addKey(protoKey);
+        }
+        
+        var header = FileProto.Header.newBuilder();
+        header.setRegion("ch")
+            .setStartTimestamp(batchReleaseTimeDuration.toSeconds())
+            .setEndTimestamp(batchReleaseTimeDuration.toSeconds() + bucketLength.toSeconds());
+        file.setHeader(header);
+        return ResponseEntity.ok().cacheControl(CacheControl.maxAge(exposedListCacheContol))
+        .header("X-BATCH-RELEASE-TIME", Long.toString(batchReleaseTimeDuration.toMillis())).body(file.build());
     }
 
     @GetMapping(value = "/exposedjson/{batchReleaseTime}", produces = "application/json")
     public @ResponseBody ResponseEntity<File> getExposedKeysAsJson(@PathVariable Long batchReleaseTime,
             WebRequest request) throws BadBatchReleaseTimeException {
-        if(!validationUtils.isValidBatchReleaseTime(batchReleaseTime)) {
+        var batchReleaseTimeDuration = Duration.ofMillis(batchReleaseTime);
+
+        if(!validationUtils.isValidBatchReleaseTime(batchReleaseTimeDuration.toMillis())) {
             return ResponseEntity.notFound().build();
         }
-
+        int max = dataService.getMaxExposedIdForBatchReleaseTime(batchReleaseTimeDuration.toMillis(), bucketLength.toMillis());
+		String etag = etagGenerator.getEtag(max, "json");
+		if (request.checkNotModified(etag)) {
+			return ResponseEntity.status(HttpStatus.NOT_MODIFIED).build();
+        }
+       
+        var exposedKeys = dataService.getSortedExposedForBatchReleaseTime(batchReleaseTimeDuration.toMillis(), bucketLength.toMillis());
         var file = new File();
-
-        return ResponseEntity.ok(file);
+        var header = new Header();
+        header.startTimestamp(batchReleaseTimeDuration.toSeconds()).endTimestamp(batchReleaseTimeDuration.toSeconds() + bucketLength.toSeconds());
+        file.gaenKeys(exposedKeys).header(header);
+        return ResponseEntity.ok().cacheControl(CacheControl.maxAge(exposedListCacheContol))
+        .header("X-BATCH-RELEASE-TIME", Long.toString(batchReleaseTimeDuration.toMillis())).body(file);
     }
 
     @GetMapping(value = "/buckets/{dayDateStr}")

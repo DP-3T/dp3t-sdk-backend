@@ -168,13 +168,13 @@ public class DPPPTController {
 		String etag = etagGenerator.getEtag(max, "json");
 		if (request.checkNotModified(etag)) {
 			return ResponseEntity.status(HttpStatus.NOT_MODIFIED).build();
-		} else {
-			List<Exposee> exposeeList = dataService.getSortedExposedForBatchReleaseTime(batchReleaseTime, batchLength);
-			ExposedOverview overview = new ExposedOverview(exposeeList);
-			overview.setBatchReleaseTime(batchReleaseTime);
-			return ResponseEntity.ok().cacheControl(CacheControl.maxAge(Duration.ofMinutes(exposedListCacheContol)))
-					.header("X-BATCH-RELEASE-TIME", batchReleaseTime.toString()).body(overview);
-		}
+		} 
+		
+		List<Exposee> exposeeList = dataService.getSortedExposedForBatchReleaseTime(batchReleaseTime, batchLength);
+		ExposedOverview overview = new ExposedOverview(exposeeList);
+		overview.setBatchReleaseTime(batchReleaseTime);
+		return ResponseEntity.ok().cacheControl(CacheControl.maxAge(Duration.ofMinutes(exposedListCacheContol)))
+				.header("X-BATCH-RELEASE-TIME", batchReleaseTime.toString()).body(overview);
 	}
 
 	@CrossOrigin(origins = { "https://editor.swagger.io" })
@@ -189,21 +189,21 @@ public class DPPPTController {
 		String etag = etagGenerator.getEtag(max, "proto");
 		if (request.checkNotModified(etag)) {
 			return ResponseEntity.status(HttpStatus.NOT_MODIFIED).build();
-		} else {
-			List<Exposee> exposeeList = dataService.getSortedExposedForBatchReleaseTime(batchReleaseTime, batchLength);
-			List<Exposed.ProtoExposee> exposees = new ArrayList<>();
-			for (Exposee exposee : exposeeList) {
-				Exposed.ProtoExposee protoExposee = Exposed.ProtoExposee.newBuilder()
-						.setKey(ByteString.copyFrom(Base64.getDecoder().decode(exposee.getKey())))
-						.setKeyDate(exposee.getKeyDate()).build();
-				exposees.add(protoExposee);
-			}
-			Exposed.ProtoExposedList protoExposee = Exposed.ProtoExposedList.newBuilder().addAllExposed(exposees)
-					.setBatchReleaseTime(batchReleaseTime).build();
-
-			return ResponseEntity.ok().cacheControl(CacheControl.maxAge(Duration.ofMinutes(exposedListCacheContol)))
-					.header("X-BATCH-RELEASE-TIME", batchReleaseTime.toString()).body(protoExposee);
 		}
+
+		List<Exposee> exposeeList = dataService.getSortedExposedForBatchReleaseTime(batchReleaseTime, batchLength);
+		List<Exposed.ProtoExposee> exposees = new ArrayList<>();
+		for (Exposee exposee : exposeeList) {
+			Exposed.ProtoExposee protoExposee = Exposed.ProtoExposee.newBuilder()
+					.setKey(ByteString.copyFrom(Base64.getDecoder().decode(exposee.getKey())))
+					.setKeyDate(exposee.getKeyDate()).build();
+			exposees.add(protoExposee);
+		}
+		Exposed.ProtoExposedList protoExposee = Exposed.ProtoExposedList.newBuilder().addAllExposed(exposees)
+				.setBatchReleaseTime(batchReleaseTime).build();
+
+		return ResponseEntity.ok().cacheControl(CacheControl.maxAge(Duration.ofMinutes(exposedListCacheContol)))
+				.header("X-BATCH-RELEASE-TIME", batchReleaseTime.toString()).body(protoExposee);
 	}
 
 	@CrossOrigin(origins = { "https://editor.swagger.io" })
