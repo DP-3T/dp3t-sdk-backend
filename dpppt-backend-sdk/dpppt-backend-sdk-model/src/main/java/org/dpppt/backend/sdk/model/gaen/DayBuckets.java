@@ -4,7 +4,7 @@ import java.util.List;
 
 public class DayBuckets {
     String day;
-    List<String> bucketUrls;
+    List<String> relativeUrls;
 
 
     public String getDay() {
@@ -12,7 +12,7 @@ public class DayBuckets {
     }
 
     public List<String> getRelativeUrls() {
-        return this.bucketUrls;
+        return this.relativeUrls;
     }
 
     public DayBuckets day(String day) {
@@ -20,8 +20,8 @@ public class DayBuckets {
         return this;
     }
 
-    public DayBuckets bucketUrls(List<String> bucketUrls) {
-        this.bucketUrls = bucketUrls;
+    public DayBuckets relativeUrls(List<String> relativeUrls) {
+        this.relativeUrls = relativeUrls;
         return this;
     }
     

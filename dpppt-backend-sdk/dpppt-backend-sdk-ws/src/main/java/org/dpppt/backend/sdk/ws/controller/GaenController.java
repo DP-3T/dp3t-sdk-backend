@@ -22,10 +22,9 @@ import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestHeader;
 import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RequestParam;
+
 import org.springframework.web.bind.annotation.ResponseBody;
 import org.springframework.web.context.request.WebRequest;
-import org.springframework.web.servlet.support.ServletUriComponentsBuilder;
 
 @Controller
 @RequestMapping("/v1/gaen")
@@ -69,17 +68,15 @@ public class GaenController {
         if (!isInRange(timestamp)) {
             return ResponseEntity.notFound().build();
         }
-        var bucketUrls = new ArrayList<String>();
+        var relativeUrls = new ArrayList<String>();
         var dayBuckets = new DayBuckets();
-        var servletUriBuilder = ServletUriComponentsBuilder.fromCurrentRequest();
 
         String controllerMapping = this.getClass().getAnnotation(RequestMapping.class).value()[0];
-        dayBuckets.day(dayDateStr).bucketUrls(bucketUrls);
+        dayBuckets.day(dayDateStr).relativeUrls(relativeUrls);
         
         while (timestamp.toInstant().toEpochMilli() < Math.min(now.toInstant().toEpochMilli(),
                 timestamp.plusDays(1).toInstant().toEpochMilli())) {
-            servletUriBuilder.replacePath(controllerMapping + "/exposed" + "/" + timestamp.toInstant().toEpochMilli());
-            bucketUrls.add(servletUriBuilder.toUriString());
+            relativeUrls.add(controllerMapping + "/exposed" + "/" + timestamp.toInstant().toEpochMilli());
             timestamp = timestamp.plus(this.bucketLength);
         }
 
