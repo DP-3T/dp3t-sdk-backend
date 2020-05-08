@@ -51,7 +51,7 @@ public class DPPPTControllerTest extends BaseControllerTest {
 		exposeeRequest.setAuthData(new ExposeeAuthData());
 		exposeeRequest
 				.setKeyDate(OffsetDateTime.now().withOffsetSameInstant(ZoneOffset.UTC).toInstant().toEpochMilli());
-		exposeeRequest.setKey(Base64.getEncoder().encodeToString("testKey16Bytes--".getBytes("UTF-8")));
+		exposeeRequest.setKey(Base64.getEncoder().encodeToString("testKey32Bytes--testKey32Bytes--".getBytes("UTF-8")));
 		exposeeRequest.setIsFake(0);
 		String token = createToken(OffsetDateTime.now().withOffsetSameInstant(ZoneOffset.UTC).plusMinutes(5));
 		MockHttpServletResponse response = mockMvc.perform(
@@ -71,10 +71,10 @@ public class DPPPTControllerTest extends BaseControllerTest {
 		var requestList = new ExposeeRequestList();
 		var exposedKey1 = new ExposedKey();
 		exposedKey1.setKeyDate(OffsetDateTime.now(ZoneOffset.UTC).toInstant().toEpochMilli());
-		exposedKey1.setKey(Base64.getEncoder().encodeToString("testKey16Bytes--".getBytes("UTF-8")));
+		exposedKey1.setKey(Base64.getEncoder().encodeToString("testKey32Bytes--testKey32Bytes--".getBytes("UTF-8")));
 		var exposedKey2 = new ExposedKey();
 		exposedKey2.setKeyDate(OffsetDateTime.now(ZoneOffset.UTC).minusDays(1).toInstant().toEpochMilli());
-		exposedKey2.setKey(Base64.getEncoder().encodeToString("testKey16Bytes--".getBytes("UTF-8")));
+		exposedKey2.setKey(Base64.getEncoder().encodeToString("testKey32Bytes--testKey32Bytes--".getBytes("UTF-8")));
 		List<ExposedKey> exposedKeys = List.of(exposedKey1, exposedKey2);
 		requestList.setExposedKeys(exposedKeys);
 		requestList.setFake(0);
@@ -95,10 +95,10 @@ public class DPPPTControllerTest extends BaseControllerTest {
 		var requestList = new ExposeeRequestList();
 		var exposedKey1 = new ExposedKey();
 		exposedKey1.setKeyDate(OffsetDateTime.now(ZoneOffset.UTC).toInstant().toEpochMilli());
-		exposedKey1.setKey(Base64.getEncoder().encodeToString("testKey16Bytes--".getBytes("UTF-8")));
+		exposedKey1.setKey(Base64.getEncoder().encodeToString("testKey32Bytes--testKey32Bytes--".getBytes("UTF-8")));
 		var exposedKey2 = new ExposedKey();
 		exposedKey2.setKeyDate(OffsetDateTime.now(ZoneOffset.UTC).minusDays(1).toInstant().toEpochMilli());
-		exposedKey2.setKey(Base64.getEncoder().encodeToString("testKey16Bytes--".getBytes("UTF-8")));
+		exposedKey2.setKey(Base64.getEncoder().encodeToString("testKey32Bytes--testKey32Bytes--".getBytes("UTF-8")));
 		List<ExposedKey> exposedKeys = List.of(exposedKey1, exposedKey2);
 		requestList.setExposedKeys(exposedKeys);
 		requestList.setFake(1);
@@ -155,7 +155,7 @@ public class DPPPTControllerTest extends BaseControllerTest {
 		exposeeRequest.setAuthData(new ExposeeAuthData());
 		exposeeRequest
 				.setKeyDate(OffsetDateTime.now().withOffsetSameInstant(ZoneOffset.UTC).toInstant().toEpochMilli());
-		exposeeRequest.setKey("~ö$%^a#@");
+		exposeeRequest.setKey("testKey32Bytes--testKey32Bytes--");
 		exposeeRequest.setIsFake(1);
 		String token = createToken(true, OffsetDateTime.now().withOffsetSameInstant(ZoneOffset.UTC).plusMinutes(5));
 		MockHttpServletResponse response = mockMvc.perform(
@@ -170,7 +170,7 @@ public class DPPPTControllerTest extends BaseControllerTest {
 		exposeeRequest.setAuthData(new ExposeeAuthData());
 		exposeeRequest
 				.setKeyDate(OffsetDateTime.now().withOffsetSameInstant(ZoneOffset.UTC).toInstant().toEpochMilli());
-		exposeeRequest.setKey(Base64.getEncoder().encodeToString("testKey16Bytes--".getBytes("UTF-8")));
+		exposeeRequest.setKey(Base64.getEncoder().encodeToString("testKey32Bytes--testKey32Bytes--".getBytes("UTF-8")));
 		exposeeRequest.setIsFake(1);
 		String token = createToken(true, OffsetDateTime.now().withOffsetSameInstant(ZoneOffset.UTC).plusMinutes(5));
 		MockHttpServletResponse response = mockMvc.perform(
@@ -190,7 +190,7 @@ public class DPPPTControllerTest extends BaseControllerTest {
 		exposeeRequest.setAuthData(new ExposeeAuthData());
 		exposeeRequest.setKeyDate(
 				LocalDate.now().minusDays(2).atStartOfDay().atOffset(ZoneOffset.UTC).toInstant().toEpochMilli());
-		exposeeRequest.setKey(Base64.getEncoder().encodeToString("test".getBytes("UTF-8")));
+		exposeeRequest.setKey(Base64.getEncoder().encodeToString("testKey32Bytes--testKey32Bytes--".getBytes("UTF-8")));
 		exposeeRequest.setIsFake(1);
 		String token = createToken(OffsetDateTime.now().withOffsetSameInstant(ZoneOffset.UTC).plusMinutes(5),
 				LocalDate.now().format(DateTimeFormatter.ISO_DATE));
@@ -206,7 +206,7 @@ public class DPPPTControllerTest extends BaseControllerTest {
 		exposeeRequest.setAuthData(new ExposeeAuthData());
 		exposeeRequest
 				.setKeyDate(OffsetDateTime.now().withOffsetSameInstant(ZoneOffset.UTC).toInstant().toEpochMilli());
-		exposeeRequest.setKey(Base64.getEncoder().encodeToString("testKey16Bytes--".getBytes("UTF-8")));
+		exposeeRequest.setKey(Base64.getEncoder().encodeToString("testKey32Bytes--testKey32Bytes--".getBytes("UTF-8")));
 		exposeeRequest.setIsFake(0);
 		String token = createToken(OffsetDateTime.now().withOffsetSameInstant(ZoneOffset.UTC).plusMinutes(5));
 
@@ -228,7 +228,7 @@ public class DPPPTControllerTest extends BaseControllerTest {
 		exposeeRequest.setAuthData(new ExposeeAuthData());
 		exposeeRequest
 				.setKeyDate(OffsetDateTime.now().withOffsetSameInstant(ZoneOffset.UTC).toInstant().toEpochMilli());
-		exposeeRequest.setKey(Base64.getEncoder().encodeToString("testKey16Bytes--".getBytes("UTF-8")));
+		exposeeRequest.setKey(Base64.getEncoder().encodeToString("testKey32Bytes--testKey32Bytes--".getBytes("UTF-8")));
 		exposeeRequest.setIsFake(1);
 		String token = createToken(true, OffsetDateTime.now().withOffsetSameInstant(ZoneOffset.UTC).plusMinutes(5));
 
@@ -250,7 +250,7 @@ public class DPPPTControllerTest extends BaseControllerTest {
 		exposeeRequest.setAuthData(new ExposeeAuthData());
 		exposeeRequest
 				.setKeyDate(OffsetDateTime.now().withOffsetSameInstant(ZoneOffset.UTC).toInstant().toEpochMilli());
-		exposeeRequest.setKey(Base64.getEncoder().encodeToString("test".getBytes("UTF-8")));
+		exposeeRequest.setKey(Base64.getEncoder().encodeToString("testKey32Bytes--testKey32Bytes--".getBytes("UTF-8")));
 		exposeeRequest.setIsFake(0);
 		String token = createToken(OffsetDateTime.now().withOffsetSameInstant(ZoneOffset.UTC).minusMinutes(5));
 
@@ -267,7 +267,7 @@ public class DPPPTControllerTest extends BaseControllerTest {
 		exposeeRequest.setAuthData(new ExposeeAuthData());
 		exposeeRequest.setKeyDate(
 				OffsetDateTime.now().plusDays(2).withOffsetSameInstant(ZoneOffset.UTC).toInstant().toEpochMilli());
-		exposeeRequest.setKey(Base64.getEncoder().encodeToString("test".getBytes("UTF-8")));
+		exposeeRequest.setKey(Base64.getEncoder().encodeToString("testKey32Bytes--testKey32Bytes--".getBytes("UTF-8")));
 		exposeeRequest.setIsFake(0);
 		String token = createToken(OffsetDateTime.now().withOffsetSameInstant(ZoneOffset.UTC).plusMinutes(5));
 
@@ -284,7 +284,7 @@ public class DPPPTControllerTest extends BaseControllerTest {
 		exposeeRequest.setAuthData(new ExposeeAuthData());
 		exposeeRequest.setKeyDate(
 				OffsetDateTime.now().withOffsetSameInstant(ZoneOffset.UTC).minusDays(22).toInstant().toEpochMilli());
-		exposeeRequest.setKey(Base64.getEncoder().encodeToString("test".getBytes("UTF-8")));
+		exposeeRequest.setKey(Base64.getEncoder().encodeToString("testKey32Bytes--testKey32Bytes--".getBytes("UTF-8")));
 		exposeeRequest.setIsFake(0);
 		String token = createToken(OffsetDateTime.now().withOffsetSameInstant(ZoneOffset.UTC).plusMinutes(5),
 				"2020-01-01");
@@ -302,7 +302,7 @@ public class DPPPTControllerTest extends BaseControllerTest {
 		exposeeRequest.setAuthData(new ExposeeAuthData());
 		exposeeRequest
 				.setKeyDate(OffsetDateTime.now().withOffsetSameInstant(ZoneOffset.UTC).toInstant().toEpochMilli());
-		exposeeRequest.setKey(Base64.getEncoder().encodeToString("testKey16Bytes--".getBytes("UTF-8")));
+		exposeeRequest.setKey(Base64.getEncoder().encodeToString("testKey32Bytes--testKey32Bytes--".getBytes("UTF-8")));
 		exposeeRequest.setIsFake(0);
 		String token = createTokenWithScope(OffsetDateTime.now().withOffsetSameInstant(ZoneOffset.UTC).plusMinutes(5),
 				"not-exposed");
@@ -327,7 +327,7 @@ public class DPPPTControllerTest extends BaseControllerTest {
 		exposeeRequest.setAuthData(new ExposeeAuthData());
 		exposeeRequest
 				.setKeyDate(OffsetDateTime.now().withOffsetSameInstant(ZoneOffset.UTC).toInstant().toEpochMilli());
-		exposeeRequest.setKey(Base64.getEncoder().encodeToString("test".getBytes("UTF-8")));
+		exposeeRequest.setKey(Base64.getEncoder().encodeToString("testKey32Bytes--testKey32Bytes--".getBytes("UTF-8")));
 		exposeeRequest.setIsFake(0);
 		String token = createToken(OffsetDateTime.now(ZoneOffset.UTC).plusDays(90)); // very late expiration date
 		MockHttpServletResponse response = mockMvc

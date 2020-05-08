@@ -105,11 +105,11 @@ public class PostgresDPPPTDataServiceTest {
         insertExposeeWithReceivedAt(receivedAt.toInstant(), key);
 
 		List<Exposee> sortedExposedForDay = dppptDataService
-				.getSortedExposedForBatchReleaseTime(now.toInstant().toEpochMilli(), 1 * 60 * 60 * 1000l);
+				.getSortedExposedForBatchReleaseTime(receivedAt.toInstant().toEpochMilli() + 1, 1 * 60 * 60 * 1000l);
 		assertFalse(sortedExposedForDay.isEmpty());
 
 		dppptDataService.cleanDB(Duration.ofDays(21));
-		sortedExposedForDay = dppptDataService.getSortedExposedForBatchReleaseTime(now.toInstant().toEpochMilli(),
+		sortedExposedForDay = dppptDataService.getSortedExposedForBatchReleaseTime(receivedAt.toInstant().toEpochMilli() + 1,
 				1 * 60 * 60 * 1000l);
 		assertTrue(sortedExposedForDay.isEmpty());
 

@@ -79,7 +79,7 @@ public class CloudControllerTestPEM {
 		ExposeeRequest exposeeRequest = new ExposeeRequest();
 		exposeeRequest.setAuthData(new ExposeeAuthData());
 		exposeeRequest.setKeyDate(LocalDate.now().atStartOfDay().atOffset(ZoneOffset.UTC).toInstant().toEpochMilli());
-		exposeeRequest.setKey(Base64.getEncoder().encodeToString("testKey16Bytes--".getBytes("UTF-8")));
+		exposeeRequest.setKey(Base64.getEncoder().encodeToString("testKey32Bytes--testKey32Bytes--".getBytes("UTF-8")));
 		MockHttpServletResponse response = mockMvc.perform(post("/v1/exposed").contentType(MediaType.APPLICATION_JSON)
 				.header("User-Agent", "MockMVC").content(json(exposeeRequest))).andExpect(status().is2xxSuccessful())
 				.andReturn().getResponse();
