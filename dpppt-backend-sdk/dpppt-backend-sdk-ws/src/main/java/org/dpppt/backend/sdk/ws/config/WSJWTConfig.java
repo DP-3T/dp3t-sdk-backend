@@ -104,6 +104,10 @@ public class WSJWTConfig extends WebSecurityConfigurerAdapter {
 	public ValidateRequest requestValidator() {
 		return new JWTValidateRequest();
 	}
+	@Bean
+	public ValidateRequest gaenRequestValidator() {
+		return new org.dpppt.backend.sdk.ws.security.gaen.JWTValidateRequest();
+	}
 
 	@Bean
 	public JWTClaimSetConverter claimConverter() {
