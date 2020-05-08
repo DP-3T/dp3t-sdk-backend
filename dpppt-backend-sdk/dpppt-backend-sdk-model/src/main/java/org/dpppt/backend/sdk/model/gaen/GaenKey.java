@@ -9,9 +9,9 @@ public class GaenKey {
     String keyData;
 
     @NotNull
-    Integer rollingStartNumber;
+    Long rollingStartNumber;
 
-    Integer rollingPeriod = 144;
+    Long rollingPeriod = 144L;
 
     Integer transmissionRiskLevel = 0;
 
@@ -19,7 +19,7 @@ public class GaenKey {
     public GaenKey() {
     }
 
-    public GaenKey(String keyData, Integer rollingStartNumber, Integer rollingPeriod, Integer transmissionRiskLevel) {
+    public GaenKey(String keyData, Long rollingStartNumber, Long rollingPeriod, Integer transmissionRiskLevel) {
         this.keyData = keyData;
         this.rollingStartNumber = rollingStartNumber;
         this.rollingPeriod = rollingPeriod;
@@ -34,19 +34,19 @@ public class GaenKey {
         this.keyData = keyData;
     }
 
-    public Integer getRollingStartNumber() {
+    public Long getRollingStartNumber() {
         return this.rollingStartNumber;
     }
 
-    public void setRollingStartNumber(Integer rollingStartNumber) {
+    public void setRollingStartNumber(Long rollingStartNumber) {
         this.rollingStartNumber = rollingStartNumber;
     }
 
-    public Integer getRollingPeriod() {
+    public Long getRollingPeriod() {
         return this.rollingPeriod;
     }
 
-    public void setRollingPeriod(Integer rollingPeriod) {
+    public void setRollingPeriod(Long rollingPeriod) {
         this.rollingPeriod = rollingPeriod;
     }
 
