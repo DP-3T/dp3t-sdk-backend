@@ -46,7 +46,7 @@ public class JDBCGAENDataServiceImpl implements GAENDataService {
 		String sql = null;
 		if (dbType.equals(PGSQL)) {
 			sql = "insert into t_gaen_exposed (key, rolling_start_number, rolling_period, transmission_risk_level) values (:key, :rolling_start_number, :rolling_period, :transmission_risk_level)"
-					+ " on conflict on constraint key do nothing";
+					+ " on conflict on constraint gaen_exposed_key do nothing";
 		} else {
 			sql = "merge into t_gaen_exposed using (values(cast(:key as varchar(24)), :rolling_start_number, :rolling_period, :transmission_risk_level))"
 					+ " as vals(key, rolling_start_number, rolling_period, transmission_risk_level) on t_gaen_exposed.key = vals.key"
