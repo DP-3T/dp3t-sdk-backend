@@ -3,22 +3,19 @@ package org.dpppt.backend.sdk.ws.controller;
 import java.time.Duration;
 import java.time.Instant;
 import java.time.LocalDate;
-import java.time.OffsetDateTime;
 import java.time.ZoneOffset;
 import java.util.ArrayList;
 import java.util.Base64;
-import java.util.List;
+import java.util.Date;
 
 import javax.validation.Valid;
 
 import com.google.protobuf.ByteString;
 
-import org.dpppt.backend.sdk.data.EtagGenerator;
 import org.dpppt.backend.sdk.data.EtagGeneratorInterface;
 import org.dpppt.backend.sdk.data.gaen.GAENDataService;
 import org.dpppt.backend.sdk.model.gaen.DayBuckets;
 import org.dpppt.backend.sdk.model.gaen.File;
-import org.dpppt.backend.sdk.model.gaen.GaenKey;
 import org.dpppt.backend.sdk.model.gaen.GaenRequest;
 import org.dpppt.backend.sdk.model.gaen.Header;
 import org.dpppt.backend.sdk.model.gaen.proto.FileProto;
@@ -42,6 +39,8 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.ResponseBody;
 import org.springframework.web.bind.annotation.ResponseStatus;
 import org.springframework.web.context.request.WebRequest;
+
+import io.jsonwebtoken.Jwts;
 
 @Controller
 @RequestMapping("/v1/gaen")
@@ -87,6 +86,37 @@ public class GaenController {
         long after = Instant.now().toEpochMilli();
         long duration = after - now;
         try {
+            Thread.sleep(Math.max(duration, 0));
+          }
+        catch (Exception ex) {
+
+        }
+        String jwt = Jwts.builder().setId("1111").setIssuedAt(new Date()).claim("onset", "2020-05-07").claim("scope", "red").compact();
+        return ResponseEntity.ok().header("Authentication", "Bearer " + jwt).build();
+    }
+
+    @PostMapping(value = "/exposednextday")
+    public @ResponseBody ResponseEntity<String> addExposedSecond(@Valid @RequestBody GaenRequest gaenRequest,
+            @RequestHeader(value = "User-Agent", required = true) String userAgent,
+            @AuthenticationPrincipal Object principal) throws InvalidDateException {
+        var now = Instant.now().toEpochMilli(); 
+        ///TODO: we need to supply another jwt validator, since the scope is different
+        // if(!this.validateRequest.isValid(principal)){
+        //     return ResponseEntity.status(HttpStatus.FORBIDDEN).build();
+        // } 
+        for(var key : gaenRequest.getGaenKeys()) {
+            if(!validationUtils.isValidBase64Key(key.getKeyData())) {
+                return new ResponseEntity<>("No valid base64 key", HttpStatus.BAD_REQUEST);
+            }
+            this.validateRequest.getKeyDate(principal, key);
+        } 
+        if(!this.validateRequest.isFakeRequest(principal, gaenRequest)) {
+            dataService.upsertExposees(gaenRequest.getGaenKeys());
+        }
+        long after = Instant.now().toEpochMilli();
+        long duration = after - now;
+        try {
+            Thread.sleep(Math.max(duration, 0));
           }
         catch (Exception ex) {
 
