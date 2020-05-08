@@ -6,13 +6,17 @@ import java.time.LocalDate;
 import java.time.OffsetDateTime;
 import java.time.ZoneOffset;
 import java.util.ArrayList;
+import java.util.List;
 
 import javax.validation.Valid;
 
 import org.dpppt.backend.sdk.model.gaen.DayBuckets;
 import org.dpppt.backend.sdk.model.gaen.File;
+import org.dpppt.backend.sdk.model.gaen.GaenKey;
 import org.dpppt.backend.sdk.model.gaen.GaenRequest;
 import org.dpppt.backend.sdk.model.gaen.proto.FileProto;
+import org.dpppt.backend.sdk.ws.security.ValidateRequest;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.stereotype.Controller;
@@ -32,17 +36,42 @@ public class GaenController {
 
     private final Integer retentionPeriod;
     private final Duration bucketLength;
+    private final Duration requestTime;
+    private final ValidateRequest validateRequest;
 
-    public GaenController(Integer retentionPeriod, Duration bucketLength) {
+    public GaenController(ValidateRequest validateRequest, Integer retentionPeriod, Duration bucketLength, Duration requestTime) {
         this.retentionPeriod = retentionPeriod;
         this.bucketLength = bucketLength;
+        this.validateRequest = validateRequest;
+        this.requestTime = requestTime;
     }
 
     @PostMapping(value = "/exposed")
     public @ResponseBody ResponseEntity<String> addExposed(@Valid @RequestBody GaenRequest gaenRequest,
             @RequestHeader(value = "User-Agent", required = true) String userAgent,
             @AuthenticationPrincipal Object principal) {
-        return ResponseEntity.ok("OK");
+        var now = Instant.now().toEpochMilli();
+        if(!this.validateRequest.isValid(principal)){
+            return ResponseEntity.status(HttpStatus.FORBIDDEN).build();
+        }
+        for(var key : gaenRequest.getGaenKeys()) {
+            if(!isValidBase64Key(key.getKeyData())) {
+                return new ResponseEntity<>("No valid base64 key", HttpStatus.BAD_REQUEST);
+            }
+            this.validateRequest.getKeyDate(principal, key);
+        }
+        if(!this.validateRequest.isFakeRequest(principal, gaenRequest)) {
+            dataService.upsertExposees(gaenRequest.getGaenKeys());
+        }
+        long after = Instant.now().toEpochMilli();
+        long duration = after - now;
+        try {
+            Thread.sleep(Math.max(this.requestTime.toMillis() - duration, 0));
+        }
+        catch (Exception ex) {
+
+        }
+        return ResponseEntity.ok().build();
     }
 
     @GetMapping(value = "/exposed/{batchReleaseTime}", produces = "application/x-protobuf")
