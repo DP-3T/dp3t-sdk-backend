@@ -13,6 +13,7 @@ import java.time.ZoneOffset;
 import java.util.ArrayList;
 import java.util.Base64;
 import java.util.Date;
+import java.util.UUID;
 import java.util.zip.ZipEntry;
 import java.util.zip.ZipOutputStream;
 
@@ -37,6 +38,7 @@ import org.springframework.http.CacheControl;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
+import org.springframework.security.oauth2.jwt.Jwt;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -66,11 +68,12 @@ public class GaenController {
     private final Duration exposedListCacheContol;
     private final PrivateKey secondDayKey;
     private final ProtoSignature gaenSigner;
+    private final String gaenRegion;
 
     public GaenController(GAENDataService dataService, EtagGeneratorInterface etagGenerator,
             ValidateRequest validateRequest, ProtoSignature gaenSigner, ValidationUtils validationUtils,
             Integer retentionPeriod, Duration bucketLength, Duration requestTime, Duration exposedListCacheContol,
-            PrivateKey secondDayKey) {
+            PrivateKey secondDayKey, String gaenRegion) {
         this.dataService = dataService;
         this.retentionPeriod = retentionPeriod;
         this.bucketLength = bucketLength;
@@ -81,6 +84,7 @@ public class GaenController {
         this.exposedListCacheContol = exposedListCacheContol;
         this.secondDayKey = secondDayKey;
         this.gaenSigner = gaenSigner;
+        this.gaenRegion = gaenRegion;
     }
 
     @PostMapping(value = "/exposed")
@@ -107,8 +111,13 @@ public class GaenController {
         } catch (Exception ex) {
 
         }
-        String jwt = Jwts.builder().setId("1111").setIssuedAt(new Date()).claim("onset", "2020-05-07")
-                .claim("scope", "red").signWith(secondDayKey).compact();
+        String jwt = Jwts.builder()
+                    .setId(UUID.randomUUID().toString())
+                    .setIssuedAt(Date.from(Instant.now()))
+                    .setExpiration(Date.from(Instant.now().plus(Duration.ofDays(1))))
+                    .claim("scope", "red")
+                    .claim("fake", ((Jwt)principal).getClaim("fake"))
+                    .signWith(secondDayKey).compact();
         return ResponseEntity.ok().header("Authentication", "Bearer " + jwt).build();
     }
 
@@ -117,7 +126,7 @@ public class GaenController {
             @RequestHeader(value = "User-Agent", required = true) String userAgent,
             @AuthenticationPrincipal Object principal) throws InvalidDateException {
         var now = Instant.now().toEpochMilli();
-        /// TODO: we need to supply another jwt validator, since the scope is different
+       
         // if(!this.validateRequest.isValid(principal)){
         // return ResponseEntity.status(HttpStatus.FORBIDDEN).build();
         // }
@@ -155,7 +164,7 @@ public class GaenController {
 
         file.addAllKeys(tekList);
        
-        file.setRegion("ch")
+        file.setRegion(gaenRegion)
             .setBatchNum(1)
             .setBatchSize(1)
             .setStartTimestamp(batchReleaseTimeDuration.toSeconds())
