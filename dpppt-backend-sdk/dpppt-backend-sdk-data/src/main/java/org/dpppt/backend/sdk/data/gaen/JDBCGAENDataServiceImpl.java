@@ -68,9 +68,9 @@ public class JDBCGAENDataServiceImpl implements GAENDataService {
 	@Transactional(readOnly = true)
 	public int getMaxExposedIdForBatchReleaseTime(Long batchReleaseTime, long batchLength) {
 		MapSqlParameterSource params = new MapSqlParameterSource();
-		params.addValue("batchReleaseTime", Date.from(Instant.ofEpochMilli(batchReleaseTime)));
-		params.addValue("startBatch", Date.from(Instant.ofEpochMilli(batchReleaseTime - batchLength)));
-		String sql = "select max(pk_exposed_id) from t_gaen_exposed where received_at >= :startBatch and received_at < :batchReleaseTime";
+		params.addValue("batchReleaseTime", Duration.ofMillis(batchReleaseTime).dividedBy(Duration.ofMinutes(10)));
+		params.addValue("startBatch", Duration.ofMillis(batchReleaseTime - batchLength).dividedBy(Duration.ofMinutes(10)));
+		String sql = "select max(pk_exposed_id) from t_gaen_exposed where rolling_start_number >= :startBatch and rolling_start_number < :batchReleaseTime";
 		Integer maxId = jt.queryForObject(sql, params, Integer.class);
 		if (maxId == null) {
 			return 0;
@@ -82,10 +82,10 @@ public class JDBCGAENDataServiceImpl implements GAENDataService {
 	@Override
 	@Transactional(readOnly = true)
 	public List<GaenKey> getSortedExposedForBatchReleaseTime(Long batchReleaseTime, long batchLength) {
-		String sql = "select pk_exposed_id, key, rolling_start_number, rolling_period, transmission_risk_level from t_gaen_exposed where received_at >= :startBatch and received_at < :batchReleaseTime order by pk_exposed_id desc";
+		String sql = "select pk_exposed_id, key, rolling_start_number, rolling_period, transmission_risk_level from t_gaen_exposed where rolling_start_number >= :startBatch and rolling_start_number < :batchReleaseTime order by pk_exposed_id desc";
 		MapSqlParameterSource params = new MapSqlParameterSource();
-		params.addValue("batchReleaseTime", Date.from(Instant.ofEpochMilli(batchReleaseTime)));
-		params.addValue("startBatch", Date.from(Instant.ofEpochMilli(batchReleaseTime - batchLength)));
+		params.addValue("batchReleaseTime", Duration.ofMillis(batchReleaseTime).dividedBy(Duration.ofMinutes(10)));
+		params.addValue("startBatch", Duration.ofMillis(batchReleaseTime - batchLength).dividedBy(Duration.ofMinutes(10)));
 		return jt.query(sql, params, new GaenKeyRowMapper());
 	}
 

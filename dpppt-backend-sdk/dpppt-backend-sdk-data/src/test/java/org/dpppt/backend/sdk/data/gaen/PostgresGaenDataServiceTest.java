@@ -80,12 +80,12 @@ public class PostgresGaenDataServiceTest {
         insertExposeeWithReceivedAt(receivedAt.toInstant(), key);
 
 		List<GaenKey> sortedExposedForDay = dppptDataService
-				.getSortedExposedForBatchReleaseTime(receivedAt.toInstant().toEpochMilli() + 1, 1 * 60 * 60 * 1000l);
+				.getSortedExposedForBatchReleaseTime(receivedAt.toInstant().toEpochMilli() + Duration.ofMinutes(10).toMillis(), 24 * 60 * 60 * 1000l);
 		assertFalse(sortedExposedForDay.isEmpty());
 
 		dppptDataService.cleanDB(Duration.ofDays(21));
-		sortedExposedForDay = dppptDataService.getSortedExposedForBatchReleaseTime(receivedAt.toInstant().toEpochMilli() + 1,
-				1 * 60 * 60 * 1000l);
+		sortedExposedForDay = dppptDataService.getSortedExposedForBatchReleaseTime(receivedAt.toInstant().toEpochMilli() +  Duration.ofMinutes(10).toMillis(),
+				24 * 60 * 60 * 1000l);
 		assertTrue(sortedExposedForDay.isEmpty());
 
     }
@@ -110,10 +110,11 @@ public class PostgresGaenDataServiceTest {
 
     private void insertExposeeWithReceivedAt(Instant receivedAt, String key) throws SQLException {
         Connection connection = dataSource.getConnection();
-        String sql = "into t_gaen_exposed (pk_exposed_id, key, received_at, rolling_start_number, rolling_period, transmission_risk_level) values (1, ?, ?,20000, 144, 0)";
+        String sql = "into t_gaen_exposed (pk_exposed_id, key, received_at, rolling_start_number, rolling_period, transmission_risk_level) values (1, ?, ?, ?, 144, 0)";
         PreparedStatement preparedStatement = connection.prepareStatement("insert " + sql);
         preparedStatement.setString(1, key);
         preparedStatement.setTimestamp(2, new Timestamp(receivedAt.toEpochMilli()));
+        preparedStatement.setInt(3, (int)Duration.ofMillis(receivedAt.toEpochMilli()).dividedBy(Duration.ofMinutes(10)));
         preparedStatement.execute();
     }
 
