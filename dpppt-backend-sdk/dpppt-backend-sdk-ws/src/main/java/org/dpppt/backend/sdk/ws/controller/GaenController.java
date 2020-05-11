@@ -204,6 +204,7 @@ public class GaenController {
 
         zip.flush();
         zip.close();
+        byteOut.close();
 
         return ResponseEntity.ok().cacheControl(CacheControl.maxAge(exposedListCacheContol))
         .header("X-BATCH-RELEASE-TIME", Long.toString(batchReleaseTimeDuration.toMillis())).body(byteOut.toByteArray());
