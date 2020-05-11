@@ -115,17 +115,7 @@ public class MultipleJWTConfig {
 
 		@Bean
 		public JWTValidator jwtValidatorGAEN() {
-			return new JWTValidator(redeemDataService, Duration.ofMinutes(maxValidityMinutes));
-		}
-
-		@Bean
-		public ValidateRequest requestValidatorGAEN() {
-			return new JWTValidateRequest();
-		}
-
-		@Bean
-		public ValidateRequest gaenRequestValidatorGAEN() {
-			return new org.dpppt.backend.sdk.ws.security.gaen.JWTValidateRequest();
+			return new JWTValidator(redeemDataService, Duration.ofDays(1));
 		}
 
 		@Bean
