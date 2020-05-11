@@ -14,6 +14,7 @@ import java.io.FileInputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.security.KeyFactory;
+import java.security.KeyPair;
 import java.security.NoSuchAlgorithmException;
 import java.security.interfaces.RSAPublicKey;
 import java.security.spec.InvalidKeySpecException;
@@ -65,11 +66,11 @@ public class MultipleJWTConfig {
 	
 		@Autowired
 		@Lazy
-		static DPPPTDataService dataService;
+		DPPPTDataService dataService;
 	
 		@Autowired
 		@Lazy
-		static RedeemDataService redeemDataService;
+		RedeemDataService redeemDataService;
 
 
 		protected String loadPublicKey() throws IOException {
@@ -108,6 +109,9 @@ public class MultipleJWTConfig {
           .jwt().decoder(jwtDecoderSecondDay());
 	// @formatter:on
 		}
+		@Autowired
+		@Lazy
+		KeyPairHolder secondDayKeyPair;
 
 		@Bean
 		public JWTValidator jwtValidatorGAEN() {
@@ -131,10 +135,10 @@ public class MultipleJWTConfig {
 
 		@Bean
 		public JwtDecoder jwtDecoderSecondDay() throws InvalidKeySpecException, NoSuchAlgorithmException, IOException {
-			X509EncodedKeySpec keySpecX509 = new X509EncodedKeySpec(Base64.getDecoder().decode(loadPublicKey()));
-			KeyFactory kf = KeyFactory.getInstance("RSA");
-			RSAPublicKey pubKey = (RSAPublicKey) kf.generatePublic(keySpecX509);
-			NimbusJwtDecoder jwtDecoder = NimbusJwtDecoder.withPublicKey(pubKey).build();
+			// X509EncodedKeySpec keySpecX509 = new X509EncodedKeySpec(Base64.getDecoder().decode(loadPublicKey()));
+			// KeyFactory kf = KeyFactory.getInstance("RSA");
+			// RSAPublicKey pubKey = (RSAPublicKey) kf.generatePublic(keySpecX509);
+			NimbusJwtDecoder jwtDecoder = NimbusJwtDecoder.withPublicKey((RSAPublicKey)secondDayKeyPair.getKeyPair().getPublic()).build();
 			jwtDecoder.setClaimSetConverter(claimConverterGAEN());
 
 			OAuth2TokenValidator<Jwt> defaultValidators = JwtValidators.createDefault();

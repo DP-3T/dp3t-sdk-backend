@@ -1,5 +1,6 @@
 package org.dpppt.backend.sdk.ws.controller;
 
+import java.security.PrivateKey;
 import java.time.Duration;
 import java.time.Instant;
 import java.time.LocalDate;
@@ -54,8 +55,9 @@ public class GaenController {
     private final EtagGeneratorInterface etagGenerator;
     private final GAENDataService dataService;
     private final Duration exposedListCacheContol;
+    private final PrivateKey secondDayKey;
 
-    public GaenController(GAENDataService dataService, EtagGeneratorInterface etagGenerator, ValidateRequest validateRequest, ValidationUtils validationUtils, Integer retentionPeriod, Duration bucketLength, Duration requestTime, Duration exposedListCacheContol) {
+    public GaenController(GAENDataService dataService, EtagGeneratorInterface etagGenerator, ValidateRequest validateRequest, ValidationUtils validationUtils, Integer retentionPeriod, Duration bucketLength, Duration requestTime, Duration exposedListCacheContol, PrivateKey secondDayKey) {
         this.dataService = dataService;
         this.retentionPeriod = retentionPeriod;
         this.bucketLength = bucketLength;
@@ -64,6 +66,7 @@ public class GaenController {
         this.validationUtils = validationUtils;
         this.etagGenerator = etagGenerator;
         this.exposedListCacheContol = exposedListCacheContol;
+        this.secondDayKey = secondDayKey;
     }
 
     @PostMapping(value = "/exposed")
@@ -91,7 +94,7 @@ public class GaenController {
         catch (Exception ex) {
 
         }
-        String jwt = Jwts.builder().setId("1111").setIssuedAt(new Date()).claim("onset", "2020-05-07").claim("scope", "red").compact();
+        String jwt = Jwts.builder().setId("1111").setIssuedAt(new Date()).claim("onset", "2020-05-07").claim("scope", "red").signWith(secondDayKey).compact();
         return ResponseEntity.ok().header("Authentication", "Bearer " + jwt).build();
     }
 
