@@ -12,11 +12,14 @@ package org.dpppt.backend.sdk.ws.controller;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
+import static org.junit.Assert.assertTrue;
+import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.content;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
+import java.io.ByteArrayInputStream;
 import java.time.Duration;
 import java.time.Instant;
 import java.time.LocalDate;
@@ -27,19 +30,34 @@ import java.time.temporal.ChronoUnit;
 import java.util.ArrayList;
 import java.util.Base64;
 import java.util.List;
+import java.util.zip.ZipEntry;
+import java.util.zip.ZipInputStream;
 
+import com.google.common.io.ByteArrayDataOutput;
+import com.google.common.io.ByteStreams;
+
+import java.security.PublicKey;
+import java.security.Security;
+
+import org.bouncycastle.jce.provider.BouncyCastleProvider;
 import org.dpppt.backend.sdk.model.ExposedKey;
 import org.dpppt.backend.sdk.model.ExposeeAuthData;
 import org.dpppt.backend.sdk.model.gaen.GaenRequest;
+import org.dpppt.backend.sdk.model.gaen.proto.TemporaryExposureKeyFormat;
+import org.dpppt.backend.sdk.ws.security.signature.ProtoSignature;
 import org.dpppt.backend.sdk.model.gaen.GaenKey;
 import org.dpppt.backend.sdk.model.ExposeeRequestList;
 import org.junit.Test;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.http.MediaType;
 import org.springframework.mock.web.MockHttpServletResponse;
 
 @SpringBootTest(properties = { "ws.app.jwt.publickey=classpath://generated_pub.pem" })
 public class GaenControllerTest extends BaseControllerTest {
+	@Autowired
+	ProtoSignature signer;
+
 	@Test
 	public void testHello() throws Exception {
 		MockHttpServletResponse response = mockMvc.perform(get("/v1")).andExpect(status().is2xxSuccessful()).andReturn()
@@ -276,6 +294,72 @@ public class GaenControllerTest extends BaseControllerTest {
 						.header("Authorization", "Bearer " + token).header("User-Agent", "MockMVC")
 						.content(json(exposeeRequest)))
 				.andExpect(status().is(401)).andExpect(content().string("")).andReturn().getResponse();
+	}
+
+	@Test
+	public void zipContainsFiles() throws Exception {
+		insertNKeysPerDayInInterval(20, OffsetDateTime.now(ZoneOffset.UTC).minusDays(15), OffsetDateTime.now(ZoneOffset.UTC));
+		MockHttpServletResponse response = mockMvc.perform(get("/v1/gaen/exposed/" + LocalDate.now().minusDays(1).atStartOfDay().atOffset(ZoneOffset.UTC).toInstant().toEpochMilli())
+						.header("User-Agent", "MockMVC")).andExpect(status().is2xxSuccessful())
+						.andReturn().getResponse();
+		ByteArrayInputStream bais = new ByteArrayInputStream(response.getContentAsByteArray());
+		ZipInputStream zip = new ZipInputStream(bais);
+
+		ZipEntry binary = zip.getNextEntry();
+		assertEquals(binary.getName(), "export.bin");
+		ByteArrayDataOutput bado = ByteStreams.newDataOutput();
+		zip.readNBytes(16);
+		while(zip.available() > 0) {
+			bado.write(zip.readNBytes(1000));
+		}
+		assertEquals(zip.available(), 0);
+		byte[] binProto = bado.toByteArray();
+
+
+		ByteArrayDataOutput bado2 = ByteStreams.newDataOutput();
+		ZipEntry signature = zip.getNextEntry();
+		assertEquals(signature.getName(), "export.sig");
+		while(zip.available() > 0){
+			bado2.write(zip.readNBytes(1000));
+		}
+		assertEquals(zip.available(), 0);
+		byte[] sigProto = bado2.toByteArray();
+
+		assertNull(zip.getNextEntry());
+		var list = TemporaryExposureKeyFormat.TEKSignatureList.parseFrom(sigProto);
+		var export =TemporaryExposureKeyFormat.TemporaryExposureKeyExport.parseFrom(binProto);
+		var sig = list.getSignatures(0);
+		java.security.Signature signatureVerifier = java.security.Signature.getInstance(sig.getSignatureInfo().getSignatureAlgorithm().trim());
+		signatureVerifier.initVerify(signer.getPublicKey());
+		signatureVerifier.update(binProto);
+		assertTrue(signatureVerifier.verify(sig.getSignature().toByteArray()));
+
+		zip.close();
+		bais.close();
+	}
+
+
+	private void insertNKeysPerDayInInterval(int N, OffsetDateTime start, OffsetDateTime end) throws Exception{
+		var current = start;
+		while (current.isBefore(end)) {
+			for(int i =0; i < N; i++) {
+				GaenRequest exposeeRequest = new GaenRequest();
+				GaenKey key = new GaenKey();
+				key.setKeyData(Base64.getEncoder().encodeToString("testKey32Bytes--".getBytes("UTF-8")));
+				key.setRollingPeriod(144);
+				key.setRollingStartNumber((int)Duration.ofMillis(Instant.now().toEpochMilli()).dividedBy(Duration.ofMinutes(10)));
+				key.setTransmissionRiskLevel(1);
+				List<GaenKey> keys = new ArrayList<>();
+				keys.add(key);
+				exposeeRequest.setGaenKeys(keys);
+				String token = createToken(OffsetDateTime.now().withOffsetSameInstant(ZoneOffset.UTC).plusMinutes(5));
+				MockHttpServletResponse response = mockMvc.perform(post("/v1/gaen/exposed")
+						.contentType(MediaType.APPLICATION_JSON).header("Authorization", "Bearer " + token)
+						.header("User-Agent", "MockMVC").content(json(exposeeRequest))).andExpect(status().is2xxSuccessful())
+						.andReturn().getResponse();
+			}
+			current = current.plusDays(1);
+		}
 	}
 
 }

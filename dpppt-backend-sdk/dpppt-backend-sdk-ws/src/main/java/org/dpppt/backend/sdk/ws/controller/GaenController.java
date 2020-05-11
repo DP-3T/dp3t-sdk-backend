@@ -201,6 +201,7 @@ public class GaenController {
 
         zip.putNextEntry(new ZipEntry("export.bin"));
         byte[] exportBin = file.toByteArray();
+        zip.write("EK Export v1    ".getBytes());
         zip.write(exportBin);
         zip.closeEntry();
 

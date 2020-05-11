@@ -3,6 +3,8 @@ package org.dpppt.backend.sdk.ws.security.signature;
 import java.security.InvalidKeyException;
 import java.security.KeyPair;
 import java.security.NoSuchAlgorithmException;
+import java.security.PublicKey;
+import java.security.Security;
 import java.security.Signature;
 import java.security.SignatureException;
 
@@ -21,7 +23,7 @@ public class ProtoSignature {
     
     public ProtoSignature(String algorithm, KeyPair keyPair, String appBundleId, String apkPackage, String keyVersion, String keyVerificationId) {
         this.keyPair = keyPair;
-        this.algorithm = algorithm;
+        this.algorithm = algorithm.trim();
         this.appBundleId = appBundleId;
         this.apkPackage = apkPackage;
         this.keyVerificationId = keyVerificationId;
@@ -33,6 +35,10 @@ public class ProtoSignature {
         signature.initSign(keyPair.getPrivate());
         signature.update(data);
         return signature.sign();
+    }
+
+    public PublicKey getPublicKey() {
+        return keyPair.getPublic();
     }
 
     public TemporaryExposureKeyFormat.TEKSignatureList getSignatureObject(byte[] keyExport, SignatureInfo tekSignature)
