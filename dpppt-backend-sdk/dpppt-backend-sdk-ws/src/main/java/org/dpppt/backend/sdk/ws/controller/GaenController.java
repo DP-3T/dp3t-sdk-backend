@@ -102,7 +102,7 @@ public class GaenController {
             this.validateRequest.getKeyDate(principal, key);
         }
         if (!this.validateRequest.isFakeRequest(principal, gaenRequest)) {
-            dataService.upsertExposees(gaenRequest.getGaenKeys());
+            dataService.upsertExposees(gaenRequest.getGaenKeys());//TODO insert only non fake keys
         }
         long after = Instant.now().toEpochMilli();
         long duration = after - now;
@@ -116,7 +116,7 @@ public class GaenController {
                     .setIssuedAt(Date.from(Instant.now()))
                     .setExpiration(Date.from(Instant.now().plus(Duration.ofDays(1))))
                     .claim("scope", "red")
-                    .claim("fake", ((Jwt)principal).getClaim("fake"))
+                    .claim("fake", this.validateRequest.isFakeRequest(principal, gaenRequest)) //TODO make sure this is true in the corrct cases
                     .signWith(secondDayKey).compact();
         return ResponseEntity.ok().header("Authentication", "Bearer " + jwt).build();
     }
