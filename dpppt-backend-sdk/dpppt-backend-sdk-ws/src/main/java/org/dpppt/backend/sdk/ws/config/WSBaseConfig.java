@@ -11,8 +11,11 @@
 package org.dpppt.backend.sdk.ws.config;
 
 import java.security.KeyPair;
+import java.security.KeyPairGenerator;
+import java.security.spec.ECGenParameterSpec;
 import java.time.Duration;
 import java.util.List;
+import java.util.Map;
 
 import javax.sql.DataSource;
 
@@ -29,6 +32,7 @@ import org.dpppt.backend.sdk.ws.controller.GaenController;
 import org.dpppt.backend.sdk.ws.filter.ResponseWrapperFilter;
 import org.dpppt.backend.sdk.ws.security.NoValidateRequest;
 import org.dpppt.backend.sdk.ws.security.ValidateRequest;
+import org.dpppt.backend.sdk.ws.security.signature.ProtoSignature;
 import org.dpppt.backend.sdk.ws.util.ValidationUtils;
 import org.flywaydb.core.Flyway;
 import org.slf4j.Logger;
@@ -96,6 +100,18 @@ public abstract class WSBaseConfig implements SchedulingConfigurer, WebMvcConfig
 	@Value("${ws.app.key_size: 32}")
 	int keySizeBytes;
 
+	@Value("${ws.app.ios.bundleId: org.dppt.ios.demo}")
+	String bundleId;
+	@Value("${ws.app.android.packageName: org.dpppt.android.demo}")
+	String packageName;
+	@Value("${ws.app.gaen.keyVersion: v1}")
+	String keyVersion;
+	@Value("${ws.app.gaen.keyIdentifier: org.gaen.v1}")
+	String keyIdentifier;
+	@Value("${ws.app.gaen.algorithm: SHA256withECDSA}")
+	String gaenAlgorithm;
+
+
 	@Autowired(required = false)
 	ValidateRequest requestValidator;
 
@@ -103,6 +119,16 @@ public abstract class WSBaseConfig implements SchedulingConfigurer, WebMvcConfig
 	ValidateRequest gaenRequestValidator;
 
 	final SignatureAlgorithm algorithm = SignatureAlgorithm.ES256;
+
+	@Bean
+	public ProtoSignature gaenSigner() {
+		try {
+			return new ProtoSignature(gaenAlgorithm, getGaenKeyPair(gaenAlgorithm),bundleId,packageName,keyVersion, keyIdentifier);
+		}
+		catch(Exception ex) {
+			throw new RuntimeException("Cannot initialize signer for protobuf");
+		}
+	}
 
 	@Bean
 	public DPPPTController dppptSDKController() {
@@ -126,7 +152,10 @@ public abstract class WSBaseConfig implements SchedulingConfigurer, WebMvcConfig
 		if (theValidator == null) {
 			theValidator = new NoValidateRequest();
 		}
-		return new GaenController(gaenDataService(), etagGenerator(), theValidator,new ValidationUtils(gaenKeySizeBytes, Duration.ofDays(retentionDays), batchLength), retentionDays, Duration.ofMillis(batchLength), Duration.ofMillis(requestTime), Duration.ofMinutes(exposedListCacheControl), secondDayKeyPair().getKeyPair().getPrivate());
+		return new GaenController(gaenDataService(), etagGenerator(), theValidator, gaenSigner(),
+				new ValidationUtils(gaenKeySizeBytes, Duration.ofDays(retentionDays), batchLength), retentionDays,
+				Duration.ofMillis(batchLength), Duration.ofMillis(requestTime),
+				Duration.ofMinutes(exposedListCacheControl), secondDayKeyPair().getKeyPair().getPrivate());
 	}
 
 	@Bean
@@ -172,6 +201,26 @@ public abstract class WSBaseConfig implements SchedulingConfigurer, WebMvcConfig
 		logger.warn("USING FALLBACK KEYPAIR. WONT'T PERSIST APP RESTART AND PROBABLY DOES NOT HAVE ENOUGH ENTROPY.");
 		return Keys.keyPairFor(algorithm);
 	}
+	public KeyPair getGaenKeyPair(String algorithm) {
+		try {
+			var splits = algorithm.split("with");
+			var algo = splits[1];
+			var kpGenerator = KeyPairGenerator.getInstance(algorithmToKeyPairAlgo.get(algo));
+			if(algo.equals("ECDSA")) {
+				ECGenParameterSpec keySpecs = new ECGenParameterSpec("secp256r1");
+				kpGenerator.initialize(keySpecs);
+			}
+			return kpGenerator.genKeyPair();
+		}
+		catch (Exception ex) {
+			throw new RuntimeException("Cannot generate KeyPair");
+		}
+	}
+
+	private static Map<String, String> algorithmToKeyPairAlgo = Map.of(
+		"ECDSA", "EC",
+		"RSA", "RSA"
+	);
 
 	@Override
 	public void configureTasks(ScheduledTaskRegistrar taskRegistrar) {

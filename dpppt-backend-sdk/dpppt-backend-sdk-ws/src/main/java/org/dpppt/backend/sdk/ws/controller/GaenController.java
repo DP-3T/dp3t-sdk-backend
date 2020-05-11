@@ -1,6 +1,11 @@
 package org.dpppt.backend.sdk.ws.controller;
 
+import java.io.ByteArrayOutputStream;
+import java.io.IOException;
+import java.security.InvalidKeyException;
+import java.security.NoSuchAlgorithmException;
 import java.security.PrivateKey;
+import java.security.SignatureException;
 import java.time.Duration;
 import java.time.Instant;
 import java.time.LocalDate;
@@ -8,6 +13,8 @@ import java.time.ZoneOffset;
 import java.util.ArrayList;
 import java.util.Base64;
 import java.util.Date;
+import java.util.zip.ZipEntry;
+import java.util.zip.ZipOutputStream;
 
 import javax.validation.Valid;
 
@@ -19,9 +26,11 @@ import org.dpppt.backend.sdk.model.gaen.DayBuckets;
 import org.dpppt.backend.sdk.model.gaen.File;
 import org.dpppt.backend.sdk.model.gaen.GaenRequest;
 import org.dpppt.backend.sdk.model.gaen.Header;
-import org.dpppt.backend.sdk.model.gaen.proto.FileProto;
+import org.dpppt.backend.sdk.model.gaen.proto.TemporaryExposureKeyFormat;
+import org.dpppt.backend.sdk.model.gaen.proto.TemporaryExposureKeyFormat.SignatureInfo;
 import org.dpppt.backend.sdk.ws.security.ValidateRequest;
 import org.dpppt.backend.sdk.ws.security.ValidateRequest.InvalidDateException;
+import org.dpppt.backend.sdk.ws.security.signature.ProtoSignature;
 import org.dpppt.backend.sdk.ws.util.ValidationUtils;
 import org.dpppt.backend.sdk.ws.util.ValidationUtils.BadBatchReleaseTimeException;
 import org.springframework.http.CacheControl;
@@ -56,8 +65,12 @@ public class GaenController {
     private final GAENDataService dataService;
     private final Duration exposedListCacheContol;
     private final PrivateKey secondDayKey;
+    private final ProtoSignature gaenSigner;
 
-    public GaenController(GAENDataService dataService, EtagGeneratorInterface etagGenerator, ValidateRequest validateRequest, ValidationUtils validationUtils, Integer retentionPeriod, Duration bucketLength, Duration requestTime, Duration exposedListCacheContol, PrivateKey secondDayKey) {
+    public GaenController(GAENDataService dataService, EtagGeneratorInterface etagGenerator,
+            ValidateRequest validateRequest, ProtoSignature gaenSigner, ValidationUtils validationUtils,
+            Integer retentionPeriod, Duration bucketLength, Duration requestTime, Duration exposedListCacheContol,
+            PrivateKey secondDayKey) {
         this.dataService = dataService;
         this.retentionPeriod = retentionPeriod;
         this.bucketLength = bucketLength;
@@ -67,34 +80,35 @@ public class GaenController {
         this.etagGenerator = etagGenerator;
         this.exposedListCacheContol = exposedListCacheContol;
         this.secondDayKey = secondDayKey;
+        this.gaenSigner = gaenSigner;
     }
 
     @PostMapping(value = "/exposed")
     public @ResponseBody ResponseEntity<String> addExposed(@Valid @RequestBody GaenRequest gaenRequest,
             @RequestHeader(value = "User-Agent", required = true) String userAgent,
             @AuthenticationPrincipal Object principal) throws InvalidDateException {
-        var now = Instant.now().toEpochMilli(); 
-        if(!this.validateRequest.isValid(principal)){
+        var now = Instant.now().toEpochMilli();
+        if (!this.validateRequest.isValid(principal)) {
             return ResponseEntity.status(HttpStatus.FORBIDDEN).build();
-        } 
-        for(var key : gaenRequest.getGaenKeys()) {
-            if(!validationUtils.isValidBase64Key(key.getKeyData())) {
+        }
+        for (var key : gaenRequest.getGaenKeys()) {
+            if (!validationUtils.isValidBase64Key(key.getKeyData())) {
                 return new ResponseEntity<>("No valid base64 key", HttpStatus.BAD_REQUEST);
             }
             this.validateRequest.getKeyDate(principal, key);
-        } 
-        if(!this.validateRequest.isFakeRequest(principal, gaenRequest)) {
+        }
+        if (!this.validateRequest.isFakeRequest(principal, gaenRequest)) {
             dataService.upsertExposees(gaenRequest.getGaenKeys());
         }
         long after = Instant.now().toEpochMilli();
         long duration = after - now;
         try {
             Thread.sleep(Math.max(duration, 0));
-          }
-        catch (Exception ex) {
+        } catch (Exception ex) {
 
         }
-        String jwt = Jwts.builder().setId("1111").setIssuedAt(new Date()).claim("onset", "2020-05-07").claim("scope", "red").signWith(secondDayKey).compact();
+        String jwt = Jwts.builder().setId("1111").setIssuedAt(new Date()).claim("onset", "2020-05-07")
+                .claim("scope", "red").signWith(secondDayKey).compact();
         return ResponseEntity.ok().header("Authentication", "Bearer " + jwt).build();
     }
 
@@ -102,34 +116,60 @@ public class GaenController {
     public @ResponseBody ResponseEntity<String> addExposedSecond(@Valid @RequestBody GaenRequest gaenRequest,
             @RequestHeader(value = "User-Agent", required = true) String userAgent,
             @AuthenticationPrincipal Object principal) throws InvalidDateException {
-        var now = Instant.now().toEpochMilli(); 
-        ///TODO: we need to supply another jwt validator, since the scope is different
+        var now = Instant.now().toEpochMilli();
+        /// TODO: we need to supply another jwt validator, since the scope is different
         // if(!this.validateRequest.isValid(principal)){
-        //     return ResponseEntity.status(HttpStatus.FORBIDDEN).build();
-        // } 
-        for(var key : gaenRequest.getGaenKeys()) {
-            if(!validationUtils.isValidBase64Key(key.getKeyData())) {
+        // return ResponseEntity.status(HttpStatus.FORBIDDEN).build();
+        // }
+        for (var key : gaenRequest.getGaenKeys()) {
+            if (!validationUtils.isValidBase64Key(key.getKeyData())) {
                 return new ResponseEntity<>("No valid base64 key", HttpStatus.BAD_REQUEST);
             }
             this.validateRequest.getKeyDate(principal, key);
-        } 
-        if(!this.validateRequest.isFakeRequest(principal, gaenRequest)) {
+        }
+        if (!this.validateRequest.isFakeRequest(principal, gaenRequest)) {
             dataService.upsertExposees(gaenRequest.getGaenKeys());
         }
         long after = Instant.now().toEpochMilli();
         long duration = after - now;
         try {
             Thread.sleep(Math.max(duration, 0));
-          }
-        catch (Exception ex) {
+        } catch (Exception ex) {
 
         }
         return ResponseEntity.ok().build();
     }
 
-    @GetMapping(value = "/exposed/{batchReleaseTime}", produces = "application/x-protobuf")
-    public @ResponseBody ResponseEntity<FileProto.File> getExposedKeys(@PathVariable Long batchReleaseTime,
-            WebRequest request) throws BadBatchReleaseTimeException {
+    private TemporaryExposureKeyFormat.TemporaryExposureKeyExport getProtoKey(Duration batchReleaseTimeDuration, SignatureInfo tekSignature) {
+        var file = TemporaryExposureKeyFormat.TemporaryExposureKeyExport.newBuilder();
+        var exposedKeys = dataService.getSortedExposedForBatchReleaseTime(batchReleaseTimeDuration.toMillis(), bucketLength.toMillis());
+        var tekList = new ArrayList<TemporaryExposureKeyFormat.TemporaryExposureKey>();
+        for(var key : exposedKeys) {
+            var protoKey = TemporaryExposureKeyFormat.TemporaryExposureKey.newBuilder()
+                .setKeyData(ByteString.copyFrom(Base64.getDecoder().decode(key.getKeyData())))
+                .setRollingPeriod(key.getRollingPeriod())
+                .setRollingStartIntervalNumber(key.getRollingStartNumber())
+                .setTransmissionRiskLevel(key.getTransmissionRiskLevel()).build();
+            tekList.add(protoKey);
+        }
+
+        file.addAllKeys(tekList);
+       
+        file.setRegion("ch")
+            .setBatchNum(1)
+            .setBatchSize(1)
+            .setStartTimestamp(batchReleaseTimeDuration.toSeconds())
+            .setEndTimestamp(batchReleaseTimeDuration.toSeconds() + bucketLength.toSeconds());
+
+        file.addSignatureInfos(tekSignature);
+
+        return file.build();
+    }
+
+    @GetMapping(value = "/exposed/{batchReleaseTime}", produces = "application/zip")
+    public @ResponseBody ResponseEntity<byte[]> getExposedKeys(@PathVariable Long batchReleaseTime, WebRequest request)
+            throws BadBatchReleaseTimeException, IOException, InvalidKeyException, SignatureException,
+            NoSuchAlgorithmException {
         
         var batchReleaseTimeDuration = Duration.ofMillis(batchReleaseTime);
 
@@ -143,24 +183,30 @@ public class GaenController {
         if (request.checkNotModified(etag)) {
 			return ResponseEntity.status(HttpStatus.NOT_MODIFIED).build();
         }
-       var file = FileProto.File.newBuilder();
-        var exposedKeys = dataService.getSortedExposedForBatchReleaseTime(batchReleaseTimeDuration.toMillis(), bucketLength.toMillis());
-        for(var key : exposedKeys) {
-            var protoKey = FileProto.Key.newBuilder()
-                .setKeyData(ByteString.copyFrom(Base64.getDecoder().decode(key.getKeyData())))
-                .setRollingPeriod(key.getRollingPeriod())
-                .setRollingStartNumber(key.getRollingStartNumber())
-                .setTransmissionRiskLevel(key.getTransmissionRiskLevel()).build();
-            file.addKey(protoKey);
-        }
-        
-        var header = FileProto.Header.newBuilder();
-        header.setRegion("ch")
-            .setStartTimestamp(batchReleaseTimeDuration.toSeconds())
-            .setEndTimestamp(batchReleaseTimeDuration.toSeconds() + bucketLength.toSeconds());
-        file.setHeader(header);
+
+        var tekSignature = gaenSigner.getSignatureInfo();
+        var file = getProtoKey(batchReleaseTimeDuration, tekSignature);
+
+        ByteArrayOutputStream byteOut = new ByteArrayOutputStream();
+        ZipOutputStream zip = new ZipOutputStream(byteOut);
+
+        zip.putNextEntry(new ZipEntry("export.bin"));
+        byte[] exportBin = file.toByteArray();
+        zip.write(exportBin);
+        zip.closeEntry();
+
+        var signatureList = gaenSigner.getSignatureObject(exportBin, tekSignature);
+
+        byte[] exportSig = signatureList.toByteArray();
+        zip.putNextEntry(new ZipEntry("export.sig"));
+        zip.write(exportSig);
+        zip.closeEntry();
+
+        zip.flush();
+        zip.close();
+
         return ResponseEntity.ok().cacheControl(CacheControl.maxAge(exposedListCacheContol))
-        .header("X-BATCH-RELEASE-TIME", Long.toString(batchReleaseTimeDuration.toMillis())).body(file.build());
+        .header("X-BATCH-RELEASE-TIME", Long.toString(batchReleaseTimeDuration.toMillis())).body(byteOut.toByteArray());
     }
 
     @GetMapping(value = "/exposedjson/{batchReleaseTime}", produces = "application/json")
