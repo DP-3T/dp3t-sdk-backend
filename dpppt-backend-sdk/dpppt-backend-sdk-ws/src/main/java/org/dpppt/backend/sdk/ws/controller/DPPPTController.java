@@ -130,6 +130,9 @@ public class DPPPTController {
 
 		List<Exposee> exposees = new ArrayList<>();
 		for (var exposedKey : exposeeRequests.getExposedKeys()) {
+			if (exposedKey == null) {
+				return ResponseEntity.badRequest().build();
+			}
 			if (!isValidBase64Key(exposedKey.getKey())) {
 				return new ResponseEntity<>("No valid base64 key", HttpStatus.BAD_REQUEST);
 			}
