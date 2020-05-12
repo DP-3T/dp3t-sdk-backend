@@ -29,6 +29,7 @@ import org.dpppt.backend.sdk.model.gaen.DayBuckets;
 import org.dpppt.backend.sdk.model.gaen.File;
 import org.dpppt.backend.sdk.model.gaen.GaenKey;
 import org.dpppt.backend.sdk.model.gaen.GaenRequest;
+import org.dpppt.backend.sdk.model.gaen.GaenSecondDay;
 import org.dpppt.backend.sdk.model.gaen.Header;
 import org.dpppt.backend.sdk.model.gaen.proto.TemporaryExposureKeyFormat;
 import org.dpppt.backend.sdk.model.gaen.proto.TemporaryExposureKeyFormat.SignatureInfo;
@@ -151,22 +152,28 @@ public class GaenController {
     }
 
     @PostMapping(value = "/exposednextday")
-    public @ResponseBody ResponseEntity<String> addExposedSecond(@Valid @RequestBody GaenRequest gaenRequest,
+    public @ResponseBody ResponseEntity<String> addExposedSecond(@Valid @RequestBody GaenSecondDay gaenSecondDay,
             @RequestHeader(value = "User-Agent", required = true) String userAgent,
             @AuthenticationPrincipal Object principal) throws InvalidDateException {
         var now = Instant.now().toEpochMilli();
-
-        // if(!this.validateRequest.isValid(principal)){
-        // return ResponseEntity.status(HttpStatus.FORBIDDEN).build();
-        // }
-        for (var key : gaenRequest.getGaenKeys()) {
-            if (!validationUtils.isValidBase64Key(key.getKeyData())) {
-                return new ResponseEntity<>("No valid base64 key", HttpStatus.BAD_REQUEST);
-            }
-            this.validateRequest.getKeyDate(principal, key);
+       
+        if (!validationUtils.isValidBase64Key(gaenSecondDay.getDelayedKey().getKeyData())) {
+            return new ResponseEntity<>("No valid base64 key", HttpStatus.BAD_REQUEST);
         }
-        if (!this.validateRequest.isFakeRequest(principal, gaenRequest)) {
-            dataService.upsertExposees(gaenRequest.getGaenKeys());
+        if(principal instanceof Jwt && !((Jwt)principal).containsClaim("delayedKeyDate")) {
+            return ResponseEntity.status(HttpStatus.FORBIDDEN).body("claim does not contain delayedKeyDate");
+        }
+        if(principal instanceof Jwt) {
+            var jwt = (Jwt)principal;
+            var claimKeyDate = Integer.parseInt(jwt.getClaimAsString("delayedKeyDate"));
+            if(!gaenSecondDay.getDelayedKey().getRollingStartNumber().equals(Integer.valueOf(claimKeyDate))) {
+                return ResponseEntity.badRequest().body("keyDate does not match claim keyDate");
+            }
+        }
+        if (!this.validateRequest.isFakeRequest(principal, gaenSecondDay)) {
+            List<GaenKey> keys = new ArrayList<>();
+            keys.add(gaenSecondDay.getDelayedKey());
+            dataService.upsertExposees(keys);
         }
         long after = Instant.now().toEpochMilli();
         long duration = after - now;
