@@ -9,6 +9,7 @@ import java.security.SignatureException;
 import java.time.Duration;
 import java.time.Instant;
 import java.time.LocalDate;
+import java.time.OffsetDateTime;
 import java.time.ZoneOffset;
 import java.util.ArrayList;
 import java.util.Base64;
@@ -34,6 +35,7 @@ import org.dpppt.backend.sdk.model.gaen.proto.TemporaryExposureKeyFormat.Signatu
 import org.dpppt.backend.sdk.ws.security.ValidateRequest;
 import org.dpppt.backend.sdk.ws.security.ValidateRequest.InvalidDateException;
 import org.dpppt.backend.sdk.ws.security.signature.ProtoSignature;
+import org.dpppt.backend.sdk.ws.util.GaenUnit;
 import org.dpppt.backend.sdk.ws.util.ValidationUtils;
 import org.dpppt.backend.sdk.ws.util.ValidationUtils.BadBatchReleaseTimeException;
 import org.springframework.http.CacheControl;
@@ -103,29 +105,49 @@ public class GaenController {
                 return new ResponseEntity<>("No valid base64 key", HttpStatus.BAD_REQUEST);
             }
             this.validateRequest.getKeyDate(principal, key);
-            if(this.validateRequest.isFakeRequest(principal, key)) {
+            if (this.validateRequest.isFakeRequest(principal, key)) {
                 continue;
             }
             nonFakeKeys.add(key);
         }
+        if (principal instanceof Jwt && ((Jwt) principal).containsClaim("fake")
+                && ((Jwt) principal).getClaim("fake").equals("1") && !nonFakeKeys.isEmpty()) {
+            return ResponseEntity.badRequest().body("Claim is fake but list contains non fake keys");
+        }
         if (!nonFakeKeys.isEmpty()) {
             dataService.upsertExposees(nonFakeKeys);
         }
+
+        var delayedKeyDateDuration = Duration.of(gaenRequest.getDelayedKeyDate(), GaenUnit.TenMinutes);
+        var delayedKeyDate = LocalDate.ofInstant(Instant.ofEpochMilli(delayedKeyDateDuration.toMillis()), ZoneOffset.UTC);
+      
+        var nowDay = LocalDate.now(ZoneOffset.UTC);
+        if(!delayedKeyDate.isAfter(nowDay.minusDays(1)) && delayedKeyDate.isBefore(nowDay.plusDays(1))) {
+            return ResponseEntity.badRequest().body("delayedKeyDate date must be between yesterday and tomorrow");
+        }
+       
+        var responseBuilder = ResponseEntity.ok();
+        if (principal instanceof Jwt) {
+            var originalJWT = (Jwt) principal;
+            var jwtBuilder = Jwts.builder().setId(UUID.randomUUID().toString()).setIssuedAt(Date.from(Instant.now()))
+                    .setExpiration(Date.from(delayedKeyDate.atStartOfDay().toInstant(ZoneOffset.UTC).plus(Duration.ofHours(48))))
+                    .claim("scope", "currentDayExposed")
+                    .claim("expectedKeyDate", gaenRequest.getDelayedKeyDate());
+            if (originalJWT.containsClaim("fake")) {
+                jwtBuilder.claim("fake", originalJWT.getClaim("fake"));
+            }
+            String jwt = jwtBuilder.signWith(secondDayKey).compact();
+            responseBuilder.header("Authentication", "Bearer " + jwt);
+        }
+
         long after = Instant.now().toEpochMilli();
         long duration = after - now;
         try {
-            Thread.sleep(Math.max(duration, 0));
+            Thread.sleep(Math.max(requestTime.minusMillis(duration).toMillis(), 0));
         } catch (Exception ex) {
 
         }
-        String jwt = Jwts.builder()
-                    .setId(UUID.randomUUID().toString())
-                    .setIssuedAt(Date.from(Instant.now()))
-                    .setExpiration(Date.from(Instant.now().plus(Duration.ofDays(1))))
-                    .claim("scope", "red")
-                    .claim("fake", this.validateRequest.isFakeRequest(principal, gaenRequest)) //TODO make sure this is true in the corrct cases
-                    .signWith(secondDayKey).compact();
-        return ResponseEntity.ok().header("Authentication", "Bearer " + jwt).build();
+        return responseBuilder.build();
     }
 
     @PostMapping(value = "/exposednextday")
@@ -133,7 +155,7 @@ public class GaenController {
             @RequestHeader(value = "User-Agent", required = true) String userAgent,
             @AuthenticationPrincipal Object principal) throws InvalidDateException {
         var now = Instant.now().toEpochMilli();
-       
+
         // if(!this.validateRequest.isValid(principal)){
         // return ResponseEntity.status(HttpStatus.FORBIDDEN).build();
         // }
@@ -149,33 +171,32 @@ public class GaenController {
         long after = Instant.now().toEpochMilli();
         long duration = after - now;
         try {
-            Thread.sleep(Math.max(duration, 0));
+            Thread.sleep(Math.max(requestTime.minusMillis(duration).toMillis(), 0));
         } catch (Exception ex) {
 
         }
         return ResponseEntity.ok().build();
     }
 
-    private TemporaryExposureKeyFormat.TemporaryExposureKeyExport getProtoKey(Duration batchReleaseTimeDuration, SignatureInfo tekSignature) {
+    private TemporaryExposureKeyFormat.TemporaryExposureKeyExport getProtoKey(Duration batchReleaseTimeDuration,
+            SignatureInfo tekSignature) {
         var file = TemporaryExposureKeyFormat.TemporaryExposureKeyExport.newBuilder();
-        var exposedKeys = dataService.getSortedExposedForBatchReleaseTime(batchReleaseTimeDuration.toMillis(), bucketLength.toMillis());
+        var exposedKeys = dataService.getSortedExposedForBatchReleaseTime(batchReleaseTimeDuration.toMillis(),
+                bucketLength.toMillis());
         var tekList = new ArrayList<TemporaryExposureKeyFormat.TemporaryExposureKey>();
-        for(var key : exposedKeys) {
+        for (var key : exposedKeys) {
             var protoKey = TemporaryExposureKeyFormat.TemporaryExposureKey.newBuilder()
-                .setKeyData(ByteString.copyFrom(Base64.getDecoder().decode(key.getKeyData())))
-                .setRollingPeriod(key.getRollingPeriod())
-                .setRollingStartIntervalNumber(key.getRollingStartNumber())
-                .setTransmissionRiskLevel(key.getTransmissionRiskLevel()).build();
+                    .setKeyData(ByteString.copyFrom(Base64.getDecoder().decode(key.getKeyData())))
+                    .setRollingPeriod(key.getRollingPeriod()).setRollingStartIntervalNumber(key.getRollingStartNumber())
+                    .setTransmissionRiskLevel(key.getTransmissionRiskLevel()).build();
             tekList.add(protoKey);
         }
 
         file.addAllKeys(tekList);
-       
-        file.setRegion(gaenRegion)
-            .setBatchNum(1)
-            .setBatchSize(1)
-            .setStartTimestamp(batchReleaseTimeDuration.toSeconds())
-            .setEndTimestamp(batchReleaseTimeDuration.toSeconds() + bucketLength.toSeconds());
+
+        file.setRegion(gaenRegion).setBatchNum(1).setBatchSize(1)
+                .setStartTimestamp(batchReleaseTimeDuration.toSeconds())
+                .setEndTimestamp(batchReleaseTimeDuration.toSeconds() + bucketLength.toSeconds());
 
         file.addSignatureInfos(tekSignature);
 
@@ -186,18 +207,19 @@ public class GaenController {
     public @ResponseBody ResponseEntity<byte[]> getExposedKeys(@PathVariable Long batchReleaseTime, WebRequest request)
             throws BadBatchReleaseTimeException, IOException, InvalidKeyException, SignatureException,
             NoSuchAlgorithmException {
-        
+
         var batchReleaseTimeDuration = Duration.ofMillis(batchReleaseTime);
 
-        if(!validationUtils.isValidBatchReleaseTime(batchReleaseTimeDuration.toMillis())) {
+        if (!validationUtils.isValidBatchReleaseTime(batchReleaseTimeDuration.toMillis())) {
             return ResponseEntity.notFound().build();
         }
 
-        int max = dataService.getMaxExposedIdForBatchReleaseTime(batchReleaseTimeDuration.toMillis(), bucketLength.toMillis());
+        int max = dataService.getMaxExposedIdForBatchReleaseTime(batchReleaseTimeDuration.toMillis(),
+                bucketLength.toMillis());
         String etag = etagGenerator.getEtag(max, "proto");
-        
+
         if (request.checkNotModified(etag)) {
-			return ResponseEntity.status(HttpStatus.NOT_MODIFIED).build();
+            return ResponseEntity.status(HttpStatus.NOT_MODIFIED).build();
         }
 
         var tekSignature = gaenSigner.getSignatureInfo();
@@ -224,7 +246,8 @@ public class GaenController {
         byteOut.close();
 
         return ResponseEntity.ok().cacheControl(CacheControl.maxAge(exposedListCacheContol))
-        .header("X-BATCH-RELEASE-TIME", Long.toString(batchReleaseTimeDuration.toMillis())).body(byteOut.toByteArray());
+                .header("X-BATCH-RELEASE-TIME", Long.toString(batchReleaseTimeDuration.toMillis()))
+                .body(byteOut.toByteArray());
     }
 
     @GetMapping(value = "/exposedjson/{batchReleaseTime}", produces = "application/json")
@@ -232,22 +255,25 @@ public class GaenController {
             WebRequest request) throws BadBatchReleaseTimeException {
         var batchReleaseTimeDuration = Duration.ofMillis(batchReleaseTime);
 
-        if(!validationUtils.isValidBatchReleaseTime(batchReleaseTimeDuration.toMillis())) {
+        if (!validationUtils.isValidBatchReleaseTime(batchReleaseTimeDuration.toMillis())) {
             return ResponseEntity.notFound().build();
         }
-        int max = dataService.getMaxExposedIdForBatchReleaseTime(batchReleaseTimeDuration.toMillis(), bucketLength.toMillis());
-		String etag = etagGenerator.getEtag(max, "json");
-		if (request.checkNotModified(etag)) {
-			return ResponseEntity.status(HttpStatus.NOT_MODIFIED).build();
+        int max = dataService.getMaxExposedIdForBatchReleaseTime(batchReleaseTimeDuration.toMillis(),
+                bucketLength.toMillis());
+        String etag = etagGenerator.getEtag(max, "json");
+        if (request.checkNotModified(etag)) {
+            return ResponseEntity.status(HttpStatus.NOT_MODIFIED).build();
         }
-       
-        var exposedKeys = dataService.getSortedExposedForBatchReleaseTime(batchReleaseTimeDuration.toMillis(), bucketLength.toMillis());
+
+        var exposedKeys = dataService.getSortedExposedForBatchReleaseTime(batchReleaseTimeDuration.toMillis(),
+                bucketLength.toMillis());
         var file = new File();
         var header = new Header();
-        header.startTimestamp(batchReleaseTimeDuration.toSeconds()).endTimestamp(batchReleaseTimeDuration.toSeconds() + bucketLength.toSeconds());
+        header.startTimestamp(batchReleaseTimeDuration.toSeconds())
+                .endTimestamp(batchReleaseTimeDuration.toSeconds() + bucketLength.toSeconds());
         file.gaenKeys(exposedKeys).header(header);
         return ResponseEntity.ok().cacheControl(CacheControl.maxAge(exposedListCacheContol))
-        .header("X-BATCH-RELEASE-TIME", Long.toString(batchReleaseTimeDuration.toMillis())).body(file);
+                .header("X-BATCH-RELEASE-TIME", Long.toString(batchReleaseTimeDuration.toMillis())).body(file);
     }
 
     @GetMapping(value = "/buckets/{dayDateStr}")
@@ -262,7 +288,7 @@ public class GaenController {
 
         String controllerMapping = this.getClass().getAnnotation(RequestMapping.class).value()[0];
         dayBuckets.day(dayDateStr).relativeUrls(relativeUrls);
-        
+
         while (timestamp.toInstant().toEpochMilli() < Math.min(now.toInstant().toEpochMilli(),
                 timestamp.plusDays(1).toInstant().toEpochMilli())) {
             relativeUrls.add(controllerMapping + "/exposed" + "/" + timestamp.toInstant().toEpochMilli());
@@ -273,19 +299,20 @@ public class GaenController {
     }
 
     @ExceptionHandler(IllegalArgumentException.class)
-	@ResponseStatus(HttpStatus.BAD_REQUEST)
-	public ResponseEntity<Object> invalidArguments() {
-		return ResponseEntity.badRequest().build();
-	}
+    @ResponseStatus(HttpStatus.BAD_REQUEST)
+    public ResponseEntity<Object> invalidArguments() {
+        return ResponseEntity.badRequest().build();
+    }
 
-	@ExceptionHandler(InvalidDateException.class)
-	@ResponseStatus(HttpStatus.BAD_REQUEST)
-	public ResponseEntity<Object> invalidDate() {
-		return ResponseEntity.badRequest().build();
-	}
-	@ExceptionHandler(BadBatchReleaseTimeException.class)
-	@ResponseStatus(HttpStatus.BAD_REQUEST)
-	public ResponseEntity<Object> invalidBatchReleaseTime() {
-		return ResponseEntity.badRequest().build();
-	}
+    @ExceptionHandler(InvalidDateException.class)
+    @ResponseStatus(HttpStatus.BAD_REQUEST)
+    public ResponseEntity<Object> invalidDate() {
+        return ResponseEntity.badRequest().build();
+    }
+
+    @ExceptionHandler(BadBatchReleaseTimeException.class)
+    @ResponseStatus(HttpStatus.BAD_REQUEST)
+    public ResponseEntity<Object> invalidBatchReleaseTime() {
+        return ResponseEntity.badRequest().build();
+    }
 }

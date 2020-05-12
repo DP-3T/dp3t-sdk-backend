@@ -64,7 +64,7 @@ public class JWTValidateRequest implements ValidateRequest {
 			if (token.containsClaim("fake") && token.getClaimAsString("fake").equals("1")) {
 				fake = true;
 			}
-			if (request.isFake() == 1) {
+			if (request.getFake() == 1) {
 				fake = true;
 			}
 			return fake;

@@ -14,6 +14,7 @@ public class GaenRequest {
     @Size(min = 14, max = 14)
     List<GaenKey> gaenKeys;
 
+    @NotNull
     Integer delayedKeyDate;
 
     public List<GaenKey> getGaenKeys() {

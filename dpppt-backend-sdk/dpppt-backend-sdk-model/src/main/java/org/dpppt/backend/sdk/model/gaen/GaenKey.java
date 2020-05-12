@@ -17,7 +17,7 @@ public class GaenKey {
     @NotNull
     Integer transmissionRiskLevel;
 
-    Integer fake;
+    Integer fake = 0;
 
 
 
@@ -63,7 +63,7 @@ public class GaenKey {
         this.transmissionRiskLevel = transmissionRiskLevel;
     }
 
-    public Integer isFake() {
+    public Integer getFake() {
         return this.fake;
     }
 

@@ -45,6 +45,7 @@ import org.dpppt.backend.sdk.model.ExposeeAuthData;
 import org.dpppt.backend.sdk.model.gaen.GaenRequest;
 import org.dpppt.backend.sdk.model.gaen.proto.TemporaryExposureKeyFormat;
 import org.dpppt.backend.sdk.ws.security.signature.ProtoSignature;
+import org.dpppt.backend.sdk.ws.util.GaenUnit;
 import org.dpppt.backend.sdk.model.gaen.GaenKey;
 import org.dpppt.backend.sdk.model.ExposeeRequestList;
 import org.junit.Test;
@@ -74,15 +75,30 @@ public class GaenControllerTest extends BaseControllerTest {
 		gaenKey1.setRollingStartNumber((int)Duration.ofMillis(Instant.now().toEpochMilli()).dividedBy(Duration.ofMinutes(10)));
 		gaenKey1.setKeyData(Base64.getEncoder().encodeToString("testKey32Bytes--".getBytes("UTF-8")));
 		gaenKey1.setRollingPeriod(144);
+		gaenKey1.setFake(0);
 		gaenKey1.setTransmissionRiskLevel(0);
 		var gaenKey2 = new GaenKey();
 		gaenKey2.setRollingStartNumber((int)Duration.ofMillis(Instant.now().minus(Duration.ofDays(1)).toEpochMilli()).dividedBy(Duration.ofMinutes(10)));
 		gaenKey2.setKeyData(Base64.getEncoder().encodeToString("testKey32Bytes--".getBytes("UTF-8")));
 		gaenKey2.setRollingPeriod(144);
+		gaenKey2.setFake(0);
 		gaenKey2.setTransmissionRiskLevel(0);
-		List<GaenKey> exposedKeys = List.of(gaenKey1, gaenKey2);
+		List<GaenKey> exposedKeys = new ArrayList<>();
+		exposedKeys.add(gaenKey1);
+		exposedKeys.add(gaenKey2);
+		for(int i = 0; i < 12; i++) {
+			var tmpKey = new GaenKey();
+			tmpKey.setRollingStartNumber((int)Duration.ofMillis(Instant.now().toEpochMilli()).dividedBy(Duration.ofMinutes(10)));
+			tmpKey.setKeyData(Base64.getEncoder().encodeToString("testKey32Bytes--".getBytes("UTF-8")));
+			tmpKey.setRollingPeriod(144);
+			tmpKey.setFake(1);
+			tmpKey.setTransmissionRiskLevel(0);
+			exposedKeys.add(tmpKey);
+		}
 		requestList.setGaenKeys(exposedKeys);
-		requestList.setFake(0);
+		var duration = Duration.ofMillis(LocalDate.now(ZoneOffset.UTC).atStartOfDay().plusDays(1).toInstant(ZoneOffset.UTC).toEpochMilli()).dividedBy(Duration.ofMinutes(10));
+		requestList.setDelayedKeyDate((int)duration);
+		gaenKey1.setFake(0);
 		String token = createToken(OffsetDateTime.now().withOffsetSameInstant(ZoneOffset.UTC).plusMinutes(5));
 		MockHttpServletResponse response = mockMvc.perform(post("/v1/gaen/exposed")
 				.contentType(MediaType.APPLICATION_JSON).header("Authorization", "Bearer " + token)
@@ -108,10 +124,116 @@ public class GaenControllerTest extends BaseControllerTest {
 		gaenKey2.setKeyData(Base64.getEncoder().encodeToString("testKey32Bytes--".getBytes("UTF-8")));
 		gaenKey2.setRollingPeriod(144);
 		gaenKey2.setTransmissionRiskLevel(0);
-		List<GaenKey> exposedKeys = List.of(gaenKey1, gaenKey2);
+
+		gaenKey1.setFake(1);
+		gaenKey2.setFake(1);
+
+		List<GaenKey> exposedKeys = new ArrayList<>();
+		exposedKeys.add(gaenKey1);
+		exposedKeys.add(gaenKey2);
+		for(int i = 0; i < 12; i++) {
+			var tmpKey = new GaenKey();
+			tmpKey.setRollingStartNumber((int)Duration.ofMillis(Instant.now().toEpochMilli()).dividedBy(Duration.ofMinutes(10)));
+			tmpKey.setKeyData(Base64.getEncoder().encodeToString("testKey32Bytes--".getBytes("UTF-8")));
+			tmpKey.setRollingPeriod(144);
+			tmpKey.setFake(1);
+			tmpKey.setTransmissionRiskLevel(0);
+			exposedKeys.add(tmpKey);
+		}
 		requestList.setGaenKeys(exposedKeys);
-		requestList.setFake(1);
-		String token = createToken(OffsetDateTime.now().withOffsetSameInstant(ZoneOffset.UTC).plusMinutes(5));
+		var duration = Duration.ofMillis(LocalDate.now(ZoneOffset.UTC).atStartOfDay().plusDays(1).toInstant(ZoneOffset.UTC).toEpochMilli()).dividedBy(Duration.ofMinutes(10));
+		requestList.setDelayedKeyDate((int)duration);
+		
+		String token = createToken(true, OffsetDateTime.now().withOffsetSameInstant(ZoneOffset.UTC).plusMinutes(5));
+		MockHttpServletResponse response = mockMvc.perform(post("/v1/gaen/exposed")
+				.contentType(MediaType.APPLICATION_JSON).header("Authorization", "Bearer " + token)
+				.header("User-Agent", "MockMVC").content(json(requestList))).andExpect(status().is2xxSuccessful())
+				.andReturn().getResponse();
+		response = mockMvc
+				.perform(post("/v1/gaen/exposedlist").contentType(MediaType.APPLICATION_JSON)
+						.header("Authorization", "Bearer " + jwtToken).header("User-Agent", "MockMVC")
+						.content(json(requestList)))
+				.andExpect(status().is(401)).andExpect(content().string("")).andReturn().getResponse();
+	}
+
+	@Test
+	public void testMultipleKeyUploadFakeAllKeysNeedToBeFake() throws Exception {
+		var requestList = new GaenRequest();
+		var gaenKey1 = new GaenKey();
+		gaenKey1.setKeyData(Base64.getEncoder().encodeToString("testKey32Bytes--".getBytes("UTF-8")));
+		gaenKey1.setRollingStartNumber((int)Duration.ofMillis(Instant.now().toEpochMilli()).dividedBy(Duration.ofMinutes(10)));
+		gaenKey1.setRollingPeriod(144);
+		gaenKey1.setTransmissionRiskLevel(0);
+		var gaenKey2 = new GaenKey();
+		gaenKey2.setRollingStartNumber((int)Duration.ofMillis(Instant.now().minus(Duration.ofDays(1)).toEpochMilli()).dividedBy(Duration.ofMinutes(10)));
+		gaenKey2.setKeyData(Base64.getEncoder().encodeToString("testKey32Bytes--".getBytes("UTF-8")));
+		gaenKey2.setRollingPeriod(144);
+		gaenKey2.setTransmissionRiskLevel(0);
+
+		gaenKey1.setFake(0);
+		gaenKey2.setFake(1);
+
+		List<GaenKey> exposedKeys = new ArrayList<>();
+		exposedKeys.add(gaenKey1);
+		exposedKeys.add(gaenKey2);
+		for(int i = 0; i < 12; i++) {
+			var tmpKey = new GaenKey();
+			tmpKey.setRollingStartNumber((int)Duration.ofMillis(Instant.now().toEpochMilli()).dividedBy(Duration.ofMinutes(10)));
+			tmpKey.setKeyData(Base64.getEncoder().encodeToString("testKey32Bytes--".getBytes("UTF-8")));
+			tmpKey.setRollingPeriod(144);
+			tmpKey.setFake(1);
+			tmpKey.setTransmissionRiskLevel(0);
+			exposedKeys.add(tmpKey);
+		}
+		requestList.setGaenKeys(exposedKeys);
+		var duration = Duration.ofMillis(LocalDate.now(ZoneOffset.UTC).atStartOfDay().plusDays(1).toInstant(ZoneOffset.UTC).toEpochMilli()).dividedBy(Duration.ofMinutes(10));
+		requestList.setDelayedKeyDate((int)duration);
+		
+		String token = createToken(true, OffsetDateTime.now().withOffsetSameInstant(ZoneOffset.UTC).plusMinutes(5));
+		MockHttpServletResponse response = mockMvc.perform(post("/v1/gaen/exposed")
+				.contentType(MediaType.APPLICATION_JSON).header("Authorization", "Bearer " + token)
+				.header("User-Agent", "MockMVC").content(json(requestList))).andExpect(status().is2xxSuccessful())
+				.andReturn().getResponse();
+		response = mockMvc
+				.perform(post("/v1/gaen/exposedlist").contentType(MediaType.APPLICATION_JSON)
+						.header("Authorization", "Bearer " + jwtToken).header("User-Agent", "MockMVC")
+						.content(json(requestList)))
+				.andExpect(status().is(401)).andExpect(content().string("")).andReturn().getResponse();
+	}
+	@Test
+	public void testMultipleKeyUploadFakeIfJWTNotFakeAllKeysCanBeFake() throws Exception {
+		var requestList = new GaenRequest();
+		var gaenKey1 = new GaenKey();
+		gaenKey1.setKeyData(Base64.getEncoder().encodeToString("testKey32Bytes--".getBytes("UTF-8")));
+		gaenKey1.setRollingStartNumber((int)Duration.ofMillis(Instant.now().toEpochMilli()).dividedBy(Duration.ofMinutes(10)));
+		gaenKey1.setRollingPeriod(144);
+		gaenKey1.setTransmissionRiskLevel(0);
+		var gaenKey2 = new GaenKey();
+		gaenKey2.setRollingStartNumber((int)Duration.ofMillis(Instant.now().minus(Duration.ofDays(1)).toEpochMilli()).dividedBy(Duration.ofMinutes(10)));
+		gaenKey2.setKeyData(Base64.getEncoder().encodeToString("testKey32Bytes--".getBytes("UTF-8")));
+		gaenKey2.setRollingPeriod(144);
+		gaenKey2.setTransmissionRiskLevel(0);
+
+		gaenKey1.setFake(1);
+		gaenKey2.setFake(1);
+
+		List<GaenKey> exposedKeys = new ArrayList<>();
+		exposedKeys.add(gaenKey1);
+		exposedKeys.add(gaenKey2);
+		for(int i = 0; i < 12; i++) {
+			var tmpKey = new GaenKey();
+			tmpKey.setRollingStartNumber((int)Duration.ofMillis(Instant.now().toEpochMilli()).dividedBy(Duration.ofMinutes(10)));
+			tmpKey.setKeyData(Base64.getEncoder().encodeToString("testKey32Bytes--".getBytes("UTF-8")));
+			tmpKey.setRollingPeriod(144);
+			tmpKey.setFake(1);
+			tmpKey.setTransmissionRiskLevel(0);
+			exposedKeys.add(tmpKey);
+		}
+		requestList.setGaenKeys(exposedKeys);
+		var duration = Duration.ofMillis(LocalDate.now(ZoneOffset.UTC).atStartOfDay().plusDays(1).toInstant(ZoneOffset.UTC).toEpochMilli()).dividedBy(Duration.ofMinutes(10));
+		requestList.setDelayedKeyDate((int)duration);
+		
+		String token = createToken(false, OffsetDateTime.now().withOffsetSameInstant(ZoneOffset.UTC).plusMinutes(5));
 		MockHttpServletResponse response = mockMvc.perform(post("/v1/gaen/exposed")
 				.contentType(MediaType.APPLICATION_JSON).header("Authorization", "Bearer " + token)
 				.header("User-Agent", "MockMVC").content(json(requestList))).andExpect(status().is2xxSuccessful())
@@ -128,7 +250,6 @@ public class GaenControllerTest extends BaseControllerTest {
 		var requestList = new GaenRequest();
 		List<GaenKey> exposedKeys = new ArrayList<GaenKey>();
 		requestList.setGaenKeys(exposedKeys);
-		requestList.setFake(0);
 		String token = createToken(OffsetDateTime.now().withOffsetSameInstant(ZoneOffset.UTC).plusMinutes(5));
 		MockHttpServletResponse response = mockMvc.perform(post("/v1/gaen/exposed")
 				.contentType(MediaType.APPLICATION_JSON).header("Authorization", "Bearer " + token)
@@ -144,8 +265,9 @@ public class GaenControllerTest extends BaseControllerTest {
 	@Test
 	public void testMultipleKeyNonNullUpload() throws Exception {
 		var requestList = new GaenRequest();
+		var duration = Duration.ofMillis(LocalDate.now(ZoneOffset.UTC).atStartOfDay().plusDays(1).toInstant(ZoneOffset.UTC).toEpochMilli()).dividedBy(Duration.ofMinutes(10));
+		requestList.setDelayedKeyDate((int)duration);
 		
-		requestList.setFake(0);
 		String token = createToken(OffsetDateTime.now().withOffsetSameInstant(ZoneOffset.UTC).plusMinutes(5));
 		MockHttpServletResponse response = mockMvc.perform(post("/v1/gaen/exposed")
 				.contentType(MediaType.APPLICATION_JSON).header("Authorization", "Bearer " + token)
@@ -161,16 +283,27 @@ public class GaenControllerTest extends BaseControllerTest {
 	@Test
 	public void keyNeedsToBeBase64() throws Exception {
 		GaenRequest exposeeRequest = new GaenRequest();
+		var duration = Duration.ofMillis(LocalDate.now(ZoneOffset.UTC).atStartOfDay().plusDays(1).toInstant(ZoneOffset.UTC).toEpochMilli()).dividedBy(Duration.ofMinutes(10));
+		exposeeRequest.setDelayedKeyDate((int)duration);
 		GaenKey key = new GaenKey();
 		key.setKeyData("00000000testKey32Bytes--");
 		key.setRollingPeriod(144);
 		key.setRollingStartNumber((int)Duration.ofMillis(Instant.now().toEpochMilli()).dividedBy(Duration.ofMinutes(10)));
 		key.setTransmissionRiskLevel(1);
+		key.setFake(1);
 		List<GaenKey> keys = new ArrayList<>();
 		keys.add(key);
+		for(int i = 0; i < 13; i++) {
+			var tmpKey = new GaenKey();
+			tmpKey.setRollingStartNumber((int)Duration.ofMillis(Instant.now().toEpochMilli()).dividedBy(Duration.ofMinutes(10)));
+			tmpKey.setKeyData(Base64.getEncoder().encodeToString("testKey32Bytes--".getBytes("UTF-8")));
+			tmpKey.setRollingPeriod(144);
+			tmpKey.setFake(1);
+			tmpKey.setTransmissionRiskLevel(0);
+			keys.add(tmpKey);
+		}
 		exposeeRequest.setGaenKeys(keys);
 		
-		exposeeRequest.setFake(1);
 		String token = createToken(true, OffsetDateTime.now().withOffsetSameInstant(ZoneOffset.UTC).plusMinutes(5));
 		MockHttpServletResponse response = mockMvc.perform(
 				post("/v1/gaen/exposed").contentType(MediaType.APPLICATION_JSON).header("Authorization", "Bearer " + token)
@@ -181,16 +314,27 @@ public class GaenControllerTest extends BaseControllerTest {
 	@Test
 	public void cannotUseKeyDateBeforeOnset() throws Exception {
 		GaenRequest exposeeRequest = new GaenRequest();
+		var duration = Duration.ofMillis(LocalDate.now(ZoneOffset.UTC).atStartOfDay().plusDays(1).toInstant(ZoneOffset.UTC).toEpochMilli()).dividedBy(Duration.ofMinutes(10));
+		exposeeRequest.setDelayedKeyDate((int)duration);
 		GaenKey key = new GaenKey();
 		key.setKeyData(Base64.getEncoder().encodeToString("testKey32Bytes--".getBytes("UTF-8")));
 		key.setRollingPeriod(144);
 		key.setRollingStartNumber((int)Duration.ofMillis(Instant.now().minus(Duration.ofDays(2)).toEpochMilli()).dividedBy(Duration.ofMinutes(10)));
 		key.setTransmissionRiskLevel(1);
+		key.setFake(1);
 		List<GaenKey> keys = new ArrayList<>();
 		keys.add(key);
+		for(int i = 0; i < 13; i++) {
+			var tmpKey = new GaenKey();
+			tmpKey.setRollingStartNumber((int)Duration.ofMillis(Instant.now().toEpochMilli()).dividedBy(Duration.ofMinutes(10)));
+			tmpKey.setKeyData(Base64.getEncoder().encodeToString("testKey32Bytes--".getBytes("UTF-8")));
+			tmpKey.setRollingPeriod(144);
+			tmpKey.setFake(1);
+			tmpKey.setTransmissionRiskLevel(0);
+			keys.add(tmpKey);
+		}
 		exposeeRequest.setGaenKeys(keys);
-		
-		exposeeRequest.setFake(1);
+
 		String token = createToken(OffsetDateTime.now().withOffsetSameInstant(ZoneOffset.UTC).plusMinutes(5),
 				LocalDate.now().format(DateTimeFormatter.ISO_DATE));
 		MockHttpServletResponse response = mockMvc.perform(
@@ -202,16 +346,27 @@ public class GaenControllerTest extends BaseControllerTest {
 	@Test
 	public void cannotUseExpiredToken() throws Exception {
 		GaenRequest exposeeRequest = new GaenRequest();
+		var duration = Duration.ofMillis(LocalDate.now(ZoneOffset.UTC).atStartOfDay().plusDays(1).toInstant(ZoneOffset.UTC).toEpochMilli()).dividedBy(Duration.ofMinutes(10));
+		exposeeRequest.setDelayedKeyDate((int)duration);
 		GaenKey key = new GaenKey();
 		key.setKeyData(Base64.getEncoder().encodeToString("testKey32Bytes--".getBytes("UTF-8")));
 		key.setRollingPeriod(144);
 		key.setRollingStartNumber((int)Duration.ofMillis(Instant.now().toEpochMilli()).dividedBy(Duration.ofMinutes(10)));
 		key.setTransmissionRiskLevel(1);
+		key.setFake(1);
 		List<GaenKey> keys = new ArrayList<>();
 		keys.add(key);
+		for(int i = 0; i < 13; i++) {
+			var tmpKey = new GaenKey();
+			tmpKey.setRollingStartNumber((int)Duration.ofMillis(Instant.now().toEpochMilli()).dividedBy(Duration.ofMinutes(10)));
+			tmpKey.setKeyData(Base64.getEncoder().encodeToString("testKey32Bytes--".getBytes("UTF-8")));
+			tmpKey.setRollingPeriod(144);
+			tmpKey.setFake(1);
+			tmpKey.setTransmissionRiskLevel(0);
+			keys.add(tmpKey);
+		}
 		exposeeRequest.setGaenKeys(keys);
-		
-		exposeeRequest.setFake(1);
+
 		String token = createToken(OffsetDateTime.now().withOffsetSameInstant(ZoneOffset.UTC).minusMinutes(5));
 
 		MockHttpServletResponse response = mockMvc
@@ -224,16 +379,27 @@ public class GaenControllerTest extends BaseControllerTest {
 	@Test
 	public void cannotUseKeyDateInFuture() throws Exception {
 		GaenRequest exposeeRequest = new GaenRequest();
+		var duration = Duration.ofMillis(LocalDate.now(ZoneOffset.UTC).atStartOfDay().plusDays(1).toInstant(ZoneOffset.UTC).toEpochMilli()).dividedBy(Duration.ofMinutes(10));
+		exposeeRequest.setDelayedKeyDate((int)duration);
 		GaenKey key = new GaenKey();
 		key.setKeyData(Base64.getEncoder().encodeToString("testKey32Bytes--".getBytes("UTF-8")));
 		key.setRollingPeriod(144);
 		key.setRollingStartNumber((int)Duration.ofMillis(Instant.now().plus(Duration.ofDays(2)).toEpochMilli()).dividedBy(Duration.ofMinutes(10)));
 		key.setTransmissionRiskLevel(1);
+		key.setFake(1);
 		List<GaenKey> keys = new ArrayList<>();
 		keys.add(key);
+		for(int i = 0; i < 13; i++) {
+			var tmpKey = new GaenKey();
+			tmpKey.setRollingStartNumber((int)Duration.ofMillis(Instant.now().toEpochMilli()).dividedBy(Duration.ofMinutes(10)));
+			tmpKey.setKeyData(Base64.getEncoder().encodeToString("testKey32Bytes--".getBytes("UTF-8")));
+			tmpKey.setRollingPeriod(144);
+			tmpKey.setFake(1);
+			tmpKey.setTransmissionRiskLevel(0);
+			keys.add(tmpKey);
+		}
 		exposeeRequest.setGaenKeys(keys);
 		
-		exposeeRequest.setFake(1);
 		String token = createToken(OffsetDateTime.now().withOffsetSameInstant(ZoneOffset.UTC).plusMinutes(5));
 
 		MockHttpServletResponse response = mockMvc
@@ -246,16 +412,27 @@ public class GaenControllerTest extends BaseControllerTest {
 	@Test
 	public void keyDateNotOlderThan21Days() throws Exception {
 		GaenRequest exposeeRequest = new GaenRequest();
+		var duration = Duration.ofMillis(LocalDate.now(ZoneOffset.UTC).atStartOfDay().plusDays(1).toInstant(ZoneOffset.UTC).toEpochMilli()).dividedBy(Duration.ofMinutes(10));
+		exposeeRequest.setDelayedKeyDate((int)duration);
 		GaenKey key = new GaenKey();
 		key.setKeyData(Base64.getEncoder().encodeToString("testKey32Bytes--".getBytes("UTF-8")));
 		key.setRollingPeriod(144);
 		key.setRollingStartNumber((int)Duration.ofMillis(Instant.now().minus(Duration.ofDays(22)).toEpochMilli()).dividedBy(Duration.ofMinutes(10)));
 		key.setTransmissionRiskLevel(1);
+		key.setFake(1);
 		List<GaenKey> keys = new ArrayList<>();
 		keys.add(key);
+		for(int i = 0; i < 13; i++) {
+			var tmpKey = new GaenKey();
+			tmpKey.setRollingStartNumber((int)Duration.ofMillis(Instant.now().toEpochMilli()).dividedBy(Duration.ofMinutes(10)));
+			tmpKey.setKeyData(Base64.getEncoder().encodeToString("testKey32Bytes--".getBytes("UTF-8")));
+			tmpKey.setRollingPeriod(144);
+			tmpKey.setFake(1);
+			tmpKey.setTransmissionRiskLevel(0);
+			keys.add(tmpKey);
+		}
 		exposeeRequest.setGaenKeys(keys);
-		
-		exposeeRequest.setFake(1);
+
 		String token = createToken(OffsetDateTime.now().withOffsetSameInstant(ZoneOffset.UTC).plusMinutes(5),
 				"2020-01-01");
 
@@ -269,16 +446,27 @@ public class GaenControllerTest extends BaseControllerTest {
 	@Test
 	public void cannotUseTokenWithWrongScope() throws Exception {
 		GaenRequest exposeeRequest = new GaenRequest();
+		var duration = Duration.ofMillis(LocalDate.now(ZoneOffset.UTC).atStartOfDay().plusDays(1).toInstant(ZoneOffset.UTC).toEpochMilli()).dividedBy(Duration.ofMinutes(10));
+		exposeeRequest.setDelayedKeyDate((int)duration);
 		GaenKey key = new GaenKey();
 		key.setKeyData(Base64.getEncoder().encodeToString("testKey32Bytes--".getBytes("UTF-8")));
 		key.setRollingPeriod(144);
 		key.setRollingStartNumber((int)Duration.ofMillis(Instant.now().toEpochMilli()).dividedBy(Duration.ofMinutes(10)));
 		key.setTransmissionRiskLevel(1);
+		key.setFake(1);
 		List<GaenKey> keys = new ArrayList<>();
 		keys.add(key);
+		for(int i = 0; i < 13; i++) {
+			var tmpKey = new GaenKey();
+			tmpKey.setRollingStartNumber((int)Duration.ofMillis(Instant.now().toEpochMilli()).dividedBy(Duration.ofMinutes(10)));
+			tmpKey.setKeyData(Base64.getEncoder().encodeToString("testKey32Bytes--".getBytes("UTF-8")));
+			tmpKey.setRollingPeriod(144);
+			tmpKey.setFake(1);
+			tmpKey.setTransmissionRiskLevel(0);
+			keys.add(tmpKey);
+		}
 		exposeeRequest.setGaenKeys(keys);
-		
-		exposeeRequest.setFake(1);
+
 		String token = createTokenWithScope(OffsetDateTime.now().withOffsetSameInstant(ZoneOffset.UTC).plusMinutes(5),
 				"not-exposed");
 
@@ -298,7 +486,7 @@ public class GaenControllerTest extends BaseControllerTest {
 
 	@Test
 	public void zipContainsFiles() throws Exception {
-		insertNKeysPerDayInInterval(20, OffsetDateTime.now(ZoneOffset.UTC).minusDays(15), OffsetDateTime.now(ZoneOffset.UTC));
+		insertNKeysPerDayInInterval(14, OffsetDateTime.now(ZoneOffset.UTC).minusDays(15), OffsetDateTime.now(ZoneOffset.UTC));
 		MockHttpServletResponse response = mockMvc.perform(get("/v1/gaen/exposed/" + LocalDate.now().minusDays(1).atStartOfDay().atOffset(ZoneOffset.UTC).toInstant().toEpochMilli())
 						.header("User-Agent", "MockMVC")).andExpect(status().is2xxSuccessful())
 						.andReturn().getResponse();
@@ -338,26 +526,29 @@ public class GaenControllerTest extends BaseControllerTest {
 		bais.close();
 	}
 
-
 	private void insertNKeysPerDayInInterval(int N, OffsetDateTime start, OffsetDateTime end) throws Exception{
 		var current = start;
 		while (current.isBefore(end)) {
+			GaenRequest exposeeRequest = new GaenRequest();
+			List<GaenKey> keys = new ArrayList<>();
+			int lastRolling = (int)Duration.ofMillis(Instant.now().toEpochMilli()).dividedBy(Duration.ofMinutes(10));
 			for(int i =0; i < N; i++) {
-				GaenRequest exposeeRequest = new GaenRequest();
 				GaenKey key = new GaenKey();
 				key.setKeyData(Base64.getEncoder().encodeToString("testKey32Bytes--".getBytes("UTF-8")));
 				key.setRollingPeriod(144);
-				key.setRollingStartNumber((int)Duration.ofMillis(Instant.now().toEpochMilli()).dividedBy(Duration.ofMinutes(10)));
+				key.setRollingStartNumber(lastRolling);
 				key.setTransmissionRiskLevel(1);
-				List<GaenKey> keys = new ArrayList<>();
+				key.setFake(0);
 				keys.add(key);
-				exposeeRequest.setGaenKeys(keys);
-				String token = createToken(OffsetDateTime.now().withOffsetSameInstant(ZoneOffset.UTC).plusMinutes(5));
-				MockHttpServletResponse response = mockMvc.perform(post("/v1/gaen/exposed")
-						.contentType(MediaType.APPLICATION_JSON).header("Authorization", "Bearer " + token)
-						.header("User-Agent", "MockMVC").content(json(exposeeRequest))).andExpect(status().is2xxSuccessful())
-						.andReturn().getResponse();
 			}
+			exposeeRequest.setGaenKeys(keys);
+			var duration = Duration.of(lastRolling, GaenUnit.TenMinutes).plusDays(1).dividedBy(Duration.ofMinutes(10));
+			exposeeRequest.setDelayedKeyDate((int)duration);
+			String token = createToken(OffsetDateTime.now().withOffsetSameInstant(ZoneOffset.UTC).plusMinutes(5));
+			MockHttpServletResponse response = mockMvc.perform(post("/v1/gaen/exposed")
+					.contentType(MediaType.APPLICATION_JSON).header("Authorization", "Bearer " + token)
+					.header("User-Agent", "MockMVC").content(json(exposeeRequest))).andExpect(status().is2xxSuccessful())
+					.andReturn().getResponse();
 			current = current.plusDays(1);
 		}
 	}
