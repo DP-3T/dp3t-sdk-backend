@@ -37,7 +37,7 @@ public class DPPPTControllerNoSecurityTest extends BaseControllerNoSecurityTest 
 		ExposeeRequest exposeeRequest = new ExposeeRequest();
 		exposeeRequest.setAuthData(new ExposeeAuthData());
 		exposeeRequest.setKeyDate(LocalDate.now().atStartOfDay().atOffset(ZoneOffset.UTC).toInstant().toEpochMilli());
-		exposeeRequest.setKey(Base64.getEncoder().encodeToString("testKey16Bytes--".getBytes("UTF-8")));
+		exposeeRequest.setKey(Base64.getEncoder().encodeToString("testKey32Bytes--testKey32Bytes--".getBytes("UTF-8")));
 		exposeeRequest.setIsFake(0);
 		MockHttpServletResponse response = mockMvc.perform(post("/v1/exposed").contentType(MediaType.APPLICATION_JSON)
 				.header("User-Agent", "MockMVC").content(json(exposeeRequest))).andExpect(status().is2xxSuccessful())
@@ -49,7 +49,7 @@ public class DPPPTControllerNoSecurityTest extends BaseControllerNoSecurityTest 
 		ExposeeRequest exposeeRequest = new ExposeeRequest();
 		exposeeRequest.setAuthData(new ExposeeAuthData());
 		exposeeRequest.setKeyDate(LocalDate.now().atStartOfDay().atOffset(ZoneOffset.UTC).toInstant().toEpochMilli());
-		exposeeRequest.setKey(Base64.getEncoder().encodeToString("testKey16Bytes--".getBytes("UTF-8")));
+		exposeeRequest.setKey(Base64.getEncoder().encodeToString("testKey32Bytes--testKey32Bytes--".getBytes("UTF-8")));
 		exposeeRequest.setIsFake(1);
 		MockHttpServletResponse response = mockMvc.perform(post("/v1/exposed").contentType(MediaType.APPLICATION_JSON)
 				.header("User-Agent", "MockMVC").content(json(exposeeRequest))).andExpect(status().is2xxSuccessful())
@@ -62,7 +62,7 @@ public class DPPPTControllerNoSecurityTest extends BaseControllerNoSecurityTest 
 		exposeeRequest.setAuthData(new ExposeeAuthData());
 		exposeeRequest.setKeyDate(
 				OffsetDateTime.now().withOffsetSameInstant(ZoneOffset.UTC).minusDays(22).toInstant().toEpochMilli());
-		exposeeRequest.setKey(Base64.getEncoder().encodeToString("test".getBytes("UTF-8")));
+		exposeeRequest.setKey(Base64.getEncoder().encodeToString("testKey32Bytes--testKey32Bytes--".getBytes("UTF-8")));
 
 		MockHttpServletResponse response = mockMvc
 				.perform(post("/v1/exposed").contentType(MediaType.APPLICATION_JSON).header("User-Agent", "MockMVC")
@@ -76,7 +76,7 @@ public class DPPPTControllerNoSecurityTest extends BaseControllerNoSecurityTest 
 		exposeeRequest.setAuthData(new ExposeeAuthData());
 		exposeeRequest.setKeyDate(
 				OffsetDateTime.now().withOffsetSameInstant(ZoneOffset.UTC).plusMinutes(1).toInstant().toEpochMilli());
-		exposeeRequest.setKey(Base64.getEncoder().encodeToString("test".getBytes("UTF-8")));
+		exposeeRequest.setKey(Base64.getEncoder().encodeToString("testKey32Bytes--testKey32Bytes--".getBytes("UTF-8")));
 
 		MockHttpServletResponse response = mockMvc
 				.perform(post("/v1/exposed").contentType(MediaType.APPLICATION_JSON).header("User-Agent", "MockMVC")
@@ -90,7 +90,7 @@ public class DPPPTControllerNoSecurityTest extends BaseControllerNoSecurityTest 
 		exposeeRequest.setAuthData(new ExposeeAuthData());
 		exposeeRequest
 				.setKeyDate(OffsetDateTime.now().withOffsetSameInstant(ZoneOffset.UTC).toInstant().toEpochMilli());
-		exposeeRequest.setKey(Base64.getEncoder().encodeToString("testKey16Bytes--".getBytes("UTF-8")));
+		exposeeRequest.setKey(Base64.getEncoder().encodeToString("testKey32Bytes--testKey32Bytes--".getBytes("UTF-8")));
 
 		MockHttpServletResponse response = mockMvc.perform(post("/v1/exposed").contentType(MediaType.APPLICATION_JSON)
 				.header("User-Agent", "MockMVC").content(json(exposeeRequest))).andExpect(status().is2xxSuccessful())

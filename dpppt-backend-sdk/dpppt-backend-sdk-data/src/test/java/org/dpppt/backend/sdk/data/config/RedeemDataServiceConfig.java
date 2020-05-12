@@ -11,20 +11,16 @@
 package org.dpppt.backend.sdk.data.config;
 
 
-import org.dpppt.backend.sdk.data.DPPPTDataService;
-import org.dpppt.backend.sdk.data.JDBCDPPPTDataServiceImpl;
+import javax.sql.DataSource;
+
 import org.dpppt.backend.sdk.data.JDBCRedeemDataServiceImpl;
 import org.dpppt.backend.sdk.data.RedeemDataService;
-import org.dpppt.backend.sdk.data.gaen.GAENDataService;
-import org.dpppt.backend.sdk.data.gaen.JDBCGAENDataServiceImpl;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 
-import javax.sql.DataSource;
-
 @Configuration
-public class DPPPTDataServiceConfig {
+public class RedeemDataServiceConfig {
 
     @Autowired
     DataSource dataSource;
@@ -33,16 +29,8 @@ public class DPPPTDataServiceConfig {
     String dbType;
 
     @Bean
-    public DPPPTDataService DPPPTDataService() {
-        return new JDBCDPPPTDataServiceImpl(dbType, dataSource);
-    }
-
-    @Bean
-    public GAENDataService gaenDataService() {
-        return new JDBCGAENDataServiceImpl(dbType, dataSource);
-    }
-    @Bean
     public RedeemDataService redeemDataService() {
         return new JDBCRedeemDataServiceImpl(dataSource);
     }
+
 }

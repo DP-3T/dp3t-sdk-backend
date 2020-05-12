@@ -45,6 +45,8 @@ import java.util.Base64;
 import java.util.Date;
 import java.util.UUID;
 
+import javax.servlet.Filter;
+
 @RunWith(SpringRunner.class)
 @SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT)
 @ActiveProfiles({ "dev", "jwt" })
@@ -59,10 +61,13 @@ public abstract class BaseControllerTest {
 	private WebApplicationContext webApplicationContext;
 	protected ObjectMapper objectMapper;
 
+	@Autowired
+	private Filter springSecurityFilterChain;
+
 	@Before
 	public void setup() throws Exception {
 		loadPrivateKey();
-		this.mockMvc = MockMvcBuilders.webAppContextSetup(webApplicationContext).apply(springSecurity()).build();
+		this.mockMvc = MockMvcBuilders.webAppContextSetup(webApplicationContext).addFilter(springSecurityFilterChain).build();
 		this.objectMapper = new ObjectMapper(new JsonFactory());
 		this.objectMapper.registerModule(new JavaTimeModule());
 	}
