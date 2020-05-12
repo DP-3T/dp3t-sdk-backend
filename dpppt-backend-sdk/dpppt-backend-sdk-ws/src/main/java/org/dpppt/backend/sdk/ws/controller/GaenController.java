@@ -9,7 +9,6 @@ import java.security.SignatureException;
 import java.time.Duration;
 import java.time.Instant;
 import java.time.LocalDate;
-import java.time.OffsetDateTime;
 import java.time.ZoneOffset;
 import java.util.ArrayList;
 import java.util.Base64;
@@ -64,7 +63,6 @@ import io.jsonwebtoken.Jwts;
 @RequestMapping("/v1/gaen")
 public class GaenController {
 
-    private final Integer retentionPeriod;
     private final Duration bucketLength;
     private final Duration requestTime;
     private final ValidateRequest validateRequest;
@@ -78,10 +76,9 @@ public class GaenController {
 
     public GaenController(GAENDataService dataService, EtagGeneratorInterface etagGenerator,
             ValidateRequest validateRequest, ProtoSignature gaenSigner, ValidationUtils validationUtils,
-            Integer retentionPeriod, Duration bucketLength, Duration requestTime, Duration exposedListCacheContol,
+            Duration bucketLength, Duration requestTime, Duration exposedListCacheContol,
             PrivateKey secondDayKey, String gaenRegion) {
         this.dataService = dataService;
-        this.retentionPeriod = retentionPeriod;
         this.bucketLength = bucketLength;
         this.validateRequest = validateRequest;
         this.requestTime = requestTime;
@@ -145,13 +142,7 @@ public class GaenController {
             responseBuilder.header("Authorization", "Bearer " + jwt);
         }
 
-        long after = Instant.now().toEpochMilli();
-        long duration = after - now;
-        try {
-            Thread.sleep(Math.max(requestTime.minusMillis(duration).toMillis(), 0));
-        } catch (Exception ex) {
-
-        }
+        normalizeRequestTime(now);
         return responseBuilder.build();
     }
 
@@ -179,13 +170,7 @@ public class GaenController {
             keys.add(gaenSecondDay.getDelayedKey());
             dataService.upsertExposees(keys);
         }
-        long after = Instant.now().toEpochMilli();
-        long duration = after - now;
-        try {
-            Thread.sleep(Math.max(requestTime.minusMillis(duration).toMillis(), 0));
-        } catch (Exception ex) {
-
-        }
+        normalizeRequestTime(now);
         return ResponseEntity.ok().build();
     }
 
@@ -326,9 +311,10 @@ public class GaenController {
 
     @GetMapping(value = "/buckets/{dayDateStr}")
     public @ResponseBody ResponseEntity<DayBuckets> getBuckets(@PathVariable String dayDateStr) {
-        var timestamp = LocalDate.parse(dayDateStr).atStartOfDay().toInstant(ZoneOffset.UTC).atOffset(ZoneOffset.UTC);
+        var atStartOfDay = LocalDate.parse(dayDateStr).atStartOfDay().toInstant(ZoneOffset.UTC).atOffset(ZoneOffset.UTC);
+        var end = atStartOfDay.plusDays(1);
         var now = Instant.now().atOffset(ZoneOffset.UTC);
-        if (!validationUtils.isDateInRange(timestamp)) {
+        if (!validationUtils.isDateInRange(atStartOfDay)) {
             return ResponseEntity.notFound().build();
         }
         var relativeUrls = new ArrayList<String>();
@@ -337,13 +323,23 @@ public class GaenController {
         String controllerMapping = this.getClass().getAnnotation(RequestMapping.class).value()[0];
         dayBuckets.day(dayDateStr).relativeUrls(relativeUrls);
 
-        while (timestamp.toInstant().toEpochMilli() < Math.min(now.toInstant().toEpochMilli(),
-                timestamp.plusDays(1).toInstant().toEpochMilli())) {
-            relativeUrls.add(controllerMapping + "/exposed" + "/" + timestamp.toInstant().toEpochMilli());
-            timestamp = timestamp.plus(this.bucketLength);
+        while (atStartOfDay.toInstant().toEpochMilli() < Math.min(now.toInstant().toEpochMilli(),
+                end.toInstant().toEpochMilli())) {
+            relativeUrls.add(controllerMapping + "/exposed" + "/" + atStartOfDay.toInstant().toEpochMilli());
+            atStartOfDay = atStartOfDay.plus(this.bucketLength);
         }
 
         return ResponseEntity.ok(dayBuckets);
+    }
+
+    private void normalizeRequestTime(long now) {
+        long after = Instant.now().toEpochMilli();
+        long duration = after - now;
+        try {
+            Thread.sleep(Math.max(requestTime.minusMillis(duration).toMillis(), 0));
+        } catch (Exception ex) {
+
+        }
     }
 
     @ExceptionHandler(IllegalArgumentException.class)
