@@ -133,7 +133,7 @@ public class GaenController {
         if (principal instanceof Jwt) {
             var originalJWT = (Jwt) principal;
             var jwtBuilder = Jwts.builder().setId(UUID.randomUUID().toString()).setIssuedAt(Date.from(Instant.now()))
-                    .setIssuer("dppt-backend")
+                    .setIssuer("dpppt-sdk-backend")
                     .setSubject(originalJWT.getSubject())
                     .setExpiration(Date.from(delayedKeyDate.atStartOfDay().toInstant(ZoneOffset.UTC).plus(Duration.ofHours(48))))
                     .claim("scope", "currentDayExposed")
