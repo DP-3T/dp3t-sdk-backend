@@ -56,8 +56,8 @@ public class NoValidateRequest implements ValidateRequest {
 			ExposeeRequest request = ((ExposeeRequest) others);
 			return request.isFake() == 1;
 		}
-		if(others instanceof GaenRequest) {
-			GaenRequest request = ((GaenRequest) others);
+		if(others instanceof GaenKey) {
+			GaenKey request = ((GaenKey) others);
 			return request.isFake() == 1;
 		}
 		throw new IllegalArgumentException();

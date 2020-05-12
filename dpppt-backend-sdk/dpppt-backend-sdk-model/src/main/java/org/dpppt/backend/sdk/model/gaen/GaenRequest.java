@@ -5,15 +5,16 @@ import java.util.List;
 import javax.validation.Valid;
 import javax.validation.constraints.NotEmpty;
 import javax.validation.constraints.NotNull;
+import javax.validation.constraints.Size;
 
 public class GaenRequest {
     @NotNull
     @NotEmpty
     @Valid
+    @Size(min = 14, max = 14)
     List<GaenKey> gaenKeys;
 
-    Integer fake = 0;
-
+    Integer delayedKeyDate;
 
     public List<GaenKey> getGaenKeys() {
         return this.gaenKeys;
@@ -23,12 +24,11 @@ public class GaenRequest {
         this.gaenKeys = gaenKeys;
     }
 
-    public Integer isFake() {
-        return this.fake;
+    public Integer getDelayedKeyDate() {
+        return this.delayedKeyDate;
     }
 
-    public void setFake(Integer fake) {
-        this.fake = fake;
+    public void setDelayedKeyDate(Integer delayedKeyDate) {
+        this.delayedKeyDate = delayedKeyDate;
     }
-
 }

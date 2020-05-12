@@ -13,6 +13,7 @@ import java.time.ZoneOffset;
 import java.util.ArrayList;
 import java.util.Base64;
 import java.util.Date;
+import java.util.List;
 import java.util.UUID;
 import java.util.zip.ZipEntry;
 import java.util.zip.ZipOutputStream;
@@ -25,6 +26,7 @@ import org.dpppt.backend.sdk.data.EtagGeneratorInterface;
 import org.dpppt.backend.sdk.data.gaen.GAENDataService;
 import org.dpppt.backend.sdk.model.gaen.DayBuckets;
 import org.dpppt.backend.sdk.model.gaen.File;
+import org.dpppt.backend.sdk.model.gaen.GaenKey;
 import org.dpppt.backend.sdk.model.gaen.GaenRequest;
 import org.dpppt.backend.sdk.model.gaen.Header;
 import org.dpppt.backend.sdk.model.gaen.proto.TemporaryExposureKeyFormat;
@@ -95,14 +97,19 @@ public class GaenController {
         if (!this.validateRequest.isValid(principal)) {
             return ResponseEntity.status(HttpStatus.FORBIDDEN).build();
         }
+        List<GaenKey> nonFakeKeys = new ArrayList<>();
         for (var key : gaenRequest.getGaenKeys()) {
             if (!validationUtils.isValidBase64Key(key.getKeyData())) {
                 return new ResponseEntity<>("No valid base64 key", HttpStatus.BAD_REQUEST);
             }
             this.validateRequest.getKeyDate(principal, key);
+            if(this.validateRequest.isFakeRequest(principal, key)) {
+                continue;
+            }
+            nonFakeKeys.add(key);
         }
-        if (!this.validateRequest.isFakeRequest(principal, gaenRequest)) {
-            dataService.upsertExposees(gaenRequest.getGaenKeys());
+        if (!nonFakeKeys.isEmpty()) {
+            dataService.upsertExposees(nonFakeKeys);
         }
         long after = Instant.now().toEpochMilli();
         long duration = after - now;
