@@ -223,6 +223,9 @@ public class DPPPTController {
 	@GetMapping(value = "/buckets/{dayDateStr}", produces = "application/json")
 	public @ResponseBody ResponseEntity<BucketList> getListOfBuckets(@PathVariable String dayDateStr) {
 		OffsetDateTime day = LocalDate.parse(dayDateStr).atStartOfDay().atOffset(ZoneOffset.UTC);
+		if (day.toEpochSecond() < 0) {
+			return ResponseEntity.badRequest().build();
+		}
 		OffsetDateTime currentBucket = day;
 		OffsetDateTime now = OffsetDateTime.now().withOffsetSameInstant(ZoneOffset.UTC);
 		List<Long> bucketList = new ArrayList<>();
