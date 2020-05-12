@@ -31,6 +31,7 @@ import org.dpppt.backend.sdk.model.gaen.GaenKey;
 import org.dpppt.backend.sdk.model.gaen.GaenRequest;
 import org.dpppt.backend.sdk.model.gaen.GaenSecondDay;
 import org.dpppt.backend.sdk.model.gaen.Header;
+import org.dpppt.backend.sdk.model.gaen.proto.FileProto;
 import org.dpppt.backend.sdk.model.gaen.proto.TemporaryExposureKeyFormat;
 import org.dpppt.backend.sdk.model.gaen.proto.TemporaryExposureKeyFormat.SignatureInfo;
 import org.dpppt.backend.sdk.ws.security.ValidateRequest;
@@ -184,6 +185,43 @@ public class GaenController {
         }
         return ResponseEntity.ok().build();
     }
+
+    @GetMapping(value = "/exposedios/{batchReleaseTime}", produces = "application/x-protobuf")
+    public @ResponseBody ResponseEntity<FileProto.File> getExposedKeysIos(@PathVariable Long batchReleaseTime,
+            WebRequest request) throws BadBatchReleaseTimeException {
+        
+        var batchReleaseTimeDuration = Duration.ofMillis(batchReleaseTime);
+
+        if(!validationUtils.isValidBatchReleaseTime(batchReleaseTimeDuration.toMillis())) {
+            return ResponseEntity.notFound().build();
+        }
+
+        int max = dataService.getMaxExposedIdForBatchReleaseTime(batchReleaseTimeDuration.toMillis(), bucketLength.toMillis());
+        String etag = etagGenerator.getEtag(max, "proto");
+        
+        if (request.checkNotModified(etag)) {
+			return ResponseEntity.status(HttpStatus.NOT_MODIFIED).build();
+        }
+       var file = FileProto.File.newBuilder();
+        var exposedKeys = dataService.getSortedExposedForBatchReleaseTime(batchReleaseTimeDuration.toMillis(), bucketLength.toMillis());
+        for(var key : exposedKeys) {
+            var protoKey = FileProto.Key.newBuilder()
+                .setKeyData(ByteString.copyFrom(Base64.getDecoder().decode(key.getKeyData())))
+                .setRollingPeriod(key.getRollingPeriod())
+                .setRollingStartNumber(key.getRollingStartNumber())
+                .setTransmissionRiskLevel(key.getTransmissionRiskLevel()).build();
+            file.addKey(protoKey);
+        }
+        
+        var header = FileProto.Header.newBuilder();
+        header.setRegion("ch")
+            .setStartTimestamp(batchReleaseTimeDuration.toSeconds())
+            .setEndTimestamp(batchReleaseTimeDuration.toSeconds() + bucketLength.toSeconds());
+        file.setHeader(header);
+        return ResponseEntity.ok().cacheControl(CacheControl.maxAge(exposedListCacheContol))
+        .header("X-BATCH-RELEASE-TIME", Long.toString(batchReleaseTimeDuration.toMillis())).body(file.build());
+    }
+
 
     private TemporaryExposureKeyFormat.TemporaryExposureKeyExport getProtoKey(Duration batchReleaseTimeDuration,
             SignatureInfo tekSignature) {
