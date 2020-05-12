@@ -159,7 +159,7 @@ public class DPPPTController {
 	@GetMapping(value = "/exposedjson/{batchReleaseTime}", produces = "application/json")
 	public @ResponseBody ResponseEntity<ExposedOverview> getExposedByDayDate(@PathVariable Long batchReleaseTime,
 			WebRequest request) {
-		if (batchReleaseTime % batchLength != 0) {
+		if (batchReleaseTime == null || batchReleaseTime % batchLength != 0) {
 			return ResponseEntity.badRequest().build();
 		}
 		if (batchReleaseTime > OffsetDateTime.now().withOffsetSameInstant(ZoneOffset.UTC).toInstant().toEpochMilli()) {
@@ -187,7 +187,7 @@ public class DPPPTController {
 	@GetMapping(value = "/exposed/{batchReleaseTime}", produces = "application/x-protobuf")
 	public @ResponseBody ResponseEntity<Exposed.ProtoExposedList> getExposedByBatch(@PathVariable Long batchReleaseTime,
 			WebRequest request) {
-		if (batchReleaseTime % batchLength != 0) {
+		if (batchReleaseTime == null || batchReleaseTime % batchLength != 0) {
 			return ResponseEntity.badRequest().build();
 		}
 		if (batchReleaseTime > OffsetDateTime.now().withOffsetSameInstant(ZoneOffset.UTC).toInstant().toEpochMilli()) {
