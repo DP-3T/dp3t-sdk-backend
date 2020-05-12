@@ -14,6 +14,7 @@ import java.time.Duration;
 import java.time.LocalDate;
 import java.time.OffsetDateTime;
 import java.time.ZoneOffset;
+import java.time.format.DateTimeParseException;
 import java.util.ArrayList;
 import java.util.Base64;
 import java.util.List;
@@ -236,7 +237,7 @@ public class DPPPTController {
 	}
 
 	@ExceptionHandler({IllegalArgumentException.class, InvalidDateException.class, JsonProcessingException.class,
-			MethodArgumentNotValidException.class})
+			MethodArgumentNotValidException.class, DateTimeParseException.class})
 	@ResponseStatus(HttpStatus.BAD_REQUEST)
 	public ResponseEntity<Object> invalidArguments() {
 		return ResponseEntity.badRequest().build();
