@@ -109,8 +109,9 @@ public class GaenController {
             this.validateRequest.getKeyDate(principal, key);
             if (this.validateRequest.isFakeRequest(principal, key)) {
                 continue;
+            } else {
+                nonFakeKeys.add(key);
             }
-            nonFakeKeys.add(key);
         }
         if (principal instanceof Jwt && ((Jwt) principal).containsClaim("fake")
                 && ((Jwt) principal).getClaim("fake").equals("1") && !nonFakeKeys.isEmpty()) {
