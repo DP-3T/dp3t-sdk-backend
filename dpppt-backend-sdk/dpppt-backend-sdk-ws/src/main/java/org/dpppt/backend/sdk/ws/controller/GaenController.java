@@ -216,7 +216,7 @@ public class GaenController {
         }
         
         var header = FileProto.Header.newBuilder();
-        header.setRegion("ch")
+        header.setRegion(gaenRegion)
             .setStartTimestamp(batchReleaseTimeDuration.toSeconds())
             .setEndTimestamp(batchReleaseTimeDuration.toSeconds() + bucketLength.toSeconds());
         file.setHeader(header);
