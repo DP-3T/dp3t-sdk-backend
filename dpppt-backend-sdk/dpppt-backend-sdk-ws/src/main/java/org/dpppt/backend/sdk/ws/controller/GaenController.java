@@ -132,14 +132,16 @@ public class GaenController {
         if (principal instanceof Jwt) {
             var originalJWT = (Jwt) principal;
             var jwtBuilder = Jwts.builder().setId(UUID.randomUUID().toString()).setIssuedAt(Date.from(Instant.now()))
+                    .setIssuer("dppt-backend")
+                    .setSubject(originalJWT.getSubject())
                     .setExpiration(Date.from(delayedKeyDate.atStartOfDay().toInstant(ZoneOffset.UTC).plus(Duration.ofHours(48))))
                     .claim("scope", "currentDayExposed")
-                    .claim("expectedKeyDate", gaenRequest.getDelayedKeyDate());
+                    .claim("delayedKeyDate", gaenRequest.getDelayedKeyDate());
             if (originalJWT.containsClaim("fake")) {
                 jwtBuilder.claim("fake", originalJWT.getClaim("fake"));
             }
             String jwt = jwtBuilder.signWith(secondDayKey).compact();
-            responseBuilder.header("Authentication", "Bearer " + jwt);
+            responseBuilder.header("Authorization", "Bearer " + jwt);
         }
 
         long after = Instant.now().toEpochMilli();
@@ -171,7 +173,7 @@ public class GaenController {
                 return ResponseEntity.badRequest().body("keyDate does not match claim keyDate");
             }
         }
-        if (!this.validateRequest.isFakeRequest(principal, gaenSecondDay)) {
+        if (!this.validateRequest.isFakeRequest(principal, gaenSecondDay.getDelayedKey())) {
             List<GaenKey> keys = new ArrayList<>();
             keys.add(gaenSecondDay.getDelayedKey());
             dataService.upsertExposees(keys);

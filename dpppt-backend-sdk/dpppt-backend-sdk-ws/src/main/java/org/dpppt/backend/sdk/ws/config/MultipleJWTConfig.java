@@ -91,18 +91,20 @@ public class MultipleJWTConfig {
 		}
 	}
 
-	@Order(2)
+	@Order(1)
 	public static class WSJWTSecondConfig extends CommonJWTBase {
 
 		@Override
 		protected void configure(HttpSecurity http) throws Exception {
 	// @formatter:off
-		http.cors()
+		http
+		.antMatcher("/v1/gaen/exposednextday")
+		.cors()
         .and()
           .authorizeRequests()
             .antMatchers(HttpMethod.POST, "/v1/gaen/exposednextday")
-            .authenticated()
-            .anyRequest()
+			.authenticated()
+			.anyRequest()
 			.permitAll()
         .and()
           .oauth2ResourceServer()
@@ -115,7 +117,7 @@ public class MultipleJWTConfig {
 
 		@Bean
 		public JWTValidator jwtValidatorGAEN() {
-			return new JWTValidator(redeemDataService, Duration.ofDays(1));
+			return new JWTValidator(redeemDataService, Duration.ofDays(3));
 		}
 
 		@Bean
@@ -137,14 +139,16 @@ public class MultipleJWTConfig {
 		}
 	}
 
-	@Order(1)
+	@Order(2)
 	public static class WSJWTConfig extends CommonJWTBase {
 
 		
 		@Override
 		protected void configure(HttpSecurity http) throws Exception {
 	// @formatter:off
-		http.cors()
+		http
+		//.regexMatcher("/v1/(exposed|exposedlist|gaen/exposed)")
+		.cors()
         .and()
           .authorizeRequests()
             .antMatchers(HttpMethod.POST, "/v1/exposed", "/v1/exposedlist", "/v1/gaen/exposed")

@@ -26,7 +26,6 @@ import java.time.LocalDate;
 import java.time.OffsetDateTime;
 import java.time.ZoneOffset;
 import java.time.format.DateTimeFormatter;
-import java.time.temporal.ChronoUnit;
 import java.util.ArrayList;
 import java.util.Base64;
 import java.util.List;
@@ -36,28 +35,29 @@ import java.util.zip.ZipInputStream;
 import com.google.common.io.ByteArrayDataOutput;
 import com.google.common.io.ByteStreams;
 
-import java.security.PublicKey;
-import java.security.Security;
-
-import org.bouncycastle.jce.provider.BouncyCastleProvider;
-import org.dpppt.backend.sdk.model.ExposedKey;
-import org.dpppt.backend.sdk.model.ExposeeAuthData;
 import org.dpppt.backend.sdk.model.gaen.GaenRequest;
+import org.dpppt.backend.sdk.model.gaen.GaenSecondDay;
 import org.dpppt.backend.sdk.model.gaen.proto.TemporaryExposureKeyFormat;
+import org.dpppt.backend.sdk.ws.config.KeyPairHolder;
 import org.dpppt.backend.sdk.ws.security.signature.ProtoSignature;
 import org.dpppt.backend.sdk.ws.util.GaenUnit;
 import org.dpppt.backend.sdk.model.gaen.GaenKey;
-import org.dpppt.backend.sdk.model.ExposeeRequestList;
+
 import org.junit.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.http.MediaType;
 import org.springframework.mock.web.MockHttpServletResponse;
 
-@SpringBootTest(properties = { "ws.app.jwt.publickey=classpath://generated_pub.pem" })
+import io.jsonwebtoken.Jwt;
+import io.jsonwebtoken.Jwts;
+
+@SpringBootTest(properties = { "ws.app.jwt.publickey=classpath://generated_pub.pem", "logging.level.org.springframework.security=DEBUG" })
 public class GaenControllerTest extends BaseControllerTest {
 	@Autowired
 	ProtoSignature signer;
+	@Autowired
+	KeyPairHolder keyPairHolder;
 
 	@Test
 	public void testHello() throws Exception {
@@ -482,6 +482,47 @@ public class GaenControllerTest extends BaseControllerTest {
 						.header("Authorization", "Bearer " + token).header("User-Agent", "MockMVC")
 						.content(json(exposeeRequest)))
 				.andExpect(status().is(401)).andExpect(content().string("")).andReturn().getResponse();
+	}
+
+	@Test
+	public void uploadKeysAndUploadKeyNextDay() throws Exception {
+		GaenRequest exposeeRequest = new GaenRequest();
+		List<GaenKey> keys = new ArrayList<>();
+		for(int i = 0; i < 14; i++) {
+			var tmpKey = new GaenKey();
+			tmpKey.setRollingStartNumber((int)Duration.ofMillis(Instant.now().minus(Duration.ofDays(1)).toEpochMilli()).dividedBy(Duration.ofMinutes(10)));
+			tmpKey.setKeyData(Base64.getEncoder().encodeToString("testKey32Bytes--".getBytes("UTF-8")));
+			tmpKey.setRollingPeriod(144);
+			tmpKey.setFake(0);
+			tmpKey.setTransmissionRiskLevel(0);
+			keys.add(tmpKey);
+		}
+		var delayedKeyDateSent = (int)Duration.ofSeconds(LocalDate.now().atStartOfDay(ZoneOffset.UTC).toEpochSecond()).dividedBy(Duration.ofMinutes(10));
+		exposeeRequest.setDelayedKeyDate(delayedKeyDateSent);
+		exposeeRequest.setGaenKeys(keys);
+		String token = createToken(OffsetDateTime.now().withOffsetSameInstant(ZoneOffset.UTC).plusMinutes(5));
+		MockHttpServletResponse response = mockMvc
+		.perform(post("/v1/gaen/exposed").contentType(MediaType.APPLICATION_JSON)
+				.header("Authorization", "Bearer " + token).header("User-Agent", "MockMVC")
+				.content(json(exposeeRequest)))
+		.andExpect(status().is(200)).andReturn().getResponse();
+		assertTrue(response.containsHeader("Authorization"));
+		String jwtString = response.getHeader("Authorization").replace("Bearer ", "");
+		Jwt jwtToken = Jwts.parserBuilder().setSigningKey(keyPairHolder.getKeyPair().getPublic()).build().parse(jwtString);
+		GaenSecondDay secondDay = new GaenSecondDay();
+		var tmpKey = new GaenKey();
+		tmpKey.setRollingStartNumber(delayedKeyDateSent);
+		tmpKey.setKeyData(Base64.getEncoder().encodeToString("testKey32Bytes--".getBytes("UTF-8")));
+		tmpKey.setRollingPeriod(144);
+		tmpKey.setFake(0);
+		tmpKey.setTransmissionRiskLevel(0);
+		secondDay.setDelayedKey(tmpKey);
+		response = mockMvc
+		.perform(post("/v1/gaen/exposednextday").contentType(MediaType.APPLICATION_JSON)
+				.header("Authorization", "Bearer " + jwtString)
+				.header("User-Agent", "MockMVC")
+				.content(json(secondDay)))
+		.andExpect(status().is(200)).andReturn().getResponse();
 	}
 
 	@Test
