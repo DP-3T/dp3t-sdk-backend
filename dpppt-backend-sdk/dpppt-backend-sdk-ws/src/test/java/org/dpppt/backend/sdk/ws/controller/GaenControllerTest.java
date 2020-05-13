@@ -533,15 +533,16 @@ public class GaenControllerTest extends BaseControllerTest {
 		ZipInputStream zipOuter = new ZipInputStream(baisOuter);
 		ZipEntry entry = zipOuter.getNextEntry();
 		while(entry != null) {
-			ZipEntry binary = zipOuter.getNextEntry();
 			ByteArrayDataOutput badoOuter = ByteStreams.newDataOutput();
 			while(zipOuter.available() > 0) {
 				badoOuter.write(zipOuter.readNBytes(1000));
 			}
+			
 			try(
 				ByteArrayInputStream bais = new ByteArrayInputStream(badoOuter.toByteArray());
 				ZipInputStream zip = new ZipInputStream(bais);
 			) {
+				var binary = zip.getNextEntry();
 				assertEquals(binary.getName(), "export.bin");
 				ByteArrayDataOutput bado = ByteStreams.newDataOutput();
 				zip.readNBytes(16);
@@ -569,6 +570,7 @@ public class GaenControllerTest extends BaseControllerTest {
 				signatureVerifier.initVerify(signer.getPublicKey());
 				signatureVerifier.update(binProto);
 				assertTrue(signatureVerifier.verify(sig.getSignature().toByteArray()));
+				assertEquals(export.getKeysCount(), 14);
 			}
 			entry = zipOuter.getNextEntry();
 		}

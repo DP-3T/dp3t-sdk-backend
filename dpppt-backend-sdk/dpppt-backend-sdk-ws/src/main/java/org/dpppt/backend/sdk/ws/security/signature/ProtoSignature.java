@@ -119,7 +119,9 @@ public class ProtoSignature {
             }
             zipCollection.closeEntry();
         }
-       
+        zipCollection.flush();
+        zipCollection.close();
+        byteOutCollection.close();
         return byteOutCollection.toByteArray();
     }
 
