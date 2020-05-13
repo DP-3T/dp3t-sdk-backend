@@ -1,6 +1,14 @@
+/*
+ * Copyright (c) 2020 Ubique Innovation AG <https://www.ubique.ch>
+ *
+ * This Source Code Form is subject to the terms of the Mozilla Public
+ * License, v. 2.0. If a copy of the MPL was not distributed with this
+ * file, You can obtain one at https://mozilla.org/MPL/2.0/.
+ *
+ * SPDX-License-Identifier: MPL-2.0
+ */
 package org.dpppt.backend.sdk.ws.controller;
 
-import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.security.InvalidKeyException;
 import java.security.NoSuchAlgorithmException;
@@ -15,8 +23,7 @@ import java.util.Base64;
 import java.util.Date;
 import java.util.List;
 import java.util.UUID;
-import java.util.zip.ZipEntry;
-import java.util.zip.ZipOutputStream;
+import java.util.stream.Collectors;
 
 import javax.validation.Valid;
 
@@ -25,14 +32,12 @@ import com.google.protobuf.ByteString;
 import org.dpppt.backend.sdk.data.EtagGeneratorInterface;
 import org.dpppt.backend.sdk.data.gaen.GAENDataService;
 import org.dpppt.backend.sdk.model.gaen.DayBuckets;
-import org.dpppt.backend.sdk.model.gaen.File;
+import org.dpppt.backend.sdk.model.gaen.GaenExposedJson;
 import org.dpppt.backend.sdk.model.gaen.GaenKey;
 import org.dpppt.backend.sdk.model.gaen.GaenRequest;
 import org.dpppt.backend.sdk.model.gaen.GaenSecondDay;
 import org.dpppt.backend.sdk.model.gaen.Header;
 import org.dpppt.backend.sdk.model.gaen.proto.FileProto;
-import org.dpppt.backend.sdk.model.gaen.proto.TemporaryExposureKeyFormat;
-import org.dpppt.backend.sdk.model.gaen.proto.TemporaryExposureKeyFormat.SignatureInfo;
 import org.dpppt.backend.sdk.ws.security.ValidateRequest;
 import org.dpppt.backend.sdk.ws.security.ValidateRequest.InvalidDateException;
 import org.dpppt.backend.sdk.ws.security.signature.ProtoSignature;
@@ -52,7 +57,6 @@ import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestHeader;
 import org.springframework.web.bind.annotation.RequestMapping;
-
 import org.springframework.web.bind.annotation.ResponseBody;
 import org.springframework.web.bind.annotation.ResponseStatus;
 import org.springframework.web.context.request.WebRequest;
@@ -210,32 +214,6 @@ public class GaenController {
         .header("X-BATCH-RELEASE-TIME", Long.toString(batchReleaseTimeDuration.toMillis())).body(file.build());
     }
 
-
-    private TemporaryExposureKeyFormat.TemporaryExposureKeyExport getProtoKey(Duration batchReleaseTimeDuration,
-            SignatureInfo tekSignature) {
-        var file = TemporaryExposureKeyFormat.TemporaryExposureKeyExport.newBuilder();
-        var exposedKeys = dataService.getSortedExposedForBatchReleaseTime(batchReleaseTimeDuration.toMillis(),
-                bucketLength.toMillis());
-        var tekList = new ArrayList<TemporaryExposureKeyFormat.TemporaryExposureKey>();
-        for (var key : exposedKeys) {
-            var protoKey = TemporaryExposureKeyFormat.TemporaryExposureKey.newBuilder()
-                    .setKeyData(ByteString.copyFrom(Base64.getDecoder().decode(key.getKeyData())))
-                    .setRollingPeriod(key.getRollingPeriod()).setRollingStartIntervalNumber(key.getRollingStartNumber())
-                    .setTransmissionRiskLevel(key.getTransmissionRiskLevel()).build();
-            tekList.add(protoKey);
-        }
-
-        file.addAllKeys(tekList);
-
-        file.setRegion(gaenRegion).setBatchNum(1).setBatchSize(1)
-                .setStartTimestamp(batchReleaseTimeDuration.toSeconds())
-                .setEndTimestamp(batchReleaseTimeDuration.toSeconds() + bucketLength.toSeconds());
-
-        file.addSignatureInfos(tekSignature);
-
-        return file.build();
-    }
-
     @GetMapping(value = "/exposed/{batchReleaseTime}", produces = "application/zip")
     public @ResponseBody ResponseEntity<byte[]> getExposedKeys(@PathVariable Long batchReleaseTime, WebRequest request)
             throws BadBatchReleaseTimeException, IOException, InvalidKeyException, SignatureException,
@@ -254,37 +232,17 @@ public class GaenController {
         if (request.checkNotModified(etag)) {
             return ResponseEntity.status(HttpStatus.NOT_MODIFIED).build();
         }
-
-        var tekSignature = gaenSigner.getSignatureInfo();
-        var file = getProtoKey(batchReleaseTimeDuration, tekSignature);
-
-        ByteArrayOutputStream byteOut = new ByteArrayOutputStream();
-        ZipOutputStream zip = new ZipOutputStream(byteOut);
-
-        zip.putNextEntry(new ZipEntry("export.bin"));
-        byte[] exportBin = file.toByteArray();
-        zip.write("EK Export v1    ".getBytes());
-        zip.write(exportBin);
-        zip.closeEntry();
-
-        var signatureList = gaenSigner.getSignatureObject(exportBin, tekSignature);
-
-        byte[] exportSig = signatureList.toByteArray();
-        zip.putNextEntry(new ZipEntry("export.sig"));
-        zip.write(exportSig);
-        zip.closeEntry();
-
-        zip.flush();
-        zip.close();
-        byteOut.close();
-
+        var exposedKeys = dataService.getSortedExposedForBatchReleaseTime(batchReleaseTimeDuration.toMillis(), bucketLength.toMillis());
+        var keysGroupedByRollingStartNumber = exposedKeys.stream().collect(Collectors.groupingBy(GaenKey::getRollingStartNumber)).values();
+        byte[] payload = gaenSigner.getPayload(keysGroupedByRollingStartNumber);
+        
         return ResponseEntity.ok().cacheControl(CacheControl.maxAge(exposedListCacheContol))
                 .header("X-BATCH-RELEASE-TIME", Long.toString(batchReleaseTimeDuration.toMillis()))
-                .body(byteOut.toByteArray());
+                .body(payload);
     }
 
     @GetMapping(value = "/exposedjson/{batchReleaseTime}", produces = "application/json")
-    public @ResponseBody ResponseEntity<File> getExposedKeysAsJson(@PathVariable Long batchReleaseTime,
+    public @ResponseBody ResponseEntity<GaenExposedJson> getExposedKeysAsJson(@PathVariable Long batchReleaseTime,
             WebRequest request) throws BadBatchReleaseTimeException {
         var batchReleaseTimeDuration = Duration.ofMillis(batchReleaseTime);
 
@@ -300,7 +258,7 @@ public class GaenController {
 
         var exposedKeys = dataService.getSortedExposedForBatchReleaseTime(batchReleaseTimeDuration.toMillis(),
                 bucketLength.toMillis());
-        var file = new File();
+        var file = new GaenExposedJson();
         var header = new Header();
         header.startTimestamp(batchReleaseTimeDuration.toSeconds())
                 .endTimestamp(batchReleaseTimeDuration.toSeconds() + bucketLength.toSeconds());
