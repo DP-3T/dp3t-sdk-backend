@@ -22,8 +22,12 @@ import java.util.HashMap;
 import java.util.List;
 
 import org.bouncycastle.util.io.pem.PemReader;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 
 public class KeyVault {
+    private static final Logger logger = LoggerFactory.getLogger(KeyVault.class);
     private final HashMap<String, KeyPair> pairVault = new HashMap<>();
 
     private final static List<Method> externalPublicProviders = new ArrayList<>();
@@ -120,6 +124,7 @@ public class KeyVault {
             try {
                 key = (PrivateKey) provider.invoke(null, privatePart, algorithm);
             } catch (IllegalAccessException | IllegalArgumentException | InvocationTargetException e) {
+                logger.warn("externalPrivateProvider failed with reflection error");
             }
             if (key != null)
                 return key;
@@ -152,6 +157,7 @@ public class KeyVault {
             try {
                 key = (PublicKey) provider.invoke(null, publicPart, algorithm);
             } catch (IllegalAccessException | IllegalArgumentException | InvocationTargetException e) {
+                logger.warn("externalPublicProvider failed with reflection error");
             }
             if (key != null)
                 return key;
