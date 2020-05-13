@@ -145,13 +145,7 @@ public abstract class WSBaseConfig implements SchedulingConfigurer, WebMvcConfig
 		return new DPPPTController(dppptSDKDataService(), etagGenerator(), appSource, exposedListCacheControl,
 				theValidator, new ValidationUtils(keySizeBytes, Duration.ofDays(retentionDays), batchLength), batchLength, requestTime);
 	}
-	@Bean
-	public KeyPairHolder secondDayKeyPair() {
-		var keyPair = Keys.keyPairFor(SignatureAlgorithm.RS256);
-		var holder = new KeyPairHolder();
-		holder.setKeyPair(keyPair);
-		return holder;
-	}
+
 	@Bean
 	public GaenController gaenController(){
 		ValidateRequest theValidator = gaenRequestValidator;
