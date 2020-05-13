@@ -25,6 +25,9 @@ import java.util.Properties;
 
 import org.bouncycastle.jce.provider.BouncyCastleProvider;
 import org.bouncycastle.util.io.pem.PemReader;
+import org.dpppt.backend.sdk.ws.security.KeyVault;
+import org.dpppt.backend.sdk.ws.security.KeyVault.PrivateKeyNoSuitableEncodingFoundException;
+import org.dpppt.backend.sdk.ws.security.KeyVault.PublicKeyNoSuitableEncodingFoundException;
 import org.flywaydb.core.Flyway;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
@@ -71,43 +74,28 @@ public class WSDevConfig extends WSBaseConfig {
 
 	}
 
-	@Override
-	public KeyPair getKeyPair(SignatureAlgorithm algorithm) {
-		Security.setProperty("crypto.policy", "unlimited");
+	@Bean
+	KeyVault keyVault() {
+		var privateKey = getPrivateKey();
+		var publicKey = getPublicKey();
+		
 		if(privateKey.isEmpty() || publicKey.isEmpty()) {
-			return super.getKeyPair(algorithm);
+			var kp = super.getKeyPair(algorithm);
+			var gaenKp = new KeyVault.KeyVaultKeyPair("gaen", kp);
+			var nextDayJWTKp = new KeyVault.KeyVaultKeyPair("nextDayJWT", kp);
+			var hashFilterKp = new KeyVault.KeyVaultKeyPair("hashFilter", kp);
+			return new KeyVault(gaenKp, nextDayJWTKp, hashFilterKp);
 		}
-		return new KeyPair(loadPublicKeyFromString(),loadPrivateKeyFromString());
-	}
+		else {
+			var gaen = new KeyVault.KeyVaultEntry("gaen", getPrivateKey(), getPublicKey(), "EC");
+			var nextDayJWT = new KeyVault.KeyVaultEntry("nextDayJWT", getPrivateKey(), getPublicKey(), "EC");
+			var hashFilter = new KeyVault.KeyVaultEntry("hashFilter", getPrivateKey(), getPublicKey(), "EC"); 
 
-	private PrivateKey loadPrivateKeyFromString() {
-		try {
-			String privateKey = getPrivateKey();
-			var reader = new StringReader(privateKey);
-			var readerPem = new PemReader(reader);
-			var obj = readerPem.readPemObject();
-			var pkcs8KeySpec = new PKCS8EncodedKeySpec(obj.getContent());
-			var kf = KeyFactory.getInstance("EC");
-			return (PrivateKey) kf.generatePrivate(pkcs8KeySpec);
-		}
-		catch (Exception ex) {
-			ex.printStackTrace();
-			throw new RuntimeException();
-		}
-	}
-
-	private PublicKey loadPublicKeyFromString() {
-		try {
-			var reader = new StringReader(getPublicKey());
-			var readerPem = new PemReader(reader);
-			var obj = readerPem.readPemObject();
-			return KeyFactory.getInstance("EC").generatePublic(
-					new X509EncodedKeySpec(obj.getContent())
-			);
-		}
-		catch (Exception ex) {
-			ex.printStackTrace();
-			throw new RuntimeException();
+			try {
+				return new KeyVault(gaen, nextDayJWT, hashFilter);
+			} catch (PrivateKeyNoSuitableEncodingFoundException | PublicKeyNoSuitableEncodingFoundException e) {
+				throw new RuntimeException(e);
+			}
 		}
 	}
 

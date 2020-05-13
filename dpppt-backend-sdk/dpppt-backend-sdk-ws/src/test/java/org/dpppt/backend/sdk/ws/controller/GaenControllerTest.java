@@ -38,7 +38,7 @@ import com.google.common.io.ByteStreams;
 import org.dpppt.backend.sdk.model.gaen.GaenRequest;
 import org.dpppt.backend.sdk.model.gaen.GaenSecondDay;
 import org.dpppt.backend.sdk.model.gaen.proto.TemporaryExposureKeyFormat;
-import org.dpppt.backend.sdk.ws.config.KeyPairHolder;
+import org.dpppt.backend.sdk.ws.security.KeyVault;
 import org.dpppt.backend.sdk.ws.security.signature.ProtoSignature;
 import org.dpppt.backend.sdk.ws.util.GaenUnit;
 import org.dpppt.backend.sdk.model.gaen.GaenKey;
@@ -57,8 +57,7 @@ public class GaenControllerTest extends BaseControllerTest {
 	@Autowired
 	ProtoSignature signer;
 	@Autowired
-	KeyPairHolder keyPairHolder;
-
+	KeyVault keyVault;
 	@Test
 	public void testHello() throws Exception {
 		MockHttpServletResponse response = mockMvc.perform(get("/v1")).andExpect(status().is2xxSuccessful()).andReturn()
@@ -508,7 +507,7 @@ public class GaenControllerTest extends BaseControllerTest {
 		.andExpect(status().is(200)).andReturn().getResponse();
 		assertTrue(response.containsHeader("Authorization"));
 		String jwtString = response.getHeader("Authorization").replace("Bearer ", "");
-		Jwt jwtToken = Jwts.parserBuilder().setSigningKey(keyPairHolder.getKeyPair().getPublic()).build().parse(jwtString);
+		Jwt jwtToken = Jwts.parserBuilder().setSigningKey(keyVault.get("nextDayJWT").getPublic()).build().parse(jwtString);
 		GaenSecondDay secondDay = new GaenSecondDay();
 		var tmpKey = new GaenKey();
 		tmpKey.setRollingStartNumber(delayedKeyDateSent);
