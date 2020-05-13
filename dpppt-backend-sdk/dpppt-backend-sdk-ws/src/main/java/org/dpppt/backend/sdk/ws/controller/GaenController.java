@@ -210,32 +210,6 @@ public class GaenController {
         .header("X-BATCH-RELEASE-TIME", Long.toString(batchReleaseTimeDuration.toMillis())).body(file.build());
     }
 
-
-    private TemporaryExposureKeyFormat.TemporaryExposureKeyExport getProtoKey(Duration batchReleaseTimeDuration,
-            SignatureInfo tekSignature) {
-        var file = TemporaryExposureKeyFormat.TemporaryExposureKeyExport.newBuilder();
-        var exposedKeys = dataService.getSortedExposedForBatchReleaseTime(batchReleaseTimeDuration.toMillis(),
-                bucketLength.toMillis());
-        var tekList = new ArrayList<TemporaryExposureKeyFormat.TemporaryExposureKey>();
-        for (var key : exposedKeys) {
-            var protoKey = TemporaryExposureKeyFormat.TemporaryExposureKey.newBuilder()
-                    .setKeyData(ByteString.copyFrom(Base64.getDecoder().decode(key.getKeyData())))
-                    .setRollingPeriod(key.getRollingPeriod()).setRollingStartIntervalNumber(key.getRollingStartNumber())
-                    .setTransmissionRiskLevel(key.getTransmissionRiskLevel()).build();
-            tekList.add(protoKey);
-        }
-
-        file.addAllKeys(tekList);
-
-        file.setRegion(gaenRegion).setBatchNum(1).setBatchSize(1)
-                .setStartTimestamp(batchReleaseTimeDuration.toSeconds())
-                .setEndTimestamp(batchReleaseTimeDuration.toSeconds() + bucketLength.toSeconds());
-
-        file.addSignatureInfos(tekSignature);
-
-        return file.build();
-    }
-
     @GetMapping(value = "/exposed/{batchReleaseTime}", produces = "application/zip")
     public @ResponseBody ResponseEntity<byte[]> getExposedKeys(@PathVariable Long batchReleaseTime, WebRequest request)
             throws BadBatchReleaseTimeException, IOException, InvalidKeyException, SignatureException,
@@ -254,33 +228,13 @@ public class GaenController {
         if (request.checkNotModified(etag)) {
             return ResponseEntity.status(HttpStatus.NOT_MODIFIED).build();
         }
+        var exposedKeys = dataService.getSortedExposedForBatchReleaseTime(batchReleaseTimeDuration.toMillis(), bucketLength.toMillis());
 
-        var tekSignature = gaenSigner.getSignatureInfo();
-        var file = getProtoKey(batchReleaseTimeDuration, tekSignature);
-
-        ByteArrayOutputStream byteOut = new ByteArrayOutputStream();
-        ZipOutputStream zip = new ZipOutputStream(byteOut);
-
-        zip.putNextEntry(new ZipEntry("export.bin"));
-        byte[] exportBin = file.toByteArray();
-        zip.write("EK Export v1    ".getBytes());
-        zip.write(exportBin);
-        zip.closeEntry();
-
-        var signatureList = gaenSigner.getSignatureObject(exportBin, tekSignature);
-
-        byte[] exportSig = signatureList.toByteArray();
-        zip.putNextEntry(new ZipEntry("export.sig"));
-        zip.write(exportSig);
-        zip.closeEntry();
-
-        zip.flush();
-        zip.close();
-        byteOut.close();
-
+        byte[] payload = gaenSigner.getPayload(List.of(exposedKeys));
+        
         return ResponseEntity.ok().cacheControl(CacheControl.maxAge(exposedListCacheContol))
                 .header("X-BATCH-RELEASE-TIME", Long.toString(batchReleaseTimeDuration.toMillis()))
-                .body(byteOut.toByteArray());
+                .body(payload);
     }
 
     @GetMapping(value = "/exposedjson/{batchReleaseTime}", produces = "application/json")

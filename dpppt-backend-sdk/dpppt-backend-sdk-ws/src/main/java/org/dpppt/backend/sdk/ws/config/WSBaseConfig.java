@@ -123,7 +123,7 @@ public abstract class WSBaseConfig implements SchedulingConfigurer, WebMvcConfig
 	@Bean
 	public ProtoSignature gaenSigner() {
 		try {
-			return new ProtoSignature(gaenAlgorithm, getGaenKeyPair(gaenAlgorithm),bundleId,packageName,keyVersion, keyIdentifier);
+			return new ProtoSignature(gaenAlgorithm, getGaenKeyPair(gaenAlgorithm),bundleId,packageName,keyVersion, keyIdentifier, gaenRegion, Duration.ofMillis(batchLength));
 		}
 		catch(Exception ex) {
 			throw new RuntimeException("Cannot initialize signer for protobuf");

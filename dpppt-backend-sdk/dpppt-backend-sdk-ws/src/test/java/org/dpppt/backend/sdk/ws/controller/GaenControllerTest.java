@@ -527,44 +527,55 @@ public class GaenControllerTest extends BaseControllerTest {
 
 	@Test
 	public void zipContainsFiles() throws Exception {
-		insertNKeysPerDayInInterval(14, OffsetDateTime.now(ZoneOffset.UTC).minusDays(15), OffsetDateTime.now(ZoneOffset.UTC));
+		insertNKeysPerDayInInterval(14, OffsetDateTime.now(ZoneOffset.UTC).minusDays(4), OffsetDateTime.now(ZoneOffset.UTC));
 		MockHttpServletResponse response = mockMvc.perform(get("/v1/gaen/exposed/" + LocalDate.now().minusDays(1).atStartOfDay().atOffset(ZoneOffset.UTC).toInstant().toEpochMilli())
 						.header("User-Agent", "MockMVC")).andExpect(status().is2xxSuccessful())
 						.andReturn().getResponse();
-		ByteArrayInputStream bais = new ByteArrayInputStream(response.getContentAsByteArray());
-		ZipInputStream zip = new ZipInputStream(bais);
+		ByteArrayInputStream baisOuter = new ByteArrayInputStream(response.getContentAsByteArray());
+		ZipInputStream zipOuter = new ZipInputStream(baisOuter);
+		ZipEntry entry = zipOuter.getNextEntry();		while(entry != null) {
+			ZipEntry binary = zipOuter.getNextEntry();
+			ByteArrayDataOutput badoOuter = ByteStreams.newDataOutput();
+			while(zipOuter.available() > 0) {
+				badoOuter.write(zipOuter.readNBytes(1000));
+			}
+			try(
+				ByteArrayInputStream bais = new ByteArrayInputStream(badoOuter.toByteArray());
+				ZipInputStream zip = new ZipInputStream(bais);
+			) {
+				assertEquals(binary.getName(), "export.bin");
+				ByteArrayDataOutput bado = ByteStreams.newDataOutput();
+				zip.readNBytes(16);
+				while(zip.available() > 0) {
+					bado.write(zip.readNBytes(1000));
+				}
+				assertEquals(zip.available(), 0);
+				byte[] binProto = bado.toByteArray();
 
-		ZipEntry binary = zip.getNextEntry();
-		assertEquals(binary.getName(), "export.bin");
-		ByteArrayDataOutput bado = ByteStreams.newDataOutput();
-		zip.readNBytes(16);
-		while(zip.available() > 0) {
-			bado.write(zip.readNBytes(1000));
+
+				ByteArrayDataOutput bado2 = ByteStreams.newDataOutput();
+				ZipEntry signature = zip.getNextEntry();
+				assertEquals(signature.getName(), "export.sig");
+				while(zip.available() > 0){
+					bado2.write(zip.readNBytes(1000));
+				}
+				assertEquals(zip.available(), 0);
+				byte[] sigProto = bado2.toByteArray();
+
+				assertNull(zip.getNextEntry());
+				var list = TemporaryExposureKeyFormat.TEKSignatureList.parseFrom(sigProto);
+				var export =TemporaryExposureKeyFormat.TemporaryExposureKeyExport.parseFrom(binProto);
+				var sig = list.getSignatures(0);
+				java.security.Signature signatureVerifier = java.security.Signature.getInstance(sig.getSignatureInfo().getSignatureAlgorithm().trim());
+				signatureVerifier.initVerify(signer.getPublicKey());
+				signatureVerifier.update(binProto);
+				assertTrue(signatureVerifier.verify(sig.getSignature().toByteArray()));
+			}
+			entry = zipOuter.getNextEntry();
 		}
-		assertEquals(zip.available(), 0);
-		byte[] binProto = bado.toByteArray();
+		
 
-
-		ByteArrayDataOutput bado2 = ByteStreams.newDataOutput();
-		ZipEntry signature = zip.getNextEntry();
-		assertEquals(signature.getName(), "export.sig");
-		while(zip.available() > 0){
-			bado2.write(zip.readNBytes(1000));
-		}
-		assertEquals(zip.available(), 0);
-		byte[] sigProto = bado2.toByteArray();
-
-		assertNull(zip.getNextEntry());
-		var list = TemporaryExposureKeyFormat.TEKSignatureList.parseFrom(sigProto);
-		var export =TemporaryExposureKeyFormat.TemporaryExposureKeyExport.parseFrom(binProto);
-		var sig = list.getSignatures(0);
-		java.security.Signature signatureVerifier = java.security.Signature.getInstance(sig.getSignatureInfo().getSignatureAlgorithm().trim());
-		signatureVerifier.initVerify(signer.getPublicKey());
-		signatureVerifier.update(binProto);
-		assertTrue(signatureVerifier.verify(sig.getSignature().toByteArray()));
-
-		zip.close();
-		bais.close();
+		
 	}
 
 	private void insertNKeysPerDayInInterval(int N, OffsetDateTime start, OffsetDateTime end) throws Exception{
