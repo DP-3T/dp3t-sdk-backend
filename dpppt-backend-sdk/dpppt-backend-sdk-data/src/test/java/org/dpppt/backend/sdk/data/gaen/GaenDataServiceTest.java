@@ -62,11 +62,10 @@ public class GaenDataServiceTest {
         List<GaenKey> keys = List.of(tmpKey, tmpKey2);
 
         dppptDataService.upsertExposees(keys);
-        dppptDataService.upsertExposees(keys);
         var returnedKeys = dppptDataService.getSortedExposedForBatchReleaseTime(LocalDate.now().atStartOfDay(ZoneOffset.UTC).toInstant().toEpochMilli(),Duration.ofDays(1).toMillis());
 
         assertEquals(keys.size(), returnedKeys.size());
-        assertEquals(keys.get(0).getKeyData(), returnedKeys.get(0).getKeyData());
+        assertEquals(keys.get(1).getKeyData(), returnedKeys.get(0).getKeyData());
     }
 
 }
