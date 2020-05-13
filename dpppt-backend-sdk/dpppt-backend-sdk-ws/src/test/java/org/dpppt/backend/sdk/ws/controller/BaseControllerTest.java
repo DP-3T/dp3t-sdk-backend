@@ -50,7 +50,7 @@ import javax.servlet.Filter;
 @RunWith(SpringRunner.class)
 @SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT)
 @ActiveProfiles({ "dev", "jwt" })
-@TestPropertySource(properties = { "ws.app.source=org.dpppt.demo", })
+@TestPropertySource(properties = { "ws.app.source=org.dpppt.demo" })
 public abstract class BaseControllerTest {
 
 	protected MockMvc mockMvc;

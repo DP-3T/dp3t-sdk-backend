@@ -31,6 +31,7 @@ import org.springframework.test.context.support.AnnotationConfigContextLoader;
 import javax.sql.DataSource;
 import java.sql.*;
 import java.time.*;
+import java.util.Base64;
 import java.util.List;
 
 import static org.junit.Assert.assertEquals;
@@ -88,6 +89,23 @@ public class PostgresGaenDataServiceTest {
 				24 * 60 * 60 * 1000l);
 		assertTrue(sortedExposedForDay.isEmpty());
 
+    }
+
+    @Test
+    public void upsert() throws Exception {
+        var tmpKey = new GaenKey();
+        tmpKey.setRollingStartNumber((int)Duration.ofMillis(Instant.now().minus(Duration.ofDays(1)).toEpochMilli()).dividedBy(Duration.ofMinutes(10)));
+        tmpKey.setKeyData(Base64.getEncoder().encodeToString("testKey32Bytes--".getBytes("UTF-8")));
+        tmpKey.setRollingPeriod(144);
+        tmpKey.setFake(0);
+        tmpKey.setTransmissionRiskLevel(0);
+        List<GaenKey> keys = List.of(tmpKey);
+
+        dppptDataService.upsertExposees(keys);
+        var returnedKeys = dppptDataService.getSortedExposedForBatchReleaseTime(LocalDate.now().atStartOfDay(ZoneOffset.UTC).toInstant().toEpochMilli(),Duration.ofDays(1).toMillis());
+
+        assertEquals(keys.size(), returnedKeys.size());
+        assertEquals(keys.get(0).getKeyData(), returnedKeys.get(0).getKeyData());
     }
 
     @Test

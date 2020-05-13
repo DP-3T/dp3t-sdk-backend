@@ -20,6 +20,7 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
 import java.io.ByteArrayInputStream;
+import java.security.SecureRandom;
 import java.time.Duration;
 import java.time.Instant;
 import java.time.LocalDate;
@@ -35,14 +36,12 @@ import java.util.zip.ZipInputStream;
 import com.google.common.io.ByteArrayDataOutput;
 import com.google.common.io.ByteStreams;
 
+import org.dpppt.backend.sdk.model.gaen.GaenKey;
 import org.dpppt.backend.sdk.model.gaen.GaenRequest;
 import org.dpppt.backend.sdk.model.gaen.GaenSecondDay;
 import org.dpppt.backend.sdk.model.gaen.proto.TemporaryExposureKeyFormat;
 import org.dpppt.backend.sdk.ws.security.KeyVault;
 import org.dpppt.backend.sdk.ws.security.signature.ProtoSignature;
-import org.dpppt.backend.sdk.ws.util.GaenUnit;
-import org.dpppt.backend.sdk.model.gaen.GaenKey;
-
 import org.junit.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
@@ -52,7 +51,7 @@ import org.springframework.mock.web.MockHttpServletResponse;
 import io.jsonwebtoken.Jwt;
 import io.jsonwebtoken.Jwts;
 
-@SpringBootTest(properties = { "ws.app.jwt.publickey=classpath://generated_pub.pem", "logging.level.org.springframework.security=DEBUG" })
+@SpringBootTest(properties = { "ws.app.jwt.publickey=classpath://generated_pub.pem", "logging.level.org.springframework.security=DEBUG", "ws.exposedlist.batchlength=86400000" })
 public class GaenControllerTest extends BaseControllerTest {
 	@Autowired
 	ProtoSignature signer;
@@ -526,8 +525,8 @@ public class GaenControllerTest extends BaseControllerTest {
 
 	@Test
 	public void zipContainsFiles() throws Exception {
-		insertNKeysPerDayInInterval(14, OffsetDateTime.now(ZoneOffset.UTC).minusDays(15), OffsetDateTime.now(ZoneOffset.UTC));
-		MockHttpServletResponse response = mockMvc.perform(get("/v1/gaen/exposed/" + LocalDate.now().minusDays(1).atStartOfDay().atOffset(ZoneOffset.UTC).toInstant().toEpochMilli())
+		insertNKeysPerDayInInterval(14, LocalDate.now(ZoneOffset.UTC).atStartOfDay().atOffset(ZoneOffset.UTC).minusDays(4), OffsetDateTime.now(ZoneOffset.UTC));
+		MockHttpServletResponse response = mockMvc.perform(get("/v1/gaen/exposed/" + LocalDate.now().atStartOfDay().atOffset(ZoneOffset.UTC).toInstant().toEpochMilli())
 						.header("User-Agent", "MockMVC")).andExpect(status().is2xxSuccessful())
 						.andReturn().getResponse();
 		ByteArrayInputStream bais = new ByteArrayInputStream(response.getContentAsByteArray());
@@ -561,9 +560,10 @@ public class GaenControllerTest extends BaseControllerTest {
 		signatureVerifier.initVerify(signer.getPublicKey());
 		signatureVerifier.update(binProto);
 		assertTrue(signatureVerifier.verify(sig.getSignature().toByteArray()));
-
 		zip.close();
 		bais.close();
+
+		assertEquals(export.getKeysCount(), 14);
 	}
 
 	private void insertNKeysPerDayInInterval(int N, OffsetDateTime start, OffsetDateTime end) throws Exception{
@@ -571,10 +571,13 @@ public class GaenControllerTest extends BaseControllerTest {
 		while (current.isBefore(end)) {
 			GaenRequest exposeeRequest = new GaenRequest();
 			List<GaenKey> keys = new ArrayList<>();
-			int lastRolling = (int)Duration.ofMillis(Instant.now().toEpochMilli()).dividedBy(Duration.ofMinutes(10));
+			SecureRandom random = new SecureRandom();
+			int lastRolling = (int)Duration.ofMillis(current.toInstant().toEpochMilli()).dividedBy(Duration.ofMinutes(10));
 			for(int i =0; i < N; i++) {
 				GaenKey key = new GaenKey();
-				key.setKeyData(Base64.getEncoder().encodeToString("testKey32Bytes--".getBytes("UTF-8")));
+				byte[] keyBytes = new byte[16];
+				random.nextBytes(keyBytes);
+				key.setKeyData(Base64.getEncoder().encodeToString(keyBytes));
 				key.setRollingPeriod(144);
 				key.setRollingStartNumber(lastRolling);
 				key.setTransmissionRiskLevel(1);
@@ -582,9 +585,9 @@ public class GaenControllerTest extends BaseControllerTest {
 				keys.add(key);
 			}
 			exposeeRequest.setGaenKeys(keys);
-			var duration = Duration.of(lastRolling, GaenUnit.TenMinutes).plusDays(1).dividedBy(Duration.ofMinutes(10));
+			var duration = Duration.ofMillis(Instant.now().toEpochMilli()).dividedBy(Duration.ofMinutes(10));
 			exposeeRequest.setDelayedKeyDate((int)duration);
-			String token = createToken(OffsetDateTime.now().withOffsetSameInstant(ZoneOffset.UTC).plusMinutes(5));
+			String token = createToken(OffsetDateTime.now().withOffsetSameInstant(ZoneOffset.UTC).plusMinutes(5), LocalDate.from(current.minusHours(1)).format(DateTimeFormatter.ISO_DATE));
 			MockHttpServletResponse response = mockMvc.perform(post("/v1/gaen/exposed")
 					.contentType(MediaType.APPLICATION_JSON).header("Authorization", "Bearer " + token)
 					.header("User-Agent", "MockMVC").content(json(exposeeRequest))).andExpect(status().is2xxSuccessful())
