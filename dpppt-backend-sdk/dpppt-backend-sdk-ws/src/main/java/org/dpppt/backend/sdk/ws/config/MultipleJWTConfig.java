@@ -13,19 +13,14 @@ package org.dpppt.backend.sdk.ws.config;
 import java.io.FileInputStream;
 import java.io.IOException;
 import java.io.InputStream;
-import java.security.KeyFactory;
-import java.security.KeyPair;
 import java.security.NoSuchAlgorithmException;
-import java.security.interfaces.RSAPublicKey;
 import java.security.spec.InvalidKeySpecException;
-import java.security.spec.X509EncodedKeySpec;
 import java.time.Duration;
-import java.util.Base64;
 
 import org.apache.commons.io.IOUtils;
 import org.dpppt.backend.sdk.data.DPPPTDataService;
 import org.dpppt.backend.sdk.data.RedeemDataService;
-import org.dpppt.backend.sdk.ws.security.CustomJwtDecoder;
+import org.dpppt.backend.sdk.ws.security.DPPTJwtDecoder;
 import org.dpppt.backend.sdk.ws.security.JWTClaimSetConverter;
 import org.dpppt.backend.sdk.ws.security.JWTValidateRequest;
 import org.dpppt.backend.sdk.ws.security.JWTValidator;
@@ -34,7 +29,6 @@ import org.dpppt.backend.sdk.ws.security.ValidateRequest;
 import org.dpppt.backend.sdk.ws.security.KeyVault.PublicKeyNoSuitableEncodingFoundException;
 import org.dpppt.backend.sdk.ws.util.KeyHelper;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -49,13 +43,9 @@ import org.springframework.security.config.annotation.web.configuration.EnableWe
 import org.springframework.security.config.annotation.web.configuration.WebSecurityConfigurerAdapter;
 import org.springframework.security.oauth2.core.DelegatingOAuth2TokenValidator;
 import org.springframework.security.oauth2.core.OAuth2TokenValidator;
-import org.springframework.security.oauth2.jose.jws.SignatureAlgorithm;
 import org.springframework.security.oauth2.jwt.Jwt;
 import org.springframework.security.oauth2.jwt.JwtDecoder;
 import org.springframework.security.oauth2.jwt.JwtValidators;
-import org.springframework.security.oauth2.jwt.NimbusJwtDecoder;
-
-import io.jsonwebtoken.Jwts;
 
 @Configuration
 @EnableWebSecurity
@@ -133,7 +123,7 @@ public class MultipleJWTConfig {
 		@Bean
 		public JwtDecoder jwtDecoderSecondDay() throws InvalidKeySpecException, NoSuchAlgorithmException, IOException {
 
-			var jwtDecoder = new CustomJwtDecoder(keyVault.get("nextDayJWT").getPublic());
+			var jwtDecoder = new DPPTJwtDecoder(keyVault.get("nextDayJWT").getPublic());
 			// jwtDecoder.setClaimSetConverter(claimConverterGAEN());
 
 			OAuth2TokenValidator<Jwt> defaultValidators = JwtValidators.createDefault();
@@ -187,7 +177,7 @@ public class MultipleJWTConfig {
 		@Primary
 		public JwtDecoder jwtDecoder() throws InvalidKeySpecException, NoSuchAlgorithmException, IOException,
 				PublicKeyNoSuitableEncodingFoundException {
-			CustomJwtDecoder jwtDecoder = new CustomJwtDecoder(KeyVault.loadPublicKey(loadPublicKey(), "RSA"));
+			DPPTJwtDecoder jwtDecoder = new DPPTJwtDecoder(KeyVault.loadPublicKey(loadPublicKey(), "RSA"));
 
 			OAuth2TokenValidator<Jwt> defaultValidators = JwtValidators.createDefault();
 			jwtDecoder.setJwtValidator(new DelegatingOAuth2TokenValidator<>(defaultValidators, jwtValidator()));

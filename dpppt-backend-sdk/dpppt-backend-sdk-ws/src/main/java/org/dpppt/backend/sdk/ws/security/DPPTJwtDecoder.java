@@ -14,11 +14,11 @@ import io.jsonwebtoken.Jwts;
 import io.jsonwebtoken.MalformedJwtException;
 import io.jsonwebtoken.security.SignatureException;
 
-public class CustomJwtDecoder implements JwtDecoder {
+public class DPPTJwtDecoder implements JwtDecoder {
     private final JwtParser parser;
     private OAuth2TokenValidator<Jwt> validator;
 
-    public CustomJwtDecoder(PublicKey publicKey) {
+    public DPPTJwtDecoder(PublicKey publicKey) {
         parser = Jwts.parserBuilder().setSigningKey(publicKey).build();
     }
 
