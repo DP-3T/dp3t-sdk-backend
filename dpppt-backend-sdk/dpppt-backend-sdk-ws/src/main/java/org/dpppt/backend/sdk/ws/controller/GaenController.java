@@ -32,7 +32,7 @@ import com.google.protobuf.ByteString;
 import org.dpppt.backend.sdk.data.EtagGeneratorInterface;
 import org.dpppt.backend.sdk.data.gaen.GAENDataService;
 import org.dpppt.backend.sdk.model.gaen.DayBuckets;
-import org.dpppt.backend.sdk.model.gaen.File;
+import org.dpppt.backend.sdk.model.gaen.GaenExposedJson;
 import org.dpppt.backend.sdk.model.gaen.GaenKey;
 import org.dpppt.backend.sdk.model.gaen.GaenRequest;
 import org.dpppt.backend.sdk.model.gaen.GaenSecondDay;
@@ -242,7 +242,7 @@ public class GaenController {
     }
 
     @GetMapping(value = "/exposedjson/{batchReleaseTime}", produces = "application/json")
-    public @ResponseBody ResponseEntity<File> getExposedKeysAsJson(@PathVariable Long batchReleaseTime,
+    public @ResponseBody ResponseEntity<GaenExposedJson> getExposedKeysAsJson(@PathVariable Long batchReleaseTime,
             WebRequest request) throws BadBatchReleaseTimeException {
         var batchReleaseTimeDuration = Duration.ofMillis(batchReleaseTime);
 
@@ -258,7 +258,7 @@ public class GaenController {
 
         var exposedKeys = dataService.getSortedExposedForBatchReleaseTime(batchReleaseTimeDuration.toMillis(),
                 bucketLength.toMillis());
-        var file = new File();
+        var file = new GaenExposedJson();
         var header = new Header();
         header.startTimestamp(batchReleaseTimeDuration.toSeconds())
                 .endTimestamp(batchReleaseTimeDuration.toSeconds() + bucketLength.toSeconds());
