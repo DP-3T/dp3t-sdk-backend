@@ -54,8 +54,6 @@ import com.google.protobuf.ByteString;
 @Controller
 @RequestMapping("/v1")
 public class DPPPTController {
-	private static final int KEY_LENGTH_BYTES_GOOGLE_APPLE = 16;
-	private static final int KEY_LENGTH_BYTES_DP3T = 32;
 
 	private final DPPPTDataService dataService;
 	private final EtagGeneratorInterface etagGenerator;
@@ -63,13 +61,12 @@ public class DPPPTController {
 	private final int exposedListCacheContol;
 	private final ValidateRequest validateRequest;
 	private final ValidationUtils validationUtils;
-	private final int retentionDays;
 	private final long batchLength;
 	private final long requestTime;
 
 
 	public DPPPTController(DPPPTDataService dataService, EtagGeneratorInterface etagGenerator, String appSource,
-			int exposedListCacheControl, ValidateRequest validateRequest, ValidationUtils validationUtils, long batchLength, int retentionDays,
+			int exposedListCacheControl, ValidateRequest validateRequest, ValidationUtils validationUtils, long batchLength,
 			long requestTime) {
 		this.dataService = dataService;
 		this.appSource = appSource;
@@ -78,7 +75,6 @@ public class DPPPTController {
 		this.validateRequest = validateRequest;
 		this.validationUtils = validationUtils;
 		this.batchLength = batchLength;
-		this.retentionDays = retentionDays;
 		this.requestTime = requestTime;
 	}
 
