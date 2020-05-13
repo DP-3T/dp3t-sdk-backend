@@ -31,6 +31,7 @@ import org.springframework.test.context.support.AnnotationConfigContextLoader;
 import javax.sql.DataSource;
 import java.sql.*;
 import java.time.*;
+import java.util.Base64;
 import java.util.List;
 
 import static org.junit.Assert.assertEquals;
@@ -91,6 +92,23 @@ public class PostgresGaenDataServiceTest {
     }
 
     @Test
+    public void upsert() throws Exception {
+        var tmpKey = new GaenKey();
+        tmpKey.setRollingStartNumber((int)Duration.ofMillis(Instant.now().minus(Duration.ofDays(1)).toEpochMilli()).dividedBy(Duration.ofMinutes(10)));
+        tmpKey.setKeyData(Base64.getEncoder().encodeToString("testKey32Bytes--".getBytes("UTF-8")));
+        tmpKey.setRollingPeriod(144);
+        tmpKey.setFake(0);
+        tmpKey.setTransmissionRiskLevel(0);
+        List<GaenKey> keys = List.of(tmpKey);
+
+        dppptDataService.upsertExposees(keys);
+        var returnedKeys = dppptDataService.getSortedExposedForBatchReleaseTime(LocalDate.now().atStartOfDay(ZoneOffset.UTC).toInstant().toEpochMilli(),Duration.ofDays(1).toMillis());
+
+        assertEquals(keys.size(), returnedKeys.size());
+        assertEquals(keys.get(0).getKeyData(), returnedKeys.get(0).getKeyData());
+    }
+
+    @Test
     public void testBatchReleaseTime() throws SQLException {
         Instant receivedAt = LocalDateTime.parse("2014-01-28T00:00:00").toInstant(ZoneOffset.UTC);
         String key = "key555";
@@ -102,7 +120,7 @@ public class PostgresGaenDataServiceTest {
         GaenKey actual = sortedExposedForBatchReleaseTime.get(0);
         assertEquals(actual.getKeyData(), key);
         int maxExposedIdForBatchReleaseTime = dppptDataService.getMaxExposedIdForBatchReleaseTime(batchTime, BATCH_LENGTH);
-        assertEquals(1, maxExposedIdForBatchReleaseTime);
+        assertEquals(100, maxExposedIdForBatchReleaseTime);
         maxExposedIdForBatchReleaseTime = dppptDataService.getMaxExposedIdForBatchReleaseTime(receivedAt.toEpochMilli(), PostgresDPPPTDataServiceTest.BATCH_LENGTH);
         assertEquals(0, maxExposedIdForBatchReleaseTime);
     }
@@ -110,7 +128,7 @@ public class PostgresGaenDataServiceTest {
 
     private void insertExposeeWithReceivedAt(Instant receivedAt, String key) throws SQLException {
         Connection connection = dataSource.getConnection();
-        String sql = "into t_gaen_exposed (pk_exposed_id, key, received_at, rolling_start_number, rolling_period, transmission_risk_level) values (1, ?, ?, ?, 144, 0)";
+        String sql = "into t_gaen_exposed (pk_exposed_id, key, received_at, rolling_start_number, rolling_period, transmission_risk_level) values (100, ?, ?, ?, 144, 0)";
         PreparedStatement preparedStatement = connection.prepareStatement("insert " + sql);
         preparedStatement.setString(1, key);
         preparedStatement.setTimestamp(2, new Timestamp(receivedAt.toEpochMilli()));

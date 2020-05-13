@@ -30,6 +30,7 @@ import org.dpppt.backend.sdk.data.gaen.JDBCGAENDataServiceImpl;
 import org.dpppt.backend.sdk.ws.controller.DPPPTController;
 import org.dpppt.backend.sdk.ws.controller.GaenController;
 import org.dpppt.backend.sdk.ws.filter.ResponseWrapperFilter;
+import org.dpppt.backend.sdk.ws.security.KeyVault;
 import org.dpppt.backend.sdk.ws.security.NoValidateRequest;
 import org.dpppt.backend.sdk.ws.security.ValidateRequest;
 import org.dpppt.backend.sdk.ws.security.signature.ProtoSignature;
@@ -41,6 +42,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.context.annotation.Lazy;
 import org.springframework.http.converter.HttpMessageConverter;
 import org.springframework.http.converter.json.MappingJackson2HttpMessageConverter;
 import org.springframework.http.converter.protobuf.ProtobufHttpMessageConverter;
@@ -118,6 +120,10 @@ public abstract class WSBaseConfig implements SchedulingConfigurer, WebMvcConfig
 	@Autowired(required = false)
 	ValidateRequest gaenRequestValidator;
 
+	@Autowired
+	@Lazy
+	KeyVault keyVault;
+
 	final SignatureAlgorithm algorithm = SignatureAlgorithm.ES256;
 
 	@Bean
@@ -137,7 +143,7 @@ public abstract class WSBaseConfig implements SchedulingConfigurer, WebMvcConfig
 			theValidator = new NoValidateRequest();
 		}
 		return new DPPPTController(dppptSDKDataService(), etagGenerator(), appSource, exposedListCacheControl,
-				theValidator, new ValidationUtils(keySizeBytes, Duration.ofDays(retentionDays), batchLength), batchLength, retentionDays, requestTime);
+				theValidator, new ValidationUtils(keySizeBytes, Duration.ofDays(retentionDays), batchLength), batchLength, requestTime);
 	}
 	@Bean
 	public KeyPairHolder secondDayKeyPair() {
@@ -155,7 +161,7 @@ public abstract class WSBaseConfig implements SchedulingConfigurer, WebMvcConfig
 		return new GaenController(gaenDataService(), etagGenerator(), theValidator, gaenSigner(),
 				new ValidationUtils(gaenKeySizeBytes, Duration.ofDays(retentionDays), batchLength),
 				Duration.ofMillis(batchLength), Duration.ofMillis(requestTime),
-				Duration.ofMinutes(exposedListCacheControl), secondDayKeyPair().getKeyPair().getPrivate(), gaenRegion);
+				Duration.ofMinutes(exposedListCacheControl), keyVault.get("nextDayJWT").getPrivate(), gaenRegion);
 	}
 
 	@Bean
@@ -194,11 +200,12 @@ public abstract class WSBaseConfig implements SchedulingConfigurer, WebMvcConfig
 
 	@Bean
 	public ResponseWrapperFilter hashFilter() {
-		return new ResponseWrapperFilter(getKeyPair(algorithm), retentionDays, protectedHeaders, setDebugHeaders);
+		return new ResponseWrapperFilter(keyVault.get("hashFilter"), retentionDays, protectedHeaders, setDebugHeaders);
 	}
 
 	public KeyPair getKeyPair(SignatureAlgorithm algorithm) {
 		logger.warn("USING FALLBACK KEYPAIR. WONT'T PERSIST APP RESTART AND PROBABLY DOES NOT HAVE ENOUGH ENTROPY.");
+
 		return Keys.keyPairFor(algorithm);
 	}
 	public KeyPair getGaenKeyPair(String algorithm) {
@@ -221,6 +228,7 @@ public abstract class WSBaseConfig implements SchedulingConfigurer, WebMvcConfig
 		"ECDSA", "EC",
 		"RSA", "RSA"
 	);
+
 
 	@Override
 	public void configureTasks(ScheduledTaskRegistrar taskRegistrar) {

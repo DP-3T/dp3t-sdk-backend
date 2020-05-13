@@ -13,25 +13,22 @@ package org.dpppt.backend.sdk.ws.config;
 import java.io.FileInputStream;
 import java.io.IOException;
 import java.io.InputStream;
-import java.security.KeyFactory;
-import java.security.KeyPair;
 import java.security.NoSuchAlgorithmException;
-import java.security.interfaces.RSAPublicKey;
 import java.security.spec.InvalidKeySpecException;
-import java.security.spec.X509EncodedKeySpec;
 import java.time.Duration;
-import java.util.Base64;
 
 import org.apache.commons.io.IOUtils;
 import org.dpppt.backend.sdk.data.DPPPTDataService;
 import org.dpppt.backend.sdk.data.RedeemDataService;
+import org.dpppt.backend.sdk.ws.security.DPPTJwtDecoder;
 import org.dpppt.backend.sdk.ws.security.JWTClaimSetConverter;
 import org.dpppt.backend.sdk.ws.security.JWTValidateRequest;
 import org.dpppt.backend.sdk.ws.security.JWTValidator;
+import org.dpppt.backend.sdk.ws.security.KeyVault;
+import org.dpppt.backend.sdk.ws.security.KeyVault.PublicKeyNoSuitableEncodingFoundException;
 import org.dpppt.backend.sdk.ws.security.ValidateRequest;
 import org.dpppt.backend.sdk.ws.util.KeyHelper;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -49,29 +46,26 @@ import org.springframework.security.oauth2.core.OAuth2TokenValidator;
 import org.springframework.security.oauth2.jwt.Jwt;
 import org.springframework.security.oauth2.jwt.JwtDecoder;
 import org.springframework.security.oauth2.jwt.JwtValidators;
-import org.springframework.security.oauth2.jwt.NimbusJwtDecoder;
 
 @Configuration
 @EnableWebSecurity
 @Profile(value = "jwt")
 public class MultipleJWTConfig {
 
-
 	public static class CommonJWTBase extends WebSecurityConfigurerAdapter {
 		@Value("${ws.app.jwt.publickey}")
 		String publicKey;
-	
+
 		@Value("${ws.app.jwt.maxValidityMinutes: 60}")
 		int maxValidityMinutes;
-	
+
 		@Autowired
 		@Lazy
 		DPPPTDataService dataService;
-	
+
 		@Autowired
 		@Lazy
 		RedeemDataService redeemDataService;
-
 
 		protected String loadPublicKey() throws IOException {
 			if (publicKey.startsWith("keycloak:")) {
@@ -111,9 +105,10 @@ public class MultipleJWTConfig {
           .jwt().decoder(jwtDecoderSecondDay());
 	// @formatter:on
 		}
+
 		@Autowired
 		@Lazy
-		KeyPairHolder secondDayKeyPair;
+		KeyVault keyVault;
 
 		@Bean
 		public JWTValidator jwtValidatorGAEN() {
@@ -127,11 +122,9 @@ public class MultipleJWTConfig {
 
 		@Bean
 		public JwtDecoder jwtDecoderSecondDay() throws InvalidKeySpecException, NoSuchAlgorithmException, IOException {
-			// X509EncodedKeySpec keySpecX509 = new X509EncodedKeySpec(Base64.getDecoder().decode(loadPublicKey()));
-			// KeyFactory kf = KeyFactory.getInstance("RSA");
-			// RSAPublicKey pubKey = (RSAPublicKey) kf.generatePublic(keySpecX509);
-			NimbusJwtDecoder jwtDecoder = NimbusJwtDecoder.withPublicKey((RSAPublicKey)secondDayKeyPair.getKeyPair().getPublic()).build();
-			jwtDecoder.setClaimSetConverter(claimConverterGAEN());
+
+			var jwtDecoder = new DPPTJwtDecoder(keyVault.get("nextDayJWT").getPublic());
+			// jwtDecoder.setClaimSetConverter(claimConverterGAEN());
 
 			OAuth2TokenValidator<Jwt> defaultValidators = JwtValidators.createDefault();
 			jwtDecoder.setJwtValidator(new DelegatingOAuth2TokenValidator<>(defaultValidators, jwtValidatorGAEN()));
@@ -142,7 +135,6 @@ public class MultipleJWTConfig {
 	@Order(2)
 	public static class WSJWTConfig extends CommonJWTBase {
 
-		
 		@Override
 		protected void configure(HttpSecurity http) throws Exception {
 	// @formatter:off
@@ -183,12 +175,9 @@ public class MultipleJWTConfig {
 
 		@Bean
 		@Primary
-		public JwtDecoder jwtDecoder() throws InvalidKeySpecException, NoSuchAlgorithmException, IOException {
-			X509EncodedKeySpec keySpecX509 = new X509EncodedKeySpec(Base64.getDecoder().decode(loadPublicKey()));
-			KeyFactory kf = KeyFactory.getInstance("RSA");
-			RSAPublicKey pubKey = (RSAPublicKey) kf.generatePublic(keySpecX509);
-			NimbusJwtDecoder jwtDecoder = NimbusJwtDecoder.withPublicKey(pubKey).build();
-			jwtDecoder.setClaimSetConverter(claimConverter());
+		public JwtDecoder jwtDecoder() throws InvalidKeySpecException, NoSuchAlgorithmException, IOException,
+				PublicKeyNoSuitableEncodingFoundException {
+			DPPTJwtDecoder jwtDecoder = new DPPTJwtDecoder(KeyVault.loadPublicKey(loadPublicKey(), "RSA"));
 
 			OAuth2TokenValidator<Jwt> defaultValidators = JwtValidators.createDefault();
 			jwtDecoder.setJwtValidator(new DelegatingOAuth2TokenValidator<>(defaultValidators, jwtValidator()));

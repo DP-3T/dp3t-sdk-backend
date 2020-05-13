@@ -11,7 +11,7 @@
 package org.dpppt.backend.sdk.ws.security;
 
 public interface ValidateRequest {
-	
+
 	public boolean isValid(Object authObject);
 
 	// authObject is the Principal, given from Springboot
@@ -20,6 +20,9 @@ public interface ValidateRequest {
 	public long getKeyDate(Object authObject, Object others) throws InvalidDateException;
 
 	public boolean isFakeRequest(Object authObject, Object others);
-	
-	public class InvalidDateException extends Exception {}
+
+	public class InvalidDateException extends Exception {
+
+		private static final long serialVersionUID = 5886601055826066148L;
+	}
 }
