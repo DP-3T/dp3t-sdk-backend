@@ -16,7 +16,6 @@ import java.time.ZoneOffset;
 
 import org.dpppt.backend.sdk.model.ExposeeRequest;
 import org.dpppt.backend.sdk.model.gaen.GaenKey;
-import org.dpppt.backend.sdk.model.gaen.GaenRequest;
 import org.dpppt.backend.sdk.ws.util.GaenUnit;
 
 public class NoValidateRequest implements ValidateRequest {
@@ -30,19 +29,21 @@ public class NoValidateRequest implements ValidateRequest {
 	public long getKeyDate(Object authObject, Object others) throws InvalidDateException {
 		if (others instanceof ExposeeRequest) {
 			ExposeeRequest request = ((ExposeeRequest) others);
-			if(request.getKeyDate() < OffsetDateTime.now().minusDays(21).toInstant().toEpochMilli()) {
+			if (request.getKeyDate() < OffsetDateTime.now().minusDays(21).toInstant().toEpochMilli()) {
 				throw new InvalidDateException();
-			} else if (request.getKeyDate() > OffsetDateTime.now().withOffsetSameInstant(ZoneOffset.UTC).toInstant().toEpochMilli()) {
+			} else if (request.getKeyDate() > OffsetDateTime.now().withOffsetSameInstant(ZoneOffset.UTC).toInstant()
+					.toEpochMilli()) {
 				throw new InvalidDateException();
 			}
 			return request.getKeyDate();
 		}
-		if(others instanceof GaenKey) {
+		if (others instanceof GaenKey) {
 			GaenKey key = ((GaenKey) others);
 			var requestDate = Duration.of(key.getRollingStartNumber(), GaenUnit.TenMinutes);
-			if(requestDate.toMillis() < OffsetDateTime.now().minusDays(21).toInstant().toEpochMilli()) {
+			if (requestDate.toMillis() < OffsetDateTime.now().minusDays(21).toInstant().toEpochMilli()) {
 				throw new InvalidDateException();
-			} else if (requestDate.toMillis() > OffsetDateTime.now().withOffsetSameInstant(ZoneOffset.UTC).toInstant().toEpochMilli()) {
+			} else if (requestDate.toMillis() > OffsetDateTime.now().withOffsetSameInstant(ZoneOffset.UTC).toInstant()
+					.toEpochMilli()) {
 				throw new InvalidDateException();
 			}
 			return requestDate.toMillis();
@@ -56,7 +57,7 @@ public class NoValidateRequest implements ValidateRequest {
 			ExposeeRequest request = ((ExposeeRequest) others);
 			return request.isFake() == 1;
 		}
-		if(others instanceof GaenKey) {
+		if (others instanceof GaenKey) {
 			GaenKey request = ((GaenKey) others);
 			return request.getFake() == 1;
 		}

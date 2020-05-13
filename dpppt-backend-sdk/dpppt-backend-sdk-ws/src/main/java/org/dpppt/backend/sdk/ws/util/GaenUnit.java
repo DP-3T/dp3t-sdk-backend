@@ -4,7 +4,6 @@ import java.time.Duration;
 import java.time.temporal.ChronoUnit;
 import java.time.temporal.Temporal;
 import java.time.temporal.TemporalUnit;
-import java.util.concurrent.TimeUnit;
 
 public class GaenUnit implements TemporalUnit {
     public static GaenUnit TenMinutes = new GaenUnit();
