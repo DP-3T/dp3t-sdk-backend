@@ -146,6 +146,13 @@ public abstract class WSBaseConfig implements SchedulingConfigurer, WebMvcConfig
 				theValidator, new ValidationUtils(keySizeBytes, Duration.ofDays(retentionDays), batchLength), batchLength, retentionDays, requestTime);
 	}
 	@Bean
+	public KeyPairHolder secondDayKeyPair() {
+		var keyPair = Keys.keyPairFor(SignatureAlgorithm.RS256);
+		var holder = new KeyPairHolder();
+		holder.setKeyPair(keyPair);
+		return holder;
+	}
+	@Bean
 	public GaenController gaenController(){
 		ValidateRequest theValidator = gaenRequestValidator;
 		if (theValidator == null) {
@@ -201,6 +208,26 @@ public abstract class WSBaseConfig implements SchedulingConfigurer, WebMvcConfig
 
 		return Keys.keyPairFor(algorithm);
 	}
+	public KeyPair getGaenKeyPair(String algorithm) {
+		try {
+			var splits = algorithm.split("with");
+			var algo = splits[1];
+			var kpGenerator = KeyPairGenerator.getInstance(algorithmToKeyPairAlgo.get(algo));
+			if(algo.equals("ECDSA")) {
+				ECGenParameterSpec keySpecs = new ECGenParameterSpec("secp256r1");
+				kpGenerator.initialize(keySpecs);
+			}
+			return kpGenerator.genKeyPair();
+		}
+		catch (Exception ex) {
+			throw new RuntimeException("Cannot generate KeyPair");
+		}
+	}
+
+	private static Map<String, String> algorithmToKeyPairAlgo = Map.of(
+		"ECDSA", "EC",
+		"RSA", "RSA"
+	);
 
 
 	@Override

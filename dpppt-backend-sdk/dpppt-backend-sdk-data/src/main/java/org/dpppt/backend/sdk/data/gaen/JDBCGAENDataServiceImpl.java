@@ -61,7 +61,7 @@ public class JDBCGAENDataServiceImpl implements GAENDataService {
 			params.addValue("transmission_risk_level", gaenKey.getTransmissionRiskLevel());
 			parameterList.add(params);
 		}
-		var affectedRows = jt.batchUpdate(sql, parameterList.toArray(new MapSqlParameterSource[0]));
+		jt.batchUpdate(sql, parameterList.toArray(new MapSqlParameterSource[0]));
 	}
 
 	@Override
