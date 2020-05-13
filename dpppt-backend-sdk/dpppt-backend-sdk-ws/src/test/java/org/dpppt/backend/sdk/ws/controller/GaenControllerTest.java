@@ -33,6 +33,10 @@ import java.util.List;
 import java.util.zip.ZipEntry;
 import java.util.zip.ZipInputStream;
 
+import com.google.common.io.ByteArrayDataOutput;
+import com.google.common.io.ByteStreams;
+
+import org.dpppt.backend.sdk.data.gaen.GAENDataService;
 import org.dpppt.backend.sdk.model.gaen.GaenKey;
 import org.dpppt.backend.sdk.model.gaen.GaenRequest;
 import org.dpppt.backend.sdk.model.gaen.GaenSecondDay;
@@ -45,9 +49,6 @@ import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.http.MediaType;
 import org.springframework.mock.web.MockHttpServletResponse;
 
-import com.google.common.io.ByteArrayDataOutput;
-import com.google.common.io.ByteStreams;
-
 import io.jsonwebtoken.Jwt;
 import io.jsonwebtoken.Jwts;
 
@@ -57,6 +58,10 @@ public class GaenControllerTest extends BaseControllerTest {
 	ProtoSignature signer;
 	@Autowired
 	KeyVault keyVault;
+	@Autowired
+	GAENDataService gaenDataService;
+
+
 	@Test
 	public void testHello() throws Exception {
 		MockHttpServletResponse response = mockMvc.perform(get("/v1")).andExpect(status().is2xxSuccessful()).andReturn()
@@ -532,6 +537,7 @@ public class GaenControllerTest extends BaseControllerTest {
 		ByteArrayInputStream baisOuter = new ByteArrayInputStream(response.getContentAsByteArray());
 		ZipInputStream zipOuter = new ZipInputStream(baisOuter);
 		ZipEntry entry = zipOuter.getNextEntry();
+		int zipEntries = 0;
 		while(entry != null) {
 			ByteArrayDataOutput badoOuter = ByteStreams.newDataOutput();
 			while(zipOuter.available() > 0) {
@@ -570,10 +576,12 @@ public class GaenControllerTest extends BaseControllerTest {
 				signatureVerifier.initVerify(signer.getPublicKey());
 				signatureVerifier.update(binProto);
 				assertTrue(signatureVerifier.verify(sig.getSignature().toByteArray()));
-				assertEquals(export.getKeysCount(), 14);
+				assertEquals(1, export.getKeysCount());
 			}
 			entry = zipOuter.getNextEntry();
+			zipEntries += 1;
 		}
+		assertEquals(14, zipEntries);
 	}
 
 	private void insertNKeysPerDayInInterval(int N, OffsetDateTime start, OffsetDateTime end) throws Exception{
@@ -593,15 +601,17 @@ public class GaenControllerTest extends BaseControllerTest {
 				key.setTransmissionRiskLevel(1);
 				key.setFake(0);
 				keys.add(key);
+				lastRolling -= Duration.ofDays(1).dividedBy(Duration.ofMinutes(10));
 			}
-			exposeeRequest.setGaenKeys(keys);
-			var duration = Duration.ofMillis(Instant.now().toEpochMilli()).dividedBy(Duration.ofMinutes(10));
-			exposeeRequest.setDelayedKeyDate((int)duration);
-			String token = createToken(OffsetDateTime.now().withOffsetSameInstant(ZoneOffset.UTC).plusMinutes(5), LocalDate.from(current.minusHours(1)).format(DateTimeFormatter.ISO_DATE));
-			MockHttpServletResponse response = mockMvc.perform(post("/v1/gaen/exposed")
-					.contentType(MediaType.APPLICATION_JSON).header("Authorization", "Bearer " + token)
-					.header("User-Agent", "MockMVC").content(json(exposeeRequest))).andExpect(status().is2xxSuccessful())
-					.andReturn().getResponse();
+			// exposeeRequest.setGaenKeys(keys);
+			// var duration = Duration.ofMillis(Instant.now().toEpochMilli()).dividedBy(Duration.ofMinutes(10));
+			// exposeeRequest.setDelayedKeyDate((int)duration);
+			// String token = createToken(OffsetDateTime.now().withOffsetSameInstant(ZoneOffset.UTC).plusMinutes(5), LocalDate.from(current.minusHours(1)).format(DateTimeFormatter.ISO_DATE));
+			// MockHttpServletResponse response = mockMvc.perform(post("/v1/gaen/exposed")
+			// 		.contentType(MediaType.APPLICATION_JSON).header("Authorization", "Bearer " + token)
+			// 		.header("User-Agent", "MockMVC").content(json(exposeeRequest))).andExpect(status().is2xxSuccessful())
+			// 		.andReturn().getResponse();
+			testGaenDataService.upsertExposees(keys, current);
 			current = current.plusDays(1);
 		}
 	}

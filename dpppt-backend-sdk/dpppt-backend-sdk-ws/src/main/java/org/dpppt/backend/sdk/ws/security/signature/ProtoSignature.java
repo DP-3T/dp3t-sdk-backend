@@ -14,6 +14,7 @@ import java.time.LocalDate;
 import java.time.ZoneOffset;
 import java.util.ArrayList;
 import java.util.Base64;
+import java.util.Collection;
 import java.util.List;
 import java.util.zip.ZipEntry;
 import java.util.zip.ZipOutputStream;
@@ -84,7 +85,7 @@ public class ProtoSignature {
         return tekSignature.build();
     }
 
-    public byte[] getPayload(List<List<GaenKey>> buckets) throws IOException, InvalidKeyException, SignatureException,
+    public byte[] getPayload(Collection<List<GaenKey>> buckets) throws IOException, InvalidKeyException, SignatureException,
             NoSuchAlgorithmException {
         ByteArrayOutputStream byteOutCollection = new ByteArrayOutputStream();
         ZipOutputStream zipCollection = new ZipOutputStream(byteOutCollection);

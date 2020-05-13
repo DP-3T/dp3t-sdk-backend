@@ -1,6 +1,5 @@
 package org.dpppt.backend.sdk.ws.controller;
 
-import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.security.InvalidKeyException;
 import java.security.NoSuchAlgorithmException;
@@ -15,8 +14,7 @@ import java.util.Base64;
 import java.util.Date;
 import java.util.List;
 import java.util.UUID;
-import java.util.zip.ZipEntry;
-import java.util.zip.ZipOutputStream;
+import java.util.stream.Collectors;
 
 import javax.validation.Valid;
 
@@ -31,8 +29,6 @@ import org.dpppt.backend.sdk.model.gaen.GaenRequest;
 import org.dpppt.backend.sdk.model.gaen.GaenSecondDay;
 import org.dpppt.backend.sdk.model.gaen.Header;
 import org.dpppt.backend.sdk.model.gaen.proto.FileProto;
-import org.dpppt.backend.sdk.model.gaen.proto.TemporaryExposureKeyFormat;
-import org.dpppt.backend.sdk.model.gaen.proto.TemporaryExposureKeyFormat.SignatureInfo;
 import org.dpppt.backend.sdk.ws.security.ValidateRequest;
 import org.dpppt.backend.sdk.ws.security.ValidateRequest.InvalidDateException;
 import org.dpppt.backend.sdk.ws.security.signature.ProtoSignature;
@@ -52,7 +48,6 @@ import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestHeader;
 import org.springframework.web.bind.annotation.RequestMapping;
-
 import org.springframework.web.bind.annotation.ResponseBody;
 import org.springframework.web.bind.annotation.ResponseStatus;
 import org.springframework.web.context.request.WebRequest;
@@ -229,8 +224,8 @@ public class GaenController {
             return ResponseEntity.status(HttpStatus.NOT_MODIFIED).build();
         }
         var exposedKeys = dataService.getSortedExposedForBatchReleaseTime(batchReleaseTimeDuration.toMillis(), bucketLength.toMillis());
-
-        byte[] payload = gaenSigner.getPayload(List.of(exposedKeys));
+        var keysGroupedByRollingStartNumber = exposedKeys.stream().collect(Collectors.groupingBy(GaenKey::getRollingStartNumber)).values();
+        byte[] payload = gaenSigner.getPayload(keysGroupedByRollingStartNumber);
         
         return ResponseEntity.ok().cacheControl(CacheControl.maxAge(exposedListCacheContol))
                 .header("X-BATCH-RELEASE-TIME", Long.toString(batchReleaseTimeDuration.toMillis()))

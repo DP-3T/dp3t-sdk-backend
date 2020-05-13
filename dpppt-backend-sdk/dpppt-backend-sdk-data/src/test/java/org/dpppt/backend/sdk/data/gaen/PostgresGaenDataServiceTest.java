@@ -10,7 +10,26 @@
 
 package org.dpppt.backend.sdk.data.gaen;
 
-import org.assertj.core.api.Assertions;
+import static org.junit.Assert.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertFalse;
+import static org.junit.jupiter.api.Assertions.assertTrue;
+
+import java.sql.Connection;
+import java.sql.PreparedStatement;
+import java.sql.ResultSet;
+import java.sql.SQLException;
+import java.sql.Timestamp;
+import java.time.Duration;
+import java.time.Instant;
+import java.time.LocalDate;
+import java.time.LocalDateTime;
+import java.time.OffsetDateTime;
+import java.time.ZoneOffset;
+import java.util.Base64;
+import java.util.List;
+
+import javax.sql.DataSource;
+
 import org.dpppt.backend.sdk.data.PostgresDPPPTDataServiceTest;
 import org.dpppt.backend.sdk.data.RedeemDataService;
 import org.dpppt.backend.sdk.data.config.DPPPTDataServiceConfig;
@@ -28,23 +47,13 @@ import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.junit4.SpringJUnit4ClassRunner;
 import org.springframework.test.context.support.AnnotationConfigContextLoader;
 
-import javax.sql.DataSource;
-import java.sql.*;
-import java.time.*;
-import java.util.Base64;
-import java.util.List;
-
-import static org.junit.Assert.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertFalse;
-import static org.junit.jupiter.api.Assertions.assertTrue;
-
 @RunWith(SpringJUnit4ClassRunner.class)
 @ContextConfiguration(loader = AnnotationConfigContextLoader.class, classes = {PostgresDataConfig.class, FlyWayConfig.class, DPPPTDataServiceConfig.class})
 @ActiveProfiles("postgres")
 public class PostgresGaenDataServiceTest {
 
     private static final String APP_SOURCE = "test-app";
-    private static final long BATCH_LENGTH = 2 * 60 * 60 * 1000L;
+    private static final Duration BATCH_LENGTH = Duration.ofHours(2);
     
     @Autowired
     private GAENDataService dppptDataService;
@@ -102,7 +111,7 @@ public class PostgresGaenDataServiceTest {
         List<GaenKey> keys = List.of(tmpKey);
 
         dppptDataService.upsertExposees(keys);
-        var returnedKeys = dppptDataService.getSortedExposedForBatchReleaseTime(LocalDate.now().atStartOfDay(ZoneOffset.UTC).toInstant().toEpochMilli(),Duration.ofDays(1).toMillis());
+        var returnedKeys = dppptDataService.getSortedExposedForBatchReleaseTime(OffsetDateTime.now(ZoneOffset.UTC).plus(BATCH_LENGTH.minusMinutes(5)).toInstant().toEpochMilli(), BATCH_LENGTH.toMillis());
 
         assertEquals(keys.size(), returnedKeys.size());
         assertEquals(keys.get(0).getKeyData(), returnedKeys.get(0).getKeyData());
@@ -115,11 +124,11 @@ public class PostgresGaenDataServiceTest {
         insertExposeeWithReceivedAt(receivedAt, key);
 
         long batchTime = LocalDateTime.parse("2014-01-28T02:00:00").toInstant(ZoneOffset.UTC).toEpochMilli();
-        List<GaenKey> sortedExposedForBatchReleaseTime = dppptDataService.getSortedExposedForBatchReleaseTime(batchTime, BATCH_LENGTH);
+        List<GaenKey> sortedExposedForBatchReleaseTime = dppptDataService.getSortedExposedForBatchReleaseTime(batchTime, BATCH_LENGTH.toMillis());
         assertEquals(1, sortedExposedForBatchReleaseTime.size());
         GaenKey actual = sortedExposedForBatchReleaseTime.get(0);
         assertEquals(actual.getKeyData(), key);
-        int maxExposedIdForBatchReleaseTime = dppptDataService.getMaxExposedIdForBatchReleaseTime(batchTime, BATCH_LENGTH);
+        int maxExposedIdForBatchReleaseTime = dppptDataService.getMaxExposedIdForBatchReleaseTime(batchTime, BATCH_LENGTH.toMillis());
         assertEquals(100, maxExposedIdForBatchReleaseTime);
         maxExposedIdForBatchReleaseTime = dppptDataService.getMaxExposedIdForBatchReleaseTime(receivedAt.toEpochMilli(), PostgresDPPPTDataServiceTest.BATCH_LENGTH);
         assertEquals(0, maxExposedIdForBatchReleaseTime);

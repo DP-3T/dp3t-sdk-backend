@@ -4,7 +4,7 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 
 import java.time.Duration;
 import java.time.Instant;
-import java.time.LocalDate;
+import java.time.OffsetDateTime;
 import java.time.ZoneOffset;
 import java.util.Base64;
 import java.util.List;
@@ -17,7 +17,6 @@ import org.dpppt.backend.sdk.data.config.FlyWayConfig;
 import org.dpppt.backend.sdk.data.config.RedeemDataServiceConfig;
 import org.dpppt.backend.sdk.data.config.StandaloneDataConfig;
 import org.dpppt.backend.sdk.model.gaen.GaenKey;
-import org.junit.Assert;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -33,7 +32,7 @@ import org.springframework.test.context.support.AnnotationConfigContextLoader;
 @ActiveProfiles("hsqldb")
 public class GaenDataServiceTest {
     private static final String APP_SOURCE = "test-app";
-    private static final long BATCH_LENGTH = 24 * 60 * 60 * 1000L;
+    private static final Duration BATCH_LENGTH = Duration.ofHours(2);
     
     @Autowired
     private GAENDataService dppptDataService;
@@ -62,7 +61,7 @@ public class GaenDataServiceTest {
         List<GaenKey> keys = List.of(tmpKey, tmpKey2);
 
         dppptDataService.upsertExposees(keys);
-        var returnedKeys = dppptDataService.getSortedExposedForBatchReleaseTime(LocalDate.now().atStartOfDay(ZoneOffset.UTC).toInstant().toEpochMilli(),Duration.ofDays(1).toMillis());
+        var returnedKeys = dppptDataService.getSortedExposedForBatchReleaseTime(OffsetDateTime.now(ZoneOffset.UTC).plus(BATCH_LENGTH.minusMinutes(5)).toInstant().toEpochMilli(), BATCH_LENGTH.toMillis());
 
         assertEquals(keys.size(), returnedKeys.size());
         assertEquals(keys.get(1).getKeyData(), returnedKeys.get(0).getKeyData());

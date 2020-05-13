@@ -24,8 +24,10 @@ import java.util.Date;
 import java.util.UUID;
 
 import javax.servlet.Filter;
+import javax.sql.DataSource;
 
 import org.apache.commons.io.IOUtils;
+import org.dpppt.backend.sdk.ws.util.TestJDBCGaen;
 import org.junit.Before;
 import org.junit.runner.RunWith;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -62,12 +64,18 @@ public abstract class BaseControllerTest {
 	@Autowired
 	private Filter springSecurityFilterChain;
 
+	@Autowired
+	DataSource dataSource;
+
+	protected TestJDBCGaen testGaenDataService;
+
 	@Before
 	public void setup() throws Exception {
 		loadPrivateKey();
 		this.mockMvc = MockMvcBuilders.webAppContextSetup(webApplicationContext).addFilter(springSecurityFilterChain).build();
 		this.objectMapper = new ObjectMapper(new JsonFactory());
 		this.objectMapper.registerModule(new JavaTimeModule());
+		this.testGaenDataService = new TestJDBCGaen("hsqldb", dataSource);
 	}
 
 	private void loadPrivateKey() throws Exception {
