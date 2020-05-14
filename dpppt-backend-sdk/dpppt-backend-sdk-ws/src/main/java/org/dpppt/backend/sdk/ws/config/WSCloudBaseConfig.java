@@ -1,34 +1,26 @@
 /*
- * Created by Ubique Innovation AG
- * https://www.ubique.ch
- * Copyright (c) 2020. All rights reserved.
+ * Copyright (c) 2020 Ubique Innovation AG <https://www.ubique.ch>
+ *
+ * This Source Code Form is subject to the terms of the Mozilla Public
+ * License, v. 2.0. If a copy of the MPL was not distributed with this
+ * file, You can obtain one at https://mozilla.org/MPL/2.0/.
+ *
+ * SPDX-License-Identifier: MPL-2.0
  */
 
 package org.dpppt.backend.sdk.ws.config;
 
-import java.io.ByteArrayInputStream;
-import java.io.Reader;
-import java.io.StringReader;
-import java.security.KeyFactory;
-import java.security.KeyPair;
-import java.security.PrivateKey;
-import java.security.PublicKey;
-import java.security.Security;
-import java.security.cert.CertificateFactory;
-import java.security.spec.PKCS8EncodedKeySpec;
-
-import javax.sql.DataSource;
-
-import org.bouncycastle.jce.provider.BouncyCastleProvider;
-import org.bouncycastle.util.io.pem.PemObject;
-import org.bouncycastle.util.io.pem.PemReader;
+import org.dpppt.backend.sdk.ws.security.KeyVault;
+import org.dpppt.backend.sdk.ws.security.KeyVault.PrivateKeyNoSuitableEncodingFoundException;
+import org.dpppt.backend.sdk.ws.security.KeyVault.PublicKeyNoSuitableEncodingFoundException;
 import org.flywaydb.core.Flyway;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.scheduling.config.ScheduledTaskRegistrar;
 
-import io.jsonwebtoken.SignatureAlgorithm;
+import javax.sql.DataSource;
 
 @Configuration
 public abstract class WSCloudBaseConfig extends WSBaseConfig {
@@ -37,7 +29,11 @@ public abstract class WSCloudBaseConfig extends WSBaseConfig {
 	private DataSource dataSource;
 
 	abstract String getPublicKey();
+
 	abstract String getPrivateKey();
+
+	@Value("${ws.cloud.base.config.publicKey.fromCertificate:true}")
+	private boolean publicKeyFromCertificate;
 
 	@Override
 	public DataSource dataSource() {
@@ -47,7 +43,8 @@ public abstract class WSCloudBaseConfig extends WSBaseConfig {
 	@Bean
 	@Override
 	public Flyway flyway() {
-		Flyway flyWay = Flyway.configure().dataSource(dataSource()).locations("classpath:/db/migration/pgsql_cluster").load();
+		Flyway flyWay = Flyway.configure().dataSource(dataSource()).locations("classpath:/db/migration/pgsql_cluster")
+				.load();
 		flyWay.migrate();
 		return flyWay;
 
@@ -62,39 +59,28 @@ public abstract class WSCloudBaseConfig extends WSBaseConfig {
 	public void configureTasks(ScheduledTaskRegistrar taskRegistrar) {
 
 	}
-	@Override
-	public KeyPair getKeyPair(SignatureAlgorithm algorithm) {
-		Security.addProvider(new BouncyCastleProvider());
-		Security.setProperty("crypto.policy", "unlimited");
-		return new KeyPair(loadPublicKeyFromString(),loadPrivateKeyFromString());
-	}
 
-	private PrivateKey loadPrivateKeyFromString() {
-		try {
-			String privateKey = getPrivateKey();
-			Reader reader = new StringReader(privateKey);
-			PemReader readerPem = new PemReader(reader);
-			PemObject obj = readerPem.readPemObject();
-			PKCS8EncodedKeySpec pkcs8KeySpec = new PKCS8EncodedKeySpec(obj.getContent());
-			KeyFactory kf = KeyFactory.getInstance("ECDSA", "BC");
-			return (PrivateKey) kf.generatePrivate(pkcs8KeySpec);
+	@Bean
+	protected KeyVault keyVault() {
+		var privateKey = getPrivateKey();
+		var publicKey = getPublicKey();
+		
+		if(privateKey.isEmpty() || publicKey.isEmpty()) {
+			var kp = super.getKeyPair(algorithm);
+			var gaenKp = new KeyVault.KeyVaultKeyPair("gaen", kp);
+			var nextDayJWTKp = new KeyVault.KeyVaultKeyPair("nextDayJWT", kp);
+			var hashFilterKp = new KeyVault.KeyVaultKeyPair("hashFilter", kp);
+			return new KeyVault(gaenKp, nextDayJWTKp, hashFilterKp);
 		}
-		catch (Exception ex) {
-			ex.printStackTrace();
-			throw new RuntimeException();
-		}
-	}
 
-	private PublicKey loadPublicKeyFromString() {
+		var gaen = new KeyVault.KeyVaultEntry("gaen", getPrivateKey(), getPublicKey(), "EC");
+		var nextDayJWT = new KeyVault.KeyVaultEntry("nextDayJWT", getPrivateKey(), getPublicKey(), "EC");
+		var hashFilter = new KeyVault.KeyVaultEntry("hashFilter", getPrivateKey(), getPublicKey(), "EC"); 
+
 		try {
-			return CertificateFactory
-			.getInstance("X.509")
-			.generateCertificate(new ByteArrayInputStream(getPublicKey().getBytes()))
-			.getPublicKey();
-		}
-		catch (Exception ex) {
-			ex.printStackTrace();
-			throw new RuntimeException();
+			return new KeyVault(gaen, nextDayJWT, hashFilter);
+		} catch (PrivateKeyNoSuitableEncodingFoundException | PublicKeyNoSuitableEncodingFoundException e) {
+			throw new RuntimeException(e);
 		}
 	}
 }

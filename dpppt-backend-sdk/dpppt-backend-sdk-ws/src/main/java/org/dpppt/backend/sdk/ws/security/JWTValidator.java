@@ -1,16 +1,19 @@
 /*
- * Created by Ubique Innovation AG
- * https://www.ubique.ch
- * Copyright (c) 2020. All rights reserved.
+ * Copyright (c) 2020 Ubique Innovation AG <https://www.ubique.ch>
+ *
+ * This Source Code Form is subject to the terms of the Mozilla Public
+ * License, v. 2.0. If a copy of the MPL was not distributed with this
+ * file, You can obtain one at https://mozilla.org/MPL/2.0/.
+ *
+ * SPDX-License-Identifier: MPL-2.0
  */
 
 package org.dpppt.backend.sdk.ws.security;
 
-import java.time.LocalDate;
-import java.time.OffsetDateTime;
-import java.time.ZoneOffset;
+import java.time.Duration;
+import java.time.Instant;
 
-import org.dpppt.backend.sdk.data.DPPPTDataService;
+import org.dpppt.backend.sdk.data.RedeemDataService;
 import org.springframework.security.oauth2.core.OAuth2Error;
 import org.springframework.security.oauth2.core.OAuth2ErrorCodes;
 import org.springframework.security.oauth2.core.OAuth2TokenValidator;
@@ -23,9 +26,12 @@ public class JWTValidator implements OAuth2TokenValidator<Jwt> {
     public static final String UUID_CLAIM = "jti";
 
 
-    private DPPPTDataService dataService;
-    public JWTValidator(DPPPTDataService dataService) {
+    private RedeemDataService dataService;
+    private Duration maxJwtValidity;
+
+    public JWTValidator(RedeemDataService dataService, Duration maxJwtValidity) {
         this.dataService = dataService;
+        this.maxJwtValidity = maxJwtValidity;
     }
 
     @Override
@@ -34,7 +40,10 @@ public class JWTValidator implements OAuth2TokenValidator<Jwt> {
             //it is a fakte token, but we still assume it is valid
             return OAuth2TokenValidatorResult.success();
         }
-        if(this.dataService.checkAndInsertPublishUUID(token.getClaim(UUID_CLAIM))) {
+        if (token.getExpiresAt() == null || Instant.now().plus(maxJwtValidity).isBefore(token.getExpiresAt())) {
+            return OAuth2TokenValidatorResult.failure(new OAuth2Error(OAuth2ErrorCodes.INVALID_REQUEST));
+        }
+        if(token.containsClaim(UUID_CLAIM) && this.dataService.checkAndInsertPublishUUID(token.getClaim(UUID_CLAIM))) {
             return OAuth2TokenValidatorResult.success();
         }
         return OAuth2TokenValidatorResult.failure(new OAuth2Error(OAuth2ErrorCodes.INVALID_SCOPE));

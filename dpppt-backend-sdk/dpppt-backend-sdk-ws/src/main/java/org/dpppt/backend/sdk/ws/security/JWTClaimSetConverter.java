@@ -1,7 +1,11 @@
 /*
- * Created by Ubique Innovation AG
- * https://www.ubique.ch
- * Copyright (c) 2020. All rights reserved.
+ * Copyright (c) 2020 Ubique Innovation AG <https://www.ubique.ch>
+ *
+ * This Source Code Form is subject to the terms of the Mozilla Public
+ * License, v. 2.0. If a copy of the MPL was not distributed with this
+ * file, You can obtain one at https://mozilla.org/MPL/2.0/.
+ *
+ * SPDX-License-Identifier: MPL-2.0
  */
 
 package org.dpppt.backend.sdk.ws.security;
@@ -18,9 +22,12 @@ public class JWTClaimSetConverter implements Converter<Map<String, Object>, Map<
 
 	public Map<String, Object> convert(Map<String, Object> claims) {
 		Map<String, Object> convertedClaims = this.delegate.convert(claims);
-		String onset = convertedClaims.get("onset") != null ? (String) convertedClaims.get("onset") : "-";
-
-		convertedClaims.put("onset", onset);
+		if(convertedClaims.containsKey("onset")) {
+			convertedClaims.put("onset", convertedClaims.get("onset"));
+		}
+		if(convertedClaims.containsKey("delayedKeyDate")) {
+			convertedClaims.put("delayedKeyDate", convertedClaims.get("delayedKeyDate"));
+		}
 
 		return convertedClaims;
 	}

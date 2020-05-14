@@ -1,3 +1,13 @@
+<!--
+  ~ Copyright (c) 2020 Ubique Innovation AG <https://www.ubique.ch>
+  ~
+  ~ This Source Code Form is subject to the terms of the Mozilla Public
+  ~ License, v. 2.0. If a copy of the MPL was not distributed with this
+  ~ file, You can obtain one at https://mozilla.org/MPL/2.0/.
+  ~
+  ~ SPDX-License-Identifier: MPL-2.0
+  -->
+
 <project xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
 	xmlns="http://maven.apache.org/POM/4.0.0"
 	xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
@@ -89,6 +99,10 @@
 			<groupId>org.springframework.boot</groupId>
 			<artifactId>spring-boot-starter-actuator</artifactId>
 		</dependency>
+		<dependency>
+			<groupId>io.micrometer</groupId>
+			<artifactId>micrometer-registry-prometheus</artifactId>
+		 </dependency>
 
 		<dependency>
 			<groupId>com.hubspot.jackson</groupId>
@@ -133,7 +147,7 @@
                 <artifactId>springboot-swagger-3</artifactId>
                 <version>1.2.4</version>
                 <configuration>
-                    <apiVersion>1.0-develop</apiVersion>
+                    <apiVersion>1.0-gapple</apiVersion>
                     <basePackages>
                        org.dpppt.backend.sdk.model
                     </basePackages>
@@ -145,6 +159,7 @@
 					</ignoredTypes>
                     <controllers>
                         <controller>org.dpppt.backend.sdk.ws.controller.DPPPTController</controller>
+						<controller> org.dpppt.backend.sdk.ws.controller.GaenController</controller>
                     </controllers>
                     <description>DP3T API</description>
                     <apiUrls>

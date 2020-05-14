@@ -1,3 +1,13 @@
+/*
+ * Copyright (c) 2020 Ubique Innovation AG <https://www.ubique.ch>
+ *
+ * This Source Code Form is subject to the terms of the Mozilla Public
+ * License, v. 2.0. If a copy of the MPL was not distributed with this
+ * file, You can obtain one at https://mozilla.org/MPL/2.0/.
+ *
+ * SPDX-License-Identifier: MPL-2.0
+ */
+
 package org.dpppt.backend.sdk.data;
 
 import org.assertj.core.api.Assertions;
@@ -30,10 +40,15 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
 public class PostgresDPPPTDataServiceTest {
 
     private static final String APP_SOURCE = "test-app";
-    private static final long BATCH_LENGTH = 2 * 60 * 60 * 1000L;
+    public static final long BATCH_LENGTH = 2 * 60 * 60 * 1000L;
+    
     @Autowired
     private DPPPTDataService dppptDataService;
 
+    @Autowired
+    private RedeemDataService redeemDataService;
+
+    
     @Autowired
     private DataSource dataSource;
 
@@ -72,89 +87,12 @@ public class PostgresDPPPTDataServiceTest {
     }
 
     @Test
-    public void shouldGetSortedExposedForDay() {
-
-        // GIVEN
-        {
-            Exposee exposee = createExposee("key1", "2014-01-28");
-
-            dppptDataService.upsertExposee(exposee, APP_SOURCE);
-        }
-
-        {
-            Exposee exposee = createExposee("key2", "2014-01-29");
-
-            dppptDataService.upsertExposee(exposee, APP_SOURCE);
-        }
-
-        // WHEN
-        final List<Exposee> sortedExposedForDay = dppptDataService.getSortedExposedForDay(OffsetDateTime.now().withOffsetSameInstant(ZoneOffset.UTC));
-
-        // THEN
-        Assertions.assertThat(sortedExposedForDay).hasSize(2);
-        Assertions.assertThat(sortedExposedForDay.get(0).getKey()).isEqualTo("key2");
-        Assertions.assertThat(sortedExposedForDay.get(1).getKey()).isEqualTo("key1");
-    }
-
-    @Test
-    public void shouldReturnEmptyListForGetSortedExposedForDay() {
-
-        // WHEN
-        final List<Exposee> sortedExposedForDay = dppptDataService.getSortedExposedForDay(OffsetDateTime.now().withOffsetSameInstant(ZoneOffset.UTC));
-
-        // THEN
-        Assertions.assertThat(sortedExposedForDay).isEmpty();
-    }
-
-    @Test
-    public void shouldGetMaxExposedIdForDay() throws SQLException {
-
-        // GIVEN
-        {
-            Exposee exposee = createExposee("key100", "2014-01-28");
-
-            dppptDataService.upsertExposee(exposee, APP_SOURCE);
-        }
-
-        {
-            String key = "key200";
-            String keyDate = "2014-01-29";
-            Exposee exposee = createExposee(key, keyDate);
-
-            dppptDataService.upsertExposee(exposee, APP_SOURCE);
-        }
-
-        // WHEN
-        final Integer maxExposedIdForDay = dppptDataService.getMaxExposedIdForDay(OffsetDateTime.now().withOffsetSameInstant(ZoneOffset.UTC));
-
-        // THEN
-        try (
-            final Connection connection = dataSource.getConnection();
-            final PreparedStatement preparedStatement = connection.prepareStatement("select * from t_exposed t where t.key = 'key200'");
-            final ResultSet resultSet = preparedStatement.executeQuery()) {
-            resultSet.next();
-
-            Assertions.assertThat(maxExposedIdForDay).isEqualTo(resultSet.getInt("pk_exposed_id"));
-        }
-    }
-
-    @Test
-    public void shouldGetZeroForGetMaxExposedIdForDay() {
-
-        // WHEN
-        final Integer maxExposedIdForDay = dppptDataService.getMaxExposedIdForDay(OffsetDateTime.now().withOffsetSameInstant(ZoneOffset.UTC));
-
-        // THEN
-        Assertions.assertThat(maxExposedIdForDay).isEqualTo(0);
-    }
-
-    @Test
     public void testRedeemUUID() {
-        boolean actual = dppptDataService.checkAndInsertPublishUUID("bc77d983-2359-48e8-835a-de673fe53ccb");
+        boolean actual = redeemDataService.checkAndInsertPublishUUID("bc77d983-2359-48e8-835a-de673fe53ccb");
         assertTrue(actual);
-        actual = dppptDataService.checkAndInsertPublishUUID("bc77d983-2359-48e8-835a-de673fe53ccb");
+        actual = redeemDataService.checkAndInsertPublishUUID("bc77d983-2359-48e8-835a-de673fe53ccb");
         assertFalse(actual);
-        actual = dppptDataService.checkAndInsertPublishUUID("1c444adb-0924-4dc4-a7eb-1f52aa6b9575");
+        actual = redeemDataService.checkAndInsertPublishUUID("1c444adb-0924-4dc4-a7eb-1f52aa6b9575");
         assertTrue(actual);
     }
 
@@ -166,13 +104,14 @@ public class PostgresDPPPTDataServiceTest {
         String key = "someKey";
         insertExposeeWithReceivedAt(receivedAt.toInstant(), key);
 
-        Integer maxExposedIdForOld = dppptDataService.getMaxExposedIdForDay(receivedAt);
-        assertEquals(1, maxExposedIdForOld.intValue());
+		List<Exposee> sortedExposedForDay = dppptDataService
+				.getSortedExposedForBatchReleaseTime(receivedAt.toInstant().toEpochMilli() + 1, 1 * 60 * 60 * 1000l);
+		assertFalse(sortedExposedForDay.isEmpty());
 
-        dppptDataService.cleanDB(21);
-
-        maxExposedIdForOld = dppptDataService.getMaxExposedIdForDay(receivedAt);
-        assertEquals(0, maxExposedIdForOld.intValue());
+		dppptDataService.cleanDB(Duration.ofDays(21));
+		sortedExposedForDay = dppptDataService.getSortedExposedForBatchReleaseTime(receivedAt.toInstant().toEpochMilli() + 1,
+				1 * 60 * 60 * 1000l);
+		assertTrue(sortedExposedForDay.isEmpty());
 
     }
 

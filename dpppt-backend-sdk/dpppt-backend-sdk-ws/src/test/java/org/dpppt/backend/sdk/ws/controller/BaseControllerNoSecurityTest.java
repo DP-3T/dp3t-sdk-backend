@@ -1,18 +1,18 @@
 /*
- * Created by Ubique Innovation AG
- * https://www.ubique.ch
- * Copyright (c) 2020. All rights reserved.
+ * Copyright (c) 2020 Ubique Innovation AG <https://www.ubique.ch>
+ *
+ * This Source Code Form is subject to the terms of the Mozilla Public
+ * License, v. 2.0. If a copy of the MPL was not distributed with this
+ * file, You can obtain one at https://mozilla.org/MPL/2.0/.
+ *
+ * SPDX-License-Identifier: MPL-2.0
  */
 
 package org.dpppt.backend.sdk.ws.controller;
 
-import com.fasterxml.jackson.core.JsonFactory;
-import com.fasterxml.jackson.databind.ObjectMapper;
-import com.fasterxml.jackson.databind.ser.impl.SimpleFilterProvider;
+import java.io.IOException;
 
-import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
 import org.junit.Before;
-import org.junit.Ignore;
 import org.junit.runner.RunWith;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
@@ -23,7 +23,10 @@ import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.setup.MockMvcBuilders;
 import org.springframework.web.context.WebApplicationContext;
 
-import java.io.IOException;
+import com.fasterxml.jackson.core.JsonFactory;
+import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.databind.ser.impl.SimpleFilterProvider;
+import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
 
 @RunWith(SpringRunner.class)
 @SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT)

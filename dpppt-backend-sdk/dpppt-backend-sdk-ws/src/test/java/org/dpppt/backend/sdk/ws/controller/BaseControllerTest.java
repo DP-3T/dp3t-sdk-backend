@@ -1,32 +1,14 @@
 /*
- * Created by Ubique Innovation AG
- * https://www.ubique.ch
- * Copyright (c) 2020. All rights reserved.
+ * Copyright (c) 2020 Ubique Innovation AG <https://www.ubique.ch>
+ *
+ * This Source Code Form is subject to the terms of the Mozilla Public
+ * License, v. 2.0. If a copy of the MPL was not distributed with this
+ * file, You can obtain one at https://mozilla.org/MPL/2.0/.
+ *
+ * SPDX-License-Identifier: MPL-2.0
  */
 
 package org.dpppt.backend.sdk.ws.controller;
-
-import com.fasterxml.jackson.core.JsonFactory;
-import com.fasterxml.jackson.databind.ObjectMapper;
-import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
-
-import org.apache.commons.io.IOUtils;
-import org.junit.Before;
-import org.junit.runner.RunWith;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.test.context.SpringBootTest;
-import org.springframework.core.io.ClassPathResource;
-import org.springframework.test.context.ActiveProfiles;
-import org.springframework.test.context.TestPropertySource;
-import org.springframework.test.context.junit4.SpringRunner;
-import org.springframework.test.web.servlet.MockMvc;
-import org.springframework.test.web.servlet.setup.MockMvcBuilders;
-import org.springframework.web.context.WebApplicationContext;
-
-import io.jsonwebtoken.Claims;
-import io.jsonwebtoken.Jwts;
-
-import static org.springframework.security.test.web.servlet.setup.SecurityMockMvcConfigurers.*;
 
 import java.io.IOException;
 import java.io.InputStream;
@@ -41,10 +23,34 @@ import java.util.Base64;
 import java.util.Date;
 import java.util.UUID;
 
+import javax.servlet.Filter;
+import javax.sql.DataSource;
+
+import org.apache.commons.io.IOUtils;
+import org.dpppt.backend.sdk.ws.util.TestJDBCGaen;
+import org.junit.Before;
+import org.junit.runner.RunWith;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.core.io.ClassPathResource;
+import org.springframework.test.context.ActiveProfiles;
+import org.springframework.test.context.TestPropertySource;
+import org.springframework.test.context.junit4.SpringRunner;
+import org.springframework.test.web.servlet.MockMvc;
+import org.springframework.test.web.servlet.setup.MockMvcBuilders;
+import org.springframework.web.context.WebApplicationContext;
+
+import com.fasterxml.jackson.core.JsonFactory;
+import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
+
+import io.jsonwebtoken.Claims;
+import io.jsonwebtoken.Jwts;
+
 @RunWith(SpringRunner.class)
 @SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT)
 @ActiveProfiles({ "dev", "jwt" })
-@TestPropertySource(properties = { "ws.app.source=org.dpppt.demo", })
+@TestPropertySource(properties = { "ws.app.source=org.dpppt.demo" })
 public abstract class BaseControllerTest {
 
 	protected MockMvc mockMvc;
@@ -55,12 +61,21 @@ public abstract class BaseControllerTest {
 	private WebApplicationContext webApplicationContext;
 	protected ObjectMapper objectMapper;
 
+	@Autowired
+	private Filter springSecurityFilterChain;
+
+	@Autowired
+	DataSource dataSource;
+
+	protected TestJDBCGaen testGaenDataService;
+
 	@Before
 	public void setup() throws Exception {
 		loadPrivateKey();
-		this.mockMvc = MockMvcBuilders.webAppContextSetup(webApplicationContext).apply(springSecurity()).build();
+		this.mockMvc = MockMvcBuilders.webAppContextSetup(webApplicationContext).addFilter(springSecurityFilterChain).build();
 		this.objectMapper = new ObjectMapper(new JsonFactory());
 		this.objectMapper.registerModule(new JavaTimeModule());
+		this.testGaenDataService = new TestJDBCGaen("hsqldb", dataSource);
 	}
 
 	private void loadPrivateKey() throws Exception {

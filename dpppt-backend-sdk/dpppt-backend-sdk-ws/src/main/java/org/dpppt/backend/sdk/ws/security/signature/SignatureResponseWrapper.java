@@ -1,7 +1,11 @@
 /*
- * Created by Ubique Innovation AG
- * https://www.ubique.ch
- * Copyright (c) 2020. All rights reserved.
+ * Copyright (c) 2020 Ubique Innovation AG <https://www.ubique.ch>
+ *
+ * This Source Code Form is subject to the terms of the Mozilla Public
+ * License, v. 2.0. If a copy of the MPL was not distributed with this
+ * file, You can obtain one at https://mozilla.org/MPL/2.0/.
+ *
+ * SPDX-License-Identifier: MPL-2.0
  */
 
 package org.dpppt.backend.sdk.ws.security.signature;
@@ -43,6 +47,7 @@ public class SignatureResponseWrapper extends HttpServletResponseWrapper {
 	private final ByteArrayOutputStream output;
 	private final KeyPair pair;
 	private final List<String> protectedHeaders;
+	private final boolean setDebugHeaders;
 
 	private HashStream stream;
 	private PrintWriter writer;
@@ -55,10 +60,11 @@ public class SignatureResponseWrapper extends HttpServletResponseWrapper {
 	private static final String CLAIM_CONTENT_HASH = "content-hash";
 
 	public SignatureResponseWrapper(HttpServletResponse response, KeyPair pair, int retentionDays,
-			List<String> protectedHeaders) {
+			List<String> protectedHeaders, boolean setDebugHeaders) {
 		super(response);
 		this.pair = pair;
 		this.protectedHeaders = protectedHeaders;
+		this.setDebugHeaders = setDebugHeaders;
 		try {
 			this.output = new ByteArrayOutputStream(response.getBufferSize());
 			this.digest = MessageDigest.getInstance("SHA-256");
@@ -119,7 +125,8 @@ public class SignatureResponseWrapper extends HttpServletResponseWrapper {
 
 		claims.setIssuer(ISSUER_DP3T);
 		claims.setIssuedAt(Date.from(OffsetDateTime.now().withOffsetSameInstant(ZoneOffset.UTC).toInstant()));
-		claims.setExpiration(Date.from(OffsetDateTime.now().withOffsetSameInstant(ZoneOffset.UTC).plusDays(retentionPeriod).toInstant()));
+		claims.setExpiration(Date.from(
+				OffsetDateTime.now().withOffsetSameInstant(ZoneOffset.UTC).plusDays(retentionPeriod).toInstant()));
 		for (String header : protectedHeaders) {
 			if (!this.containsHeader(header)) {
 				continue;
@@ -129,15 +136,18 @@ public class SignatureResponseWrapper extends HttpServletResponseWrapper {
 			String headerValue = this.getHeader(header);
 			claims.put(normalizedHeader, headerValue);
 			if (normalizedHeader.equals("batch-release-time")) {
-				OffsetDateTime issueDate = OffsetDateTime.ofInstant(Instant.ofEpochMilli(Long.parseLong(headerValue)), ZoneOffset.UTC);
+				OffsetDateTime issueDate = OffsetDateTime.ofInstant(Instant.ofEpochMilli(Long.parseLong(headerValue)),
+						ZoneOffset.UTC);
 				claims.setIssuedAt(Date.from(issueDate.toInstant()));
 				claims.setExpiration(Date.from(issueDate.plusDays(retentionPeriod).toInstant()));
 			}
 		}
 		String signature = Jwts.builder().setClaims(claims).signWith(pair.getPrivate()).compact();
 
-		this.setHeader(HEADER_DIGEST, "sha-256=" + Hex.encodeHexString(theHash));
-		this.setHeader(HEADER_PUBLIC_KEY, getPublicKeyAsPEM());
+		if (this.setDebugHeaders) {
+			this.setHeader(HEADER_DIGEST, "sha-256=" + Hex.encodeHexString(theHash));
+			this.setHeader(HEADER_PUBLIC_KEY, getPublicKeyAsPEM());
+		}
 		this.setHeader(HEADER_SIGNATURE, signature);
 
 	}
