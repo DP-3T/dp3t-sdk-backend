@@ -22,9 +22,12 @@ public class JWTClaimSetConverter implements Converter<Map<String, Object>, Map<
 
 	public Map<String, Object> convert(Map<String, Object> claims) {
 		Map<String, Object> convertedClaims = this.delegate.convert(claims);
-		String onset = convertedClaims.get("onset") != null ? (String) convertedClaims.get("onset") : "-";
-
-		convertedClaims.put("onset", onset);
+		if(convertedClaims.containsKey("onset")) {
+			convertedClaims.put("onset", convertedClaims.get("onset"));
+		}
+		if(convertedClaims.containsKey("delayedKeyDate")) {
+			convertedClaims.put("delayedKeyDate", convertedClaims.get("delayedKeyDate"));
+		}
 
 		return convertedClaims;
 	}
