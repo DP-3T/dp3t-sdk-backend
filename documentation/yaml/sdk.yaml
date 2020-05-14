@@ -3,21 +3,10 @@ servers:
 - url: https://demo.dpppt.org
   description: ''
 info:
-  version: 1.0-develop
+  version: 1.0-gapple
   description: DP3T API
   title: DP3T API
 paths:
-  /v1/:
-    get:
-      summary: hello
-      description: hello
-      responses:
-        '200':
-          description: ''
-          content:
-            application/json:
-              schema:
-                type: string
   /v1/exposed:
     post:
       summary: addExposee
@@ -35,6 +24,42 @@ paths:
           application/json:
             schema:
               $ref: '#/components/schemas/org.dpppt.backend.sdk.model.ExposeeRequest'
+        description: N/A
+      parameters:
+      - name: User-Agent
+        in: header
+        description: ''
+        required: true
+        schema:
+          type: string
+  /v1/:
+    get:
+      summary: hello
+      description: hello
+      responses:
+        '200':
+          description: ''
+          content:
+            application/json:
+              schema:
+                type: string
+  /v1/exposedlist:
+    post:
+      summary: addExposee
+      description: addExposee
+      responses:
+        '200':
+          description: ''
+          content:
+            application/json:
+              schema:
+                type: string
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/org.dpppt.backend.sdk.model.ExposeeRequestList'
         description: N/A
       parameters:
       - name: User-Agent
@@ -99,6 +124,97 @@ paths:
         required: true
         schema:
           type: string
+  /v1/gaen/exposed:
+    post:
+      summary: addExposed
+      description: addExposed
+      responses:
+        '200':
+          description: ''
+          content:
+            application/json:
+              schema:
+                type: string
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/org.dpppt.backend.sdk.model.gaen.GaenRequest'
+        description: N/A
+      parameters:
+      - name: User-Agent
+        in: header
+        description: ''
+        required: true
+        schema:
+          type: string
+  /v1/gaen/exposednextday:
+    post:
+      summary: addExposedSecond
+      description: addExposedSecond
+      responses:
+        '200':
+          description: ''
+          content:
+            application/json:
+              schema:
+                type: string
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/org.dpppt.backend.sdk.model.gaen.GaenSecondDay'
+        description: N/A
+      parameters:
+      - name: User-Agent
+        in: header
+        description: ''
+        required: true
+        schema:
+          type: string
+  /v1/gaen/exposedios/{batchReleaseTime}:
+    get:
+      summary: getExposedKeysIos
+      description: getExposedKeysIos
+      responses:
+        '200':
+          description: ''
+          content:
+            application/x-protobuf:
+              schema:
+                $ref: '#/components/schemas/org.dpppt.backend.sdk.model.gaen.proto.FileProto.File'
+      parameters:
+      - name: batchReleaseTime
+        in: path
+        description: ''
+        required: true
+        schema:
+          type: integer
+          format: long
+  /v1/gaen/exposed/{batchReleaseTime}:
+    get:
+      summary: getExposedKeys
+      description: getExposedKeys
+      responses:
+        '200':
+          description: ''
+          content:
+            application/zip:
+              schema:
+                type: string
+                format: binary
+      parameters:
+      - name: batchReleaseTime
+        in: path
+        description: ''
+        required: true
+        schema:
+          type: integer
+          format: long
+  /v1/gaen/exposedjson/{batchReleaseTime}: {
+    }
 components:
   schemas:
     org.dpppt.backend.sdk.model.BucketList:
@@ -108,6 +224,17 @@ components:
           type: array
           items:
             type: integer
+    org.dpppt.backend.sdk.model.ExposedKey:
+      type: object
+      required:
+      - key
+      - keyDate
+      properties:
+        key:
+          type: string
+        keyDate:
+          type: integer
+          format: long
     org.dpppt.backend.sdk.model.ExposedOverview:
       type: object
       properties:
@@ -149,6 +276,107 @@ components:
           format: long
         authData:
           $ref: '#/components/schemas/org.dpppt.backend.sdk.model.ExposeeAuthData'
+    org.dpppt.backend.sdk.model.ExposeeRequestList:
+      type: object
+      required:
+      - exposedKeys
+      properties:
+        exposedKeys:
+          type: array
+          items:
+            $ref: '#/components/schemas/org.dpppt.backend.sdk.model.ExposedKey'
+        fake:
+          type: integer
+    org.dpppt.backend.sdk.model.gaen.GaenKey:
+      type: object
+      required:
+      - keyData
+      - rollingStartNumber
+      - rollingPeriod
+      - transmissionRiskLevel
+      properties:
+        keyData:
+          type: string
+        rollingStartNumber:
+          type: integer
+        rollingPeriod:
+          type: integer
+        transmissionRiskLevel:
+          type: integer
+        fake:
+          type: integer
+    org.dpppt.backend.sdk.model.gaen.GaenRequest:
+      type: object
+      required:
+      - gaenKeys
+      - delayedKeyDate
+      properties:
+        gaenKeys:
+          type: array
+          items:
+            $ref: '#/components/schemas/org.dpppt.backend.sdk.model.gaen.GaenKey'
+        delayedKeyDate:
+          type: integer
+    org.dpppt.backend.sdk.model.gaen.GaenSecondDay:
+      type: object
+      required:
+      - delayedKey
+      properties:
+        delayedKey:
+          $ref: '#/components/schemas/org.dpppt.backend.sdk.model.gaen.GaenKey'
+        fake:
+          type: integer
+    org.dpppt.backend.sdk.model.gaen.proto.FileProto.File:
+      type: object
+      properties:
+        bitField0_:
+          type: integer
+        header_:
+          $ref: '#/components/schemas/org.dpppt.backend.sdk.model.gaen.proto.FileProto.Header'
+        key_:
+          type: array
+          items:
+            $ref: '#/components/schemas/org.dpppt.backend.sdk.model.gaen.proto.FileProto.Key'
+        memoizedSize:
+          type: integer
+        memoizedHashCode:
+          type: integer
+    org.dpppt.backend.sdk.model.gaen.proto.FileProto.Header:
+      type: object
+      properties:
+        bitField0_:
+          type: integer
+        startTimestamp_:
+          type: integer
+          format: long
+        endTimestamp_:
+          type: integer
+          format: long
+        region_:
+          type: object
+        batchNum_:
+          type: integer
+        batchSize_:
+          type: integer
+        memoizedSize:
+          type: integer
+        memoizedHashCode:
+          type: integer
+    org.dpppt.backend.sdk.model.gaen.proto.FileProto.Key:
+      type: object
+      properties:
+        bitField0_:
+          type: integer
+        rollingStartNumber_:
+          type: integer
+        rollingPeriod_:
+          type: integer
+        transmissionRiskLevel_:
+          type: integer
+        memoizedSize:
+          type: integer
+        memoizedHashCode:
+          type: integer
     org.dpppt.backend.sdk.model.proto.Exposed.ProtoExposedList:
       type: object
       properties:
