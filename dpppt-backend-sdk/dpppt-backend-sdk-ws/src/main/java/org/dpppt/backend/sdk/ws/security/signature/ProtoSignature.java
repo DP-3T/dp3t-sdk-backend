@@ -114,24 +114,27 @@ public class ProtoSignature {
             zipFileName.append("key_export_").append(group);
            
             zipCollection.putNextEntry(new ZipEntry(zipFileName.toString()));
+            ByteArrayOutputStream byteOut = new ByteArrayOutputStream();
+            ZipOutputStream zip = new ZipOutputStream(byteOut);
+           
+            zip.putNextEntry(new ZipEntry("export.bin"));
+            byte[] exportBin = protoFile.toByteArray();
+            zip.write(EXPORT_MAGIC_STRING.getBytes());
+            zip.write(exportBin);
+            zip.closeEntry();
+        
+            var signatureList = getSignatureObject(exportBin);
 
-            try(ByteArrayOutputStream byteOut = new ByteArrayOutputStream();
-                ZipOutputStream zip = new ZipOutputStream(byteOut)) {
-                zip.putNextEntry(new ZipEntry("export.bin"));
-                byte[] exportBin = protoFile.toByteArray();
-                zip.write(EXPORT_MAGIC_STRING.getBytes());
-                zip.write(exportBin);
-                zip.closeEntry();
+            byte[] exportSig = signatureList.toByteArray();
+            zip.putNextEntry(new ZipEntry("export.sig"));
+            zip.write(exportSig);
+            zip.closeEntry();
+            zip.flush();
+            zip.close();
+            byteOut.flush();
+            byteOut.close();
+            zipCollection.write(byteOut.toByteArray());
             
-                var signatureList = getSignatureObject(exportBin);
-
-                byte[] exportSig = signatureList.toByteArray();
-                zip.putNextEntry(new ZipEntry("export.sig"));
-                zip.write(exportSig);
-                zip.closeEntry();
-                zip.flush();
-                zipCollection.write(byteOut.toByteArray());
-            }
             zipCollection.closeEntry();
         }
         zipCollection.flush();
