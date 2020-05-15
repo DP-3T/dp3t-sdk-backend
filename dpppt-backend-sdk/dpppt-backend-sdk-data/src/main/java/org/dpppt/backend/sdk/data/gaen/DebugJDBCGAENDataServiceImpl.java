@@ -44,7 +44,7 @@ public class DebugJDBCGAENDataServiceImpl implements DebugGAENDataService {
 		String sql = null;
 		if (dbType.equals(PGSQL)) {
 			sql = "insert into t_debug_gaen_exposed (device_name, key, rolling_start_number, rolling_period, transmission_risk_level) values (:device_name, :key, :rolling_start_number, :rolling_period, :transmission_risk_level)"
-					+ " on conflict on constraint gaen_exposed_key do nothing";
+					+ " on conflict on constraint debug_gaen_exposed_key do nothing";
 		} else {
 			sql = "merge into t_debug_gaen_exposed using (values(cast(:device_name as varchar(200)), cast(:key as varchar(24)), :rolling_start_number, :rolling_period, :transmission_risk_level))"
 					+ " as vals(device_name, key, rolling_start_number, rolling_period, transmission_risk_level) on t_gaen_exposed.key = vals.key"
