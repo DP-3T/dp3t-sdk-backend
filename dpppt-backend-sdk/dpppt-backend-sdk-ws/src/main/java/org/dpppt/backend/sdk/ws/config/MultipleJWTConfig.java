@@ -41,6 +41,7 @@ import org.springframework.http.HttpMethod;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
 import org.springframework.security.config.annotation.web.configuration.WebSecurityConfigurerAdapter;
+import org.springframework.security.config.http.SessionCreationPolicy;
 import org.springframework.security.oauth2.core.DelegatingOAuth2TokenValidator;
 import org.springframework.security.oauth2.core.OAuth2TokenValidator;
 import org.springframework.security.oauth2.jwt.Jwt;
@@ -92,6 +93,7 @@ public class MultipleJWTConfig {
 		protected void configure(HttpSecurity http) throws Exception {
 	// @formatter:off
 		http
+		.sessionManagement().sessionCreationPolicy(SessionCreationPolicy.STATELESS).and()
 		.antMatcher("/v1/gaen/exposednextday")
 		.cors()
         .and()
@@ -139,6 +141,7 @@ public class MultipleJWTConfig {
 		protected void configure(HttpSecurity http) throws Exception {
 	// @formatter:off
 		http
+		.sessionManagement().sessionCreationPolicy(SessionCreationPolicy.STATELESS).and()
 		//.regexMatcher("/v1/(exposed|exposedlist|gaen/exposed)")
 		.cors()
         .and()
