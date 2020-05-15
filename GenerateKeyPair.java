@@ -1,5 +1,6 @@
 /**
  * This file only serves as an example on how to get keys in the right encoding. 
+ * This outputs the keys in the PKCS8 format for the private key and the X509 format for the publickey
  * 
  * DO NOT USE THEM IN PRODUCTION UNLESS THE KEYSPECS ARE OK FOR YOU
  */
