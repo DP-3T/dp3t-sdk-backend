@@ -39,6 +39,7 @@ import org.dpppt.backend.sdk.ws.util.GaenUnit;
 
 public class ProtoSignature {
     public static final String EXPORT_MAGIC_STRING = "EK Export v1    ";
+    public static final byte[] EXPORT_MAGIC = {0x45, 0x4B, 0x20, 0x45, 0x78, 0x70, 0x6F, 0x72, 0x74, 0x20, 0x76, 0x31, 0x20, 0x20, 0x20, 0x20}; //"EK Export v1    "
 
     private final String algorithm;
     private final KeyPair keyPair;
@@ -119,7 +120,7 @@ public class ProtoSignature {
            
             zip.putNextEntry(new ZipEntry("export.bin"));
             byte[] exportBin = protoFile.toByteArray();
-            zip.write(EXPORT_MAGIC_STRING.getBytes());
+            zip.write(EXPORT_MAGIC);
             zip.write(exportBin);
             zip.closeEntry();
         
