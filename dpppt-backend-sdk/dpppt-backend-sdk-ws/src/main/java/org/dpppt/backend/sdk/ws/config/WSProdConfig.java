@@ -160,7 +160,7 @@ public class WSProdConfig extends WSBaseConfig {
 		@Autowired
 		ProtoSignature gaenSigner;
 		@Autowired
-		ValidateRequest gaenRequestValidator;
+		ValidateRequest backupValidator;
 		@Autowired
 		ValidationUtils gaenValidationUtils;
 		@Autowired
@@ -185,7 +185,7 @@ public class WSProdConfig extends WSBaseConfig {
 		}
 		@Bean
 		DebugController debugController() {
-			return new DebugController(dataService(),gaenSigner,gaenRequestValidator, gaenValidationUtils,Duration.ofMillis(batchLength), Duration.ofMillis(requestTime));
+			return new DebugController(dataService(),gaenSigner,backupValidator, gaenValidationUtils,Duration.ofMillis(batchLength), Duration.ofMillis(requestTime));
 		}
 	}
 

@@ -159,12 +159,16 @@ public abstract class WSBaseConfig implements SchedulingConfigurer, WebMvcConfig
 	public GaenController gaenController(){
 		ValidateRequest theValidator = gaenRequestValidator;
 		if (theValidator == null) {
-			theValidator = new NoValidateRequest();
+			theValidator = backupValidator();
 		}
 		return new GaenController(gaenDataService(), etagGenerator(), theValidator, gaenSigner(),
 				gaenValidationUtils(),
 				Duration.ofMillis(batchLength), Duration.ofMillis(requestTime),
 				Duration.ofMinutes(exposedListCacheControl), keyVault.get("nextDayJWT").getPrivate(), gaenRegion);
+	}
+	@Bean
+	ValidateRequest backupValidator() {
+		return new NoValidateRequest();
 	}
 
 	@Bean
