@@ -46,7 +46,7 @@ public class DebugJDBCGAENDataServiceImpl implements DebugGAENDataService {
 			sql = "insert into t_debug_gaen_exposed (device_name, key, rolling_start_number, rolling_period, transmission_risk_level) values (:device_name, :key, :rolling_start_number, :rolling_period, :transmission_risk_level)"
 					+ " on conflict on constraint gaen_exposed_key do nothing";
 		} else {
-			sql = "merge into t_gaen_exposed using (values(cast(:device_name as varchar(200)), cast(:key as varchar(24)), :rolling_start_number, :rolling_period, :transmission_risk_level))"
+			sql = "merge into t_debug_gaen_exposed using (values(cast(:device_name as varchar(200)), cast(:key as varchar(24)), :rolling_start_number, :rolling_period, :transmission_risk_level))"
 					+ " as vals(device_name, key, rolling_start_number, rolling_period, transmission_risk_level) on t_gaen_exposed.key = vals.key"
 					+ " when not matched then insert (device_name, key, rolling_start_number, rolling_period, transmission_risk_level) values (vals.device_name, vals.key, vals.rolling_start_number, vals.rolling_period, transmission_risk_level)";
 		}
@@ -66,7 +66,7 @@ public class DebugJDBCGAENDataServiceImpl implements DebugGAENDataService {
 	@Override
 	@Transactional(readOnly = true)
 	public Map<String, List<GaenKey>> getSortedExposedForBatchReleaseTime(Long batchReleaseTime, long batchLength) {
-		String sql = "select pk_exposed_id, device_name, key, rolling_start_number, rolling_period, transmission_risk_level from t_gaen_exposed where received_at >= :startBatch and received_at < :batchReleaseTime order by pk_exposed_id desc";
+		String sql = "select pk_exposed_id, device_name, key, rolling_start_number, rolling_period, transmission_risk_level from t_debug_gaen_exposed where received_at >= :startBatch and received_at < :batchReleaseTime order by pk_exposed_id desc";
 		MapSqlParameterSource params = new MapSqlParameterSource();
 		params.addValue("batchReleaseTime", Date.from(Instant.ofEpochMilli(batchReleaseTime)));
 		params.addValue("startBatch", Date.from(Instant.ofEpochMilli(batchReleaseTime - batchLength)));
