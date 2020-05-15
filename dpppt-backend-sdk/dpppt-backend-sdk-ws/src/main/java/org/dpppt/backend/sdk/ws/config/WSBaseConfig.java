@@ -144,9 +144,17 @@ public abstract class WSBaseConfig implements SchedulingConfigurer, WebMvcConfig
 			theValidator = new NoValidateRequest();
 		}
 		return new DPPPTController(dppptSDKDataService(), etagGenerator(), appSource, exposedListCacheControl,
-				theValidator, new ValidationUtils(keySizeBytes, Duration.ofDays(retentionDays), batchLength), batchLength, requestTime);
+				theValidator, dpptValidationUtils(), batchLength, requestTime);
 	}
 
+	@Bean
+	public ValidationUtils dpptValidationUtils(){
+		return new ValidationUtils(keySizeBytes, Duration.ofDays(retentionDays), batchLength);
+	}
+	@Bean
+	public ValidationUtils gaenValidationUtils() {
+		return new ValidationUtils(gaenKeySizeBytes, Duration.ofDays(retentionDays), batchLength);
+	}
 	@Bean
 	public GaenController gaenController(){
 		ValidateRequest theValidator = gaenRequestValidator;
@@ -154,7 +162,7 @@ public abstract class WSBaseConfig implements SchedulingConfigurer, WebMvcConfig
 			theValidator = new NoValidateRequest();
 		}
 		return new GaenController(gaenDataService(), etagGenerator(), theValidator, gaenSigner(),
-				new ValidationUtils(gaenKeySizeBytes, Duration.ofDays(retentionDays), batchLength),
+				gaenValidationUtils(),
 				Duration.ofMillis(batchLength), Duration.ofMillis(requestTime),
 				Duration.ofMinutes(exposedListCacheControl), keyVault.get("nextDayJWT").getPrivate(), gaenRegion);
 	}

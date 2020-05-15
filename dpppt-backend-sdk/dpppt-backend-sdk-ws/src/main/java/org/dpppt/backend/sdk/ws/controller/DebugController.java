@@ -3,6 +3,7 @@ package org.dpppt.backend.sdk.ws.controller;
 import java.io.IOException;
 import java.security.InvalidKeyException;
 import java.security.NoSuchAlgorithmException;
+import java.security.SignatureException;
 import java.time.Duration;
 import java.time.Instant;
 import java.time.LocalDate;
@@ -15,11 +16,13 @@ import java.util.stream.Collectors;
 
 import javax.validation.Valid;
 
+import org.dpppt.backend.sdk.data.gaen.DebugGAENDataService;
 import org.dpppt.backend.sdk.model.gaen.DayBuckets;
 import org.dpppt.backend.sdk.model.gaen.GaenKey;
 import org.dpppt.backend.sdk.model.gaen.GaenRequest;
 import org.dpppt.backend.sdk.ws.security.ValidateRequest;
 import org.dpppt.backend.sdk.ws.security.ValidateRequest.InvalidDateException;
+import org.dpppt.backend.sdk.ws.security.signature.ProtoSignature;
 import org.dpppt.backend.sdk.ws.util.GaenUnit;
 import org.dpppt.backend.sdk.ws.util.ValidationUtils;
 import org.dpppt.backend.sdk.ws.util.ValidationUtils.BadBatchReleaseTimeException;
@@ -47,17 +50,22 @@ public class DebugController {
     private final ValidationUtils validationUtils;
     private final Duration bucketLength;
     private final Duration requestTime;
+    private final ProtoSignature gaenSigner;
+    private final DebugGAENDataService dataService;
 
-    public DebugController(DebugGAENDataService dataService, ValidateRequest validateRequest, ValidationUtils validationUtils, Duration bucketLength, Duration requestTime) {
+    public DebugController(DebugGAENDataService dataService, ProtoSignature gaenSigner, ValidateRequest validateRequest, ValidationUtils validationUtils, Duration bucketLength, Duration requestTime) {
         this.validateRequest = validateRequest;
         this.validationUtils = validationUtils;
         this.bucketLength = bucketLength;
         this.requestTime = requestTime;
+        this.gaenSigner = gaenSigner;
+        this.dataService = dataService;
     }
 
     @PostMapping(value = "/exposed")
     public @ResponseBody ResponseEntity<String> addExposed(@Valid @RequestBody GaenRequest gaenRequest,
             @RequestHeader(value = "User-Agent", required = true) String userAgent,
+            @RequestHeader(value = "X-Device-Name", required = true) String deviceName,
             @AuthenticationPrincipal Object principal) throws InvalidDateException {
         var now = Instant.now().toEpochMilli();
         if (!this.validateRequest.isValid(principal)) {
@@ -80,7 +88,7 @@ public class DebugController {
             return ResponseEntity.badRequest().body("Claim is fake but list contains non fake keys");
         }
         if (!nonFakeKeys.isEmpty()) {
-            dataService.upsertExposees(nonFakeKeys);
+            dataService.upsertExposees(deviceName, nonFakeKeys);
         }
        
         var responseBuilder = ResponseEntity.ok();
@@ -92,7 +100,7 @@ public class DebugController {
     @GetMapping(value = "/exposed/{batchReleaseTime}", produces = "application/zip")
     public @ResponseBody ResponseEntity<byte[]> getExposedKeys(@PathVariable Long batchReleaseTime, WebRequest request)
             throws BadBatchReleaseTimeException, IOException, InvalidKeyException,
-            NoSuchAlgorithmException {
+            NoSuchAlgorithmException, SignatureException {
 
         var batchReleaseTimeDuration = Duration.ofMillis(batchReleaseTime);
 
@@ -101,8 +109,8 @@ public class DebugController {
         }
 
         var exposedKeys = dataService.getSortedExposedForBatchReleaseTime(batchReleaseTimeDuration.toMillis(), bucketLength.toMillis());
-        var keysGroupedByRollingStartNumber = exposedKeys.stream().collect(Collectors.groupingBy(GaenKey::getRollingStartNumber)).values();
-        byte[] payload = gaenSigner.getPayload(keysGroupedByRollingStartNumber);
+        
+        byte[] payload = gaenSigner.getPayload(exposedKeys);
         
         return ResponseEntity.ok()
                 .header("X-BATCH-RELEASE-TIME", Long.toString(batchReleaseTimeDuration.toMillis()))
