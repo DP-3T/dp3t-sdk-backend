@@ -50,6 +50,7 @@ import org.springframework.scheduling.annotation.EnableScheduling;
 import org.springframework.scheduling.annotation.SchedulingConfigurer;
 import org.springframework.scheduling.config.IntervalTask;
 import org.springframework.scheduling.config.ScheduledTaskRegistrar;
+import org.springframework.web.servlet.config.annotation.PathMatchConfigurer;
 import org.springframework.web.servlet.config.annotation.WebMvcConfigurer;
 
 import com.fasterxml.jackson.annotation.JsonInclude;
@@ -222,7 +223,6 @@ public abstract class WSBaseConfig implements SchedulingConfigurer, WebMvcConfig
 		"ECDSA", "EC",
 		"RSA", "RSA"
 	);
-
 
 	@Override
 	public void configureTasks(ScheduledTaskRegistrar taskRegistrar) {
