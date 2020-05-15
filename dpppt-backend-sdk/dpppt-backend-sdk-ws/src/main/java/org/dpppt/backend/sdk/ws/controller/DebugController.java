@@ -103,8 +103,7 @@ public class DebugController {
             NoSuchAlgorithmException, SignatureException {
 
         var batchReleaseTimeDuration = Duration.ofMillis(batchReleaseTime);
-
-        if (!validationUtils.isValidBatchReleaseTime(batchReleaseTimeDuration.toMillis())) {
+        if (batchReleaseTime % bucketLength.toMillis() != 0) {
             return ResponseEntity.notFound().build();
         }
 
@@ -122,9 +121,9 @@ public class DebugController {
         var atStartOfDay = LocalDate.parse(dayDateStr).atStartOfDay().toInstant(ZoneOffset.UTC).atOffset(ZoneOffset.UTC);
         var end = atStartOfDay.plusDays(1);
         var now = Instant.now().atOffset(ZoneOffset.UTC);
-        if (!validationUtils.isDateInRange(atStartOfDay)) {
-            return ResponseEntity.notFound().build();
-        }
+        // if (!validationUtils.isDateInRange(atStartOfDay)) {
+        //     return ResponseEntity.notFound().build();
+        // }
         var relativeUrls = new ArrayList<String>();
         var dayBuckets = new DayBuckets();
 

@@ -145,10 +145,10 @@ public class WSProdConfig extends WSBaseConfig {
 	@Profile("debug")
 	@Configuration
 	public static class DebugConfig {
-		@Value("${ws.exposedlist.batchlength: 7200000}")
+		@Value("${ws.exposedlist.debug.batchlength: 86400000}")
 		long batchLength;
 	
-		@Value("${ws.exposedlist.requestTime: 1500}")
+		@Value("${ws.exposedlist.debug.requestTime: 1500}")
 		long requestTime;
 
 		@Autowired
