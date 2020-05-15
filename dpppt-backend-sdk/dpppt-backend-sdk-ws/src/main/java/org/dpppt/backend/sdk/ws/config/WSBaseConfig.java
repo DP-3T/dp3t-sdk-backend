@@ -110,7 +110,7 @@ public abstract class WSBaseConfig implements SchedulingConfigurer, WebMvcConfig
 	String keyVersion;
 	@Value("${ws.app.gaen.keyIdentifier: org.gaen.v1}")
 	String keyIdentifier;
-	@Value("${ws.app.gaen.algorithm:SHA256withECDSA}")
+	@Value("${ws.app.gaen.algorithm:1.2.840.10045.4.3.2}")
 	String gaenAlgorithm;
 
 
@@ -129,7 +129,7 @@ public abstract class WSBaseConfig implements SchedulingConfigurer, WebMvcConfig
 	@Bean
 	public ProtoSignature gaenSigner() {
 		try {
-			return new ProtoSignature(gaenAlgorithm, getGaenKeyPair(gaenAlgorithm),bundleId,packageName,keyVersion, keyIdentifier, gaenRegion, Duration.ofMillis(batchLength));
+			return new ProtoSignature(gaenAlgorithm, keyVault.get("gaen") ,bundleId,packageName,keyVersion, keyIdentifier, gaenRegion, Duration.ofMillis(batchLength));
 		}
 		catch(Exception ex) {
 			throw new RuntimeException("Cannot initialize signer for protobuf");
@@ -202,27 +202,6 @@ public abstract class WSBaseConfig implements SchedulingConfigurer, WebMvcConfig
 
 		return Keys.keyPairFor(algorithm);
 	}
-	public KeyPair getGaenKeyPair(String algorithm) {
-		try {
-			var splits = algorithm.split("with");
-			var algo = splits[1];
-			var kpGenerator = KeyPairGenerator.getInstance(algorithmToKeyPairAlgo.get(algo));
-			if(algo.equals("ECDSA")) {
-				ECGenParameterSpec keySpecs = new ECGenParameterSpec("secp256r1");
-				kpGenerator.initialize(keySpecs);
-			}
-			return kpGenerator.genKeyPair();
-		}
-		catch (Exception ex) {
-			throw new RuntimeException("Cannot generate KeyPair");
-		}
-	}
-
-	private static Map<String, String> algorithmToKeyPairAlgo = Map.of(
-		"ECDSA", "EC",
-		"RSA", "RSA"
-	);
-
 
 	@Override
 	public void configureTasks(ScheduledTaskRegistrar taskRegistrar) {
