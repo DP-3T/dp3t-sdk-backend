@@ -56,8 +56,13 @@ This repository contains a backend implementation (webservice) written with Spri
 * [Springboot-Swagger-3](https://github.com/Ubique-OSS/springboot-swagger3) (Github Package, plugin dependency)
 
 ### Database
-For development purposes an hsqldb can be used to run the webservice locally. For production systems, it is recommended to connect to a PostgreSQL dabatase (cluster if possible). The simple database schema is described in the following diagram:
-![](documentation/img/dp3t-backend-dbschema.svg)
+For development purposes an hsqldb can be used to run the webservice locally. For production systems, it is recommended to connect to a PostgreSQL dabatase (cluster if possible). There are two tables storing keys, one for the DP3T vendor independent format, one for the Google/Apple approach format. Further, to protect against JWT replay attacks a third table stores the JTI temporarily. The schemas are as following :
+
+![](documentation/img/t_exposed.svg)
+
+![](documentation/img/t_gaen_exposed.svg)
+
+![](documentation/img/t_redeem_uuid.svg)
 
 ### API
 > Note that currently, documentation cannot be generated automatically. Hence, the generated swagger might not be up-to-date. If you checkout the repo, you can use the make doc command to generate a new swagger file (though without any documentation strings).
