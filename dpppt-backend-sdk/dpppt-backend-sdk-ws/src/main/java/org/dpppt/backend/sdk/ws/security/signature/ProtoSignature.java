@@ -50,6 +50,7 @@ public class ProtoSignature {
     private final String gaenRegion;
     private final Duration bucketLength;
 
+    public Map<String, String> oidToJavaSignature = Map.of("1.2.840.10045.4.3.2", "SHA256withECDSA");
 
     
     public ProtoSignature(String algorithm, KeyPair keyPair, String appBundleId, String apkPackage, String keyVersion, String keyVerificationId, String gaenRegion, Duration bucketLength) {
@@ -64,7 +65,7 @@ public class ProtoSignature {
     }
 
     private byte[] sign(byte[] data) throws SignatureException, InvalidKeyException, NoSuchAlgorithmException {
-        Signature signature = Signature.getInstance(algorithm);
+        Signature signature = Signature.getInstance(oidToJavaSignature.get(algorithm));
         signature.initSign(keyPair.getPrivate());
         signature.update(data);
         return signature.sign();
