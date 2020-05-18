@@ -24,6 +24,7 @@ import java.time.ZoneOffset;
 import java.util.ArrayList;
 import java.util.Base64;
 import java.util.Collection;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.zip.ZipEntry;
@@ -38,6 +39,7 @@ import org.dpppt.backend.sdk.ws.util.GaenUnit;
 
 public class ProtoSignature {
     public static final String EXPORT_MAGIC_STRING = "EK Export v1    ";
+    public static final byte[] EXPORT_MAGIC = {0x45, 0x4B, 0x20, 0x45, 0x78, 0x70, 0x6F, 0x72, 0x74, 0x20, 0x76, 0x31, 0x20, 0x20, 0x20, 0x20}; //"EK Export v1    "
 
     private final String algorithm;
     private final KeyPair keyPair;
@@ -96,45 +98,62 @@ public class ProtoSignature {
         return tekSignature.build();
     }
 
-    public byte[] getPayload(Collection<List<GaenKey>> buckets) throws IOException, InvalidKeyException, SignatureException,
-            NoSuchAlgorithmException {
+    public byte[] getPayload(Map<String, List<GaenKey>> groupedBuckets) throws IOException, InvalidKeyException, SignatureException,
+    NoSuchAlgorithmException {
         ByteArrayOutputStream byteOutCollection = new ByteArrayOutputStream();
         ZipOutputStream zipCollection = new ZipOutputStream(byteOutCollection);
         
-        for(var keys : buckets) {
+        for(var keyGroup : groupedBuckets.entrySet()) {
+            var keys = keyGroup.getValue();
+            var group = keyGroup.getKey();
             if(keys.isEmpty()) continue;
 
             var keyDate = Duration.of(keys.get(0).getRollingStartNumber(), GaenUnit.TenMinutes);
+            var keyLocalDate = LocalDate.ofInstant(Instant.ofEpochMilli(keyDate.toMillis()), ZoneOffset.UTC);
             var protoFile = getProtoKey(keys, keyDate);
             var zipFileName = new StringBuilder();
-            var keyLocalDate = LocalDate.ofInstant(Instant.ofEpochMilli(keyDate.toMillis()), ZoneOffset.UTC);
-            zipFileName.append("key_export_").append(keyLocalDate);
+            
+            zipFileName.append("key_export_").append(group);
            
             zipCollection.putNextEntry(new ZipEntry(zipFileName.toString()));
+            ByteArrayOutputStream byteOut = new ByteArrayOutputStream();
+            ZipOutputStream zip = new ZipOutputStream(byteOut);
+           
+            zip.putNextEntry(new ZipEntry("export.bin"));
+            byte[] exportBin = protoFile.toByteArray();
+            zip.write(EXPORT_MAGIC);
+            zip.write(exportBin);
+            zip.closeEntry();
+        
+            var signatureList = getSignatureObject(exportBin);
 
-            try(ByteArrayOutputStream byteOut = new ByteArrayOutputStream();
-                ZipOutputStream zip = new ZipOutputStream(byteOut)) {
-                zip.putNextEntry(new ZipEntry("export.bin"));
-                byte[] exportBin = protoFile.toByteArray();
-                zip.write(EXPORT_MAGIC_STRING.getBytes());
-                zip.write(exportBin);
-                zip.closeEntry();
+            byte[] exportSig = signatureList.toByteArray();
+            zip.putNextEntry(new ZipEntry("export.sig"));
+            zip.write(exportSig);
+            zip.closeEntry();
+            zip.flush();
+            zip.close();
+            byteOut.flush();
+            byteOut.close();
+            zipCollection.write(byteOut.toByteArray());
             
-                var signatureList = getSignatureObject(exportBin);
-
-                byte[] exportSig = signatureList.toByteArray();
-                zip.putNextEntry(new ZipEntry("export.sig"));
-                zip.write(exportSig);
-                zip.closeEntry();
-                zip.flush();
-                zipCollection.write(byteOut.toByteArray());
-            }
             zipCollection.closeEntry();
         }
         zipCollection.flush();
         zipCollection.close();
         byteOutCollection.close();
         return byteOutCollection.toByteArray();
+    }
+    public byte[] getPayload(Collection<List<GaenKey>> buckets) throws IOException, InvalidKeyException, SignatureException,
+            NoSuchAlgorithmException {
+        Map<String, List<GaenKey>> grouped = new HashMap<String, List<GaenKey>>();
+        for(var keys : buckets) {
+            if(keys.isEmpty()) continue;
+            var keyDate = Duration.of(keys.get(0).getRollingStartNumber(), GaenUnit.TenMinutes);
+            var keyLocalDate = LocalDate.ofInstant(Instant.ofEpochMilli(keyDate.toMillis()), ZoneOffset.UTC).toString();
+            grouped.put(keyLocalDate, keys);
+        }
+       return getPayload(grouped);
     }
 
     private TemporaryExposureKeyFormat.TemporaryExposureKeyExport getProtoKey(List<GaenKey> exposedKeys, Duration batchReleaseTimeDuration) {

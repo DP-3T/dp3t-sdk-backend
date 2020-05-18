@@ -10,19 +10,29 @@
 
 package org.dpppt.backend.sdk.ws.config;
 
+import java.time.Duration;
+import java.util.Arrays;
 import java.util.Base64;
 import java.util.Properties;
 
 import javax.sql.DataSource;
 
+import org.dpppt.backend.sdk.data.gaen.DebugGAENDataService;
+import org.dpppt.backend.sdk.data.gaen.DebugJDBCGAENDataServiceImpl;
+import org.dpppt.backend.sdk.ws.controller.DebugController;
 import org.dpppt.backend.sdk.ws.security.KeyVault;
+import org.dpppt.backend.sdk.ws.security.ValidateRequest;
 import org.dpppt.backend.sdk.ws.security.KeyVault.PrivateKeyNoSuitableEncodingFoundException;
 import org.dpppt.backend.sdk.ws.security.KeyVault.PublicKeyNoSuitableEncodingFoundException;
+import org.dpppt.backend.sdk.ws.security.signature.ProtoSignature;
+import org.dpppt.backend.sdk.ws.util.ValidationUtils;
 import org.flywaydb.core.Flyway;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.Profile;
+import org.springframework.core.env.Environment;
 import org.springframework.scheduling.config.ScheduledTaskRegistrar;
 
 
@@ -130,6 +140,53 @@ public class WSProdConfig extends WSBaseConfig {
 
     String getPublicKey() {
         return new String(Base64.getDecoder().decode(publicKey));
-    }
+	}
+	
+	@Profile("debug")
+	@Configuration
+	public static class DebugConfig {
+		@Value("${ws.exposedlist.debug.batchlength: 86400000}")
+		long batchLength;
+	
+		@Value("${ws.exposedlist.debug.requestTime: 1500}")
+		long requestTime;
+
+		@Autowired
+		KeyVault keyVault;
+		@Autowired
+		Flyway flyway;
+		@Autowired
+		DataSource dataSource;
+		@Autowired
+		ProtoSignature gaenSigner;
+		@Autowired
+		ValidateRequest backupValidator;
+		@Autowired
+		ValidationUtils gaenValidationUtils;
+		@Autowired
+		Environment env;
+		
+		protected boolean isProd() {
+			return Arrays.asList(env.getActiveProfiles()).contains("prod");
+		}
+		protected boolean isDev() {
+			return Arrays.asList(env.getActiveProfiles()).contains("dev");
+		}
+		
+		@Bean
+			DebugGAENDataService dataService() {
+				String dbType = "";
+				if(isProd()) {
+					dbType = "pgsql";
+				} else if(isDev()) {
+					dbType = "hsqldb";
+				}
+			return new DebugJDBCGAENDataServiceImpl(dbType, dataSource);
+		}
+		@Bean
+		DebugController debugController() {
+			return new DebugController(dataService(),gaenSigner,backupValidator, gaenValidationUtils,Duration.ofMillis(batchLength), Duration.ofMillis(requestTime));
+		}
+	}
 
 }

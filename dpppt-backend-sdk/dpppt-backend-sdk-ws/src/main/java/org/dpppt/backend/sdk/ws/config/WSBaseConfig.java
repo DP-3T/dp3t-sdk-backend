@@ -50,6 +50,7 @@ import org.springframework.scheduling.annotation.EnableScheduling;
 import org.springframework.scheduling.annotation.SchedulingConfigurer;
 import org.springframework.scheduling.config.IntervalTask;
 import org.springframework.scheduling.config.ScheduledTaskRegistrar;
+import org.springframework.web.servlet.config.annotation.PathMatchConfigurer;
 import org.springframework.web.servlet.config.annotation.WebMvcConfigurer;
 
 import com.fasterxml.jackson.annotation.JsonInclude;
@@ -143,19 +144,31 @@ public abstract class WSBaseConfig implements SchedulingConfigurer, WebMvcConfig
 			theValidator = new NoValidateRequest();
 		}
 		return new DPPPTController(dppptSDKDataService(), etagGenerator(), appSource, exposedListCacheControl,
-				theValidator, new ValidationUtils(keySizeBytes, Duration.ofDays(retentionDays), batchLength), batchLength, requestTime);
+				theValidator, dpptValidationUtils(), batchLength, requestTime);
 	}
 
+	@Bean
+	public ValidationUtils dpptValidationUtils(){
+		return new ValidationUtils(keySizeBytes, Duration.ofDays(retentionDays), batchLength);
+	}
+	@Bean
+	public ValidationUtils gaenValidationUtils() {
+		return new ValidationUtils(gaenKeySizeBytes, Duration.ofDays(retentionDays), batchLength);
+	}
 	@Bean
 	public GaenController gaenController(){
 		ValidateRequest theValidator = gaenRequestValidator;
 		if (theValidator == null) {
-			theValidator = new NoValidateRequest();
+			theValidator = backupValidator();
 		}
 		return new GaenController(gaenDataService(), etagGenerator(), theValidator, gaenSigner(),
-				new ValidationUtils(gaenKeySizeBytes, Duration.ofDays(retentionDays), batchLength),
+				gaenValidationUtils(),
 				Duration.ofMillis(batchLength), Duration.ofMillis(requestTime),
 				Duration.ofMinutes(exposedListCacheControl), keyVault.get("nextDayJWT").getPrivate(), gaenRegion);
+	}
+	@Bean
+	ValidateRequest backupValidator() {
+		return new NoValidateRequest();
 	}
 
 	@Bean
