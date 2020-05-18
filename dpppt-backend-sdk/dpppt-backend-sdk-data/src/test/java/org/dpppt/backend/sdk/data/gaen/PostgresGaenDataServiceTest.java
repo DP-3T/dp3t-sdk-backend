@@ -149,7 +149,7 @@ public class PostgresGaenDataServiceTest {
         
         
         returnedKeys = dppptDataService.getSortedExposedForKeyDate(receivedAt.minus(Duration.ofDays(2)).toEpochMilli(), batchTime, batchTime + 2 * 60 * 60 * 1000l);
-        assertEquals(0, returnedKeys);
+        assertEquals(0, returnedKeys.size());
     }
 
 
