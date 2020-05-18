@@ -16,8 +16,8 @@ import java.time.OffsetDateTime;
 import java.time.ZoneOffset;
 
 import org.dpppt.backend.sdk.model.gaen.GaenKey;
+import org.dpppt.backend.sdk.model.gaen.GaenUnit;
 import org.dpppt.backend.sdk.ws.security.ValidateRequest;
-import org.dpppt.backend.sdk.ws.util.GaenUnit;
 import org.springframework.security.oauth2.jwt.Jwt;
 
 public class JWTValidateRequest implements ValidateRequest {

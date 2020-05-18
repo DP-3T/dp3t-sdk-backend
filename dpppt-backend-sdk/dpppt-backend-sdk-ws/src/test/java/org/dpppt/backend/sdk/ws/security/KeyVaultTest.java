@@ -19,6 +19,7 @@ import org.junit.Test;
 public class KeyVaultTest {
     @Test
     public void testProviderNeedsToBeStatic() throws Exception {
+    	byte[] test = "EK Export v1    ".getBytes();
         assertFalse(KeyVault.registerNewPublicEncodingProvider(KeyVaultTest.class, "testFunctionPublic1"));
         assertFalse(KeyVault.registerNewPrivateEncodingProvider(KeyVaultTest.class, "testFunctionPrivate1"));
     }

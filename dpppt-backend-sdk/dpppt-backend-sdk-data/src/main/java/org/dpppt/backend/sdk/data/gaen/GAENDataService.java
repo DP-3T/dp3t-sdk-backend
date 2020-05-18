@@ -28,19 +28,21 @@ public interface GAENDataService {
 	 * Returns the maximum id of the stored exposed entries for the given batch.
 	 * 
 	 * @param batchReleaseTime
-	 * @param batchLength
+	 * @param publishedAfter
+	 * @param publishedUntil
 	 * @return
 	 */
-	int getMaxExposedIdForBatchReleaseTime(Long batchReleaseTime, long batchLength);
+	int getMaxExposedIdForKeyDate(Long keyDate, Long publishedAfter, Long publishedUntil);
 
 	/**
 	 * Returns all exposeed keys for the given batch.
 	 * 
 	 * @param batchReleaseTime
-	 * @param batchLength
+	 * @param publishedAfter
+	 * @param publishedUntil
 	 * @return
 	 */
-	List<GaenKey> getSortedExposedForBatchReleaseTime(Long batchReleaseTime, long batchLength);
+	List<GaenKey> getSortedExposedForKeyDate(Long keyDate, Long publishedAfter, Long publishedUntil);
 
 	/**
 	 * deletes entries older than retentionperiod

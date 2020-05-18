@@ -3,6 +3,8 @@ package org.dpppt.backend.sdk.model.gaen;
 import java.util.List;
 
 public class DayBuckets {
+	
+	Long dayTimestamp;
     String day;
     List<String> relativeUrls;
 
@@ -14,6 +16,10 @@ public class DayBuckets {
     public List<String> getRelativeUrls() {
         return this.relativeUrls;
     }
+    
+    public Long getDayTimestamp() {
+		return dayTimestamp;
+	}
 
     public DayBuckets day(String day) {
         this.day = day;
@@ -23,6 +29,11 @@ public class DayBuckets {
     public DayBuckets relativeUrls(List<String> relativeUrls) {
         this.relativeUrls = relativeUrls;
         return this;
+    }
+    
+    public DayBuckets dayTimestamp(Long dayTimestamp) {
+    	this.dayTimestamp = dayTimestamp;
+    	return this;
     }
     
 }

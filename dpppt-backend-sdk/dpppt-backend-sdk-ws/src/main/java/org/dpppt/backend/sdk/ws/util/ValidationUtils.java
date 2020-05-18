@@ -48,6 +48,16 @@ public class ValidationUtils {
 		return true;
 	}
 
+	/**
+	 * Check if the given timestamp is a valid key date: Must be midnight utc.
+	 * 
+	 * @param keyDate
+	 * @return
+	 */
+	public boolean isValidKeyDate(Long keyDate) {
+		return (Instant.ofEpochMilli(keyDate).atOffset(ZoneOffset.UTC).getHour() == 0);
+	}
+
 	public boolean isValidBatchReleaseTime(Long batchReleaseTime) throws BadBatchReleaseTimeException {
 		if (batchReleaseTime % batchLength != 0) {
 			throw new BadBatchReleaseTimeException();
@@ -67,4 +77,5 @@ public class ValidationUtils {
 		private static final long serialVersionUID = 618376703047108588L;
 
 	}
+
 }

@@ -25,6 +25,7 @@ import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.OffsetDateTime;
 import java.time.ZoneOffset;
+import java.time.temporal.ChronoUnit;
 import java.util.Base64;
 import java.util.List;
 
@@ -37,6 +38,7 @@ import org.dpppt.backend.sdk.data.config.FlyWayConfig;
 import org.dpppt.backend.sdk.data.config.PostgresDataConfig;
 import org.dpppt.backend.sdk.model.Exposee;
 import org.dpppt.backend.sdk.model.gaen.GaenKey;
+import org.dpppt.backend.sdk.model.gaen.GaenUnit;
 import org.jetbrains.annotations.NotNull;
 import org.junit.After;
 import org.junit.Test;
@@ -87,15 +89,17 @@ public class PostgresGaenDataServiceTest {
         OffsetDateTime receivedAt = now.minusDays(21);
         Connection connection = dataSource.getConnection();
         String key = "someKey";
-        insertExposeeWithReceivedAt(receivedAt.toInstant(), key);
+        insertExposeeWithReceivedAtAndKeyDate(receivedAt.toInstant(), receivedAt.minusDays(1).toInstant(), key);
 
 		List<GaenKey> sortedExposedForDay = dppptDataService
-				.getSortedExposedForBatchReleaseTime(receivedAt.toInstant().toEpochMilli() + Duration.ofMinutes(10).toMillis(), 24 * 60 * 60 * 1000l);
+				.getSortedExposedForKeyDate(receivedAt.minusDays(1).toInstant().toEpochMilli(), null, now.toInstant().toEpochMilli());
+		
 		assertFalse(sortedExposedForDay.isEmpty());
 
 		dppptDataService.cleanDB(Duration.ofDays(21));
-		sortedExposedForDay = dppptDataService.getSortedExposedForBatchReleaseTime(receivedAt.toInstant().toEpochMilli() +  Duration.ofMinutes(10).toMillis(),
-				24 * 60 * 60 * 1000l);
+		sortedExposedForDay = dppptDataService
+				.getSortedExposedForKeyDate(receivedAt.minusDays(1).toInstant().toEpochMilli(), null, now.toInstant().toEpochMilli());
+		
 		assertTrue(sortedExposedForDay.isEmpty());
 
     }
@@ -111,8 +115,16 @@ public class PostgresGaenDataServiceTest {
         List<GaenKey> keys = List.of(tmpKey);
 
         dppptDataService.upsertExposees(keys);
-        var returnedKeys = dppptDataService.getSortedExposedForBatchReleaseTime(OffsetDateTime.now(ZoneOffset.UTC).plus(BATCH_LENGTH.minusMinutes(5)).toInstant().toEpochMilli(), BATCH_LENGTH.toMillis());
+        
+		long now = System.currentTimeMillis();
+		// calculate exposed until bucket, but get bucket in the future, as keys have
+		// been inserted with timestamp now.
+		long publishedUntil = now - (now % BATCH_LENGTH.toMillis()) + BATCH_LENGTH.toMillis();
 
+		var returnedKeys = dppptDataService.getSortedExposedForKeyDate(
+				Instant.now().minus(Duration.ofDays(1)).truncatedTo(ChronoUnit.DAYS).toEpochMilli(), null,
+				publishedUntil);
+		
         assertEquals(keys.size(), returnedKeys.size());
         assertEquals(keys.get(0).getKeyData(), returnedKeys.get(0).getKeyData());
     }
@@ -121,17 +133,23 @@ public class PostgresGaenDataServiceTest {
     public void testBatchReleaseTime() throws SQLException {
         Instant receivedAt = LocalDateTime.parse("2014-01-28T00:00:00").toInstant(ZoneOffset.UTC);
         String key = "key555";
-        insertExposeeWithReceivedAt(receivedAt, key);
+        insertExposeeWithReceivedAtAndKeyDate(receivedAt, receivedAt.minus(Duration.ofDays(2)), key);
 
         long batchTime = LocalDateTime.parse("2014-01-28T02:00:00").toInstant(ZoneOffset.UTC).toEpochMilli();
-        List<GaenKey> sortedExposedForBatchReleaseTime = dppptDataService.getSortedExposedForBatchReleaseTime(batchTime, BATCH_LENGTH.toMillis());
-        assertEquals(1, sortedExposedForBatchReleaseTime.size());
-        GaenKey actual = sortedExposedForBatchReleaseTime.get(0);
+        
+
+		var returnedKeys = dppptDataService.getSortedExposedForKeyDate(receivedAt.minus(Duration.ofDays(2)).toEpochMilli(), null, batchTime);
+        
+        assertEquals(1, returnedKeys.size());
+        GaenKey actual = returnedKeys.get(0);
         assertEquals(actual.getKeyData(), key);
-        int maxExposedIdForBatchReleaseTime = dppptDataService.getMaxExposedIdForBatchReleaseTime(batchTime, BATCH_LENGTH.toMillis());
+        
+        int maxExposedIdForBatchReleaseTime = dppptDataService.getMaxExposedIdForKeyDate(receivedAt.minus(Duration.ofDays(2)).toEpochMilli(), null,	batchTime);
         assertEquals(100, maxExposedIdForBatchReleaseTime);
-        maxExposedIdForBatchReleaseTime = dppptDataService.getMaxExposedIdForBatchReleaseTime(receivedAt.toEpochMilli(), PostgresDPPPTDataServiceTest.BATCH_LENGTH);
-        assertEquals(0, maxExposedIdForBatchReleaseTime);
+        
+        
+        returnedKeys = dppptDataService.getSortedExposedForKeyDate(receivedAt.minus(Duration.ofDays(2)).toEpochMilli(), batchTime, batchTime + 2 * 60 * 60 * 1000l);
+        assertEquals(0, returnedKeys);
     }
 
 
@@ -142,6 +160,16 @@ public class PostgresGaenDataServiceTest {
         preparedStatement.setString(1, key);
         preparedStatement.setTimestamp(2, new Timestamp(receivedAt.toEpochMilli()));
         preparedStatement.setInt(3, (int)Duration.ofMillis(receivedAt.toEpochMilli()).dividedBy(Duration.ofMinutes(10)));
+        preparedStatement.execute();
+    }
+    
+    private void insertExposeeWithReceivedAtAndKeyDate(Instant receivedAt, Instant keyDate, String key) throws SQLException {
+        Connection connection = dataSource.getConnection();
+        String sql = "into t_gaen_exposed (pk_exposed_id, key, received_at, rolling_start_number, rolling_period, transmission_risk_level) values (100, ?, ?, ?, 144, 0)";
+        PreparedStatement preparedStatement = connection.prepareStatement("insert " + sql);
+        preparedStatement.setString(1, key);
+        preparedStatement.setTimestamp(2, new Timestamp(receivedAt.toEpochMilli()));
+        preparedStatement.setInt(3, (int) GaenUnit.TenMinutes.between(Instant.ofEpochMilli(0), keyDate));
         preparedStatement.execute();
     }
 
