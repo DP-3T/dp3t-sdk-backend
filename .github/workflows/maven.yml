@@ -37,7 +37,7 @@ jobs:
       run: echo "${{ github.ref }}"
     - name: Publish to GitHub Packages Apache Maven
       if: github.ref == 'refs/heads/develop'
-      run: mvn deploy --file dpppt-backend-sdk/pom.xml -s $GITHUB_WORKSPACE/settings.xml
+      run: mvn -DskipTests deploy --file dpppt-backend-sdk/pom.xml -s $GITHUB_WORKSPACE/settings.xml
       env:
         GITHUB_TOKEN: ${{ github.token }}
     - name: Create Snapshot Release
