@@ -22,7 +22,6 @@ import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
 import java.util.UUID;
-import java.util.stream.Collectors;
 
 import javax.validation.Valid;
 
@@ -174,13 +173,13 @@ public class GaenController {
 
 	@GetMapping(value = "/exposed/{keyDate}", produces = "application/zip")
 	public @ResponseBody ResponseEntity<byte[]> getExposedKeys(@PathVariable Long keyDate,
-			@RequestParam(required = false) Long publishedAfter, WebRequest request)
+			@RequestParam(required = false) Long publishedafter, WebRequest request)
 			throws BadBatchReleaseTimeException, IOException, InvalidKeyException, SignatureException,
 			NoSuchAlgorithmException {
-		if (!validationUtils.isValidBatchReleaseTime(keyDate)) {
+		if (!validationUtils.isValidKeyDate(keyDate)) {
 			return ResponseEntity.notFound().build();
 		}
-		if (publishedAfter != null && !validationUtils.isValidBatchReleaseTime(publishedAfter)) {
+		if (publishedafter != null && !validationUtils.isValidBatchReleaseTime(publishedafter)) {
 			return ResponseEntity.notFound().build();
 		}
 
@@ -188,28 +187,32 @@ public class GaenController {
 		// calculate exposed until bucket
 		long publishedUntil = now - (now % bucketLength.toMillis());
 
-		int max = dataService.getMaxExposedIdForKeyDate(keyDate, publishedAfter, publishedUntil);
+		int max = dataService.getMaxExposedIdForKeyDate(keyDate, publishedafter, publishedUntil);
 		String etag = etagGenerator.getEtag(max, "proto");
 
 		if (request.checkNotModified(etag)) {
 			return ResponseEntity.status(HttpStatus.NOT_MODIFIED).build();
 		}
 		
-		var exposedKeys = dataService.getSortedExposedForKeyDate(keyDate, publishedAfter, publishedUntil);
+		var exposedKeys = dataService.getSortedExposedForKeyDate(keyDate, publishedafter, publishedUntil);
+		if (exposedKeys.isEmpty()) {
+			return ResponseEntity.noContent().cacheControl(CacheControl.maxAge(exposedListCacheContol))
+					.header("X-PUBLISHED-UNTIL", Long.toString(publishedUntil)).build();
+		}
+		
 		byte[] payload = gaenSigner.getPayload(exposedKeys);
-
 		return ResponseEntity.ok().cacheControl(CacheControl.maxAge(exposedListCacheContol))
 				.header("X-PUBLISHED-UNTIL", Long.toString(publishedUntil)).body(payload);
 	}
 
 	@GetMapping(value = "/exposedjson/{keyDate}", produces = "application/json")
 	public @ResponseBody ResponseEntity<GaenExposedJson> getExposedKeysAsJson(@PathVariable Long keyDate,
-			@RequestParam(required = false) Long publishedAfter, WebRequest request)
+			@RequestParam(required = false) Long publishedafter, WebRequest request)
 			throws BadBatchReleaseTimeException {
-		if (!validationUtils.isValidBatchReleaseTime(keyDate)) {
+		if (!validationUtils.isValidKeyDate(keyDate)) {
 			return ResponseEntity.notFound().build();
 		}
-		if (publishedAfter != null && !validationUtils.isValidBatchReleaseTime(publishedAfter)) {
+		if (publishedafter != null && !validationUtils.isValidBatchReleaseTime(publishedafter)) {
 			return ResponseEntity.notFound().build();
 		}
 
@@ -217,14 +220,18 @@ public class GaenController {
 		// calculate exposed until bucket
 		long publishedUntil = now - (now % bucketLength.toMillis());
 
-		int max = dataService.getMaxExposedIdForKeyDate(keyDate, publishedAfter, publishedUntil);
+		int max = dataService.getMaxExposedIdForKeyDate(keyDate, publishedafter, publishedUntil);
 		String etag = etagGenerator.getEtag(max, "json");
 		if (request.checkNotModified(etag)) {
 			return ResponseEntity.status(HttpStatus.NOT_MODIFIED).build();
 		}
 
-		var exposedKeys = dataService.getSortedExposedForKeyDate(keyDate, publishedAfter, publishedUntil);
-
+		var exposedKeys = dataService.getSortedExposedForKeyDate(keyDate, publishedafter, publishedUntil);
+		if (exposedKeys.isEmpty()) {
+			return ResponseEntity.noContent().cacheControl(CacheControl.maxAge(exposedListCacheContol))
+					.header("X-PUBLISHED-UNTIL", Long.toString(publishedUntil)).build();
+		}
+		
 		var file = new GaenExposedJson();
 		var header = new Header();
 		file.gaenKeys(exposedKeys).header(header);
