@@ -16,7 +16,7 @@ import java.time.ZoneOffset;
 
 import org.dpppt.backend.sdk.model.ExposeeRequest;
 import org.dpppt.backend.sdk.model.gaen.GaenKey;
-import org.dpppt.backend.sdk.ws.util.GaenUnit;
+import org.dpppt.backend.sdk.model.gaen.GaenUnit;
 
 public class NoValidateRequest implements ValidateRequest {
 

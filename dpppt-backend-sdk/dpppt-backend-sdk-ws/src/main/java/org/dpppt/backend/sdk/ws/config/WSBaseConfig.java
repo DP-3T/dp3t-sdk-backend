@@ -114,7 +114,6 @@ public abstract class WSBaseConfig implements SchedulingConfigurer, WebMvcConfig
 	@Value("${ws.app.gaen.algorithm:1.2.840.10045.4.3.2}")
 	String gaenAlgorithm;
 
-
 	@Autowired(required = false)
 	ValidateRequest requestValidator;
 
@@ -130,9 +129,9 @@ public abstract class WSBaseConfig implements SchedulingConfigurer, WebMvcConfig
 	@Bean
 	public ProtoSignature gaenSigner() {
 		try {
-			return new ProtoSignature(gaenAlgorithm, keyVault.get("gaen") ,bundleId,packageName,keyVersion, keyIdentifier, gaenRegion, Duration.ofMillis(batchLength));
-		}
-		catch(Exception ex) {
+			return new ProtoSignature(gaenAlgorithm, keyVault.get("gaen"), bundleId, packageName, keyVersion,
+					keyIdentifier, gaenRegion, Duration.ofMillis(batchLength));
+		} catch (Exception ex) {
 			throw new RuntimeException("Cannot initialize signer for protobuf");
 		}
 	}
@@ -148,24 +147,26 @@ public abstract class WSBaseConfig implements SchedulingConfigurer, WebMvcConfig
 	}
 
 	@Bean
-	public ValidationUtils dpptValidationUtils(){
+	public ValidationUtils dpptValidationUtils() {
 		return new ValidationUtils(keySizeBytes, Duration.ofDays(retentionDays), batchLength);
 	}
+
 	@Bean
 	public ValidationUtils gaenValidationUtils() {
 		return new ValidationUtils(gaenKeySizeBytes, Duration.ofDays(retentionDays), batchLength);
 	}
+
 	@Bean
-	public GaenController gaenController(){
+	public GaenController gaenController() {
 		ValidateRequest theValidator = gaenRequestValidator;
 		if (theValidator == null) {
 			theValidator = backupValidator();
 		}
-		return new GaenController(gaenDataService(), etagGenerator(), theValidator, gaenSigner(),
-				gaenValidationUtils(),
+		return new GaenController(gaenDataService(), etagGenerator(), theValidator, gaenSigner(), gaenValidationUtils(),
 				Duration.ofMillis(batchLength), Duration.ofMillis(requestTime),
-				Duration.ofMinutes(exposedListCacheControl), keyVault.get("nextDayJWT").getPrivate(), gaenRegion);
+				Duration.ofMinutes(exposedListCacheControl), keyVault.get("nextDayJWT").getPrivate());
 	}
+
 	@Bean
 	ValidateRequest backupValidator() {
 		return new NoValidateRequest();
@@ -175,12 +176,12 @@ public abstract class WSBaseConfig implements SchedulingConfigurer, WebMvcConfig
 	public DPPPTDataService dppptSDKDataService() {
 		return new JDBCDPPPTDataServiceImpl(getDbType(), dataSource());
 	}
-	
+
 	@Bean
 	public GAENDataService gaenDataService() {
 		return new JDBCGAENDataServiceImpl(getDbType(), dataSource());
 	}
-	
+
 	@Bean
 	public RedeemDataService redeemDataService() {
 		return new JDBCRedeemDataServiceImpl(dataSource());

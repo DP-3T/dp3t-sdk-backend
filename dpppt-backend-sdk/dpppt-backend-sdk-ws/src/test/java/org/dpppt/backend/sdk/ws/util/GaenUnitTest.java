@@ -13,6 +13,7 @@ import static org.junit.Assert.assertEquals;
 
 import java.time.Duration;
 
+import org.dpppt.backend.sdk.model.gaen.GaenUnit;
 import org.junit.Test;
 
 public class GaenUnitTest {
