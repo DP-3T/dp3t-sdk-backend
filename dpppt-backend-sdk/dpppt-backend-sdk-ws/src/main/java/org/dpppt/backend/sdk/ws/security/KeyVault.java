@@ -157,6 +157,7 @@ public class KeyVault {
 			var reader = new StringReader(privatePart);
 			var readerPem = new PemReader(reader);
 			var obj = readerPem.readPemObject();
+			readerPem.close();
 			return KeyFactory.getInstance(algorithm).generatePrivate(new PKCS8EncodedKeySpec(obj.getContent()));
 		} catch (InvalidKeySpecException | NoSuchAlgorithmException | IOException e) {
 			return null;
@@ -192,6 +193,7 @@ public class KeyVault {
 			var reader = new StringReader(publicPart);
 			var readerPem = new PemReader(reader);
 			var obj = readerPem.readPemObject();
+			readerPem.close();
 			return KeyFactory.getInstance(algorithm).generatePublic(new X509EncodedKeySpec(obj.getContent()));
 		} catch (InvalidKeySpecException | NoSuchAlgorithmException | IOException e) {
 			return null;
@@ -232,8 +234,12 @@ public class KeyVault {
 	}
 
 	public static class PrivateKeyNoSuitableEncodingFoundException extends Exception {
+
+		private static final long serialVersionUID = 1623575762871663224L;
 	}
 
 	public static class PublicKeyNoSuitableEncodingFoundException extends Exception {
+
+		private static final long serialVersionUID = -1286647270505904967L;
 	}
 }
