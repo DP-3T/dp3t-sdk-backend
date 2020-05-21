@@ -32,4 +32,9 @@ public class WSCloudDevConfig extends WSCloudBaseConfig {
     String getPublicKey() {
         return new String(Base64.getDecoder().decode(publicKey));
     }
+    
+    @Override
+    public String getBundleId() {
+    	return "this.is.the.dev.bundleid";
+    }
 }
