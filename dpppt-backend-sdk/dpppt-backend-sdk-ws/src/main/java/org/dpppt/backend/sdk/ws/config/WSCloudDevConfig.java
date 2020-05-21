@@ -35,6 +35,11 @@ public class WSCloudDevConfig extends WSCloudBaseConfig {
     
     @Override
     public String getBundleId() {
-    	return "this.is.the.dev.bundleid";
+    	return "ch.admin.bag.dp3t.dev";
     }
+
+    @Override
+	public String getPackageName() {
+		return "ch.admin.bag.dp3t";
+	}
 }
