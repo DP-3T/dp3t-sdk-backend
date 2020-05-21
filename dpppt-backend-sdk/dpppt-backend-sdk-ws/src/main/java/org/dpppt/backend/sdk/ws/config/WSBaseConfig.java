@@ -101,7 +101,7 @@ public abstract class WSBaseConfig implements SchedulingConfigurer, WebMvcConfig
 	String bundleId;
 	@Value("${ws.app.android.packageName:org.dpppt.android.demo}")
 	String packageName;
-	@Value("${ws.app.gaen.keyVersion:v1}")
+	@Value("${ws.app.gaen.keyVersion:1}")
 	String keyVersion;
 	@Value("${ws.app.gaen.keyIdentifier:228}")
 	String keyIdentifier;
