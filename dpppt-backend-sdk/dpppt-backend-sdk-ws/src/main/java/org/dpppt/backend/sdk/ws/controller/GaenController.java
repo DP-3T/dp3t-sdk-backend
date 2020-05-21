@@ -25,7 +25,6 @@ import java.util.UUID;
 
 import javax.validation.Valid;
 
-import org.dpppt.backend.sdk.data.EtagGeneratorInterface;
 import org.dpppt.backend.sdk.data.gaen.GAENDataService;
 import org.dpppt.backend.sdk.model.gaen.DayBuckets;
 import org.dpppt.backend.sdk.model.gaen.GaenExposedJson;
@@ -67,13 +66,12 @@ public class GaenController {
 	private final Duration requestTime;
 	private final ValidateRequest validateRequest;
 	private final ValidationUtils validationUtils;
-	private final EtagGeneratorInterface etagGenerator;
 	private final GAENDataService dataService;
 	private final Duration exposedListCacheContol;
 	private final PrivateKey secondDayKey;
 	private final ProtoSignature gaenSigner;
 
-	public GaenController(GAENDataService dataService, EtagGeneratorInterface etagGenerator,
+	public GaenController(GAENDataService dataService, 
 			ValidateRequest validateRequest, ProtoSignature gaenSigner, ValidationUtils validationUtils,
 			Duration bucketLength, Duration requestTime, Duration exposedListCacheContol, PrivateKey secondDayKey) {
 		this.dataService = dataService;
@@ -81,7 +79,6 @@ public class GaenController {
 		this.validateRequest = validateRequest;
 		this.requestTime = requestTime;
 		this.validationUtils = validationUtils;
-		this.etagGenerator = etagGenerator;
 		this.exposedListCacheContol = exposedListCacheContol;
 		this.secondDayKey = secondDayKey;
 		this.gaenSigner = gaenSigner;
@@ -186,13 +183,6 @@ public class GaenController {
 		long now = System.currentTimeMillis();
 		// calculate exposed until bucket
 		long publishedUntil = now - (now % bucketLength.toMillis());
-
-		int max = dataService.getMaxExposedIdForKeyDate(keyDate, publishedafter, publishedUntil);
-		String etag = etagGenerator.getEtag(max, "proto");
-
-		if (request.checkNotModified(etag)) {
-			return ResponseEntity.status(HttpStatus.NOT_MODIFIED).build();
-		}
 		
 		var exposedKeys = dataService.getSortedExposedForKeyDate(keyDate, publishedafter, publishedUntil);
 		if (exposedKeys.isEmpty()) {
@@ -219,12 +209,6 @@ public class GaenController {
 		long now = System.currentTimeMillis();
 		// calculate exposed until bucket
 		long publishedUntil = now - (now % bucketLength.toMillis());
-
-		int max = dataService.getMaxExposedIdForKeyDate(keyDate, publishedafter, publishedUntil);
-		String etag = etagGenerator.getEtag(max, "json");
-		if (request.checkNotModified(etag)) {
-			return ResponseEntity.status(HttpStatus.NOT_MODIFIED).build();
-		}
 
 		var exposedKeys = dataService.getSortedExposedForKeyDate(keyDate, publishedafter, publishedUntil);
 		if (exposedKeys.isEmpty()) {
