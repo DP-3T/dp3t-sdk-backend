@@ -19,6 +19,8 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
 import java.io.ByteArrayInputStream;
+import java.io.File;
+import java.io.FileOutputStream;
 import java.io.IOException;
 import java.security.InvalidKeyException;
 import java.security.NoSuchAlgorithmException;
@@ -634,13 +636,15 @@ public class GaenControllerTest extends BaseControllerTest {
 		boolean foundSignature = false;
 
 		byte[] signatureProto = null;
+		byte[] exportBin = null;
 		byte[] keyProto = null;
 
 		while (entry != null) {
 			if (entry.getName().equals("export.bin")) {
 				foundData = true;
-				zipOuter.readNBytes(16); // skip first bytes
-				keyProto = zipOuter.readAllBytes();
+				exportBin = zipOuter.readAllBytes();
+				keyProto = new byte[exportBin.length-16];
+				System.arraycopy(exportBin, 16, keyProto, 0, keyProto.length);
 			}
 			if (entry.getName().equals("export.sig")) {
 				foundSignature = true;
@@ -659,7 +663,7 @@ public class GaenControllerTest extends BaseControllerTest {
 				.getInstance(sig.getSignatureInfo().getSignatureAlgorithm().trim());
 		signatureVerifier.initVerify(signer.getPublicKey());
 
-		signatureVerifier.update(keyProto);
+		signatureVerifier.update(exportBin);
 		assertTrue(signatureVerifier.verify(sig.getSignature().toByteArray()),
 				"Could not verify signature in zip file");
 		assertEquals(expectKeyCount, export.getKeysCount());

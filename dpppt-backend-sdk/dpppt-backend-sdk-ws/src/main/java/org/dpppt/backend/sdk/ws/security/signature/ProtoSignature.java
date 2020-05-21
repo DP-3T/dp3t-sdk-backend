@@ -11,12 +11,7 @@ package org.dpppt.backend.sdk.ws.security.signature;
 
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
-import java.security.InvalidKeyException;
-import java.security.KeyPair;
-import java.security.NoSuchAlgorithmException;
-import java.security.PublicKey;
-import java.security.Signature;
-import java.security.SignatureException;
+import java.security.*;
 import java.time.Duration;
 import java.time.Instant;
 import java.time.LocalDate;
@@ -85,8 +80,10 @@ public class ProtoSignature {
 			var protoFile = getProtoKey(keys, keyDate);
 
 			zip.putNextEntry(new ZipEntry("export.bin"));
-			byte[] exportBin = protoFile.toByteArray();
-			zip.write(EXPORT_MAGIC);
+			byte[] protoFileBytes = protoFile.toByteArray();
+			byte[] exportBin = new byte[EXPORT_MAGIC.length+protoFileBytes.length];
+			System.arraycopy(EXPORT_MAGIC, 0, exportBin, 0, EXPORT_MAGIC.length);
+			System.arraycopy(protoFileBytes, 0, exportBin, EXPORT_MAGIC.length, protoFileBytes.length);
 			zip.write(exportBin);
 			zip.closeEntry();
 
