@@ -586,7 +586,7 @@ public class GaenControllerTest extends BaseControllerTest {
 
 	@Test
 	public void zipContainsFiles() throws Exception {
-		LocalDateTime now = LocalDateTime.now();
+		LocalDateTime now = LocalDateTime.now(ZoneOffset.UTC);
 
 		// insert two times 5 keys per day for the last 14 days. the second batch has a
 		// different received at timestamp. (+6 hours)
