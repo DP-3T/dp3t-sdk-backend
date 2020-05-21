@@ -17,8 +17,6 @@ import java.util.List;
 import javax.sql.DataSource;
 
 import org.dpppt.backend.sdk.data.DPPPTDataService;
-import org.dpppt.backend.sdk.data.EtagGenerator;
-import org.dpppt.backend.sdk.data.EtagGeneratorInterface;
 import org.dpppt.backend.sdk.data.JDBCDPPPTDataServiceImpl;
 import org.dpppt.backend.sdk.data.JDBCRedeemDataServiceImpl;
 import org.dpppt.backend.sdk.data.RedeemDataService;
@@ -154,7 +152,7 @@ public abstract class WSBaseConfig implements SchedulingConfigurer, WebMvcConfig
 		if (theValidator == null) {
 			theValidator = new NoValidateRequest();
 		}
-		return new DPPPTController(dppptSDKDataService(), etagGenerator(), appSource, exposedListCacheControl,
+		return new DPPPTController(dppptSDKDataService(), appSource, exposedListCacheControl,
 				theValidator, dpptValidationUtils(), batchLength, requestTime);
 	}
 
@@ -174,7 +172,7 @@ public abstract class WSBaseConfig implements SchedulingConfigurer, WebMvcConfig
 		if (theValidator == null) {
 			theValidator = backupValidator();
 		}
-		return new GaenController(gaenDataService(), etagGenerator(), theValidator, gaenSigner(), gaenValidationUtils(),
+		return new GaenController(gaenDataService(), theValidator, gaenSigner(), gaenValidationUtils(),
 				Duration.ofMillis(batchLength), Duration.ofMillis(requestTime),
 				Duration.ofMinutes(exposedListCacheControl), keyVault.get("nextDayJWT").getPrivate());
 	}
@@ -211,11 +209,6 @@ public abstract class WSBaseConfig implements SchedulingConfigurer, WebMvcConfig
 	public void extendMessageConverters(List<HttpMessageConverter<?>> converters) {
 		converters.add(new ProtobufHttpMessageConverter());
 		WebMvcConfigurer.super.extendMessageConverters(converters);
-	}
-
-	@Bean
-	public EtagGeneratorInterface etagGenerator() {
-		return new EtagGenerator();
 	}
 
 	@Bean

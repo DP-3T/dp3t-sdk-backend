@@ -21,7 +21,6 @@ import java.util.List;
 import javax.validation.Valid;
 
 import org.dpppt.backend.sdk.data.DPPPTDataService;
-import org.dpppt.backend.sdk.data.EtagGeneratorInterface;
 import org.dpppt.backend.sdk.model.BucketList;
 import org.dpppt.backend.sdk.model.ExposedOverview;
 import org.dpppt.backend.sdk.model.Exposee;
@@ -56,7 +55,6 @@ import com.google.protobuf.ByteString;
 public class DPPPTController {
 
 	private final DPPPTDataService dataService;
-	private final EtagGeneratorInterface etagGenerator;
 	private final String appSource;
 	private final int exposedListCacheContol;
 	private final ValidateRequest validateRequest;
@@ -65,12 +63,11 @@ public class DPPPTController {
 	private final long requestTime;
 
 
-	public DPPPTController(DPPPTDataService dataService, EtagGeneratorInterface etagGenerator, String appSource,
+	public DPPPTController(DPPPTDataService dataService, String appSource,
 			int exposedListCacheControl, ValidateRequest validateRequest, ValidationUtils validationUtils, long batchLength,
 			long requestTime) {
 		this.dataService = dataService;
 		this.appSource = appSource;
-		this.etagGenerator = etagGenerator;
 		this.exposedListCacheContol = exposedListCacheControl;
 		this.validateRequest = validateRequest;
 		this.validationUtils = validationUtils;
@@ -161,12 +158,6 @@ public class DPPPTController {
 		if(!validationUtils.isValidBatchReleaseTime(batchReleaseTime)) {
 			return ResponseEntity.notFound().build();
 		}
-
-		int max = dataService.getMaxExposedIdForBatchReleaseTime(batchReleaseTime, batchLength);
-		String etag = etagGenerator.getEtag(max, "json");
-		if (request.checkNotModified(etag)) {
-			return ResponseEntity.status(HttpStatus.NOT_MODIFIED).build();
-		} 
 		
 		List<Exposee> exposeeList = dataService.getSortedExposedForBatchReleaseTime(batchReleaseTime, batchLength);
 		ExposedOverview overview = new ExposedOverview(exposeeList);
@@ -181,12 +172,6 @@ public class DPPPTController {
 			WebRequest request) throws BadBatchReleaseTimeException {
 		if(!validationUtils.isValidBatchReleaseTime(batchReleaseTime)) {
 			return ResponseEntity.notFound().build();
-		}
-		
-		int max = dataService.getMaxExposedIdForBatchReleaseTime(batchReleaseTime, batchLength);
-		String etag = etagGenerator.getEtag(max, "proto");
-		if (request.checkNotModified(etag)) {
-			return ResponseEntity.status(HttpStatus.NOT_MODIFIED).build();
 		}
 
 		List<Exposee> exposeeList = dataService.getSortedExposedForBatchReleaseTime(batchReleaseTime, batchLength);
