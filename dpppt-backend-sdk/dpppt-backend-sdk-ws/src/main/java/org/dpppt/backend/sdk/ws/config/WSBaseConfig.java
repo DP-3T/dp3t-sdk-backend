@@ -121,12 +121,28 @@ public abstract class WSBaseConfig implements SchedulingConfigurer, WebMvcConfig
 	KeyVault keyVault;
 
 	final SignatureAlgorithm algorithm = SignatureAlgorithm.ES256;
+	
+	public String getBundleId() {
+		return this.bundleId;
+	}
+
+	public String getPackageName() {
+		return this.packageName;
+	}
+
+	public String getKeyVersion() {
+		return this.keyVersion;
+	}
+	
+	public String getKeyIdentifier() {
+		return this.keyIdentifier;
+	}
 
 	@Bean
 	public ProtoSignature gaenSigner() {
 		try {
-			return new ProtoSignature(gaenAlgorithm, keyVault.get("gaen"), bundleId, packageName, keyVersion,
-					keyIdentifier, gaenRegion, Duration.ofMillis(batchLength));
+			return new ProtoSignature(gaenAlgorithm, keyVault.get("gaen"), getBundleId(), getPackageName(), getKeyVersion(),
+					getKeyIdentifier(), gaenRegion, Duration.ofMillis(batchLength));
 		} catch (Exception ex) {
 			throw new RuntimeException("Cannot initialize signer for protobuf");
 		}

@@ -32,4 +32,14 @@ public class WSCloudProdConfig extends WSCloudBaseConfig {
     String getPublicKey() {
         return new String(Base64.getDecoder().decode(publicKey));
     }
+
+    @Override
+    public String getBundleId() {
+    	return "ch.admin.bag.dp3t";
+    }
+
+    @Override
+	public String getPackageName() {
+		return "ch.admin.bag.dp3t";
+	}
 }
