@@ -91,7 +91,7 @@ public abstract class WSBaseConfig implements SchedulingConfigurer, WebMvcConfig
 	@Value("${ws.app.source}")
 	String appSource;
 
-	@Value("${ws.app.gaen.region: ch}")
+	@Value("${ws.app.gaen.region:ch}")
 	String gaenRegion;
 
 	@Value("${ws.app.gaen.key_size: 16}")
@@ -99,13 +99,13 @@ public abstract class WSBaseConfig implements SchedulingConfigurer, WebMvcConfig
 	@Value("${ws.app.key_size: 32}")
 	int keySizeBytes;
 
-	@Value("${ws.app.ios.bundleId: org.dppt.ios.demo}")
+	@Value("${ws.app.ios.bundleId:org.dppt.ios.demo}")
 	String bundleId;
-	@Value("${ws.app.android.packageName: org.dpppt.android.demo}")
+	@Value("${ws.app.android.packageName:org.dpppt.android.demo}")
 	String packageName;
-	@Value("${ws.app.gaen.keyVersion: v1}")
+	@Value("${ws.app.gaen.keyVersion:v1}")
 	String keyVersion;
-	@Value("${ws.app.gaen.keyIdentifier: org.gaen.v1}")
+	@Value("${ws.app.gaen.keyIdentifier:org.gaen.v1}")
 	String keyIdentifier;
 	@Value("${ws.app.gaen.algorithm:1.2.840.10045.4.3.2}")
 	String gaenAlgorithm;
