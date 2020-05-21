@@ -103,7 +103,7 @@ public abstract class WSBaseConfig implements SchedulingConfigurer, WebMvcConfig
 	String packageName;
 	@Value("${ws.app.gaen.keyVersion:1}")
 	String keyVersion;
-	@Value("${ws.app.gaen.keyIdentifier:org.gaen.v1}")
+	@Value("${ws.app.gaen.keyIdentifier:228}")
 	String keyIdentifier;
 	@Value("${ws.app.gaen.algorithm:1.2.840.10045.4.3.2}")
 	String gaenAlgorithm;
