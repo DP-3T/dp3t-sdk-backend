@@ -97,10 +97,10 @@ public class GaenController {
 			if (!validationUtils.isValidBase64Key(key.getKeyData())) {
 				return new ResponseEntity<>("No valid base64 key", HttpStatus.BAD_REQUEST);
 			}
-			this.validateRequest.getKeyDate(principal, key);
 			if (this.validateRequest.isFakeRequest(principal, key)) {
 				continue;
 			} else {
+				this.validateRequest.getKeyDate(principal, key);
 				nonFakeKeys.add(key);
 			}
 		}
