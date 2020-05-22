@@ -121,7 +121,7 @@ public class ProtoSignature {
 
 	private SignatureInfo tekSignature() {
 		var tekSignature = TemporaryExposureKeyFormat.SignatureInfo.newBuilder();
-		tekSignature.setAppBundleId(appBundleId).setAndroidPackage(apkPackage).setVerificationKeyVersion(keyVersion)
+		tekSignature.setAppBundleId(appBundleId).setVerificationKeyVersion(keyVersion)
 				.setVerificationKeyId(keyVerificationId).setSignatureAlgorithm(algorithm);
 		return tekSignature.build();
 	}
