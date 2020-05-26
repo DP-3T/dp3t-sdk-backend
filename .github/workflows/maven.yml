@@ -29,7 +29,7 @@ jobs:
         repositories: '[{"id" : "github", "url" : "https://maven.pkg.github.com/Ubique-OSS/springboot-swagger3"}, {"id" : "github-annotation", "url" : "https://maven.pkg.github.com/Ubique-OSS/springboot-swagger3-annotations"}]'
     - name: Build with Maven
       run: |
-        mvn install -Dmaven.test.skip=true --file dpppt-backend-sdk/pom.xml; 
+        mvn install --file dpppt-backend-sdk/pom.xml; 
         mvn springboot-swagger-3:springboot-swagger-3 -f dpppt-backend-sdk/dpppt-backend-sdk-ws/pom.xml
       env:
         GITHUB_TOKEN: ${{ github.token }}
@@ -37,7 +37,7 @@ jobs:
       run: echo "${{ github.ref }}"
     - name: Publish to GitHub Packages Apache Maven
       if: github.ref == 'refs/heads/develop'
-      run: mvn deploy --file dpppt-backend-sdk/pom.xml -s $GITHUB_WORKSPACE/settings.xml
+      run: mvn deploy -Dmaven.test.skip=true --file dpppt-backend-sdk/pom.xml -s $GITHUB_WORKSPACE/settings.xml
       env:
         GITHUB_TOKEN: ${{ github.token }}
     - name: Create Snapshot Release
