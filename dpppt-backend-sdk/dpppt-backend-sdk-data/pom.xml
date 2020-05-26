@@ -1,3 +1,13 @@
+<!--
+  ~ Copyright (c) 2020 Ubique Innovation AG <https://www.ubique.ch>
+  ~
+  ~ This Source Code Form is subject to the terms of the Mozilla Public
+  ~ License, v. 2.0. If a copy of the MPL was not distributed with this
+  ~ file, You can obtain one at https://mozilla.org/MPL/2.0/.
+  ~
+  ~ SPDX-License-Identifier: MPL-2.0
+  -->
+
 <project xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
 	xmlns="http://maven.apache.org/POM/4.0.0"
 	xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
@@ -9,6 +19,10 @@
 	</parent>
 	<artifactId>dpppt-backend-sdk-data</artifactId>
 	<name>DP3T Backend SDK Data</name>
+
+	<properties>
+		<org.testcontainers.version>1.12.5</org.testcontainers.version>
+	</properties>
 
 	<dependencies>
 
@@ -40,6 +54,12 @@
 		<dependency>
 			<groupId>org.flywaydb</groupId>
 			<artifactId>flyway-core</artifactId>
+		</dependency>
+		<dependency>
+			<groupId>org.testcontainers</groupId>
+			<artifactId>postgresql</artifactId>
+			<version>${org.testcontainers.version}</version>
+			<scope>test</scope>
 		</dependency>
 
 	</dependencies>

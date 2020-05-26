@@ -1,50 +1,61 @@
 /*
- * Created by Ubique Innovation AG
- * https://www.ubique.ch
- * Copyright (c) 2020. All rights reserved.
+ * Copyright (c) 2020 Ubique Innovation AG <https://www.ubique.ch>
+ *
+ * This Source Code Form is subject to the terms of the Mozilla Public
+ * License, v. 2.0. If a copy of the MPL was not distributed with this
+ * file, You can obtain one at https://mozilla.org/MPL/2.0/.
+ *
+ * SPDX-License-Identifier: MPL-2.0
  */
 
 package org.dpppt.backend.sdk.data;
 
+import java.time.Duration;
 import java.util.List;
 
 import org.dpppt.backend.sdk.model.Exposee;
-import org.joda.time.DateTime;
 
 public interface DPPPTDataService {
 
 	/**
 	 * Upserts the given exposee
 	 * 
-	 * @param exposee
-	 * @param appSource
+	 * @param exposee   the exposee to upsert
+	 * @param appSource the app name
 	 */
 	void upsertExposee(Exposee exposee, String appSource);
 
 	/**
-	 * returns all exposees for the given day [day: 00:00, day+1: 00:00)
+	 * Upserts the given exposees (if keys cannot be derived from one master key)
 	 * 
-	 * @param day
-	 * @return
+	 * @param exposeex  the list of exposees to upsert
+	 * @param appSource the app name
 	 */
-	List<Exposee> getSortedExposedForDay(DateTime day);
+	void upsertExposees(List<Exposee> exposees, String appSource);
 
 	/**
-	 * Returns the maximum id of the stored exposed entries for the given day date
+	 * Returns the maximum id of the stored exposed entries fo the given batch.
 	 * 
-	 * @param day
-	 * 
+	 * @param batchReleaseTime
+	 * @param batchLength
 	 * @return
 	 */
-	Integer getMaxExposedIdForDay(DateTime day);
+	int getMaxExposedIdForBatchReleaseTime(Long batchReleaseTime, long batchLength);
 
 	/**
-	 * Checks and inserts a publish uuid.
+	 * Returns all exposees for the given batch.
 	 * 
-	 * @param uuid
-	 * @return return true if the uuid has been inserted. if the uuid is not valid,
-	 *         returns false.
+	 * @param batchReleaseTime
+	 * @param batchLength
+	 * @return
 	 */
-	boolean checkAndInsertPublishUUID(String uuid);
+	List<Exposee> getSortedExposedForBatchReleaseTime(Long batchReleaseTime, long batchLength);
+
+	/**
+	 * deletes entries older than retentionperiod
+	 * 
+	 * @param retentionPeriod
+	 */
+	void cleanDB(Duration retentionPeriod);
 
 }

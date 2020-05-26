@@ -1,3 +1,13 @@
+<!--
+  ~ Copyright (c) 2020 Ubique Innovation AG <https://www.ubique.ch>
+  ~
+  ~ This Source Code Form is subject to the terms of the Mozilla Public
+  ~ License, v. 2.0. If a copy of the MPL was not distributed with this
+  ~ file, You can obtain one at https://mozilla.org/MPL/2.0/.
+  ~
+  ~ SPDX-License-Identifier: MPL-2.0
+  -->
+
 <project xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
 	xmlns="http://maven.apache.org/POM/4.0.0"
 	xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
@@ -31,6 +41,37 @@
 			<scope>test</scope>
 		</dependency>
 		<dependency>
+			<groupId>io.jsonwebtoken</groupId>
+			<artifactId>jjwt-api</artifactId>
+			<version>0.11.1</version>
+		</dependency>
+		<dependency>
+			<groupId>io.jsonwebtoken</groupId>
+			<artifactId>jjwt-root</artifactId>
+			<version>0.11.1</version>
+			<type>pom</type>
+		</dependency>
+	
+		<dependency>
+			<groupId>io.jsonwebtoken</groupId>
+			<artifactId>jjwt-jackson</artifactId>
+			<version>0.11.1</version>
+			<scope>runtime</scope>
+		</dependency>
+
+		<dependency>
+			<groupId>io.jsonwebtoken</groupId>
+			<artifactId>jjwt-impl</artifactId>
+			<version>0.11.1</version>
+			<scope>runtime</scope>
+		</dependency>
+
+		<dependency>
+    		<groupId>org.bouncycastle</groupId>
+			<artifactId>bcpkix-jdk15on</artifactId>
+			<version>1.65</version>
+		</dependency>
+		<dependency>
 			<groupId>org.springframework.security.oauth</groupId>
 			<artifactId>spring-security-oauth2</artifactId>
 			<version>2.4.0.RELEASE</version>
@@ -57,6 +98,16 @@
 		<dependency>
 			<groupId>org.springframework.boot</groupId>
 			<artifactId>spring-boot-starter-actuator</artifactId>
+		</dependency>
+		<dependency>
+			<groupId>io.micrometer</groupId>
+			<artifactId>micrometer-registry-prometheus</artifactId>
+		 </dependency>
+
+		<dependency>
+			<groupId>com.hubspot.jackson</groupId>
+			<artifactId>jackson-datatype-protobuf</artifactId>
+			<version>0.9.11-jackson2.9</version>
 		</dependency>
 
 	</dependencies>
@@ -91,7 +142,43 @@
 					</execution>
 				</executions>
 			</plugin>
+			<plugin>
+                <groupId>ch.ubique.openapi</groupId>
+                <artifactId>springboot-swagger-3</artifactId>
+                <version>1.2.4</version>
+                <configuration>
+                    <apiVersion>1.0-gapple</apiVersion>
+                    <basePackages>
+                       org.dpppt.backend.sdk.model
+                    </basePackages>
+					<blackListedPackages>
+						<blackListedPackage>com.google.protobuf</blackListedPackage>
+					</blackListedPackages>
+					<ignoredTypes>
+						<ignoredType>byte</ignoredType>
+					</ignoredTypes>
+                    <controllers>
+                        <controller>org.dpppt.backend.sdk.ws.controller.DPPPTController</controller>
+						<controller> org.dpppt.backend.sdk.ws.controller.GaenController</controller>
+                    </controllers>
+                    <description>DP3T API</description>
+                    <apiUrls>
+                        <apiUrl>https://demo.dpppt.org</apiUrl>
+                    </apiUrls>
+                    <title>DP3T API</title>
+                </configuration>
+            </plugin>
 		</plugins>
 	</build>
+
+	<pluginRepositories>
+    <pluginRepository>
+        <id>github</id>
+          <name>GitHub OWNER Apache Maven Packages</name>
+          <url>https://maven.pkg.github.com/Ubique-OSS/springboot-swagger3</url>
+           <releases><enabled>true</enabled></releases>
+          <snapshots><enabled>true</enabled></snapshots>
+    </pluginRepository>
+    </pluginRepositories>
 
 </project>

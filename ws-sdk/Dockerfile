@@ -1,7 +1,7 @@
 # Dockerfile for STARSDK-WS
 # http://www.ubique.ch/
 
-FROM openjdk:8-jdk
+FROM openjdk:11.0.7-jre-slim
 MAINTAINER Martin Alig <alig@ubique.ch>
 MAINTAINER Tobias Bachmann <bachmann@ubique.ch>
 MAINTAINER Felix Haller <haller@ubique.ch>

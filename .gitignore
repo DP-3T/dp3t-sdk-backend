@@ -29,3 +29,12 @@ hs_err_pid*
 **/bin
 **/*.log.*
 **/.vscode
+**/*-local.properties
+
+# intellij
+.idea
+*.iml
+
+# maven
+**/target
+**/generated
