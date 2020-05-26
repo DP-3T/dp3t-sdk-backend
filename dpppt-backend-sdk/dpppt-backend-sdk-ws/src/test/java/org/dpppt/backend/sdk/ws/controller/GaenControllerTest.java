@@ -368,7 +368,7 @@ public class GaenControllerTest extends BaseControllerTest {
 		key.setRollingStartNumber((int) Duration.ofMillis(Instant.now().minus(Duration.ofDays(2)).toEpochMilli())
 				.dividedBy(Duration.ofMinutes(10)));
 		key.setTransmissionRiskLevel(1);
-		key.setFake(1);
+		key.setFake(0);
 		List<GaenKey> keys = new ArrayList<>();
 		keys.add(key);
 		for (int i = 0; i < 13; i++) {
@@ -441,7 +441,7 @@ public class GaenControllerTest extends BaseControllerTest {
 		key.setRollingStartNumber((int) Duration.ofMillis(Instant.now().plus(Duration.ofDays(2)).toEpochMilli())
 				.dividedBy(Duration.ofMinutes(10)));
 		key.setTransmissionRiskLevel(1);
-		key.setFake(1);
+		key.setFake(0);
 		List<GaenKey> keys = new ArrayList<>();
 		keys.add(key);
 		for (int i = 0; i < 13; i++) {
@@ -478,7 +478,7 @@ public class GaenControllerTest extends BaseControllerTest {
 		key.setRollingStartNumber((int) Duration.ofMillis(Instant.now().minus(Duration.ofDays(22)).toEpochMilli())
 				.dividedBy(Duration.ofMinutes(10)));
 		key.setTransmissionRiskLevel(1);
-		key.setFake(1);
+		key.setFake(0);
 		List<GaenKey> keys = new ArrayList<>();
 		keys.add(key);
 		for (int i = 0; i < 13; i++) {
