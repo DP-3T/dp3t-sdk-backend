@@ -33,8 +33,6 @@ jobs:
         mvn springboot-swagger-3:springboot-swagger-3 -f dpppt-backend-sdk/dpppt-backend-sdk-ws/pom.xml
       env:
         GITHUB_TOKEN: ${{ github.token }}
-    - name: Echo the current ref
-      run: echo "${{ github.ref }}"
     - name: SonarCloud Scan
       run: mvn -B sonar:sonar --file dpppt-backend-sdk/pom.xml
       env:
