@@ -120,10 +120,9 @@ public class KeyVault {
 		this.pairVault.put(pair.pairKey, pair.keyPair);
 	}
 
-	private KeyPair loadKeyPairFromString(KeyVaultEntry entry)
-			throws PrivateKeyNoSuitableEncodingFoundException, PublicKeyNoSuitableEncodingFoundException {
-		PrivateKey privateKey = loadPrivateKey(entry.privatePart, entry.algorithm);
-		PublicKey publicKey = loadPublicKey(entry.publicPart, entry.algorithm);
+	private KeyPair loadKeyPairFromString(KeyVaultEntry entry) {
+		PrivateKey privateKey = loadPrivateKeyFromPem(entry.privatePart, entry.algorithm);
+		PublicKey publicKey = loadPublicKeyFromPem(entry.publicPart, entry.algorithm);
 
 		return new KeyPair(publicKey, privateKey);
 	}
