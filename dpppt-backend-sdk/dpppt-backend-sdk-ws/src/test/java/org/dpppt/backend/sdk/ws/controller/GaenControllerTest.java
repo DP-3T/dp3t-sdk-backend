@@ -26,6 +26,7 @@ import java.security.InvalidKeyException;
 import java.security.NoSuchAlgorithmException;
 import java.security.SecureRandom;
 import java.security.SignatureException;
+import java.time.Clock;
 import java.time.Duration;
 import java.time.Instant;
 import java.time.LocalDate;
@@ -587,7 +588,6 @@ public class GaenControllerTest extends BaseControllerTest {
 				.content(json(secondDay))).andExpect(status().is(200)).andReturn().getResponse();
 	}
 
-	@Ignore
 	@Test
 	public void zipContainsFiles() throws Exception {
 		LocalDateTime now = LocalDateTime.now(ZoneOffset.UTC);
@@ -596,16 +596,16 @@ public class GaenControllerTest extends BaseControllerTest {
 		// different received at timestamp. (+6 hours)
 		insertNKeysPerDayInInterval(14,
 				LocalDate.now(ZoneOffset.UTC).atStartOfDay().atOffset(ZoneOffset.UTC).minusDays(4),
-				OffsetDateTime.now(ZoneOffset.UTC), now.minus(Duration.ofDays(1)).atOffset(ZoneOffset.UTC));
+				now.atOffset(ZoneOffset.UTC), now.minus(Duration.ofDays(1)).atOffset(ZoneOffset.UTC));
 
 		insertNKeysPerDayInInterval(14,
 				LocalDate.now(ZoneOffset.UTC).atStartOfDay().atOffset(ZoneOffset.UTC).minusDays(4),
-				OffsetDateTime.now(ZoneOffset.UTC), now.minus(Duration.ofHours(12)).atOffset(ZoneOffset.UTC));
+				now.atOffset(ZoneOffset.UTC), now.minus(Duration.ofHours(12)).atOffset(ZoneOffset.UTC));
 
 		// request the keys with date date 1 day ago. no publish until.
 		MockHttpServletResponse response = mockMvc
 				.perform(get("/v1/gaen/exposed/"
-						+ now.minusDays(8).toLocalDate().atStartOfDay(ZoneId.of("UTC")).toInstant().toEpochMilli())
+						+ now.minusDays(8).toLocalDate().atStartOfDay(ZoneOffset.UTC).toInstant().toEpochMilli())
 								.header("User-Agent", "MockMVC"))
 				.andExpect(status().is2xxSuccessful()).andReturn().getResponse();
 
@@ -616,12 +616,12 @@ public class GaenControllerTest extends BaseControllerTest {
 
 		// request again the keys with date date 1 day ago. with publish until, so that
 		// we only get the second batch.
+		var bucketAfterSecondRelease = Duration.ofMillis(now.toInstant(ZoneOffset.UTC).toEpochMilli()).minusDays(1).plusHours(10).dividedBy(Duration.ofHours(2)) * 2*60*60*1000;
 		MockHttpServletResponse responseWithPublishedAfter = mockMvc
 				.perform(get("/v1/gaen/exposed/"
-						+ now.minusDays(8).toLocalDate().atStartOfDay().atOffset(ZoneOffset.UTC).toInstant().toEpochMilli())
+						+ now.minusDays(8).toLocalDate().atStartOfDay(ZoneOffset.UTC).toInstant().toEpochMilli())
 								.header("User-Agent", "MockMVC").param("publishedafter",
-										Long.toString(now.minusDays(1).toLocalDate().atStartOfDay(ZoneId.of("UTC"))
-												.plus(Duration.ofHours(2)).toInstant().toEpochMilli())))
+										Long.toString(bucketAfterSecondRelease)))
 				.andExpect(status().is2xxSuccessful()).andReturn().getResponse();
 
 		verifyZipResponse(responseWithPublishedAfter, 5);
@@ -704,7 +704,7 @@ public class GaenControllerTest extends BaseControllerTest {
 			current = current.plusDays(1);
 		}
 		for (Entry<Integer, Integer> entry: rollingToCount.entrySet()) {
-			logger.info("Rolling start number: " + entry.getKey() + " -> count: " + entry.getValue());
+			logger.info("Rolling start number: " + entry.getKey() + " -> count: " + entry.getValue() + " (received at: " + receivedAt.toString() + ")");
 		}
 	}
 
