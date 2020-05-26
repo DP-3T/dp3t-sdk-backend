@@ -34,7 +34,7 @@ jobs:
       env:
         GITHUB_TOKEN: ${{ github.token }}
     - name: SonarCloud Scan
-      run: mvn -B sonar:sonar --file dpppt-backend-sdk/pom.xml
+      run: mvn -B sonar:sonar --file dpppt-backend-sdk/dpppt-backend-sdk-ws/pom.xml
       env:
         SONAR_ORGANIZATION: ${{ secrets.SONAR_ORGANIZATION }}
         SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
