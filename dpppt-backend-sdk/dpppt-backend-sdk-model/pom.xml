@@ -19,7 +19,9 @@
 	</parent>
 	<artifactId>dpppt-backend-sdk-model</artifactId>
 	<name>DP3T Backend SDK Model</name>
-
+	<properties>
+		<sonar.projectKey>DP-3T_dp3t-sdk-model</sonar.projectKey>
+	</properties>
 	<dependencies>
 		<dependency>
 			<groupId>com.fasterxml.jackson.core</groupId>

@@ -23,6 +23,7 @@
 
 	<properties>
 		<start-class>org.dpppt.backend.sdk.ws.Application</start-class>
+		<sonar.projectKey>DP-3T_dp3t-sdk-backend</sonar.projectKey>
 	</properties>
 
 	<dependencies>
