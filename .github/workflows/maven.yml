@@ -35,6 +35,12 @@ jobs:
         GITHUB_TOKEN: ${{ github.token }}
     - name: Echo the current ref
       run: echo "${{ github.ref }}"
+    - name: SonarCloud Scan
+      run: mvn -B sonar:sonar --file dpppt-backend-sdk/pom.xml
+      env:
+        SONAR_ORGANIZATION: ${{ secrets.SONAR_ORGANIZATION }}
+        SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
+        GITHUB_TOKEN: ${{ github.token }}
     - name: Publish to GitHub Packages Apache Maven
       if: github.ref == 'refs/heads/develop'
       run: mvn deploy -Dmaven.test.skip=true --file dpppt-backend-sdk/pom.xml -s $GITHUB_WORKSPACE/settings.xml
