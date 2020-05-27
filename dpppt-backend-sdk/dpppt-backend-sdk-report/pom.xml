@@ -23,6 +23,7 @@
 	<properties>
 		<code.coverage.project.folder>${basedir}/../</code.coverage.project.folder>
 		<code.coverage.overall.data.folder>${basedir}/../target/aggregate.exec</code.coverage.overall.data.folder>
+		<sonar.projectKey>DP-3T_dp3t-sdk-report</sonar.projectKey>
 	</properties>
 
 	<dependencies>

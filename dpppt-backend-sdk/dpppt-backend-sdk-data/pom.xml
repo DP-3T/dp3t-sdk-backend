@@ -22,6 +22,7 @@
 
 	<properties>
 		<org.testcontainers.version>1.12.5</org.testcontainers.version>
+		<sonar.projectKey>DP-3T_dp3t-sdk-data</sonar.projectKey>
 	</properties>
 
 	<dependencies>
