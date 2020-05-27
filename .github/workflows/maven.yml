@@ -18,6 +18,8 @@ jobs:
     - uses: actions/checkout@v2
     - run: |
         git fetch --no-tags --prune --depth=1 origin +refs/heads/*:refs/remotes/origin/*
+    - run: echo ::set-env name=PULL_NUMBER::$(echo "$GITHUB_REF" | awk -F / '{print $3}')
+      shell: bash
     - name: Set up JDK 11
       uses: actions/setup-java@v1
       with:
@@ -35,8 +37,16 @@ jobs:
         mvn springboot-swagger-3:springboot-swagger-3 -f dpppt-backend-sdk/dpppt-backend-sdk-ws/pom.xml
       env:
         GITHUB_TOKEN: ${{ github.token }}
-    - name: SonarCloud Scan
+    - name: SonarCloud Scan (develop)
       run: mvn verify -B sonar:sonar --file dpppt-backend-sdk/dpppt-backend-sdk-ws/pom.xml
+      if: github.ref == 'refs/heads/develop'
+      env:
+        SONAR_ORGANIZATION: ${{ secrets.SONAR_ORGANIZATION }}
+        SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
+        GITHUB_TOKEN: ${{ github.token }}
+    - name: SonarCloud Scan (PR)
+      run: mvn verify -B sonar:sonar -Dsonar.pullrequest.base=develop -Dsonar.pullrequest.key=$PULL_NUMBER --file dpppt-backend-sdk/dpppt-backend-sdk-ws/pom.xml
+      if: github.ref != 'refs/heads/develop'
       env:
         SONAR_ORGANIZATION: ${{ secrets.SONAR_ORGANIZATION }}
         SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
