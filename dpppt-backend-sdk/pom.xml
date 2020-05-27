@@ -29,7 +29,7 @@
 		<sonar.host.url>https://sonarcloud.io</sonar.host.url>
 		<sonar.organization>${env.SONAR_ORGANIZATION}</sonar.organization>
 		<sonar.login>${env.SONAR_TOKEN}</sonar.login>
-		<sonar.coverage.jacoco.xmlReportPaths>${project.basedir}/dpppt-backend-sdk-report/target/site/jacoco-aggregate/jacoco.xml</sonar.coverage.jacoco.xmlReportPaths>
+		<sonar.coverage.jacoco.xmlReportPaths>${project.basedir}/../dpppt-backend-sdk-report/target/site/jacoco-aggregate/jacoco.xml</sonar.coverage.jacoco.xmlReportPaths>
 	</properties>
 
 	<modules>
