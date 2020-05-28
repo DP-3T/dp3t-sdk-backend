@@ -24,6 +24,7 @@ import java.util.Base64;
 import java.util.Date;
 import java.util.List;
 import java.util.UUID;
+import java.util.concurrent.Callable;
 
 import javax.validation.Valid;
 
@@ -43,6 +44,7 @@ import org.dpppt.backend.sdk.ws.util.ValidationUtils.BadBatchReleaseTimeExceptio
 import org.springframework.http.CacheControl;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.scheduling.annotation.Async;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.security.oauth2.jwt.Jwt;
 import org.springframework.stereotype.Controller;
@@ -87,17 +89,17 @@ public class GaenController {
 	}
 
 	@PostMapping(value = "/exposed")
-	public @ResponseBody ResponseEntity<String> addExposed(@Valid @RequestBody GaenRequest gaenRequest,
+	public @ResponseBody Callable<ResponseEntity<String>> addExposed(@Valid @RequestBody GaenRequest gaenRequest,
 			@RequestHeader(value = "User-Agent", required = true) String userAgent,
 			@AuthenticationPrincipal Object principal) throws InvalidDateException {
 		var now = Instant.now().toEpochMilli();
 		if (!this.validateRequest.isValid(principal)) {
-			return ResponseEntity.status(HttpStatus.FORBIDDEN).build();
+			return () -> { return ResponseEntity.status(HttpStatus.FORBIDDEN).build();};
 		}
 		List<GaenKey> nonFakeKeys = new ArrayList<>();
 		for (var key : gaenRequest.getGaenKeys()) {
 			if (!validationUtils.isValidBase64Key(key.getKeyData())) {
-				return new ResponseEntity<>("No valid base64 key", HttpStatus.BAD_REQUEST);
+				return () -> {return new ResponseEntity<>("No valid base64 key", HttpStatus.BAD_REQUEST);};
 			}
 			if (this.validateRequest.isFakeRequest(principal, key)) {
 				continue;
@@ -108,7 +110,7 @@ public class GaenController {
 		}
 		if (principal instanceof Jwt && ((Jwt) principal).containsClaim("fake")
 				&& ((Jwt) principal).getClaim("fake").equals("1") && !nonFakeKeys.isEmpty()) {
-			return ResponseEntity.badRequest().body("Claim is fake but list contains non fake keys");
+			return () -> { return ResponseEntity.badRequest().body("Claim is fake but list contains non fake keys");};
 		}
 		if (!nonFakeKeys.isEmpty()) {
 			dataService.upsertExposees(nonFakeKeys);
@@ -120,7 +122,7 @@ public class GaenController {
 
 		var nowDay = LocalDate.now(ZoneOffset.UTC);
 		if (!delayedKeyDate.isAfter(nowDay.minusDays(1)) && delayedKeyDate.isBefore(nowDay.plusDays(1))) {
-			return ResponseEntity.badRequest().body("delayedKeyDate date must be between yesterday and tomorrow");
+			return () -> {return ResponseEntity.badRequest().body("delayedKeyDate date must be between yesterday and tomorrow");};
 		}
 
 		var responseBuilder = ResponseEntity.ok();
@@ -137,9 +139,11 @@ public class GaenController {
 			String jwt = jwtBuilder.signWith(secondDayKey).compact();
 			responseBuilder.header("Authorization", "Bearer " + jwt);
 		}
-
-		normalizeRequestTime(now);
-		return responseBuilder.build();
+		Callable<ResponseEntity<String>> cb = () -> {
+			normalizeRequestTime(now);
+			return  responseBuilder.build();
+		};
+		return cb;
 	}
 
 	@PostMapping(value = "/exposednextday")
