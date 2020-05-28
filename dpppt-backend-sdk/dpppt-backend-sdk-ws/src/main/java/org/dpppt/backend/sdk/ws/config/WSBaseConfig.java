@@ -43,8 +43,10 @@ import org.springframework.http.converter.json.MappingJackson2HttpMessageConvert
 import org.springframework.http.converter.protobuf.ProtobufHttpMessageConverter;
 import org.springframework.scheduling.annotation.EnableScheduling;
 import org.springframework.scheduling.annotation.SchedulingConfigurer;
+import org.springframework.scheduling.concurrent.ThreadPoolTaskExecutor;
 import org.springframework.scheduling.config.IntervalTask;
 import org.springframework.scheduling.config.ScheduledTaskRegistrar;
+import org.springframework.web.servlet.config.annotation.AsyncSupportConfigurer;
 import org.springframework.web.servlet.config.annotation.WebMvcConfigurer;
 
 import com.fasterxml.jackson.annotation.JsonInclude;
@@ -221,6 +223,19 @@ public abstract class WSBaseConfig implements SchedulingConfigurer, WebMvcConfig
 
 		return Keys.keyPairFor(algorithm);
 	}
+
+	@Override    
+	public void configureAsyncSupport(AsyncSupportConfigurer configurer) {
+		configurer.setTaskExecutor(mvcTaskExecutor());
+		configurer.setDefaultTimeout(5_000);
+  }
+  @Bean
+  public ThreadPoolTaskExecutor mvcTaskExecutor() {
+		ThreadPoolTaskExecutor taskExecutor = new ThreadPoolTaskExecutor();
+		taskExecutor.setThreadNamePrefix("mvc-task-");
+		taskExecutor.setMaxPoolSize(1000);
+		return taskExecutor;
+  }
 
 	@Override
 	public void configureTasks(ScheduledTaskRegistrar taskRegistrar) {
