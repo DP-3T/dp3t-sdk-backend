@@ -26,14 +26,13 @@ import java.security.InvalidKeyException;
 import java.security.NoSuchAlgorithmException;
 import java.security.SecureRandom;
 import java.security.SignatureException;
-import java.time.Clock;
+
 import java.time.Duration;
 import java.time.Instant;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.OffsetDateTime;
-import java.time.OffsetTime;
-import java.time.ZoneId;
+
 import java.time.ZoneOffset;
 import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
@@ -52,7 +51,7 @@ import org.dpppt.backend.sdk.model.gaen.GaenSecondDay;
 import org.dpppt.backend.sdk.model.gaen.proto.TemporaryExposureKeyFormat;
 import org.dpppt.backend.sdk.ws.security.KeyVault;
 import org.dpppt.backend.sdk.ws.security.signature.ProtoSignature;
-import org.junit.Ignore;
+
 import org.junit.Test;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -589,6 +588,25 @@ public class GaenControllerTest extends BaseControllerTest {
 	}
 
 	@Test
+	public void testDebugController() throws Exception {
+		LocalDateTime now = LocalDateTime.now(ZoneOffset.UTC);
+		insertNKeysPerDayInIntervalWithDebugFlag(14,
+				LocalDate.now(ZoneOffset.UTC).atStartOfDay().atOffset(ZoneOffset.UTC).minusDays(4),
+				now.atOffset(ZoneOffset.UTC), now.minus(Duration.ofDays(1)).atOffset(ZoneOffset.UTC), true);
+
+		insertNKeysPerDayInIntervalWithDebugFlag(14,
+				LocalDate.now(ZoneOffset.UTC).atStartOfDay().atOffset(ZoneOffset.UTC).minusDays(4),
+				now.atOffset(ZoneOffset.UTC), now.minus(Duration.ofHours(12)).atOffset(ZoneOffset.UTC), true);
+		MockHttpServletResponse response = mockMvc
+				.perform(get("/v1/debug/exposed/"
+						+ now.toLocalDate().atStartOfDay(ZoneOffset.UTC).toInstant().toEpochMilli())
+								.header("User-Agent", "MockMVC"))
+				.andExpect(status().is2xxSuccessful()).andReturn().getResponse();
+
+		verifyZipInZipResponse(response, 0);
+	}
+
+	@Test
 	public void zipContainsFiles() throws Exception {
 		LocalDateTime now = LocalDateTime.now(ZoneOffset.UTC);
 
@@ -625,6 +643,15 @@ public class GaenControllerTest extends BaseControllerTest {
 				.andExpect(status().is2xxSuccessful()).andReturn().getResponse();
 
 		verifyZipResponse(responseWithPublishedAfter, 5);
+	}
+
+	private void verifyZipInZipResponse(MockHttpServletResponse response, int expectKeyCount) throws Exception {
+		ByteArrayInputStream baisOuter = new ByteArrayInputStream(response.getContentAsByteArray());
+		ZipInputStream zipOuter = new ZipInputStream(baisOuter);
+		ZipEntry entry = zipOuter.getNextEntry();
+		while(entry != null) {
+			entry = zipOuter.getNextEntry();
+		}
 	}
 
 	private void verifyZipResponse(MockHttpServletResponse response, int expectKeyCount)
@@ -669,8 +696,7 @@ public class GaenControllerTest extends BaseControllerTest {
 		assertEquals(expectKeyCount, export.getKeysCount());
 	}
 
-	private void insertNKeysPerDayInInterval(int n, OffsetDateTime start, OffsetDateTime end, OffsetDateTime receivedAt)
-			throws Exception {
+	private void insertNKeysPerDayInIntervalWithDebugFlag(int n, OffsetDateTime start, OffsetDateTime end, OffsetDateTime receivedAt, boolean debug) throws Exception {
 		var current = start;
 		Map<Integer, Integer> rollingToCount = new HashMap<>();
 		while (current.isBefore(end)) {
@@ -700,12 +726,21 @@ public class GaenControllerTest extends BaseControllerTest {
 				lastRolling -= Duration.ofDays(1).dividedBy(Duration.ofMinutes(10));
 				
 			}
-			testGaenDataService.upsertExposees(keys, receivedAt);
+			if(debug) {
+				testGaenDataService.upsertExposeesDebug(keys, receivedAt);
+			} else {
+				testGaenDataService.upsertExposees(keys, receivedAt);
+			}
 			current = current.plusDays(1);
 		}
 		for (Entry<Integer, Integer> entry: rollingToCount.entrySet()) {
 			logger.info("Rolling start number: " + entry.getKey() + " -> count: " + entry.getValue() + " (received at: " + receivedAt.toString() + ")");
 		}
+	}
+
+	private void insertNKeysPerDayInInterval(int n, OffsetDateTime start, OffsetDateTime end, OffsetDateTime receivedAt)
+			throws Exception {
+		insertNKeysPerDayInIntervalWithDebugFlag(n, start, end, receivedAt, false);
 	}
 
 }

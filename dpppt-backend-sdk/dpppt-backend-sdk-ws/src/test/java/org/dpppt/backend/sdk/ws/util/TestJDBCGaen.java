@@ -54,4 +54,27 @@ public class TestJDBCGaen {
 		}
 		jt.batchUpdate(sql, parameterList.toArray(new MapSqlParameterSource[0]));
 	}
+	@Transactional(readOnly = false)
+	public void upsertExposeesDebug(List<GaenKey> gaenKeys, OffsetDateTime receivedAt) {
+		String sql = null;
+		if (dbType.equals(PGSQL)) {
+			sql = "insert into t_debug_gaen_exposed (key, rolling_start_number, rolling_period, transmission_risk_level, received_at, device_name) values (:key, :rolling_start_number, :rolling_period, :transmission_risk_level, :received_at, 'test')"
+					+ " on conflict on constraint debug_gaen_exposed_key do nothing";
+		} else {
+			sql = "merge into t_debug_gaen_exposed using (values(cast(:key as varchar(24)), :rolling_start_number, :rolling_period, :transmission_risk_level, :received_at, 'test'))"
+					+ " as vals(key, rolling_start_number, rolling_period, transmission_risk_level, received_at, device_name) on t_debug_gaen_exposed.key = vals.key"
+					+ " when not matched then insert (key, rolling_start_number, rolling_period, transmission_risk_level, received_at, device_name) values (vals.key, vals.rolling_start_number, vals.rolling_period, vals.transmission_risk_level, vals.received_at, vals.device_name)";
+		}
+		var parameterList = new ArrayList<MapSqlParameterSource>();
+		for(var gaenKey : gaenKeys) {
+			MapSqlParameterSource params = new MapSqlParameterSource();
+			params.addValue("key", gaenKey.getKeyData());
+			params.addValue("rolling_start_number", gaenKey.getRollingStartNumber());
+			params.addValue("rolling_period", gaenKey.getRollingPeriod());
+            params.addValue("transmission_risk_level", gaenKey.getTransmissionRiskLevel());
+            params.addValue("received_at", Date.from((receivedAt.toInstant())));
+			parameterList.add(params);
+		}
+		jt.batchUpdate(sql, parameterList.toArray(new MapSqlParameterSource[0]));
+	}
 }

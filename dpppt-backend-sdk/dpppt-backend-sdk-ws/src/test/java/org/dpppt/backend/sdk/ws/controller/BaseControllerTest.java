@@ -49,7 +49,7 @@ import io.jsonwebtoken.Jwts;
 
 @RunWith(SpringRunner.class)
 @SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT)
-@ActiveProfiles({ "dev", "jwt" })
+@ActiveProfiles({ "dev", "jwt", "debug" })
 @TestPropertySource(properties = { "ws.app.source=org.dpppt.demo" })
 public abstract class BaseControllerTest {
 
