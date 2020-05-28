@@ -44,7 +44,6 @@ import org.dpppt.backend.sdk.ws.util.ValidationUtils.BadBatchReleaseTimeExceptio
 import org.springframework.http.CacheControl;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
-import org.springframework.scheduling.annotation.Async;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.security.oauth2.jwt.Jwt;
 import org.springframework.stereotype.Controller;
@@ -75,9 +74,9 @@ public class GaenController {
 	private final PrivateKey secondDayKey;
 	private final ProtoSignature gaenSigner;
 
-	public GaenController(GAENDataService dataService, 
-			ValidateRequest validateRequest, ProtoSignature gaenSigner, ValidationUtils validationUtils,
-			Duration bucketLength, Duration requestTime, Duration exposedListCacheContol, PrivateKey secondDayKey) {
+	public GaenController(GAENDataService dataService, ValidateRequest validateRequest, ProtoSignature gaenSigner,
+			ValidationUtils validationUtils, Duration bucketLength, Duration requestTime,
+			Duration exposedListCacheContol, PrivateKey secondDayKey) {
 		this.dataService = dataService;
 		this.bucketLength = bucketLength;
 		this.validateRequest = validateRequest;
@@ -94,12 +93,16 @@ public class GaenController {
 			@AuthenticationPrincipal Object principal) throws InvalidDateException {
 		var now = Instant.now().toEpochMilli();
 		if (!this.validateRequest.isValid(principal)) {
-			return () -> { return ResponseEntity.status(HttpStatus.FORBIDDEN).build();};
+			return () -> {
+				return ResponseEntity.status(HttpStatus.FORBIDDEN).build();
+			};
 		}
 		List<GaenKey> nonFakeKeys = new ArrayList<>();
 		for (var key : gaenRequest.getGaenKeys()) {
 			if (!validationUtils.isValidBase64Key(key.getKeyData())) {
-				return () -> {return new ResponseEntity<>("No valid base64 key", HttpStatus.BAD_REQUEST);};
+				return () -> {
+					return new ResponseEntity<>("No valid base64 key", HttpStatus.BAD_REQUEST);
+				};
 			}
 			if (this.validateRequest.isFakeRequest(principal, key)) {
 				continue;
@@ -110,7 +113,9 @@ public class GaenController {
 		}
 		if (principal instanceof Jwt && ((Jwt) principal).containsClaim("fake")
 				&& ((Jwt) principal).getClaim("fake").equals("1") && !nonFakeKeys.isEmpty()) {
-			return () -> { return ResponseEntity.badRequest().body("Claim is fake but list contains non fake keys");};
+			return () -> {
+				return ResponseEntity.badRequest().body("Claim is fake but list contains non fake keys");
+			};
 		}
 		if (!nonFakeKeys.isEmpty()) {
 			dataService.upsertExposees(nonFakeKeys);
@@ -122,7 +127,9 @@ public class GaenController {
 
 		var nowDay = LocalDate.now(ZoneOffset.UTC);
 		if (!delayedKeyDate.isAfter(nowDay.minusDays(1)) && delayedKeyDate.isBefore(nowDay.plusDays(1))) {
-			return () -> {return ResponseEntity.badRequest().body("delayedKeyDate date must be between yesterday and tomorrow");};
+			return () -> {
+				return ResponseEntity.badRequest().body("delayedKeyDate date must be between yesterday and tomorrow");
+			};
 		}
 
 		var responseBuilder = ResponseEntity.ok();
@@ -141,28 +148,35 @@ public class GaenController {
 		}
 		Callable<ResponseEntity<String>> cb = () -> {
 			normalizeRequestTime(now);
-			return  responseBuilder.build();
+			return responseBuilder.build();
 		};
 		return cb;
 	}
 
 	@PostMapping(value = "/exposednextday")
-	public @ResponseBody Callable<ResponseEntity<String>> addExposedSecond(@Valid @RequestBody GaenSecondDay gaenSecondDay,
+	public @ResponseBody Callable<ResponseEntity<String>> addExposedSecond(
+			@Valid @RequestBody GaenSecondDay gaenSecondDay,
 			@RequestHeader(value = "User-Agent", required = true) String userAgent,
 			@AuthenticationPrincipal Object principal) throws InvalidDateException {
 		var now = Instant.now().toEpochMilli();
 
 		if (!validationUtils.isValidBase64Key(gaenSecondDay.getDelayedKey().getKeyData())) {
-			return () -> {return new ResponseEntity<>("No valid base64 key", HttpStatus.BAD_REQUEST);};
+			return () -> {
+				return new ResponseEntity<>("No valid base64 key", HttpStatus.BAD_REQUEST);
+			};
 		}
 		if (principal instanceof Jwt && !((Jwt) principal).containsClaim("delayedKeyDate")) {
-			return () -> {return ResponseEntity.status(HttpStatus.FORBIDDEN).body("claim does not contain delayedKeyDate");};
+			return () -> {
+				return ResponseEntity.status(HttpStatus.FORBIDDEN).body("claim does not contain delayedKeyDate");
+			};
 		}
 		if (principal instanceof Jwt) {
 			var jwt = (Jwt) principal;
 			var claimKeyDate = Integer.parseInt(jwt.getClaimAsString("delayedKeyDate"));
 			if (!gaenSecondDay.getDelayedKey().getRollingStartNumber().equals(Integer.valueOf(claimKeyDate))) {
-				return () -> {return ResponseEntity.badRequest().body("keyDate does not match claim keyDate");};
+				return () -> {
+					return ResponseEntity.badRequest().body("keyDate does not match claim keyDate");
+				};
 			}
 		}
 		if (!this.validateRequest.isFakeRequest(principal, gaenSecondDay.getDelayedKey())) {
@@ -175,7 +189,7 @@ public class GaenController {
 			return ResponseEntity.ok().build();
 		};
 		return cb;
-		
+
 	}
 
 	@GetMapping(value = "/exposed/{keyDate}", produces = "application/zip")
@@ -193,13 +207,13 @@ public class GaenController {
 		long now = System.currentTimeMillis();
 		// calculate exposed until bucket
 		long publishedUntil = now - (now % bucketLength.toMillis());
-		
+
 		var exposedKeys = dataService.getSortedExposedForKeyDate(keyDate, publishedafter, publishedUntil);
 		if (exposedKeys.isEmpty()) {
 			return ResponseEntity.noContent().cacheControl(CacheControl.maxAge(exposedListCacheContol))
 					.header("X-PUBLISHED-UNTIL", Long.toString(publishedUntil)).build();
 		}
-		
+
 		byte[] payload = gaenSigner.getPayload(exposedKeys);
 		var digest = MessageDigest.getInstance("SHA256");
 		digest.update(payload);
@@ -228,7 +242,7 @@ public class GaenController {
 			return ResponseEntity.noContent().cacheControl(CacheControl.maxAge(exposedListCacheContol))
 					.header("X-PUBLISHED-UNTIL", Long.toString(publishedUntil)).build();
 		}
-		
+
 		var file = new GaenExposedJson();
 		var header = new Header();
 		file.gaenKeys(exposedKeys).header(header);
