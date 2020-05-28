@@ -58,7 +58,7 @@ public class DPPTJwtDecoder implements JwtDecoder {
 				}
 			}
 			return springJwt;
-		} catch (ExpiredJwtException | MalformedJwtException | SignatureException | IllegalArgumentException ex) {
+		} catch (io.jsonwebtoken.JwtException | IllegalArgumentException ex) {
 			throw new JwtException(ex.getMessage());
 		}
 
