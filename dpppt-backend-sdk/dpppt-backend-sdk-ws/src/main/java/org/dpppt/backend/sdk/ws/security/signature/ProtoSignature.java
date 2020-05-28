@@ -11,7 +11,12 @@ package org.dpppt.backend.sdk.ws.security.signature;
 
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
-import java.security.*;
+import java.security.InvalidKeyException;
+import java.security.KeyPair;
+import java.security.NoSuchAlgorithmException;
+import java.security.PublicKey;
+import java.security.Signature;
+import java.security.SignatureException;
 import java.time.Duration;
 import java.time.Instant;
 import java.time.LocalDate;
@@ -25,16 +30,16 @@ import java.util.Map;
 import java.util.zip.ZipEntry;
 import java.util.zip.ZipOutputStream;
 
-import com.google.protobuf.ByteString;
-
 import org.dpppt.backend.sdk.model.gaen.GaenKey;
 import org.dpppt.backend.sdk.model.gaen.GaenUnit;
 import org.dpppt.backend.sdk.model.gaen.proto.TemporaryExposureKeyFormat;
 import org.dpppt.backend.sdk.model.gaen.proto.TemporaryExposureKeyFormat.SignatureInfo;
 
+import com.google.protobuf.ByteString;
+
 public class ProtoSignature {
-	public static final String EXPORT_MAGIC_STRING = "EK Export v1    ";
-	public static final byte[] EXPORT_MAGIC = { 0x45, 0x4B, 0x20, 0x45, 0x78, 0x70, 0x6F, 0x72, 0x74, 0x20, 0x76, 0x31,
+
+	private static final byte[] EXPORT_MAGIC = { 0x45, 0x4B, 0x20, 0x45, 0x78, 0x70, 0x6F, 0x72, 0x74, 0x20, 0x76, 0x31,
 			0x20, 0x20, 0x20, 0x20 }; // "EK Export v1 "
 
 	private final String algorithm;
@@ -81,7 +86,7 @@ public class ProtoSignature {
 
 			zip.putNextEntry(new ZipEntry("export.bin"));
 			byte[] protoFileBytes = protoFile.toByteArray();
-			byte[] exportBin = new byte[EXPORT_MAGIC.length+protoFileBytes.length];
+			byte[] exportBin = new byte[EXPORT_MAGIC.length + protoFileBytes.length];
 			System.arraycopy(EXPORT_MAGIC, 0, exportBin, 0, EXPORT_MAGIC.length);
 			System.arraycopy(protoFileBytes, 0, exportBin, EXPORT_MAGIC.length, protoFileBytes.length);
 			zip.write(exportBin);

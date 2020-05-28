@@ -37,6 +37,7 @@ jobs:
         mvn springboot-swagger-3:springboot-swagger-3 -f dpppt-backend-sdk/dpppt-backend-sdk-ws/pom.xml
       env:
         GITHUB_TOKEN: ${{ github.token }}
+        TESTCONTAINERS_RYUK_DISABLED: true
     - name: SonarCloud Scan (develop)
       run: mvn verify -B sonar:sonar --file dpppt-backend-sdk/dpppt-backend-sdk-ws/pom.xml
       if: github.ref == 'refs/heads/develop'
@@ -44,6 +45,7 @@ jobs:
         SONAR_ORGANIZATION: ${{ secrets.SONAR_ORGANIZATION }}
         SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
         GITHUB_TOKEN: ${{ github.token }}
+        TESTCONTAINERS_RYUK_DISABLED: true
     - name: SonarCloud Scan (PR)
       run: mvn verify -B sonar:sonar -Dsonar.pullrequest.base=develop -Dsonar.pullrequest.key=$PULL_NUMBER --file dpppt-backend-sdk/dpppt-backend-sdk-ws/pom.xml
       if: github.ref != 'refs/heads/develop'
@@ -51,6 +53,7 @@ jobs:
         SONAR_ORGANIZATION: ${{ secrets.SONAR_ORGANIZATION }}
         SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
         GITHUB_TOKEN: ${{ github.token }}
+        TESTCONTAINERS_RYUK_DISABLED: true
     - name: Publish to GitHub Packages Apache Maven
       if: github.ref == 'refs/heads/develop'
       run: mvn deploy -Dmaven.test.skip=true --file dpppt-backend-sdk/pom.xml -s $GITHUB_WORKSPACE/settings.xml
