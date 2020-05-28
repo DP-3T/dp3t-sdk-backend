@@ -147,22 +147,22 @@ public class GaenController {
 	}
 
 	@PostMapping(value = "/exposednextday")
-	public @ResponseBody ResponseEntity<String> addExposedSecond(@Valid @RequestBody GaenSecondDay gaenSecondDay,
+	public @ResponseBody Callable<ResponseEntity<String>> addExposedSecond(@Valid @RequestBody GaenSecondDay gaenSecondDay,
 			@RequestHeader(value = "User-Agent", required = true) String userAgent,
 			@AuthenticationPrincipal Object principal) throws InvalidDateException {
 		var now = Instant.now().toEpochMilli();
 
 		if (!validationUtils.isValidBase64Key(gaenSecondDay.getDelayedKey().getKeyData())) {
-			return new ResponseEntity<>("No valid base64 key", HttpStatus.BAD_REQUEST);
+			return () -> {return new ResponseEntity<>("No valid base64 key", HttpStatus.BAD_REQUEST);};
 		}
 		if (principal instanceof Jwt && !((Jwt) principal).containsClaim("delayedKeyDate")) {
-			return ResponseEntity.status(HttpStatus.FORBIDDEN).body("claim does not contain delayedKeyDate");
+			return () -> {return ResponseEntity.status(HttpStatus.FORBIDDEN).body("claim does not contain delayedKeyDate");};
 		}
 		if (principal instanceof Jwt) {
 			var jwt = (Jwt) principal;
 			var claimKeyDate = Integer.parseInt(jwt.getClaimAsString("delayedKeyDate"));
 			if (!gaenSecondDay.getDelayedKey().getRollingStartNumber().equals(Integer.valueOf(claimKeyDate))) {
-				return ResponseEntity.badRequest().body("keyDate does not match claim keyDate");
+				return () -> {return ResponseEntity.badRequest().body("keyDate does not match claim keyDate");};
 			}
 		}
 		if (!this.validateRequest.isFakeRequest(principal, gaenSecondDay.getDelayedKey())) {
@@ -170,8 +170,12 @@ public class GaenController {
 			keys.add(gaenSecondDay.getDelayedKey());
 			dataService.upsertExposees(keys);
 		}
-		normalizeRequestTime(now);
-		return ResponseEntity.ok().build();
+		Callable<ResponseEntity<String>> cb = () -> {
+			normalizeRequestTime(now);
+			return ResponseEntity.ok().build();
+		};
+		return cb;
+		
 	}
 
 	@GetMapping(value = "/exposed/{keyDate}", produces = "application/zip")

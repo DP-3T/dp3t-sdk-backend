@@ -590,9 +590,10 @@ public class GaenControllerTest extends BaseControllerTest {
 		tmpKey.setFake(0);
 		tmpKey.setTransmissionRiskLevel(0);
 		secondDay.setDelayedKey(tmpKey);
-		response = mockMvc.perform(post("/v1/gaen/exposednextday").contentType(MediaType.APPLICATION_JSON)
+		responseAsync = mockMvc.perform(post("/v1/gaen/exposednextday").contentType(MediaType.APPLICATION_JSON)
 				.header("Authorization", "Bearer " + jwtString).header("User-Agent", "MockMVC")
-				.content(json(secondDay))).andExpect(status().is(200)).andReturn().getResponse();
+				.content(json(secondDay))).andExpect(request().asyncStarted()).andReturn();
+		mockMvc.perform(asyncDispatch(responseAsync)).andExpect(status().is(200));
 	}
 
 	@Test
