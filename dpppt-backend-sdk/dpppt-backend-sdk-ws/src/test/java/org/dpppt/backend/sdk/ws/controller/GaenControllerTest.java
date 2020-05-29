@@ -60,6 +60,7 @@ import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.http.MediaType;
 import org.springframework.mock.web.MockHttpServletResponse;
 import org.springframework.test.web.servlet.MvcResult;
+import org.springframework.transaction.annotation.Transactional;
 
 import io.jsonwebtoken.Jwt;
 import io.jsonwebtoken.Jwts;
@@ -616,7 +617,9 @@ public class GaenControllerTest extends BaseControllerTest {
 	}
 
 	@Test
+	@Transactional
 	public void zipContainsFiles() throws Exception {
+		
 		LocalDateTime now = LocalDateTime.now(ZoneOffset.UTC);
 
 		// insert two times 5 keys per day for the last 14 days. the second batch has a
@@ -655,6 +658,7 @@ public class GaenControllerTest extends BaseControllerTest {
 	}
 
 	@Test
+	@Transactional
 	public void testEtag() throws Exception {
 		LocalDateTime now = LocalDateTime.now(ZoneOffset.UTC);
 		insertNKeysPerDayInInterval(14,
