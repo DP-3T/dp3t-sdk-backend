@@ -78,33 +78,34 @@ public class ProtoSignature {
 	 */
 	public ProtoSignatureWrapper getPayload(List<GaenKey> keys)
 			throws IOException, InvalidKeyException, SignatureException, NoSuchAlgorithmException {
-
-		ByteArrayOutputStream byteOut = new ByteArrayOutputStream();
+		if(keys.isEmpty()) {
+			throw new IOException("Keys should not be empty");
+		}
+ 		ByteArrayOutputStream byteOut = new ByteArrayOutputStream();
 		ZipOutputStream zip = new ZipOutputStream(byteOut);
 		ByteArrayOutputStream hashOut = new ByteArrayOutputStream();
 		var digest = MessageDigest.getInstance("SHA256");
-		if (keys != null && !keys.isEmpty()) {
-			var keyDate = Duration.of(keys.get(0).getRollingStartNumber(), GaenUnit.TenMinutes);
-			var protoFile = getProtoKey(keys, keyDate);
+		var keyDate = Duration.of(keys.get(0).getRollingStartNumber(), GaenUnit.TenMinutes);
+		var protoFile = getProtoKey(keys, keyDate);
 
-			zip.putNextEntry(new ZipEntry("export.bin"));
-			byte[] protoFileBytes = protoFile.toByteArray();
-			byte[] exportBin = new byte[EXPORT_MAGIC.length + protoFileBytes.length];
-			System.arraycopy(EXPORT_MAGIC, 0, exportBin, 0, EXPORT_MAGIC.length);
-			System.arraycopy(protoFileBytes, 0, exportBin, EXPORT_MAGIC.length, protoFileBytes.length);
-			zip.write(exportBin);
-			zip.closeEntry();
+		zip.putNextEntry(new ZipEntry("export.bin"));
+		byte[] protoFileBytes = protoFile.toByteArray();
+		byte[] exportBin = new byte[EXPORT_MAGIC.length + protoFileBytes.length];
+		System.arraycopy(EXPORT_MAGIC, 0, exportBin, 0, EXPORT_MAGIC.length);
+		System.arraycopy(protoFileBytes, 0, exportBin, EXPORT_MAGIC.length, protoFileBytes.length);
+		zip.write(exportBin);
+		zip.closeEntry();
 
-			var signatureList = getSignatureObject(exportBin);
-			hashOut.write(digest.digest(exportBin));
+		var signatureList = getSignatureObject(exportBin);
+		digest.update(exportBin);
+		digest.update(keyPair.getPublic().getEncoded());
+		hashOut.write(digest.digest());
 
-			byte[] exportSig = signatureList.toByteArray();
-			zip.putNextEntry(new ZipEntry("export.sig"));
-			zip.write(exportSig);
-			zip.closeEntry();
-		} else {
-			hashOut.write(digest.digest("empty".getBytes()));
-		}
+		byte[] exportSig = signatureList.toByteArray();
+		zip.putNextEntry(new ZipEntry("export.sig"));
+		zip.write(exportSig);
+		zip.closeEntry();
+		
 		zip.flush();
 		zip.close();
 		byteOut.flush();
