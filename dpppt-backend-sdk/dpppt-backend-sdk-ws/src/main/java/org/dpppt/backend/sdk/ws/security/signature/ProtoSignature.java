@@ -13,6 +13,7 @@ import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.security.InvalidKeyException;
 import java.security.KeyPair;
+import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
 import java.security.PublicKey;
 import java.security.Signature;
@@ -81,6 +82,7 @@ public class ProtoSignature {
 		ByteArrayOutputStream byteOut = new ByteArrayOutputStream();
 		ZipOutputStream zip = new ZipOutputStream(byteOut);
 		ByteArrayOutputStream hashOut = new ByteArrayOutputStream();
+		var digest = MessageDigest.getInstance("SHA256");
 		if (keys != null && !keys.isEmpty()) {
 			var keyDate = Duration.of(keys.get(0).getRollingStartNumber(), GaenUnit.TenMinutes);
 			var protoFile = getProtoKey(keys, keyDate);
@@ -94,12 +96,14 @@ public class ProtoSignature {
 			zip.closeEntry();
 
 			var signatureList = getSignatureObject(exportBin);
-			hashOut.write(signatureList.getSignatures(0).getSignature().toByteArray());
+			hashOut.write(digest.digest(exportBin));
 
 			byte[] exportSig = signatureList.toByteArray();
 			zip.putNextEntry(new ZipEntry("export.sig"));
 			zip.write(exportSig);
 			zip.closeEntry();
+		} else {
+			hashOut.write(digest.digest("empty".getBytes()));
 		}
 		zip.flush();
 		zip.close();

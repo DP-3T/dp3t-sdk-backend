@@ -11,6 +11,7 @@
 package org.dpppt.backend.sdk.ws.controller;
 
 import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertNotEquals;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
@@ -19,8 +20,7 @@ import static org.springframework.test.web.servlet.request.MockMvcRequestBuilder
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
 
 import java.io.ByteArrayInputStream;
-import java.io.File;
-import java.io.FileOutputStream;
+
 import java.io.IOException;
 import java.security.InvalidKeyException;
 import java.security.NoSuchAlgorithmException;
@@ -652,6 +652,51 @@ public class GaenControllerTest extends BaseControllerTest {
 				.andExpect(status().is2xxSuccessful()).andReturn().getResponse();
 
 		verifyZipResponse(responseWithPublishedAfter, 5);
+	}
+
+	@Test
+	public void testEtag() throws Exception {
+		LocalDateTime now = LocalDateTime.now(ZoneOffset.UTC);
+		insertNKeysPerDayInInterval(14,
+				LocalDate.now(ZoneOffset.UTC).atStartOfDay().atOffset(ZoneOffset.UTC).minusDays(4),
+				now.atOffset(ZoneOffset.UTC), now.minus(Duration.ofDays(1)).atOffset(ZoneOffset.UTC));
+
+		insertNKeysPerDayInInterval(14,
+				LocalDate.now(ZoneOffset.UTC).atStartOfDay().atOffset(ZoneOffset.UTC).minusDays(4),
+				now.atOffset(ZoneOffset.UTC), now.minus(Duration.ofHours(12)).atOffset(ZoneOffset.UTC));
+		// request the keys with date date 1 day ago. no publish until.
+		MockHttpServletResponse response = mockMvc
+				.perform(get("/v1/gaen/exposed/"
+						+ now.minusDays(8).toLocalDate().atStartOfDay(ZoneOffset.UTC).toInstant().toEpochMilli())
+								.header("User-Agent", "MockMVC"))
+				.andExpect(status().is2xxSuccessful()).andReturn().getResponse();
+
+		Long publishedUntil = Long.parseLong(response.getHeader("X-PUBLISHED-UNTIL"));
+		assertTrue(publishedUntil < System.currentTimeMillis(), "Published until must be in the past");
+		var expectedEtag = response.getHeader("etag");
+
+		response = mockMvc
+				.perform(get("/v1/gaen/exposed/"
+						+ now.minusDays(8).toLocalDate().atStartOfDay(ZoneOffset.UTC).toInstant().toEpochMilli())
+								.header("User-Agent", "MockMVC"))
+				.andExpect(status().is2xxSuccessful()).andReturn().getResponse();
+
+		publishedUntil = Long.parseLong(response.getHeader("X-PUBLISHED-UNTIL"));
+		assertTrue(publishedUntil < System.currentTimeMillis(), "Published until must be in the past");
+		assertEquals(expectedEtag, response.getHeader("etag"));
+
+		insertNKeysPerDayInInterval(14,
+				LocalDate.now(ZoneOffset.UTC).atStartOfDay().atOffset(ZoneOffset.UTC).minusDays(4),
+				now.atOffset(ZoneOffset.UTC), now.minus(Duration.ofHours(12)).atOffset(ZoneOffset.UTC));
+				response = mockMvc
+				.perform(get("/v1/gaen/exposed/"
+						+ now.minusDays(8).toLocalDate().atStartOfDay(ZoneOffset.UTC).toInstant().toEpochMilli())
+								.header("User-Agent", "MockMVC"))
+				.andExpect(status().is2xxSuccessful()).andReturn().getResponse();
+
+		publishedUntil = Long.parseLong(response.getHeader("X-PUBLISHED-UNTIL"));
+		assertTrue(publishedUntil < System.currentTimeMillis(), "Published until must be in the past");
+		assertNotEquals(expectedEtag, response.getHeader("etag"));
 	}
 
 	private void verifyZipInZipResponse(MockHttpServletResponse response, int expectKeyCount) throws Exception {
