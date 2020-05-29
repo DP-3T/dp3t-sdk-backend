@@ -10,6 +10,8 @@
 
 package org.dpppt.backend.sdk.ws.config;
 
+import javax.sql.DataSource;
+
 import org.dpppt.backend.sdk.ws.security.KeyVault;
 import org.dpppt.backend.sdk.ws.security.KeyVault.PrivateKeyNoSuitableEncodingFoundException;
 import org.dpppt.backend.sdk.ws.security.KeyVault.PublicKeyNoSuitableEncodingFoundException;
@@ -19,8 +21,6 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.scheduling.config.ScheduledTaskRegistrar;
-
-import javax.sql.DataSource;
 
 @Configuration
 public abstract class WSCloudBaseConfig extends WSBaseConfig {

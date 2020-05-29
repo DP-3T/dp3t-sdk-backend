@@ -21,7 +21,6 @@ import java.time.OffsetDateTime;
 import java.time.ZoneOffset;
 import java.util.Base64;
 import java.util.Date;
-import java.util.GregorianCalendar;
 import java.util.Iterator;
 
 import org.dpppt.backend.sdk.model.ExposeeAuthData;
