@@ -11,7 +11,6 @@ package org.dpppt.backend.sdk.ws.controller;
 
 import java.io.IOException;
 import java.security.InvalidKeyException;
-import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
 import java.security.PrivateKey;
 import java.security.SignatureException;
