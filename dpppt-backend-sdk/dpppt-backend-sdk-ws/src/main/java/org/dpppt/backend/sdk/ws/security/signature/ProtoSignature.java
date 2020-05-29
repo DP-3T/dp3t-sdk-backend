@@ -75,11 +75,12 @@ public class ProtoSignature {
 	 * @throws SignatureException
 	 * @throws NoSuchAlgorithmException
 	 */
-	public byte[] getPayload(List<GaenKey> keys)
+	public ProtoSignatureWrapper getPayload(List<GaenKey> keys)
 			throws IOException, InvalidKeyException, SignatureException, NoSuchAlgorithmException {
 
 		ByteArrayOutputStream byteOut = new ByteArrayOutputStream();
 		ZipOutputStream zip = new ZipOutputStream(byteOut);
+		ByteArrayOutputStream hashOut = new ByteArrayOutputStream();
 		if (keys != null && !keys.isEmpty()) {
 			var keyDate = Duration.of(keys.get(0).getRollingStartNumber(), GaenUnit.TenMinutes);
 			var protoFile = getProtoKey(keys, keyDate);
@@ -93,6 +94,7 @@ public class ProtoSignature {
 			zip.closeEntry();
 
 			var signatureList = getSignatureObject(exportBin);
+			hashOut.write(signatureList.getSignatures(0).getSignature().toByteArray());
 
 			byte[] exportSig = signatureList.toByteArray();
 			zip.putNextEntry(new ZipEntry("export.sig"));
@@ -103,7 +105,10 @@ public class ProtoSignature {
 		zip.close();
 		byteOut.flush();
 		byteOut.close();
-		return byteOut.toByteArray();
+		hashOut.flush();
+		hashOut.close();
+
+		return new ProtoSignatureWrapper(hashOut.toByteArray(), byteOut.toByteArray());
 	}
 
 	private byte[] sign(byte[] data) throws SignatureException, InvalidKeyException, NoSuchAlgorithmException {
@@ -218,6 +223,22 @@ public class ProtoSignature {
 		file.addSignatureInfos(tekSignature());
 
 		return file.build();
+	}
+
+	public class ProtoSignatureWrapper {
+		private final byte[] hash;
+		private final byte[] zip;
+		public ProtoSignatureWrapper(byte[] hash, byte[] zip) {
+			this.hash = hash;
+			this.zip = zip;
+		}
+		
+		public byte[] getHash() {
+			return hash;
+		}
+		public byte[] getZip() {
+			return zip;
+		}
 	}
 
 }

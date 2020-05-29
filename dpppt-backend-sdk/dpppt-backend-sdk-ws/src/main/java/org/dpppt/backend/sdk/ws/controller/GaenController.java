@@ -39,6 +39,7 @@ import org.dpppt.backend.sdk.model.gaen.Header;
 import org.dpppt.backend.sdk.ws.security.ValidateRequest;
 import org.dpppt.backend.sdk.ws.security.ValidateRequest.InvalidDateException;
 import org.dpppt.backend.sdk.ws.security.signature.ProtoSignature;
+import org.dpppt.backend.sdk.ws.security.signature.ProtoSignature.ProtoSignatureWrapper;
 import org.dpppt.backend.sdk.ws.util.ValidationUtils;
 import org.dpppt.backend.sdk.ws.util.ValidationUtils.BadBatchReleaseTimeException;
 import org.springframework.http.CacheControl;
@@ -214,12 +215,11 @@ public class GaenController {
 					.header("X-PUBLISHED-UNTIL", Long.toString(publishedUntil)).build();
 		}
 
-		byte[] payload = gaenSigner.getPayload(exposedKeys);
-		var digest = MessageDigest.getInstance("SHA256");
-		digest.update(payload);
+		ProtoSignatureWrapper payload = gaenSigner.getPayload(exposedKeys);
+
 		return ResponseEntity.ok().cacheControl(CacheControl.maxAge(exposedListCacheContol))
-				.eTag(Base64.getEncoder().encodeToString(digest.digest()))
-				.header("X-PUBLISHED-UNTIL", Long.toString(publishedUntil)).body(payload);
+				.eTag(Base64.getEncoder().encodeToString(payload.getHash()))
+				.header("X-PUBLISHED-UNTIL", Long.toString(publishedUntil)).body(payload.getZip());
 	}
 
 	@GetMapping(value = "/exposedjson/{keyDate}", produces = "application/json")
