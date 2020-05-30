@@ -76,7 +76,7 @@ public class MultipleJWTConfig {
 			InputStream in = null;
 			if (publicKey.startsWith("classpath:/")) {
 				in = new ClassPathResource(publicKey.substring(11)).getInputStream();
-				readAsStringFromInputStreamAndClose(in);
+				return readAsStringFromInputStreamAndClose(in);
 			} else if (publicKey.startsWith("file:/")) {
 				in = new FileInputStream(publicKey);
 				return readAsStringFromInputStreamAndClose(in);
