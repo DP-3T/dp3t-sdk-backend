@@ -73,16 +73,21 @@ public class MultipleJWTConfig {
 				String url = publicKey.replace("keycloak:/", "");
 				return KeyHelper.getPublicKeyFromKeycloak(url);
 			}
-
 			InputStream in = null;
 			if (publicKey.startsWith("classpath:/")) {
 				in = new ClassPathResource(publicKey.substring(11)).getInputStream();
-				return IOUtils.toString(in);
+				readAsStringFromInputStreamAndClose(in);
 			} else if (publicKey.startsWith("file:/")) {
 				in = new FileInputStream(publicKey);
-				return IOUtils.toString(in);
+				return readAsStringFromInputStreamAndClose(in);
 			}
 			return publicKey;
+		}
+
+		private String readAsStringFromInputStreamAndClose(InputStream in) throws IOException {
+			String result = IOUtils.toString(in);
+			in.close();
+			return result;
 		}
 	}
 
@@ -187,5 +192,5 @@ public class MultipleJWTConfig {
 			return jwtDecoder;
 		}
 	}
-	
+
 }
