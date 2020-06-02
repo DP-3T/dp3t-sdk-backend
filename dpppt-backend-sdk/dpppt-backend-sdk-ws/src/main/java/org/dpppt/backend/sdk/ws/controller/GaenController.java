@@ -215,9 +215,12 @@ public class GaenController {
 		}
 
 		ProtoSignatureWrapper payload = gaenSigner.getPayload(exposedKeys);
-
+		String etag = Base64.getEncoder().encodeToString(payload.getHash());
+		if(request.checkNotModified(etag)) {
+			return ResponseEntity.status(HttpStatus.NOT_MODIFIED).build();
+		}
 		return ResponseEntity.ok().cacheControl(CacheControl.maxAge(exposedListCacheContol))
-				.eTag(Base64.getEncoder().encodeToString(payload.getHash()))
+				.eTag(etag)
 				.header("X-PUBLISHED-UNTIL", Long.toString(publishedUntil)).body(payload.getZip());
 	}
 

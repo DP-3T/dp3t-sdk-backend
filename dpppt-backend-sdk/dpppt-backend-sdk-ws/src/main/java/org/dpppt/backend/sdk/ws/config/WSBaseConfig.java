@@ -70,7 +70,7 @@ public abstract class WSBaseConfig implements SchedulingConfigurer, WebMvcConfig
 
 	public abstract String getDbType();
 
-	@Value("${ws.exposedlist.cachecontrol: 5}")
+	@Value("${ws.exposedlist.cachecontrol: 300000}")
 	int exposedListCacheControl;
 
 	@Value("${ws.headers.protected:}")
@@ -176,7 +176,7 @@ public abstract class WSBaseConfig implements SchedulingConfigurer, WebMvcConfig
 		}
 		return new GaenController(gaenDataService(), theValidator, gaenSigner(), gaenValidationUtils(),
 				Duration.ofMillis(batchLength), Duration.ofMillis(requestTime),
-				Duration.ofMinutes(exposedListCacheControl), keyVault.get("nextDayJWT").getPrivate());
+				Duration.ofMillis(exposedListCacheControl), keyVault.get("nextDayJWT").getPrivate());
 	}
 
 	@Bean
