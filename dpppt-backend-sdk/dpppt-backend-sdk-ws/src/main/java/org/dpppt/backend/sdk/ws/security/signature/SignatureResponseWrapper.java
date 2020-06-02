@@ -33,6 +33,7 @@ import javax.servlet.http.HttpServletResponseWrapper;
 import org.apache.commons.codec.binary.Hex;
 import org.bouncycastle.util.io.pem.PemObject;
 import org.bouncycastle.util.io.pem.PemWriter;
+import org.springframework.http.HttpStatus;
 import org.springframework.util.Base64Utils;
 
 import io.jsonwebtoken.Claims;
@@ -117,6 +118,10 @@ public class SignatureResponseWrapper extends HttpServletResponseWrapper {
 	}
 
 	private void setSignature() throws IOException {
+		if(HttpStatus.valueOf(this.getStatus()) != HttpStatus.OK) {
+			return;
+		}
+		
 		byte[] theHash = this.getHash();
 
 		Claims claims = Jwts.claims();
