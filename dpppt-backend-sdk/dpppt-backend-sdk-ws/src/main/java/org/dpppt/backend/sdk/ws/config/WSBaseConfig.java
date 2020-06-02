@@ -20,6 +20,7 @@ import org.dpppt.backend.sdk.data.DPPPTDataService;
 import org.dpppt.backend.sdk.data.JDBCDPPPTDataServiceImpl;
 import org.dpppt.backend.sdk.data.JDBCRedeemDataServiceImpl;
 import org.dpppt.backend.sdk.data.RedeemDataService;
+import org.dpppt.backend.sdk.data.gaen.FakeKeyService;
 import org.dpppt.backend.sdk.data.gaen.GAENDataService;
 import org.dpppt.backend.sdk.data.gaen.JDBCGAENDataServiceImpl;
 import org.dpppt.backend.sdk.ws.controller.DPPPTController;
@@ -41,6 +42,8 @@ import org.springframework.context.annotation.Lazy;
 import org.springframework.http.converter.HttpMessageConverter;
 import org.springframework.http.converter.json.MappingJackson2HttpMessageConverter;
 import org.springframework.http.converter.protobuf.ProtobufHttpMessageConverter;
+import org.springframework.jdbc.datasource.embedded.EmbeddedDatabaseBuilder;
+import org.springframework.jdbc.datasource.embedded.EmbeddedDatabaseType;
 import org.springframework.scheduling.annotation.EnableScheduling;
 import org.springframework.scheduling.annotation.SchedulingConfigurer;
 import org.springframework.scheduling.concurrent.ThreadPoolTaskExecutor;
@@ -139,6 +142,30 @@ public abstract class WSBaseConfig implements SchedulingConfigurer, WebMvcConfig
 	}
 
 	@Bean
+	public FakeKeyService fakeKeyService() {
+		try {
+		return new FakeKeyService(fakeGAENService(), Integer.valueOf(10), Integer.valueOf(gaenKeySizeBytes), Duration.ofDays(retentionDays));
+		} catch(Exception ex) {
+			throw new RuntimeException("FakeKeyService could not be instantiated");
+		}
+	}
+	@Bean
+	DataSource fakeDataSource() {
+		return new EmbeddedDatabaseBuilder().setType(EmbeddedDatabaseType.HSQL).build();
+	}
+	@Bean
+	GAENDataService fakeGAENService() {
+		return new JDBCGAENDataServiceImpl("hsql", fakeDataSource());
+	}
+	@Bean 
+	Flyway fakeFlyway() {
+		Flyway flyWay = Flyway.configure().dataSource(fakeDataSource()).locations("classpath:/db/migration/hsqldb").load();
+		flyWay.migrate();
+		return flyWay;
+	}
+
+	
+	@Bean
 	public ProtoSignature gaenSigner() {
 		try {
 			return new ProtoSignature(gaenAlgorithm, keyVault.get("gaen"), getBundleId(), getPackageName(), getKeyVersion(),
@@ -174,7 +201,7 @@ public abstract class WSBaseConfig implements SchedulingConfigurer, WebMvcConfig
 		if (theValidator == null) {
 			theValidator = backupValidator();
 		}
-		return new GaenController(gaenDataService(), theValidator, gaenSigner(), gaenValidationUtils(),
+		return new GaenController(gaenDataService(),fakeKeyService(), theValidator, gaenSigner(), gaenValidationUtils(),
 				Duration.ofMillis(batchLength), Duration.ofMillis(requestTime),
 				Duration.ofMillis(exposedListCacheControl), keyVault.get("nextDayJWT").getPrivate());
 	}
