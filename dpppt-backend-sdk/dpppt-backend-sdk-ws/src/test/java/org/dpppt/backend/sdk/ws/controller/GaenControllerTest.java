@@ -653,7 +653,8 @@ public class GaenControllerTest extends BaseControllerTest {
 										Long.toString(bucketAfterSecondRelease)))
 				.andExpect(status().is2xxSuccessful()).andReturn().getResponse();
 
-		verifyZipResponse(responseWithPublishedAfter, 5);
+		//we always have 10
+		verifyZipResponse(responseWithPublishedAfter, 10);
 	}
 
 	@Test
