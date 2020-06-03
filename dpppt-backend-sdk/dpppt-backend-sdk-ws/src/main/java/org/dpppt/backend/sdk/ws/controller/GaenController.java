@@ -76,8 +76,8 @@ public class GaenController {
 	private final PrivateKey secondDayKey;
 	private final ProtoSignature gaenSigner;
 
-	public GaenController(GAENDataService dataService, FakeKeyService fakeKeyService,  ValidateRequest validateRequest, ProtoSignature gaenSigner,
-			ValidationUtils validationUtils, Duration bucketLength, Duration requestTime,
+	public GaenController(GAENDataService dataService, FakeKeyService fakeKeyService, ValidateRequest validateRequest,
+			ProtoSignature gaenSigner, ValidationUtils validationUtils, Duration bucketLength, Duration requestTime,
 			Duration exposedListCacheContol, PrivateKey secondDayKey) {
 		this.dataService = dataService;
 		this.fakeKeyService = fakeKeyService;
@@ -214,15 +214,18 @@ public class GaenController {
 		var exposedKeys = dataService.getSortedExposedForKeyDate(keyDate, publishedafter, publishedUntil);
 		if (exposedKeys.isEmpty()) {
 			exposedKeys = fakeKeyService.fillUpKeys(exposedKeys, keyDate);
+			if (exposedKeys.isEmpty()) {
+				return ResponseEntity.noContent().cacheControl(CacheControl.maxAge(exposedListCacheContol))
+						.header("X-PUBLISHED-UNTIL", Long.toString(publishedUntil)).build();
+			}
 		}
 
 		ProtoSignatureWrapper payload = gaenSigner.getPayload(exposedKeys);
 		String etag = Base64.getEncoder().encodeToString(payload.getHash());
-		if(request.checkNotModified(etag)) {
+		if (request.checkNotModified(etag)) {
 			return null;
 		}
-		return ResponseEntity.ok().cacheControl(CacheControl.maxAge(exposedListCacheContol))
-				.eTag(etag)
+		return ResponseEntity.ok().cacheControl(CacheControl.maxAge(exposedListCacheContol)).eTag(etag)
 				.header("X-PUBLISHED-UNTIL", Long.toString(publishedUntil)).body(payload.getZip());
 	}
 
