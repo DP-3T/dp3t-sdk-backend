@@ -42,6 +42,7 @@ import org.springframework.context.annotation.Lazy;
 import org.springframework.http.converter.HttpMessageConverter;
 import org.springframework.http.converter.json.MappingJackson2HttpMessageConverter;
 import org.springframework.http.converter.protobuf.ProtobufHttpMessageConverter;
+import org.springframework.jdbc.datasource.DataSourceTransactionManager;
 import org.springframework.jdbc.datasource.embedded.EmbeddedDatabaseBuilder;
 import org.springframework.jdbc.datasource.embedded.EmbeddedDatabaseType;
 import org.springframework.scheduling.annotation.EnableScheduling;
@@ -49,6 +50,7 @@ import org.springframework.scheduling.annotation.SchedulingConfigurer;
 import org.springframework.scheduling.concurrent.ThreadPoolTaskExecutor;
 import org.springframework.scheduling.config.IntervalTask;
 import org.springframework.scheduling.config.ScheduledTaskRegistrar;
+import org.springframework.transaction.PlatformTransactionManager;
 import org.springframework.web.servlet.config.annotation.AsyncSupportConfigurer;
 import org.springframework.web.servlet.config.annotation.WebMvcConfigurer;
 
@@ -145,6 +147,19 @@ public abstract class WSBaseConfig implements SchedulingConfigurer, WebMvcConfig
 	}
 
 	@Bean
+	public PlatformTransactionManager transactionManager() throws Exception {
+		DataSourceTransactionManager dstm = new DataSourceTransactionManager(dataSource());
+		return dstm;
+	}
+
+	@Bean 
+	Flyway fakeFlyway() {
+		Flyway flyWay = Flyway.configure().dataSource(fakeDataSource()).locations("classpath:/db/migration/hsqldb").load();
+		flyWay.migrate();
+		return flyWay;
+	}
+
+	@Bean
 	public FakeKeyService fakeKeyService() {
 		try {
 		return new FakeKeyService(fakeGAENService(), Integer.valueOf(10), Integer.valueOf(gaenKeySizeBytes), Duration.ofDays(retentionDays),fillEmptyZips);
@@ -159,12 +174,6 @@ public abstract class WSBaseConfig implements SchedulingConfigurer, WebMvcConfig
 	@Bean
 	GAENDataService fakeGAENService() {
 		return new JDBCGAENDataServiceImpl("hsql", fakeDataSource());
-	}
-	@Bean 
-	Flyway fakeFlyway() {
-		Flyway flyWay = Flyway.configure().dataSource(fakeDataSource()).locations("classpath:/db/migration/hsqldb").load();
-		flyWay.migrate();
-		return flyWay;
 	}
 
 	

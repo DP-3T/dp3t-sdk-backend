@@ -32,12 +32,15 @@ import org.junit.Before;
 import org.junit.runner.RunWith;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.context.annotation.Bean;
 import org.springframework.core.io.ClassPathResource;
+import org.springframework.jdbc.datasource.DataSourceTransactionManager;
 import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.context.TestPropertySource;
 import org.springframework.test.context.junit4.SpringRunner;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.setup.MockMvcBuilders;
+import org.springframework.transaction.PlatformTransactionManager;
 import org.springframework.web.context.WebApplicationContext;
 
 import com.fasterxml.jackson.core.JsonFactory;
