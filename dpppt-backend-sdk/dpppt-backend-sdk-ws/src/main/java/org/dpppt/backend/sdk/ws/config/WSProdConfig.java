@@ -106,7 +106,7 @@ public class WSProdConfig extends WSBaseConfig {
 
 	@Override
 	public void configureTasks(ScheduledTaskRegistrar taskRegistrar) {
-
+		super.configureTasks(taskRegistrar);
 	}
 
 	@Bean

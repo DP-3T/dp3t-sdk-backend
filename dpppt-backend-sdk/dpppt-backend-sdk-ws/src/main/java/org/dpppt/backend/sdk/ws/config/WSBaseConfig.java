@@ -12,7 +12,9 @@ package org.dpppt.backend.sdk.ws.config;
 
 import java.security.KeyPair;
 import java.time.Duration;
+import java.time.ZoneOffset;
 import java.util.List;
+import java.util.TimeZone;
 
 import javax.sql.DataSource;
 
@@ -47,8 +49,10 @@ import org.springframework.jdbc.datasource.embedded.EmbeddedDatabaseType;
 import org.springframework.scheduling.annotation.EnableScheduling;
 import org.springframework.scheduling.annotation.SchedulingConfigurer;
 import org.springframework.scheduling.concurrent.ThreadPoolTaskExecutor;
+import org.springframework.scheduling.config.CronTask;
 import org.springframework.scheduling.config.IntervalTask;
 import org.springframework.scheduling.config.ScheduledTaskRegistrar;
+import org.springframework.scheduling.support.CronTrigger;
 import org.springframework.web.servlet.config.annotation.AsyncSupportConfigurer;
 import org.springframework.web.servlet.config.annotation.WebMvcConfigurer;
 
@@ -277,5 +281,10 @@ public abstract class WSBaseConfig implements SchedulingConfigurer, WebMvcConfig
 			redeemDataService().cleanDB(Duration.ofDays(1));
 			logger.info("DB cleanup up");
 		}, 60 * 60 * 1000L));
+		
+		var trigger = new CronTrigger("0 0 2 * * *", TimeZone.getTimeZone(ZoneOffset.UTC));
+		taskRegistrar.addCronTask(new CronTask(() -> {
+			fakeKeyService().updateFakeKeys();
+		}, trigger));
 	}
 }

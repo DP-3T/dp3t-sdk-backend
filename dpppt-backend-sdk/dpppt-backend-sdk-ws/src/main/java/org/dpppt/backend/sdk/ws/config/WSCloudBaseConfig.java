@@ -57,7 +57,7 @@ public abstract class WSCloudBaseConfig extends WSBaseConfig {
 
 	@Override
 	public void configureTasks(ScheduledTaskRegistrar taskRegistrar) {
-
+		super.configureTasks(taskRegistrar);
 	}
 
 	@Bean
