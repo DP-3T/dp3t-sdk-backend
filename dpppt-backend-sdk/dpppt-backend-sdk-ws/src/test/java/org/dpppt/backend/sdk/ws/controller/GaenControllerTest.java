@@ -13,6 +13,7 @@ package org.dpppt.backend.sdk.ws.controller;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotEquals;
 import static org.junit.Assert.assertNotNull;
+import static org.junit.Assert.assertNull;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.asyncDispatch;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
@@ -653,6 +654,30 @@ public class GaenControllerTest extends BaseControllerTest {
 				.andExpect(status().is2xxSuccessful()).andReturn().getResponse();
 
 		verifyZipResponse(responseWithPublishedAfter, 5);
+	}
+
+	@Test
+	@Transactional
+	public void testNonEmptyResponseAnd304() throws Exception {
+		MockHttpServletResponse response = mockMvc
+				.perform(get("/v1/gaen/exposed/"
+						+ LocalDate.now(ZoneOffset.UTC).minusDays(8).atStartOfDay(ZoneOffset.UTC).toInstant().toEpochMilli())
+								.header("User-Agent", "MockMVC"))
+				.andExpect(status().isOk()).andReturn().getResponse();
+		verifyZipInZipResponse(response, 10);
+		var etag = response.getHeader("ETag");
+		var firstPublishUntil = response.getHeader("X-PUBLISHED-UNTIL");
+		var signature = response.getHeader("Signature");
+		assertNotNull(signature);
+		Thread.sleep(2000);
+		response = mockMvc
+				.perform(get("/v1/gaen/exposed/"
+						+ LocalDate.now(ZoneOffset.UTC).minusDays(8).atStartOfDay(ZoneOffset.UTC).toInstant().toEpochMilli())
+								.header("User-Agent", "MockMVC")
+								.header("If-None-Match", etag))
+				.andExpect(status().is(304)).andReturn().getResponse();
+		signature = response.getHeader("Signature");
+		assertNull(signature);
 	}
 
 	@Test
