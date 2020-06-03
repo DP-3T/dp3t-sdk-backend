@@ -55,7 +55,7 @@ public class FakeKeyService {
         this.dataService.cleanDB(retentionPeriod.plusDays(2));
     }
     public List<GaenKey> fillUpKeys(List<GaenKey> keys, Long keyDate) {
-        if(!isEnabled || keys.size() >= minNumOfKeys) {
+        if(!isEnabled) {
             return keys;
         }
         var fakeKeys = this.dataService.getSortedExposedForKeyDate(keyDate, null, LocalDate.now().plusDays(1).atStartOfDay(ZoneOffset.UTC).toInstant().toEpochMilli());
