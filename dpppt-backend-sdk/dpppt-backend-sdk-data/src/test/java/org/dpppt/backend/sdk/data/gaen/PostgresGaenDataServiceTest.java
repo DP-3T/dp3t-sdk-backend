@@ -31,7 +31,6 @@ import java.util.List;
 
 import javax.sql.DataSource;
 
-import org.dpppt.backend.sdk.data.PostgresDPPPTDataServiceTest;
 import org.dpppt.backend.sdk.data.RedeemDataService;
 import org.dpppt.backend.sdk.data.config.DPPPTDataServiceConfig;
 import org.dpppt.backend.sdk.data.config.FlyWayConfig;
@@ -50,20 +49,20 @@ import org.springframework.test.context.junit4.SpringJUnit4ClassRunner;
 import org.springframework.test.context.support.AnnotationConfigContextLoader;
 
 @RunWith(SpringJUnit4ClassRunner.class)
-@ContextConfiguration(loader = AnnotationConfigContextLoader.class, classes = {PostgresDataConfig.class, FlyWayConfig.class, DPPPTDataServiceConfig.class})
+@ContextConfiguration(loader = AnnotationConfigContextLoader.class, classes = { PostgresDataConfig.class,
+        FlyWayConfig.class, DPPPTDataServiceConfig.class })
 @ActiveProfiles("postgres")
 public class PostgresGaenDataServiceTest {
 
     private static final String APP_SOURCE = "test-app";
     private static final Duration BATCH_LENGTH = Duration.ofHours(2);
-    
+
     @Autowired
     private GAENDataService dppptDataService;
 
     @Autowired
     private RedeemDataService redeemDataService;
 
-    
     @Autowired
     private DataSource dataSource;
 
@@ -91,23 +90,24 @@ public class PostgresGaenDataServiceTest {
         String key = "someKey";
         insertExposeeWithReceivedAtAndKeyDate(receivedAt.toInstant(), receivedAt.minusDays(1).toInstant(), key);
 
-		List<GaenKey> sortedExposedForDay = dppptDataService
-				.getSortedExposedForKeyDate(receivedAt.minusDays(1).toInstant().toEpochMilli(), null, now.toInstant().toEpochMilli());
-		
-		assertFalse(sortedExposedForDay.isEmpty());
+        List<GaenKey> sortedExposedForDay = dppptDataService.getSortedExposedForKeyDate(
+                receivedAt.minusDays(1).toInstant().toEpochMilli(), null, now.toInstant().toEpochMilli());
 
-		dppptDataService.cleanDB(Duration.ofDays(21));
-		sortedExposedForDay = dppptDataService
-				.getSortedExposedForKeyDate(receivedAt.minusDays(1).toInstant().toEpochMilli(), null, now.toInstant().toEpochMilli());
-		
-		assertTrue(sortedExposedForDay.isEmpty());
+        assertFalse(sortedExposedForDay.isEmpty());
+
+        dppptDataService.cleanDB(Duration.ofDays(21));
+        sortedExposedForDay = dppptDataService.getSortedExposedForKeyDate(
+                receivedAt.minusDays(1).toInstant().toEpochMilli(), null, now.toInstant().toEpochMilli());
+
+        assertTrue(sortedExposedForDay.isEmpty());
 
     }
 
     @Test
     public void upsert() throws Exception {
         var tmpKey = new GaenKey();
-        tmpKey.setRollingStartNumber((int)Duration.ofMillis(Instant.now().minus(Duration.ofDays(1)).toEpochMilli()).dividedBy(Duration.ofMinutes(10)));
+        tmpKey.setRollingStartNumber((int) Duration.ofMillis(Instant.now().minus(Duration.ofDays(1)).toEpochMilli())
+                .dividedBy(Duration.ofMinutes(10)));
         tmpKey.setKeyData(Base64.getEncoder().encodeToString("testKey32Bytes--".getBytes("UTF-8")));
         tmpKey.setRollingPeriod(144);
         tmpKey.setFake(0);
@@ -115,16 +115,16 @@ public class PostgresGaenDataServiceTest {
         List<GaenKey> keys = List.of(tmpKey);
 
         dppptDataService.upsertExposees(keys);
-        
-		long now = System.currentTimeMillis();
-		// calculate exposed until bucket, but get bucket in the future, as keys have
-		// been inserted with timestamp now.
-		long publishedUntil = now - (now % BATCH_LENGTH.toMillis()) + BATCH_LENGTH.toMillis();
 
-		var returnedKeys = dppptDataService.getSortedExposedForKeyDate(
-				Instant.now().minus(Duration.ofDays(1)).truncatedTo(ChronoUnit.DAYS).toEpochMilli(), null,
-				publishedUntil);
-		
+        long now = System.currentTimeMillis();
+        // calculate exposed until bucket, but get bucket in the future, as keys have
+        // been inserted with timestamp now.
+        long publishedUntil = now - (now % BATCH_LENGTH.toMillis()) + BATCH_LENGTH.toMillis();
+
+        var returnedKeys = dppptDataService.getSortedExposedForKeyDate(
+                Instant.now().minus(Duration.ofDays(1)).truncatedTo(ChronoUnit.DAYS).toEpochMilli(), null,
+                publishedUntil);
+
         assertEquals(keys.size(), returnedKeys.size());
         assertEquals(keys.get(0).getKeyData(), returnedKeys.get(0).getKeyData());
     }
@@ -136,22 +136,22 @@ public class PostgresGaenDataServiceTest {
         insertExposeeWithReceivedAtAndKeyDate(receivedAt, receivedAt.minus(Duration.ofDays(2)), key);
 
         long batchTime = LocalDateTime.parse("2014-01-28T02:00:00").toInstant(ZoneOffset.UTC).toEpochMilli();
-        
 
-		var returnedKeys = dppptDataService.getSortedExposedForKeyDate(receivedAt.minus(Duration.ofDays(2)).toEpochMilli(), null, batchTime);
-        
+        var returnedKeys = dppptDataService
+                .getSortedExposedForKeyDate(receivedAt.minus(Duration.ofDays(2)).toEpochMilli(), null, batchTime);
+
         assertEquals(1, returnedKeys.size());
         GaenKey actual = returnedKeys.get(0);
         assertEquals(actual.getKeyData(), key);
-        
-        int maxExposedIdForBatchReleaseTime = dppptDataService.getMaxExposedIdForKeyDate(receivedAt.minus(Duration.ofDays(2)).toEpochMilli(), null,	batchTime);
+
+        int maxExposedIdForBatchReleaseTime = dppptDataService
+                .getMaxExposedIdForKeyDate(receivedAt.minus(Duration.ofDays(2)).toEpochMilli(), null, batchTime);
         assertEquals(100, maxExposedIdForBatchReleaseTime);
-        
-        
-        returnedKeys = dppptDataService.getSortedExposedForKeyDate(receivedAt.minus(Duration.ofDays(2)).toEpochMilli(), batchTime, batchTime + 2 * 60 * 60 * 1000l);
+
+        returnedKeys = dppptDataService.getSortedExposedForKeyDate(receivedAt.minus(Duration.ofDays(2)).toEpochMilli(),
+                batchTime, batchTime + 2 * 60 * 60 * 1000l);
         assertEquals(0, returnedKeys.size());
     }
-
 
     private void insertExposeeWithReceivedAt(Instant receivedAt, String key) throws SQLException {
         Connection connection = dataSource.getConnection();
@@ -159,11 +159,13 @@ public class PostgresGaenDataServiceTest {
         PreparedStatement preparedStatement = connection.prepareStatement("insert " + sql);
         preparedStatement.setString(1, key);
         preparedStatement.setTimestamp(2, new Timestamp(receivedAt.toEpochMilli()));
-        preparedStatement.setInt(3, (int)Duration.ofMillis(receivedAt.toEpochMilli()).dividedBy(Duration.ofMinutes(10)));
+        preparedStatement.setInt(3,
+                (int) Duration.ofMillis(receivedAt.toEpochMilli()).dividedBy(Duration.ofMinutes(10)));
         preparedStatement.execute();
     }
-    
-    private void insertExposeeWithReceivedAtAndKeyDate(Instant receivedAt, Instant keyDate, String key) throws SQLException {
+
+    private void insertExposeeWithReceivedAtAndKeyDate(Instant receivedAt, Instant keyDate, String key)
+            throws SQLException {
         Connection connection = dataSource.getConnection();
         String sql = "into t_gaen_exposed (pk_exposed_id, key, received_at, rolling_start_number, rolling_period, transmission_risk_level) values (100, ?, ?, ?, 144, 0)";
         PreparedStatement preparedStatement = connection.prepareStatement("insert " + sql);
@@ -177,14 +179,15 @@ public class PostgresGaenDataServiceTest {
     private Exposee createExposee(String key, String keyDate) {
         Exposee exposee = new Exposee();
         exposee.setKey(key);
-        exposee.setKeyDate(LocalDate.parse("2014-01-28").atStartOfDay().atOffset(ZoneOffset.UTC).toInstant().toEpochMilli());
+        exposee.setKeyDate(
+                LocalDate.parse("2014-01-28").atStartOfDay().atOffset(ZoneOffset.UTC).toInstant().toEpochMilli());
         return exposee;
     }
 
     private long getExposeeCount() throws SQLException {
-        try (
-                final Connection connection = dataSource.getConnection();
-                final PreparedStatement preparedStatement = connection.prepareStatement("select count(*) from t_exposed");
+        try (final Connection connection = dataSource.getConnection();
+                final PreparedStatement preparedStatement = connection
+                        .prepareStatement("select count(*) from t_exposed");
                 final ResultSet resultSet = preparedStatement.executeQuery()) {
             resultSet.next();
             return resultSet.getLong(1);
@@ -192,10 +195,8 @@ public class PostgresGaenDataServiceTest {
     }
 
     protected void executeSQL(String sql) throws SQLException {
-        try (
-            final Connection connection = dataSource.getConnection();
-            final PreparedStatement preparedStatement = connection.prepareStatement(sql);
-        ) {
+        try (final Connection connection = dataSource.getConnection();
+                final PreparedStatement preparedStatement = connection.prepareStatement(sql);) {
             preparedStatement.execute();
         }
     }
