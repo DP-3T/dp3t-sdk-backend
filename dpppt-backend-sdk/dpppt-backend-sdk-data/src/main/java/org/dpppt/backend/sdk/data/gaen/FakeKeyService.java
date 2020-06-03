@@ -21,13 +21,15 @@ public class FakeKeyService {
     private final SecureRandom random;
     private final Integer keySize;
     private final Duration retentionPeriod;
+    private final boolean isEnabled;
 
-    public FakeKeyService(GAENDataService dataService, Integer minNumOfKeys, Integer keySize, Duration retentionPeriod) throws NoSuchAlgorithmException{
+    public FakeKeyService(GAENDataService dataService, Integer minNumOfKeys, Integer keySize, Duration retentionPeriod, boolean isEnabled) throws NoSuchAlgorithmException{
         this.dataService = dataService;
         this.minNumOfKeys = minNumOfKeys;
         this.random = SecureRandom.getInstanceStrong();
         this.keySize = keySize;
         this.retentionPeriod = retentionPeriod;
+        this.isEnabled = isEnabled;
         this.currentKeyDate = LocalDate.now(ZoneOffset.UTC).minusDays(1);
         this.updateFakeKeys();
 
@@ -53,7 +55,7 @@ public class FakeKeyService {
         this.dataService.cleanDB(retentionPeriod.plusDays(2));
     }
     public List<GaenKey> fillUpKeys(List<GaenKey> keys, Long keyDate) {
-        if(keys.size() >= minNumOfKeys) {
+        if(!isEnabled || keys.size() >= minNumOfKeys) {
             return keys;
         }
         var fakeKeys = this.dataService.getSortedExposedForKeyDate(keyDate, null, LocalDate.now().plusDays(1).atStartOfDay(ZoneOffset.UTC).toInstant().toEpochMilli());
