@@ -48,7 +48,7 @@ public class SignatureResponseWrapperTest {
 
 		response = new MockHttpServletResponse();
 		KeyPair keyPair = Keys.keyPairFor(SignatureAlgorithm.ES256);
-		KeyPair wrongKey = Keys.keyPairFor(SignatureAlgorithm.ES256);
+
 		List<String> protectedHeaders = new ArrayList<String>();
 		protectedHeaders.add("X-BATCH-RELEASE-TIME");
 		SignatureResponseWrapper signatureResponseWrapper = new SignatureResponseWrapper(response, keyPair, 21,
@@ -63,6 +63,39 @@ public class SignatureResponseWrapperTest {
 		assertEquals(expected, digest);
 
 	}
+	@Test
+	public void setSignatureOnlyFor200And204ButNotFor304() throws IOException {
+		response = new MockHttpServletResponse();
+		response.setStatus(200);
+
+		KeyPair keyPair = Keys.keyPairFor(SignatureAlgorithm.ES256);
+
+		List<String> protectedHeaders = new ArrayList<String>();
+		SignatureResponseWrapper signatureResponseWrapper = new SignatureResponseWrapper(response, keyPair, 21,
+				protectedHeaders, true);
+		signatureResponseWrapper.getOutputStream().print("TEST");
+		signatureResponseWrapper.flushBuffer();
+		String rawJWT = response.getHeader("Signature");
+		assertNotNull(rawJWT);
+
+		response = new MockHttpServletResponse();
+		response.setStatus(204);
+		signatureResponseWrapper = new SignatureResponseWrapper(response, keyPair, 21,
+				protectedHeaders, true);
+		signatureResponseWrapper.getOutputStream().print("TEST");
+		signatureResponseWrapper.flushBuffer();
+		rawJWT = response.getHeader("Signature");
+		assertNotNull(rawJWT);
+
+		response = new MockHttpServletResponse();
+		response.setStatus(304);
+		signatureResponseWrapper = new SignatureResponseWrapper(response, keyPair, 21,
+				protectedHeaders, true);
+		signatureResponseWrapper.getOutputStream().print("TEST");
+		signatureResponseWrapper.flushBuffer();
+		rawJWT = response.getHeader("Signature");
+		assertNull(rawJWT);
+	} 
 
 	@Test
 	public void testSignatureViaOutput() throws IOException, NoSuchAlgorithmException {
