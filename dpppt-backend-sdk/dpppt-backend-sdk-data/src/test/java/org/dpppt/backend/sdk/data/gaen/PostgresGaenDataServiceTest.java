@@ -12,6 +12,7 @@ package org.dpppt.backend.sdk.data.gaen;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
+import static org.junit.jupiter.api.Assertions.assertNotEquals;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
 import java.sql.Connection;
@@ -26,6 +27,7 @@ import java.time.LocalDateTime;
 import java.time.OffsetDateTime;
 import java.time.ZoneOffset;
 import java.time.temporal.ChronoUnit;
+import java.util.ArrayList;
 import java.util.Base64;
 import java.util.List;
 
@@ -58,7 +60,9 @@ public class PostgresGaenDataServiceTest {
     private static final Duration BATCH_LENGTH = Duration.ofHours(2);
 
     @Autowired
-    private GAENDataService dppptDataService;
+    private GAENDataService gaenDataService;
+    @Autowired
+    private FakeKeyService fakeKeyService;
 
     @Autowired
     private RedeemDataService redeemDataService;
@@ -70,6 +74,28 @@ public class PostgresGaenDataServiceTest {
     public void tearDown() throws SQLException {
         executeSQL("truncate table t_exposed");
         executeSQL("truncate table t_redeem_uuid");
+    }
+
+    @Test
+    public void testFakeKeyContainsKeysForLast21Days() {
+        var today = LocalDate.now(ZoneOffset.UTC);
+        var noKeyAtThisDate = today.minusDays(22);
+        var keysUntilToday = today.minusDays(21);
+
+        var keys = new ArrayList<GaenKey>();
+        var emptyList = fakeKeyService.fillUpKeys(keys, noKeyAtThisDate.atStartOfDay(ZoneOffset.UTC).toInstant().toEpochMilli());
+        assertEquals(0, emptyList.size());
+        do {
+            keys.clear();
+            var list = fakeKeyService.fillUpKeys(keys, keysUntilToday.atStartOfDay(ZoneOffset.UTC).toInstant().toEpochMilli());
+           
+            assertEquals(10, list.size());
+            keysUntilToday = keysUntilToday.plusDays(1);
+        } while(keysUntilToday.isBefore(today));
+        
+        keys.clear();
+        emptyList = fakeKeyService.fillUpKeys(keys, noKeyAtThisDate.atStartOfDay(ZoneOffset.UTC).toInstant().toEpochMilli());
+        assertEquals(0, emptyList.size());
     }
 
     @Test
@@ -90,13 +116,13 @@ public class PostgresGaenDataServiceTest {
         String key = "someKey";
         insertExposeeWithReceivedAtAndKeyDate(receivedAt.toInstant(), receivedAt.minusDays(1).toInstant(), key);
 
-        List<GaenKey> sortedExposedForDay = dppptDataService.getSortedExposedForKeyDate(
+        List<GaenKey> sortedExposedForDay = gaenDataService.getSortedExposedForKeyDate(
                 receivedAt.minusDays(1).toInstant().toEpochMilli(), null, now.toInstant().toEpochMilli());
 
         assertFalse(sortedExposedForDay.isEmpty());
 
-        dppptDataService.cleanDB(Duration.ofDays(21));
-        sortedExposedForDay = dppptDataService.getSortedExposedForKeyDate(
+        gaenDataService.cleanDB(Duration.ofDays(21));
+        sortedExposedForDay = gaenDataService.getSortedExposedForKeyDate(
                 receivedAt.minusDays(1).toInstant().toEpochMilli(), null, now.toInstant().toEpochMilli());
 
         assertTrue(sortedExposedForDay.isEmpty());
@@ -114,14 +140,14 @@ public class PostgresGaenDataServiceTest {
         tmpKey.setTransmissionRiskLevel(0);
         List<GaenKey> keys = List.of(tmpKey);
 
-        dppptDataService.upsertExposees(keys);
+        gaenDataService.upsertExposees(keys);
 
         long now = System.currentTimeMillis();
         // calculate exposed until bucket, but get bucket in the future, as keys have
         // been inserted with timestamp now.
         long publishedUntil = now - (now % BATCH_LENGTH.toMillis()) + BATCH_LENGTH.toMillis();
 
-        var returnedKeys = dppptDataService.getSortedExposedForKeyDate(
+        var returnedKeys = gaenDataService.getSortedExposedForKeyDate(
                 Instant.now().minus(Duration.ofDays(1)).truncatedTo(ChronoUnit.DAYS).toEpochMilli(), null,
                 publishedUntil);
 
@@ -137,18 +163,18 @@ public class PostgresGaenDataServiceTest {
 
         long batchTime = LocalDateTime.parse("2014-01-28T02:00:00").toInstant(ZoneOffset.UTC).toEpochMilli();
 
-        var returnedKeys = dppptDataService
+        var returnedKeys = gaenDataService
                 .getSortedExposedForKeyDate(receivedAt.minus(Duration.ofDays(2)).toEpochMilli(), null, batchTime);
 
         assertEquals(1, returnedKeys.size());
         GaenKey actual = returnedKeys.get(0);
         assertEquals(actual.getKeyData(), key);
 
-        int maxExposedIdForBatchReleaseTime = dppptDataService
+        int maxExposedIdForBatchReleaseTime = gaenDataService
                 .getMaxExposedIdForKeyDate(receivedAt.minus(Duration.ofDays(2)).toEpochMilli(), null, batchTime);
         assertEquals(100, maxExposedIdForBatchReleaseTime);
 
-        returnedKeys = dppptDataService.getSortedExposedForKeyDate(receivedAt.minus(Duration.ofDays(2)).toEpochMilli(),
+        returnedKeys = gaenDataService.getSortedExposedForKeyDate(receivedAt.minus(Duration.ofDays(2)).toEpochMilli(),
                 batchTime, batchTime + 2 * 60 * 60 * 1000l);
         assertEquals(0, returnedKeys.size());
     }
