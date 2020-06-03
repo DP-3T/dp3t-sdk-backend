@@ -118,8 +118,14 @@ public class SignatureResponseWrapper extends HttpServletResponseWrapper {
 	}
 
 	private void setSignature() throws IOException {
-		if(HttpStatus.valueOf(this.getStatus()) != HttpStatus.OK) {
-			return;
+		switch(HttpStatus.valueOf(this.getStatus())) {
+			//only setsignature for 200 and 204
+			case OK:
+			case NO_CONTENT:
+			break;
+
+			default:
+				return;
 		}
 		
 		byte[] theHash = this.getHash();
