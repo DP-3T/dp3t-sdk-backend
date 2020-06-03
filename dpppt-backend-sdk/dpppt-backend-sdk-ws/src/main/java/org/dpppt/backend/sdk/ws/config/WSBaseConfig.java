@@ -86,7 +86,7 @@ public abstract class WSBaseConfig implements SchedulingConfigurer, WebMvcConfig
 	@Value("${ws.headers.debug: false}")
 	boolean setDebugHeaders;
 
-	@Value("${ws.gaen.fillemptyzips: true}")
+	@Value("${ws.gaen.fillemptyzips: false}")
 	boolean fillEmptyZips;
 
 	@Value("${ws.gaen.fillto: 10}")
@@ -134,7 +134,7 @@ public abstract class WSBaseConfig implements SchedulingConfigurer, WebMvcConfig
 	KeyVault keyVault;
 
 	final SignatureAlgorithm algorithm = SignatureAlgorithm.ES256;
-	
+
 	public String getBundleId() {
 		return this.bundleId;
 	}
@@ -146,14 +146,15 @@ public abstract class WSBaseConfig implements SchedulingConfigurer, WebMvcConfig
 	public String getKeyVersion() {
 		return this.keyVersion;
 	}
-	
+
 	public String getKeyIdentifier() {
 		return this.keyIdentifier;
 	}
 
-	@Bean 
+	@Bean
 	Flyway fakeFlyway() {
-		Flyway flyWay = Flyway.configure().dataSource(fakeDataSource()).locations("classpath:/db/migration/hsqldb").load();
+		Flyway flyWay = Flyway.configure().dataSource(fakeDataSource()).locations("classpath:/db/migration/hsqldb")
+				.load();
 		flyWay.migrate();
 		return flyWay;
 	}
@@ -161,26 +162,28 @@ public abstract class WSBaseConfig implements SchedulingConfigurer, WebMvcConfig
 	@Bean
 	public FakeKeyService fakeKeyService() {
 		try {
-		return new FakeKeyService(fakeGAENService(), Integer.valueOf(fillto), Integer.valueOf(gaenKeySizeBytes), Duration.ofDays(retentionDays),fillEmptyZips);
-		} catch(Exception ex) {
-			throw new RuntimeException("FakeKeyService could not be instantiated");
+			return new FakeKeyService(fakeGAENService(), Integer.valueOf(fillto), Integer.valueOf(gaenKeySizeBytes),
+					Duration.ofDays(retentionDays), fillEmptyZips);
+		} catch (Exception ex) {
+			throw new RuntimeException("FakeKeyService could not be instantiated", ex);
 		}
 	}
+
 	@Bean
 	DataSource fakeDataSource() {
 		return new EmbeddedDatabaseBuilder().generateUniqueName(true).setType(EmbeddedDatabaseType.HSQL).build();
 	}
+
 	@Bean
 	GAENDataService fakeGAENService() {
 		return new JDBCGAENDataServiceImpl("hsql", fakeDataSource());
 	}
 
-	
 	@Bean
 	public ProtoSignature gaenSigner() {
 		try {
-			return new ProtoSignature(gaenAlgorithm, keyVault.get("gaen"), getBundleId(), getPackageName(), getKeyVersion(),
-					getKeyIdentifier(), gaenRegion, Duration.ofMillis(batchLength));
+			return new ProtoSignature(gaenAlgorithm, keyVault.get("gaen"), getBundleId(), getPackageName(),
+					getKeyVersion(), getKeyIdentifier(), gaenRegion, Duration.ofMillis(batchLength));
 		} catch (Exception ex) {
 			throw new RuntimeException("Cannot initialize signer for protobuf");
 		}
@@ -192,8 +195,8 @@ public abstract class WSBaseConfig implements SchedulingConfigurer, WebMvcConfig
 		if (theValidator == null) {
 			theValidator = new NoValidateRequest();
 		}
-		return new DPPPTController(dppptSDKDataService(), appSource, exposedListCacheControl,
-				theValidator, dpptValidationUtils(), batchLength, requestTime);
+		return new DPPPTController(dppptSDKDataService(), appSource, exposedListCacheControl, theValidator,
+				dpptValidationUtils(), batchLength, requestTime);
 	}
 
 	@Bean
@@ -212,8 +215,8 @@ public abstract class WSBaseConfig implements SchedulingConfigurer, WebMvcConfig
 		if (theValidator == null) {
 			theValidator = backupValidator();
 		}
-		return new GaenController(gaenDataService(),fakeKeyService(), theValidator, gaenSigner(), gaenValidationUtils(),
-				Duration.ofMillis(batchLength), Duration.ofMillis(requestTime),
+		return new GaenController(gaenDataService(), fakeKeyService(), theValidator, gaenSigner(),
+				gaenValidationUtils(), Duration.ofMillis(batchLength), Duration.ofMillis(requestTime),
 				Duration.ofMillis(exposedListCacheControl), keyVault.get("nextDayJWT").getPrivate());
 	}
 
@@ -262,18 +265,19 @@ public abstract class WSBaseConfig implements SchedulingConfigurer, WebMvcConfig
 		return Keys.keyPairFor(algorithm);
 	}
 
-	@Override    
+	@Override
 	public void configureAsyncSupport(AsyncSupportConfigurer configurer) {
 		configurer.setTaskExecutor(mvcTaskExecutor());
 		configurer.setDefaultTimeout(5_000);
-  }
-  @Bean
-  public ThreadPoolTaskExecutor mvcTaskExecutor() {
+	}
+
+	@Bean
+	public ThreadPoolTaskExecutor mvcTaskExecutor() {
 		ThreadPoolTaskExecutor taskExecutor = new ThreadPoolTaskExecutor();
 		taskExecutor.setThreadNamePrefix("mvc-task-");
 		taskExecutor.setMaxPoolSize(1000);
 		return taskExecutor;
-  }
+	}
 
 	@Override
 	public void configureTasks(ScheduledTaskRegistrar taskRegistrar) {
@@ -284,7 +288,7 @@ public abstract class WSBaseConfig implements SchedulingConfigurer, WebMvcConfig
 			redeemDataService().cleanDB(Duration.ofDays(1));
 			logger.info("DB cleanup up");
 		}, 60 * 60 * 1000L));
-		
+
 		var trigger = new CronTrigger("0 0 2 * * *", TimeZone.getTimeZone(ZoneOffset.UTC));
 		taskRegistrar.addCronTask(new CronTask(() -> fakeKeyService().updateFakeKeys(), trigger));
 	}

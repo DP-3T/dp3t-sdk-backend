@@ -12,7 +12,6 @@ package org.dpppt.backend.sdk.data.gaen;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
-import static org.junit.jupiter.api.Assertions.assertNotEquals;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
 import java.sql.Connection;
@@ -45,185 +44,191 @@ import org.junit.After;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.context.ContextConfiguration;
+import org.springframework.test.context.TestPropertySource;
 import org.springframework.test.context.junit4.SpringJUnit4ClassRunner;
 import org.springframework.test.context.support.AnnotationConfigContextLoader;
 
 @RunWith(SpringJUnit4ClassRunner.class)
 @ContextConfiguration(loader = AnnotationConfigContextLoader.class, classes = { PostgresDataConfig.class,
-        FlyWayConfig.class, DPPPTDataServiceConfig.class })
+		FlyWayConfig.class, DPPPTDataServiceConfig.class })
 @ActiveProfiles("postgres")
+@TestPropertySource(properties = { "ws.gaen.fillemptyzips=true" })
 public class PostgresGaenDataServiceTest {
 
-    private static final String APP_SOURCE = "test-app";
-    private static final Duration BATCH_LENGTH = Duration.ofHours(2);
+	private static final String APP_SOURCE = "test-app";
+	private static final Duration BATCH_LENGTH = Duration.ofHours(2);
 
-    @Autowired
-    private GAENDataService gaenDataService;
-    @Autowired
-    private FakeKeyService fakeKeyService;
+	@Autowired
+	private GAENDataService gaenDataService;
+	@Autowired
+	private FakeKeyService fakeKeyService;
 
-    @Autowired
-    private RedeemDataService redeemDataService;
+	@Autowired
+	private RedeemDataService redeemDataService;
 
-    @Autowired
-    private DataSource dataSource;
+	@Autowired
+	private DataSource dataSource;
 
-    @After
-    public void tearDown() throws SQLException {
-        executeSQL("truncate table t_exposed");
-        executeSQL("truncate table t_redeem_uuid");
-    }
+	@After
+	public void tearDown() throws SQLException {
+		executeSQL("truncate table t_exposed");
+		executeSQL("truncate table t_redeem_uuid");
+	}
 
-    @Test
-    public void testFakeKeyContainsKeysForLast21Days() {
-        var today = LocalDate.now(ZoneOffset.UTC);
-        var noKeyAtThisDate = today.minusDays(22);
-        var keysUntilToday = today.minusDays(21);
+	@Test
+	public void testFakeKeyContainsKeysForLast21Days() {
+		var today = LocalDate.now(ZoneOffset.UTC);
+		var noKeyAtThisDate = today.minusDays(22);
+		var keysUntilToday = today.minusDays(21);
 
-        var keys = new ArrayList<GaenKey>();
-        var emptyList = fakeKeyService.fillUpKeys(keys, noKeyAtThisDate.atStartOfDay(ZoneOffset.UTC).toInstant().toEpochMilli());
-        assertEquals(0, emptyList.size());
-        do {
-            keys.clear();
-            var list = fakeKeyService.fillUpKeys(keys, keysUntilToday.atStartOfDay(ZoneOffset.UTC).toInstant().toEpochMilli());
-           
-            assertEquals(10, list.size());
-            keysUntilToday = keysUntilToday.plusDays(1);
-        } while(keysUntilToday.isBefore(today));
+		var keys = new ArrayList<GaenKey>();
+		var emptyList = fakeKeyService.fillUpKeys(keys,
+				noKeyAtThisDate.atStartOfDay(ZoneOffset.UTC).toInstant().toEpochMilli());
+		assertEquals(0, emptyList.size());
+		do {
+			keys.clear();
+			var list = fakeKeyService.fillUpKeys(keys,
+					keysUntilToday.atStartOfDay(ZoneOffset.UTC).toInstant().toEpochMilli());
 
-        keys.clear();
-        emptyList = fakeKeyService.fillUpKeys(keys, noKeyAtThisDate.atStartOfDay(ZoneOffset.UTC).toInstant().toEpochMilli());
-        assertEquals(0, emptyList.size());
-    }
+			assertEquals(10, list.size());
+			keysUntilToday = keysUntilToday.plusDays(1);
+		} while (keysUntilToday.isBefore(today));
 
-    @Test
-    public void testRedeemUUID() {
-        boolean actual = redeemDataService.checkAndInsertPublishUUID("bc77d983-2359-48e8-835a-de673fe53ccb");
-        assertTrue(actual);
-        actual = redeemDataService.checkAndInsertPublishUUID("bc77d983-2359-48e8-835a-de673fe53ccb");
-        assertFalse(actual);
-        actual = redeemDataService.checkAndInsertPublishUUID("1c444adb-0924-4dc4-a7eb-1f52aa6b9575");
-        assertTrue(actual);
-    }
+		keys.clear();
+		emptyList = fakeKeyService.fillUpKeys(keys,
+				noKeyAtThisDate.atStartOfDay(ZoneOffset.UTC).toInstant().toEpochMilli());
+		assertEquals(0, emptyList.size());
+	}
 
-    @Test
-    public void cleanup() throws SQLException {
-        OffsetDateTime now = OffsetDateTime.now().withOffsetSameInstant(ZoneOffset.UTC);
-        OffsetDateTime receivedAt = now.minusDays(21);
-        Connection connection = dataSource.getConnection();
-        String key = "someKey";
-        insertExposeeWithReceivedAtAndKeyDate(receivedAt.toInstant(), receivedAt.minusDays(1).toInstant(), key);
+	@Test
+	public void testRedeemUUID() {
+		boolean actual = redeemDataService.checkAndInsertPublishUUID("bc77d983-2359-48e8-835a-de673fe53ccb");
+		assertTrue(actual);
+		actual = redeemDataService.checkAndInsertPublishUUID("bc77d983-2359-48e8-835a-de673fe53ccb");
+		assertFalse(actual);
+		actual = redeemDataService.checkAndInsertPublishUUID("1c444adb-0924-4dc4-a7eb-1f52aa6b9575");
+		assertTrue(actual);
+	}
 
-        List<GaenKey> sortedExposedForDay = gaenDataService.getSortedExposedForKeyDate(
-                receivedAt.minusDays(1).toInstant().toEpochMilli(), null, now.toInstant().toEpochMilli());
+	@Test
+	public void cleanup() throws SQLException {
+		OffsetDateTime now = OffsetDateTime.now().withOffsetSameInstant(ZoneOffset.UTC);
+		OffsetDateTime receivedAt = now.minusDays(21);
+		Connection connection = dataSource.getConnection();
+		String key = "someKey";
+		insertExposeeWithReceivedAtAndKeyDate(receivedAt.toInstant(), receivedAt.minusDays(1).toInstant(), key);
 
-        assertFalse(sortedExposedForDay.isEmpty());
+		List<GaenKey> sortedExposedForDay = gaenDataService.getSortedExposedForKeyDate(
+				receivedAt.minusDays(1).toInstant().toEpochMilli(), null, now.toInstant().toEpochMilli());
 
-        gaenDataService.cleanDB(Duration.ofDays(21));
-        sortedExposedForDay = gaenDataService.getSortedExposedForKeyDate(
-                receivedAt.minusDays(1).toInstant().toEpochMilli(), null, now.toInstant().toEpochMilli());
+		assertFalse(sortedExposedForDay.isEmpty());
 
-        assertTrue(sortedExposedForDay.isEmpty());
+		gaenDataService.cleanDB(Duration.ofDays(21));
+		sortedExposedForDay = gaenDataService.getSortedExposedForKeyDate(
+				receivedAt.minusDays(1).toInstant().toEpochMilli(), null, now.toInstant().toEpochMilli());
 
-    }
+		assertTrue(sortedExposedForDay.isEmpty());
 
-    @Test
-    public void upsert() throws Exception {
-        var tmpKey = new GaenKey();
-        tmpKey.setRollingStartNumber((int) Duration.ofMillis(Instant.now().minus(Duration.ofDays(1)).toEpochMilli())
-                .dividedBy(Duration.ofMinutes(10)));
-        tmpKey.setKeyData(Base64.getEncoder().encodeToString("testKey32Bytes--".getBytes("UTF-8")));
-        tmpKey.setRollingPeriod(144);
-        tmpKey.setFake(0);
-        tmpKey.setTransmissionRiskLevel(0);
-        List<GaenKey> keys = List.of(tmpKey);
+	}
 
-        gaenDataService.upsertExposees(keys);
+	@Test
+	public void upsert() throws Exception {
+		var tmpKey = new GaenKey();
+		tmpKey.setRollingStartNumber((int) Duration.ofMillis(Instant.now().minus(Duration.ofDays(1)).toEpochMilli())
+				.dividedBy(Duration.ofMinutes(10)));
+		tmpKey.setKeyData(Base64.getEncoder().encodeToString("testKey32Bytes--".getBytes("UTF-8")));
+		tmpKey.setRollingPeriod(144);
+		tmpKey.setFake(0);
+		tmpKey.setTransmissionRiskLevel(0);
+		List<GaenKey> keys = List.of(tmpKey);
 
-        long now = System.currentTimeMillis();
-        // calculate exposed until bucket, but get bucket in the future, as keys have
-        // been inserted with timestamp now.
-        long publishedUntil = now - (now % BATCH_LENGTH.toMillis()) + BATCH_LENGTH.toMillis();
+		gaenDataService.upsertExposees(keys);
 
-        var returnedKeys = gaenDataService.getSortedExposedForKeyDate(
-                Instant.now().minus(Duration.ofDays(1)).truncatedTo(ChronoUnit.DAYS).toEpochMilli(), null,
-                publishedUntil);
+		long now = System.currentTimeMillis();
+		// calculate exposed until bucket, but get bucket in the future, as keys have
+		// been inserted with timestamp now.
+		long publishedUntil = now - (now % BATCH_LENGTH.toMillis()) + BATCH_LENGTH.toMillis();
 
-        assertEquals(keys.size(), returnedKeys.size());
-        assertEquals(keys.get(0).getKeyData(), returnedKeys.get(0).getKeyData());
-    }
+		var returnedKeys = gaenDataService.getSortedExposedForKeyDate(
+				Instant.now().minus(Duration.ofDays(1)).truncatedTo(ChronoUnit.DAYS).toEpochMilli(), null,
+				publishedUntil);
 
-    @Test
-    public void testBatchReleaseTime() throws SQLException {
-        Instant receivedAt = LocalDateTime.parse("2014-01-28T00:00:00").toInstant(ZoneOffset.UTC);
-        String key = "key555";
-        insertExposeeWithReceivedAtAndKeyDate(receivedAt, receivedAt.minus(Duration.ofDays(2)), key);
+		assertEquals(keys.size(), returnedKeys.size());
+		assertEquals(keys.get(0).getKeyData(), returnedKeys.get(0).getKeyData());
+	}
 
-        long batchTime = LocalDateTime.parse("2014-01-28T02:00:00").toInstant(ZoneOffset.UTC).toEpochMilli();
+	@Test
+	public void testBatchReleaseTime() throws SQLException {
+		Instant receivedAt = LocalDateTime.parse("2014-01-28T00:00:00").toInstant(ZoneOffset.UTC);
+		String key = "key555";
+		insertExposeeWithReceivedAtAndKeyDate(receivedAt, receivedAt.minus(Duration.ofDays(2)), key);
 
-        var returnedKeys = gaenDataService
-                .getSortedExposedForKeyDate(receivedAt.minus(Duration.ofDays(2)).toEpochMilli(), null, batchTime);
+		long batchTime = LocalDateTime.parse("2014-01-28T02:00:00").toInstant(ZoneOffset.UTC).toEpochMilli();
 
-        assertEquals(1, returnedKeys.size());
-        GaenKey actual = returnedKeys.get(0);
-        assertEquals(actual.getKeyData(), key);
+		var returnedKeys = gaenDataService
+				.getSortedExposedForKeyDate(receivedAt.minus(Duration.ofDays(2)).toEpochMilli(), null, batchTime);
 
-        int maxExposedIdForBatchReleaseTime = gaenDataService
-                .getMaxExposedIdForKeyDate(receivedAt.minus(Duration.ofDays(2)).toEpochMilli(), null, batchTime);
-        assertEquals(100, maxExposedIdForBatchReleaseTime);
+		assertEquals(1, returnedKeys.size());
+		GaenKey actual = returnedKeys.get(0);
+		assertEquals(actual.getKeyData(), key);
 
-        returnedKeys = gaenDataService.getSortedExposedForKeyDate(receivedAt.minus(Duration.ofDays(2)).toEpochMilli(),
-                batchTime, batchTime + 2 * 60 * 60 * 1000l);
-        assertEquals(0, returnedKeys.size());
-    }
+		int maxExposedIdForBatchReleaseTime = gaenDataService
+				.getMaxExposedIdForKeyDate(receivedAt.minus(Duration.ofDays(2)).toEpochMilli(), null, batchTime);
+		assertEquals(100, maxExposedIdForBatchReleaseTime);
 
-    private void insertExposeeWithReceivedAt(Instant receivedAt, String key) throws SQLException {
-        Connection connection = dataSource.getConnection();
-        String sql = "into t_gaen_exposed (pk_exposed_id, key, received_at, rolling_start_number, rolling_period, transmission_risk_level) values (100, ?, ?, ?, 144, 0)";
-        PreparedStatement preparedStatement = connection.prepareStatement("insert " + sql);
-        preparedStatement.setString(1, key);
-        preparedStatement.setTimestamp(2, new Timestamp(receivedAt.toEpochMilli()));
-        preparedStatement.setInt(3,
-                (int) Duration.ofMillis(receivedAt.toEpochMilli()).dividedBy(Duration.ofMinutes(10)));
-        preparedStatement.execute();
-    }
+		returnedKeys = gaenDataService.getSortedExposedForKeyDate(receivedAt.minus(Duration.ofDays(2)).toEpochMilli(),
+				batchTime, batchTime + 2 * 60 * 60 * 1000l);
+		assertEquals(0, returnedKeys.size());
+	}
 
-    private void insertExposeeWithReceivedAtAndKeyDate(Instant receivedAt, Instant keyDate, String key)
-            throws SQLException {
-        Connection connection = dataSource.getConnection();
-        String sql = "into t_gaen_exposed (pk_exposed_id, key, received_at, rolling_start_number, rolling_period, transmission_risk_level) values (100, ?, ?, ?, 144, 0)";
-        PreparedStatement preparedStatement = connection.prepareStatement("insert " + sql);
-        preparedStatement.setString(1, key);
-        preparedStatement.setTimestamp(2, new Timestamp(receivedAt.toEpochMilli()));
-        preparedStatement.setInt(3, (int) GaenUnit.TenMinutes.between(Instant.ofEpochMilli(0), keyDate));
-        preparedStatement.execute();
-    }
+	private void insertExposeeWithReceivedAt(Instant receivedAt, String key) throws SQLException {
+		Connection connection = dataSource.getConnection();
+		String sql = "into t_gaen_exposed (pk_exposed_id, key, received_at, rolling_start_number, rolling_period, transmission_risk_level) values (100, ?, ?, ?, 144, 0)";
+		PreparedStatement preparedStatement = connection.prepareStatement("insert " + sql);
+		preparedStatement.setString(1, key);
+		preparedStatement.setTimestamp(2, new Timestamp(receivedAt.toEpochMilli()));
+		preparedStatement.setInt(3,
+				(int) Duration.ofMillis(receivedAt.toEpochMilli()).dividedBy(Duration.ofMinutes(10)));
+		preparedStatement.execute();
+	}
 
-    @NotNull
-    private Exposee createExposee(String key, String keyDate) {
-        Exposee exposee = new Exposee();
-        exposee.setKey(key);
-        exposee.setKeyDate(
-                LocalDate.parse("2014-01-28").atStartOfDay().atOffset(ZoneOffset.UTC).toInstant().toEpochMilli());
-        return exposee;
-    }
+	private void insertExposeeWithReceivedAtAndKeyDate(Instant receivedAt, Instant keyDate, String key)
+			throws SQLException {
+		Connection connection = dataSource.getConnection();
+		String sql = "into t_gaen_exposed (pk_exposed_id, key, received_at, rolling_start_number, rolling_period, transmission_risk_level) values (100, ?, ?, ?, 144, 0)";
+		PreparedStatement preparedStatement = connection.prepareStatement("insert " + sql);
+		preparedStatement.setString(1, key);
+		preparedStatement.setTimestamp(2, new Timestamp(receivedAt.toEpochMilli()));
+		preparedStatement.setInt(3, (int) GaenUnit.TenMinutes.between(Instant.ofEpochMilli(0), keyDate));
+		preparedStatement.execute();
+	}
 
-    private long getExposeeCount() throws SQLException {
-        try (final Connection connection = dataSource.getConnection();
-                final PreparedStatement preparedStatement = connection
-                        .prepareStatement("select count(*) from t_exposed");
-                final ResultSet resultSet = preparedStatement.executeQuery()) {
-            resultSet.next();
-            return resultSet.getLong(1);
-        }
-    }
+	@NotNull
+	private Exposee createExposee(String key, String keyDate) {
+		Exposee exposee = new Exposee();
+		exposee.setKey(key);
+		exposee.setKeyDate(
+				LocalDate.parse("2014-01-28").atStartOfDay().atOffset(ZoneOffset.UTC).toInstant().toEpochMilli());
+		return exposee;
+	}
 
-    protected void executeSQL(String sql) throws SQLException {
-        try (final Connection connection = dataSource.getConnection();
-                final PreparedStatement preparedStatement = connection.prepareStatement(sql);) {
-            preparedStatement.execute();
-        }
-    }
+	private long getExposeeCount() throws SQLException {
+		try (final Connection connection = dataSource.getConnection();
+				final PreparedStatement preparedStatement = connection
+						.prepareStatement("select count(*) from t_exposed");
+				final ResultSet resultSet = preparedStatement.executeQuery()) {
+			resultSet.next();
+			return resultSet.getLong(1);
+		}
+	}
+
+	protected void executeSQL(String sql) throws SQLException {
+		try (final Connection connection = dataSource.getConnection();
+				final PreparedStatement preparedStatement = connection.prepareStatement(sql);) {
+			preparedStatement.execute();
+		}
+	}
 }

@@ -8,8 +8,6 @@ import java.time.temporal.ChronoUnit;
 import java.util.Base64;
 import java.util.List;
 
-import javax.sql.DataSource;
-
 import org.dpppt.backend.sdk.data.config.DPPPTDataServiceConfig;
 import org.dpppt.backend.sdk.data.config.FlyWayConfig;
 import org.dpppt.backend.sdk.data.config.RedeemDataServiceConfig;
