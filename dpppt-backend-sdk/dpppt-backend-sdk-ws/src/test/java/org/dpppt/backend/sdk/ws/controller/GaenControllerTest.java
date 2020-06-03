@@ -670,7 +670,7 @@ public class GaenControllerTest extends BaseControllerTest {
 		var firstPublishUntil = response.getHeader("X-PUBLISHED-UNTIL");
 		var signature = response.getHeader("Signature");
 		assertNotNull(signature);
-		Thread.sleep(2000);
+
 		response = mockMvc
 				.perform(get("/v1/gaen/exposed/"
 						+ LocalDate.now(ZoneOffset.UTC).minusDays(8).atStartOfDay(ZoneOffset.UTC).toInstant().toEpochMilli())
