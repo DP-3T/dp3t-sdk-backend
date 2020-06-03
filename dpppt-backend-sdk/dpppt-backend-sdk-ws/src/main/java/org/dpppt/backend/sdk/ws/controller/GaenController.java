@@ -212,12 +212,10 @@ public class GaenController {
 		long publishedUntil = now - (now % bucketLength.toMillis());
 
 		var exposedKeys = dataService.getSortedExposedForKeyDate(keyDate, publishedafter, publishedUntil);
+		exposedKeys = fakeKeyService.fillUpKeys(exposedKeys, keyDate);
 		if (exposedKeys.isEmpty()) {
-			exposedKeys = fakeKeyService.fillUpKeys(exposedKeys, keyDate);
-			if (exposedKeys.isEmpty()) {
-				return ResponseEntity.noContent().cacheControl(CacheControl.maxAge(exposedListCacheContol))
-						.header("X-PUBLISHED-UNTIL", Long.toString(publishedUntil)).build();
-			}
+			return ResponseEntity.noContent().cacheControl(CacheControl.maxAge(exposedListCacheContol))
+					.header("X-PUBLISHED-UNTIL", Long.toString(publishedUntil)).build();
 		}
 
 		ProtoSignatureWrapper payload = gaenSigner.getPayload(exposedKeys);
