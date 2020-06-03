@@ -657,7 +657,7 @@ public class GaenControllerTest extends BaseControllerTest {
 	}
 
 	@Test
-	@Transactional
+	@Transactional(transactionManager = "testTransactionManager")
 	public void testNonEmptyResponseAnd304() throws Exception {
 		MockHttpServletResponse response = mockMvc
 				.perform(get("/v1/gaen/exposed/"
@@ -681,7 +681,7 @@ public class GaenControllerTest extends BaseControllerTest {
 	}
 
 	@Test
-	@Transactional
+	@Transactional(transactionManager = "testTransactionManager")
 	public void testEtag() throws Exception {
 		LocalDateTime now = LocalDateTime.now(ZoneOffset.UTC);
 		insertNKeysPerDayInInterval(14,
