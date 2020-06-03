@@ -26,7 +26,7 @@ public class FakeKeyService {
 			boolean isEnabled) throws NoSuchAlgorithmException {
 		this.dataService = dataService;
 		this.minNumOfKeys = minNumOfKeys;
-		this.random = SecureRandom.getInstanceStrong();
+		this.random = new SecureRandom();
 		this.keySize = keySize;
 		this.retentionPeriod = retentionPeriod;
 		this.isEnabled = isEnabled;
