@@ -56,11 +56,6 @@ public class WSDevConfig extends WSBaseConfig {
 		return "hsqldb";
 	}
 
-	@Override
-	public void configureTasks(ScheduledTaskRegistrar taskRegistrar) {
-		super.configureTasks(taskRegistrar);
-	}
-
 	@Bean
 	KeyVault keyVault() {
 		var privateKey = getPrivateKey();

@@ -54,12 +54,7 @@ public abstract class WSCloudBaseConfig extends WSBaseConfig {
 	public String getDbType() {
 		return "pgsql";
 	}
-
-	@Override
-	public void configureTasks(ScheduledTaskRegistrar taskRegistrar) {
-		super.configureTasks(taskRegistrar);
-	}
-
+	
 	@Bean
 	protected KeyVault keyVault() {
 		var privateKey = getPrivateKey();

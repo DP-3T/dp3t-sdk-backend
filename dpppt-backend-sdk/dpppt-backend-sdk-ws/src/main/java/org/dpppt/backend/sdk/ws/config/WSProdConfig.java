@@ -104,11 +104,6 @@ public class WSProdConfig extends WSBaseConfig {
 		return "pgsql";
 	}
 
-	@Override
-	public void configureTasks(ScheduledTaskRegistrar taskRegistrar) {
-		super.configureTasks(taskRegistrar);
-	}
-
 	@Bean
 	KeyVault keyVault() {
 		var privateKey = getPrivateKey();
