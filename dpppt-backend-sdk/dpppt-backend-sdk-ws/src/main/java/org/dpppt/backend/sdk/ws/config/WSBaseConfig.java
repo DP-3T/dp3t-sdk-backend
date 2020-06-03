@@ -86,11 +86,11 @@ public abstract class WSBaseConfig implements SchedulingConfigurer, WebMvcConfig
 	@Value("${ws.headers.debug: false}")
 	boolean setDebugHeaders;
 
-	@Value("${ws.gaen.fillemptyzips: false}")
-	boolean fillEmptyZips;
+	@Value("${ws.gaen.randomkeysenabled: false}")
+	boolean randomkeysenabled;
 
-	@Value("${ws.gaen.fillto: 10}")
-	int fillto;
+	@Value("${ws.gaen.randomkeyamount: 10}")
+	int randomkeyamount;
 
 	@Value("${ws.retentiondays: 21}")
 	int retentionDays;
@@ -162,8 +162,8 @@ public abstract class WSBaseConfig implements SchedulingConfigurer, WebMvcConfig
 	@Bean
 	public FakeKeyService fakeKeyService() {
 		try {
-			return new FakeKeyService(fakeGAENService(), Integer.valueOf(fillto), Integer.valueOf(gaenKeySizeBytes),
-					Duration.ofDays(retentionDays), fillEmptyZips);
+			return new FakeKeyService(fakeGAENService(), Integer.valueOf(randomkeyamount), Integer.valueOf(gaenKeySizeBytes),
+					Duration.ofDays(retentionDays), randomkeysenabled);
 		} catch (Exception ex) {
 			throw new RuntimeException("FakeKeyService could not be instantiated", ex);
 		}

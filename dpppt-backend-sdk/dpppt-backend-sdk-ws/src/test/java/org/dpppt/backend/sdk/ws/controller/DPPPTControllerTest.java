@@ -34,7 +34,7 @@ import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.http.MediaType;
 import org.springframework.mock.web.MockHttpServletResponse;
 
-@SpringBootTest(properties = { "ws.app.jwt.publickey=classpath://generated_pub.pem", "ws.gaen.fillemptyzips=true" })
+@SpringBootTest(properties = { "ws.app.jwt.publickey=classpath://generated_pub.pem", "ws.gaen.randomkeysenabled=true" })
 public class DPPPTControllerTest extends BaseControllerTest {
 	@Test
 	public void testHello() throws Exception {

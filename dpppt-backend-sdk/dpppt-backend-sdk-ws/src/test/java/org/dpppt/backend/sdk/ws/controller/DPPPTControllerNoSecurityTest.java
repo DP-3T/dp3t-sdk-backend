@@ -34,7 +34,7 @@ import org.springframework.mock.web.MockHttpServletResponse;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 
-@SpringBootTest(properties = { "ws.gaen.fillemptyzips=true" })
+@SpringBootTest(properties = { "ws.gaen.randomkeysenabled=true" })
 public class DPPPTControllerNoSecurityTest extends BaseControllerNoSecurityTest {
 	@Test
 	public void testJWT() throws Exception {

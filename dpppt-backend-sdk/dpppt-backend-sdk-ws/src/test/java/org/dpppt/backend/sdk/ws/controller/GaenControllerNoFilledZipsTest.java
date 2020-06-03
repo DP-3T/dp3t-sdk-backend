@@ -17,7 +17,7 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 @SpringBootTest(properties = {
         "ws.app.jwt.publickey=classpath://generated_pub.pem",
         "logging.level.org.springframework.security=DEBUG", "ws.exposedlist.batchlength=7200000",
-        "ws.gaen.fillemptyzips=false" })
+        "ws.gaen.randomkeysenabled=false" })
 public class GaenControllerNoFilledZipsTest extends BaseControllerTest {
     @Test
 	@Transactional

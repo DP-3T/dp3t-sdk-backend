@@ -65,7 +65,7 @@ import io.jsonwebtoken.Jwt;
 import io.jsonwebtoken.Jwts;
 
 @SpringBootTest(properties = { "ws.app.jwt.publickey=classpath://generated_pub.pem",
-		"logging.level.org.springframework.security=DEBUG", "ws.exposedlist.batchlength=7200000", "ws.gaen.fillemptyzips=true" })
+		"logging.level.org.springframework.security=DEBUG", "ws.exposedlist.batchlength=7200000", "ws.gaen.randomkeysenabled=true" })
 public class GaenControllerTest extends BaseControllerTest {
 	@Autowired
 	ProtoSignature signer;
@@ -641,7 +641,7 @@ public class GaenControllerTest extends BaseControllerTest {
 		Long publishedUntil = Long.parseLong(response.getHeader("X-PUBLISHED-UNTIL"));
 		assertTrue(publishedUntil < System.currentTimeMillis(), "Published until must be in the past");
 
-		verifyZipResponse(response, 10);
+		verifyZipResponse(response, 20);
 
 		// request again the keys with date date 1 day ago. with publish until, so that
 		// we only get the second batch.

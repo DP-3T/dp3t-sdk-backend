@@ -32,8 +32,8 @@ import javax.sql.DataSource;
 @Configuration
 public class DPPPTDataServiceConfig {
 
-    @Value("${ws.gaen.fillemptyzips: true}")
-    boolean fillEmptyZips;
+    @Value("${ws.gaen.randomkeysenabled: true}")
+    boolean randomkeysenabled;
 
     @Autowired
     DataSource dataSource;
@@ -68,6 +68,6 @@ public class DPPPTDataServiceConfig {
 
     @Bean
     public FakeKeyService fakeKeyService() throws NoSuchAlgorithmException {
-        return new FakeKeyService(fakeService(), 10, 16, Duration.ofDays(21), fillEmptyZips);
+        return new FakeKeyService(fakeService(), 10, 16, Duration.ofDays(21), randomkeysenabled);
     }
 }
