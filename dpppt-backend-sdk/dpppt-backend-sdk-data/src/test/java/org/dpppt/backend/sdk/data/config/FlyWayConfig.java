@@ -24,6 +24,9 @@ public class FlyWayConfig {
 	@Autowired
     DataSource dataSource;
 
+	@Autowired
+	DataSource fakeDataSource;
+	
 	@Bean
 	@Profile("hsqldb")
 	public Flyway flyway() {
@@ -36,6 +39,12 @@ public class FlyWayConfig {
 	@Profile("postgres")
 	public Flyway flywayPostgres() {
 		Flyway flyWay = Flyway.configure().dataSource(dataSource).locations("classpath:/db/migration/pgsql").load();
+		flyWay.migrate();
+		return flyWay;
+	}
+	@Bean
+	public Flyway fakeFlyway() {
+		Flyway flyWay = Flyway.configure().dataSource(fakeDataSource).locations("classpath:/db/migration/hsqldb").load();
 		flyWay.migrate();
 		return flyWay;
 	}

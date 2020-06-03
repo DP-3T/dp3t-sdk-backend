@@ -20,7 +20,6 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
-import org.springframework.scheduling.config.ScheduledTaskRegistrar;
 
 @Configuration
 public abstract class WSCloudBaseConfig extends WSBaseConfig {
@@ -53,11 +52,6 @@ public abstract class WSCloudBaseConfig extends WSBaseConfig {
 	@Override
 	public String getDbType() {
 		return "pgsql";
-	}
-
-	@Override
-	public void configureTasks(ScheduledTaskRegistrar taskRegistrar) {
-
 	}
 
 	@Bean

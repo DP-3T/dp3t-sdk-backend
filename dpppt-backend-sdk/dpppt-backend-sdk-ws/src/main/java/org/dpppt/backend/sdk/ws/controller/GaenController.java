@@ -27,6 +27,7 @@ import java.util.concurrent.Callable;
 
 import javax.validation.Valid;
 
+import org.dpppt.backend.sdk.data.gaen.FakeKeyService;
 import org.dpppt.backend.sdk.data.gaen.GAENDataService;
 import org.dpppt.backend.sdk.model.gaen.DayBuckets;
 import org.dpppt.backend.sdk.model.gaen.GaenExposedJson;
@@ -70,14 +71,16 @@ public class GaenController {
 	private final ValidateRequest validateRequest;
 	private final ValidationUtils validationUtils;
 	private final GAENDataService dataService;
+	private final FakeKeyService fakeKeyService;
 	private final Duration exposedListCacheContol;
 	private final PrivateKey secondDayKey;
 	private final ProtoSignature gaenSigner;
 
-	public GaenController(GAENDataService dataService, ValidateRequest validateRequest, ProtoSignature gaenSigner,
-			ValidationUtils validationUtils, Duration bucketLength, Duration requestTime,
+	public GaenController(GAENDataService dataService, FakeKeyService fakeKeyService, ValidateRequest validateRequest,
+			ProtoSignature gaenSigner, ValidationUtils validationUtils, Duration bucketLength, Duration requestTime,
 			Duration exposedListCacheContol, PrivateKey secondDayKey) {
 		this.dataService = dataService;
+		this.fakeKeyService = fakeKeyService;
 		this.bucketLength = bucketLength;
 		this.validateRequest = validateRequest;
 		this.requestTime = requestTime;
@@ -209,6 +212,7 @@ public class GaenController {
 		long publishedUntil = now - (now % bucketLength.toMillis());
 
 		var exposedKeys = dataService.getSortedExposedForKeyDate(keyDate, publishedafter, publishedUntil);
+		exposedKeys = fakeKeyService.fillUpKeys(exposedKeys, keyDate);
 		if (exposedKeys.isEmpty()) {
 			return ResponseEntity.noContent().cacheControl(CacheControl.maxAge(exposedListCacheContol))
 					.header("X-PUBLISHED-UNTIL", Long.toString(publishedUntil)).build();

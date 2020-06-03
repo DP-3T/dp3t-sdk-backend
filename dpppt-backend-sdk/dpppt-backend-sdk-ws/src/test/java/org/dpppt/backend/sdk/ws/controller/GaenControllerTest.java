@@ -13,6 +13,7 @@ package org.dpppt.backend.sdk.ws.controller;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotEquals;
 import static org.junit.Assert.assertNotNull;
+import static org.junit.Assert.assertNull;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.asyncDispatch;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
@@ -64,7 +65,7 @@ import io.jsonwebtoken.Jwt;
 import io.jsonwebtoken.Jwts;
 
 @SpringBootTest(properties = { "ws.app.jwt.publickey=classpath://generated_pub.pem",
-		"logging.level.org.springframework.security=DEBUG", "ws.exposedlist.batchlength=7200000" })
+		"logging.level.org.springframework.security=DEBUG", "ws.exposedlist.batchlength=7200000", "ws.gaen.randomkeysenabled=true" })
 public class GaenControllerTest extends BaseControllerTest {
 	@Autowired
 	ProtoSignature signer;
@@ -640,7 +641,7 @@ public class GaenControllerTest extends BaseControllerTest {
 		Long publishedUntil = Long.parseLong(response.getHeader("X-PUBLISHED-UNTIL"));
 		assertTrue(publishedUntil < System.currentTimeMillis(), "Published until must be in the past");
 
-		verifyZipResponse(response, 10);
+		verifyZipResponse(response, 20);
 
 		// request again the keys with date date 1 day ago. with publish until, so that
 		// we only get the second batch.
@@ -652,11 +653,36 @@ public class GaenControllerTest extends BaseControllerTest {
 										Long.toString(bucketAfterSecondRelease)))
 				.andExpect(status().is2xxSuccessful()).andReturn().getResponse();
 
-		verifyZipResponse(responseWithPublishedAfter, 5);
+		//we always have 10
+		verifyZipResponse(responseWithPublishedAfter, 15);
 	}
 
 	@Test
-	@Transactional
+	@Transactional(transactionManager = "testTransactionManager")
+	public void testNonEmptyResponseAnd304() throws Exception {
+		MockHttpServletResponse response = mockMvc
+				.perform(get("/v1/gaen/exposed/"
+						+ LocalDate.now(ZoneOffset.UTC).minusDays(8).atStartOfDay(ZoneOffset.UTC).toInstant().toEpochMilli())
+								.header("User-Agent", "MockMVC"))
+				.andExpect(status().isOk()).andReturn().getResponse();
+		verifyZipInZipResponse(response, 10);
+		var etag = response.getHeader("ETag");
+		var firstPublishUntil = response.getHeader("X-PUBLISHED-UNTIL");
+		var signature = response.getHeader("Signature");
+		assertNotNull(signature);
+
+		response = mockMvc
+				.perform(get("/v1/gaen/exposed/"
+						+ LocalDate.now(ZoneOffset.UTC).minusDays(8).atStartOfDay(ZoneOffset.UTC).toInstant().toEpochMilli())
+								.header("User-Agent", "MockMVC")
+								.header("If-None-Match", etag))
+				.andExpect(status().is(304)).andReturn().getResponse();
+		signature = response.getHeader("Signature");
+		assertNull(signature);
+	}
+
+	@Test
+	@Transactional(transactionManager = "testTransactionManager")
 	public void testEtag() throws Exception {
 		LocalDateTime now = LocalDateTime.now(ZoneOffset.UTC);
 		insertNKeysPerDayInInterval(14,

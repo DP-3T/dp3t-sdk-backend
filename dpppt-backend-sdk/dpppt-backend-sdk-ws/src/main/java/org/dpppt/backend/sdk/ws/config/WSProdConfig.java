@@ -33,7 +33,6 @@ import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.Profile;
 import org.springframework.core.env.Environment;
-import org.springframework.scheduling.config.ScheduledTaskRegistrar;
 
 import com.zaxxer.hikari.HikariConfig;
 import com.zaxxer.hikari.HikariDataSource;
@@ -102,11 +101,6 @@ public class WSProdConfig extends WSBaseConfig {
 	@Override
 	public String getDbType() {
 		return "pgsql";
-	}
-
-	@Override
-	public void configureTasks(ScheduledTaskRegistrar taskRegistrar) {
-
 	}
 
 	@Bean
