@@ -40,7 +40,7 @@ public class WSDevConfig extends WSBaseConfig {
 	@Bean
 	@Override
 	public DataSource dataSource() {
-		return new EmbeddedDatabaseBuilder().setType(EmbeddedDatabaseType.HSQL).build();
+		return new EmbeddedDatabaseBuilder().generateUniqueName(true).setType(EmbeddedDatabaseType.HSQL).build();
 	}
 
 	@Bean

@@ -154,7 +154,7 @@ public abstract class WSBaseConfig implements SchedulingConfigurer, WebMvcConfig
 	}
 	@Bean
 	DataSource fakeDataSource() {
-		return new EmbeddedDatabaseBuilder().setType(EmbeddedDatabaseType.HSQL).build();
+		return new EmbeddedDatabaseBuilder().generateUniqueName(true).setType(EmbeddedDatabaseType.HSQL).build();
 	}
 	@Bean
 	GAENDataService fakeGAENService() {

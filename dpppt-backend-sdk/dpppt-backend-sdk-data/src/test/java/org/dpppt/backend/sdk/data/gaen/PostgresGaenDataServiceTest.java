@@ -92,7 +92,7 @@ public class PostgresGaenDataServiceTest {
             assertEquals(10, list.size());
             keysUntilToday = keysUntilToday.plusDays(1);
         } while(keysUntilToday.isBefore(today));
-        
+
         keys.clear();
         emptyList = fakeKeyService.fillUpKeys(keys, noKeyAtThisDate.atStartOfDay(ZoneOffset.UTC).toInstant().toEpochMilli());
         assertEquals(0, emptyList.size());

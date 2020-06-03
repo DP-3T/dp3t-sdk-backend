@@ -32,10 +32,7 @@ public class GaenDataServiceTest {
 	private static final Duration BUCKET_LENGTH = Duration.ofHours(2);
 
 	@Autowired
-	private GAENDataService dppptDataService;
-
-	@Autowired
-	private DataSource dataSource;
+	private GAENDataService gaenDataService;
 
 	@Test
 	public void upsert() throws Exception {
@@ -55,14 +52,14 @@ public class GaenDataServiceTest {
 		tmpKey2.setTransmissionRiskLevel(0);
 		List<GaenKey> keys = List.of(tmpKey, tmpKey2);
 
-		dppptDataService.upsertExposees(keys);
+		gaenDataService.upsertExposees(keys);
 
 		long now = System.currentTimeMillis();
 		// calculate exposed until bucket, but get bucket in the future, as keys have
 		// been inserted with timestamp now.
 		long publishedUntil = now - (now % BUCKET_LENGTH.toMillis()) + BUCKET_LENGTH.toMillis();
 
-		var returnedKeys = dppptDataService.getSortedExposedForKeyDate(
+		var returnedKeys = gaenDataService.getSortedExposedForKeyDate(
 				Instant.now().minus(Duration.ofDays(1)).truncatedTo(ChronoUnit.DAYS).toEpochMilli(), null,
 				publishedUntil);
 

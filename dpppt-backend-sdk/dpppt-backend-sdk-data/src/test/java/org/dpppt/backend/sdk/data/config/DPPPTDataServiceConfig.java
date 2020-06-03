@@ -40,7 +40,7 @@ public class DPPPTDataServiceConfig {
 
     @Bean
     public DataSource fakeDataSource() {
-        return new EmbeddedDatabaseBuilder().setType(EmbeddedDatabaseType.HSQL).build();
+        return new EmbeddedDatabaseBuilder().generateUniqueName(true).setType(EmbeddedDatabaseType.HSQL).build();
     }
 
     @Autowired
