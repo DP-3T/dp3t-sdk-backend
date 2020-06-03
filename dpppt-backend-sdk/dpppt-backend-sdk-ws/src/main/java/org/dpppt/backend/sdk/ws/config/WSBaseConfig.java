@@ -152,31 +152,19 @@ public abstract class WSBaseConfig implements SchedulingConfigurer, WebMvcConfig
 	}
 
 	@Bean
-	Flyway fakeFlyway() {
-		Flyway flyWay = Flyway.configure().dataSource(fakeDataSource()).locations("classpath:/db/migration/hsqldb")
-				.load();
-		flyWay.migrate();
-		return flyWay;
-	}
-
-	@Bean
 	public FakeKeyService fakeKeyService() {
 		try {
-			return new FakeKeyService(fakeGAENService(), Integer.valueOf(randomkeyamount), Integer.valueOf(gaenKeySizeBytes),
-					Duration.ofDays(retentionDays), randomkeysenabled);
+			DataSource fakeDataSource = new EmbeddedDatabaseBuilder().generateUniqueName(true)
+					.setType(EmbeddedDatabaseType.HSQL).build();
+			Flyway flyWay = Flyway.configure().dataSource(fakeDataSource).locations("classpath:/db/migration/hsqldb")
+					.load();
+			flyWay.migrate();
+			GAENDataService fakeGaenService = new JDBCGAENDataServiceImpl("hsql", fakeDataSource);
+			return new FakeKeyService(fakeGaenService, Integer.valueOf(randomkeyamount),
+					Integer.valueOf(gaenKeySizeBytes), Duration.ofDays(retentionDays), randomkeysenabled);
 		} catch (Exception ex) {
 			throw new RuntimeException("FakeKeyService could not be instantiated", ex);
 		}
-	}
-
-	@Bean
-	DataSource fakeDataSource() {
-		return new EmbeddedDatabaseBuilder().generateUniqueName(true).setType(EmbeddedDatabaseType.HSQL).build();
-	}
-
-	@Bean
-	GAENDataService fakeGAENService() {
-		return new JDBCGAENDataServiceImpl("hsql", fakeDataSource());
 	}
 
 	@Bean
