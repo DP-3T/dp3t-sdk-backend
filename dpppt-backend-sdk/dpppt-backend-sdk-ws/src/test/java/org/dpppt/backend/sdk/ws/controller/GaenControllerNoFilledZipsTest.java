@@ -31,7 +31,7 @@ public class GaenControllerNoFilledZipsTest extends BaseControllerTest {
 		var etag = response.getHeader("ETag");
         var firstPublishUntil = response.getHeader("X-PUBLISHED-UNTIL");
         var signature = response.getHeader("Signature");
-        assertNull(signature); //Todo: Android fix
+        assertNotNull(signature);
         assertNotNull(firstPublishUntil);
         assertNull(etag);
 	}
