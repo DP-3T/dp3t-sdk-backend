@@ -654,7 +654,7 @@ public class GaenControllerTest extends BaseControllerTest {
 				.andExpect(status().is2xxSuccessful()).andReturn().getResponse();
 
 		//we always have 10
-		verifyZipResponse(responseWithPublishedAfter, 10);
+		verifyZipResponse(responseWithPublishedAfter, 15);
 	}
 
 	@Test

@@ -34,41 +34,35 @@ public class FakeKeyService {
 		this.updateFakeKeys();
 	}
 
-	public void updateFakeKeys() {
-		deleteAllKeys();
-		currentKeyDate = currentKeyDate.plusDays(1);
-		var tmpDate = currentKeyDate.minusDays(retentionPeriod.toDays());
-		do {
-			var keys = new ArrayList<GaenKey>();
-			for (int i = 0; i < minNumOfKeys; i++) {
-				byte[] keyData = new byte[keySize];
-				random.nextBytes(keyData);
-				var keyGAENTime = (int) Duration.ofSeconds(tmpDate.toEpochSecond(LocalTime.MIDNIGHT, ZoneOffset.UTC))
-						.dividedBy(GaenUnit.TenMinutes.getDuration());
-				var key = new GaenKey(Base64.getEncoder().encodeToString(keyData), keyGAENTime, 144, 0);
-				keys.add(key);
-			}
-			this.dataService.upsertExposees(keys);
-			tmpDate = tmpDate.plusDays(1);
-		} while (tmpDate.isBefore(currentKeyDate));
-	}
-
-	private void deleteAllKeys() {
-		this.dataService.cleanDB(retentionPeriod.plusDays(2));
-	}
-
-	public List<GaenKey> fillUpKeys(List<GaenKey> keys, Long keyDate) {
-		if (!isEnabled || keys.size() >= minNumOfKeys) {
-			return keys;
-		}
-		var fakeKeys = this.dataService.getSortedExposedForKeyDate(keyDate, null,
-				LocalDate.now().plusDays(1).atStartOfDay(ZoneOffset.UTC).toInstant().toEpochMilli());
-		if (fakeKeys.size() < minNumOfKeys) {
-			return keys;
-		}
-		for (int i = minNumOfKeys - keys.size() - 1; i >= 0; i--) {
-			keys.add(fakeKeys.get(i));
-		}
-		return keys;
-	}
+    public void updateFakeKeys() {
+        deleteAllKeys();
+        currentKeyDate = currentKeyDate.plusDays(1);
+        var tmpDate = currentKeyDate.minusDays(retentionPeriod.toDays());
+        do {
+            var keys = new ArrayList<GaenKey>();
+            for(int i =0; i < minNumOfKeys;i++){
+                byte[] keyData = new byte[keySize];
+                random.nextBytes(keyData);
+                var keyGAENTime = (int)Duration.ofSeconds(tmpDate.toEpochSecond(LocalTime.MIDNIGHT, ZoneOffset.UTC)).dividedBy(GaenUnit.TenMinutes.getDuration());
+                var key = new GaenKey(Base64.getEncoder().encodeToString(keyData), keyGAENTime, 144, 0);
+                keys.add(key);
+            }
+            this.dataService.upsertExposees(keys);
+            tmpDate = tmpDate.plusDays(1);
+        } while(tmpDate.isBefore(currentKeyDate));
+    }
+    private void deleteAllKeys() {
+        this.dataService.cleanDB(retentionPeriod.plusDays(2));
+    }
+    public List<GaenKey> fillUpKeys(List<GaenKey> keys, Long keyDate) {
+        if(!isEnabled || keys.size() >= minNumOfKeys) {
+            return keys;
+        }
+        var fakeKeys = this.dataService.getSortedExposedForKeyDate(keyDate, null, LocalDate.now().plusDays(1).atStartOfDay(ZoneOffset.UTC).toInstant().toEpochMilli());
+        if(fakeKeys.size() < minNumOfKeys) {
+            return keys;
+        }
+        keys.addAll(fakeKeys);
+        return keys;
+    }
 }
