@@ -59,9 +59,7 @@ public class FakeKeyService {
             return keys;
         }
         var fakeKeys = this.dataService.getSortedExposedForKeyDate(keyDate, null, LocalDate.now().plusDays(1).atStartOfDay(ZoneOffset.UTC).toInstant().toEpochMilli());
-        if(fakeKeys.size() < minNumOfKeys) {
-            return keys;
-        }
+       
         keys.addAll(fakeKeys);
         return keys;
     }
