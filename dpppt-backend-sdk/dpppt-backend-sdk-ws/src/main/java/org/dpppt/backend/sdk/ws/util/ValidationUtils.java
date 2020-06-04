@@ -59,7 +59,7 @@ public class ValidationUtils {
 	}
 
 	public boolean isValidBatchReleaseTime(Long batchReleaseTime) throws BadBatchReleaseTimeException {
-		if (batchReleaseTime % batchLength != 0) {
+		if (batchReleaseTime == null || batchReleaseTime % batchLength != 0) {
 			throw new BadBatchReleaseTimeException();
 		}
 		if (batchReleaseTime > OffsetDateTime.now().withOffsetSameInstant(ZoneOffset.UTC).toInstant().toEpochMilli()) {
