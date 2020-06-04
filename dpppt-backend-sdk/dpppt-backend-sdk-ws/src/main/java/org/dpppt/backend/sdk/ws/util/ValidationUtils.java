@@ -55,7 +55,7 @@ public class ValidationUtils {
 	 * @return
 	 */
 	public boolean isValidKeyDate(Long keyDate) {
-		return (Instant.ofEpochMilli(keyDate).atOffset(ZoneOffset.UTC).getHour() == 0);
+		return keyDate != null && (Instant.ofEpochMilli(keyDate).atOffset(ZoneOffset.UTC).getHour() == 0);
 	}
 
 	public boolean isValidBatchReleaseTime(Long batchReleaseTime) throws BadBatchReleaseTimeException {
