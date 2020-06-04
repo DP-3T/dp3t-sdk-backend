@@ -39,5 +39,5 @@ jobs:
         repo_token: "${{ secrets.GITHUB_TOKEN }}"
         prerelease: false
         files: |
-          dpppt-backend-sdk/dpppt-backend-sdk-ws/target/dpppt-backend-sdk-ws-*-SNAPSHOT.jar
+          dpppt-backend-sdk/dpppt-backend-sdk-ws/target/dpppt-backend-sdk-ws.jar
           dpppt-backend-sdk/dpppt-backend-sdk-ws/generated/swagger/swagger.yaml
