@@ -66,7 +66,7 @@ jobs:
       with:
         name: Snapshot Release ${{ github.ref }}
         tag: SNAPSHOT
-        artifacts: "dpppt-backend-sdk/dpppt-backend-sdk-ws/target/dpppt-backend-sdk-ws-*-SNAPSHOT.jar,dpppt-backend-sdk/dpppt-backend-sdk-ws/generated/swagger/swagger.yaml"
+        artifacts: "dpppt-backend-sdk/dpppt-backend-sdk-ws/target/dpppt-backend-sdk-ws.jar,dpppt-backend-sdk/dpppt-backend-sdk-ws/generated/swagger/swagger.yaml"
         body: |
             Changes in this Release
             - Snapshot release
