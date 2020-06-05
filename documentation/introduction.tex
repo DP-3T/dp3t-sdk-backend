@@ -1,0 +1,14 @@
+\part{Technical Description}
+\section{Introduction}
+This document outlines the backend as it is. The models and requests are automatically generated. Hence, they should reflect the current live situation. We try to provide examples and description to clarify the use of the fields and responses returned.
+
+\section{Verification of Data}
+To handle heavy workload, requests are routed via a content-delivery-network (CDN). This means that we need to provide proof that the data was not modified by the CDN. We propose a Elliptic-Curve Digital Signature Algorithm using the P256 elliptic curve with a SHA-256 hashing algorithm. The P256 elliptic curve has good native support for the Apple and Android platforms to verify signatures. The public key should be available on the discovery platform and is as well included and distributed with the applications for iOS and Android.
+
+The ensure the possibility of signature verification, the signed endpoints return an object with a signature and a data field, of which the data field contains a base64 representation of the list. In the current implementation the representation is a json of a list of keys. To improve performance of possible large decodings, we plan to switch to protobuf or something similar, which should speed up the parsing.
+
+Since we only want to ensure that the data we are processing was indeed the data sent from the specified backend, it is sufficient to generate the signature of the content which will be processed. 
+
+Too further improve operability, the algorithm used to generate the signature should as well be encoded within the json object, similiar to a JWK (Json web key).
+
+\section{Google/Apple Privacy-Preserving Contact Tracing Similarities}

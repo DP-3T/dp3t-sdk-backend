@@ -1,0 +1,68 @@
+% Options for packages loaded elsewhere
+\PassOptionsToPackage{unicode}{hyperref}
+\PassOptionsToPackage{hyphens}{url}
+%
+\documentclass[a4paper
+]{ubarticle}
+\usepackage{graphicx}
+\usepackage{amssymb,amsmath}
+    \usepackage{parskip}
+  \usepackage{tabu}
+  \usepackage{longtable}
+\makeatother
+
+\usepackage{seqsplit}
+\usepackage{hyperref}
+\hypersetup{
+  pdftitle={DPPPT API},
+  hidelinks,
+  pdfcreator={LaTeX via pandoc}}
+\urlstyle{same} % disable monospaced font for URLs
+\setlength{\emergencystretch}{3em} % prevent overfull lines
+\providecommand{\tightlist}{%
+  \setlength{\itemsep}{0pt}\setlength{\parskip}{0pt}}
+\setcounter{secnumdepth}{-\maxdimen} % remove section numbering
+
+\title{DPPPT API}
+\date{\today}
+\author{pepp-pt}
+
+\begin{document}
+\begin{titlepage}
+	%\includegraphics[width=7cm]{ubique-logo.png}
+	\hspace{4.3cm}
+ {\raggedleft
+	 \textbf{DP3T} \\
+	%\hspace{11.5cm} Niederdorfstrasse 77 \\
+%	8001 Zürich \\
+\vspace{0.3cm}
+	 
+\par}
+	\vspace{3cm}
+	{\Huge {{title}} \par}
+	\vspace{1.5cm}
+	{\huge Documentation \par}
+	\vspace{3cm}
+	{ \large \today }
+	\end{titlepage}
+\thispagestyle{empty}
+\clearpage
+\tableofcontents
+\clearpage
+\include{introduction}
+\part{Web Service}
+\subsection{Introduction}
+A test implementation is hosted on: {{host}}. 
+
+This part of the documentation deals with the different API-Endpoints. Examples to fields are put into the models section~\ref{sec:Models} to increase readability. Every request lists all possible status codes and the reason for the status code.
+{{#requests}}
+{{> request }}
+{{/requests}}
+\part{Models}
+All Models, which are used by the Endpoints are described here. For every field we give examples, to give an overview of what the backend expects.
+\label{sec:Models}
+{{#schemas}}
+{{> schema }}
+{{/schemas}}
+
+\end{document}
