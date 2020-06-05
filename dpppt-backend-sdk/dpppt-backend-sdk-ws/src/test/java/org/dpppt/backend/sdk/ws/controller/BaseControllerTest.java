@@ -27,6 +27,7 @@ import javax.servlet.Filter;
 import javax.sql.DataSource;
 
 import org.apache.commons.io.IOUtils;
+import org.dpppt.backend.sdk.ws.filter.ResponseWrapperFilter;
 import org.dpppt.backend.sdk.ws.util.TestJDBCGaen;
 import org.junit.Before;
 import org.junit.runner.RunWith;
@@ -49,7 +50,7 @@ import io.jsonwebtoken.Jwts;
 
 @RunWith(SpringRunner.class)
 @SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT)
-@ActiveProfiles({ "dev", "jwt" })
+@ActiveProfiles({ "dev", "jwt", "debug", "test-config" })
 @TestPropertySource(properties = { "ws.app.source=org.dpppt.demo" })
 public abstract class BaseControllerTest {
 
@@ -65,6 +66,9 @@ public abstract class BaseControllerTest {
 	private Filter springSecurityFilterChain;
 
 	@Autowired
+	private ResponseWrapperFilter filter;
+
+	@Autowired
 	DataSource dataSource;
 
 	protected TestJDBCGaen testGaenDataService;
@@ -72,7 +76,7 @@ public abstract class BaseControllerTest {
 	@Before
 	public void setup() throws Exception {
 		loadPrivateKey();
-		this.mockMvc = MockMvcBuilders.webAppContextSetup(webApplicationContext).addFilter(springSecurityFilterChain).build();
+		this.mockMvc = MockMvcBuilders.webAppContextSetup(webApplicationContext).addFilter(springSecurityFilterChain).addFilter(filter, "/*").build();
 		this.objectMapper = new ObjectMapper(new JsonFactory());
 		this.objectMapper.registerModule(new JavaTimeModule());
 		this.testGaenDataService = new TestJDBCGaen("hsqldb", dataSource);

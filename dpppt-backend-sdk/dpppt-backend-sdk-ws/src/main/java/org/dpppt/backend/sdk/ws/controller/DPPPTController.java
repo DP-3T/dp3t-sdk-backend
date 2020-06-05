@@ -68,7 +68,7 @@ public class DPPPTController {
 			long requestTime) {
 		this.dataService = dataService;
 		this.appSource = appSource;
-		this.exposedListCacheContol = exposedListCacheControl;
+		this.exposedListCacheContol = exposedListCacheControl/1000/60;
 		this.validateRequest = validateRequest;
 		this.validationUtils = validationUtils;
 		this.batchLength = batchLength;

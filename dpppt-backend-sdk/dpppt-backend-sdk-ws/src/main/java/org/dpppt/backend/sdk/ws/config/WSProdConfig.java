@@ -21,9 +21,9 @@ import org.dpppt.backend.sdk.data.gaen.DebugGAENDataService;
 import org.dpppt.backend.sdk.data.gaen.DebugJDBCGAENDataServiceImpl;
 import org.dpppt.backend.sdk.ws.controller.DebugController;
 import org.dpppt.backend.sdk.ws.security.KeyVault;
-import org.dpppt.backend.sdk.ws.security.ValidateRequest;
 import org.dpppt.backend.sdk.ws.security.KeyVault.PrivateKeyNoSuitableEncodingFoundException;
 import org.dpppt.backend.sdk.ws.security.KeyVault.PublicKeyNoSuitableEncodingFoundException;
+import org.dpppt.backend.sdk.ws.security.ValidateRequest;
 import org.dpppt.backend.sdk.ws.security.signature.ProtoSignature;
 import org.dpppt.backend.sdk.ws.util.ValidationUtils;
 import org.flywaydb.core.Flyway;
@@ -33,8 +33,6 @@ import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.Profile;
 import org.springframework.core.env.Environment;
-import org.springframework.scheduling.config.ScheduledTaskRegistrar;
-
 
 import com.zaxxer.hikari.HikariConfig;
 import com.zaxxer.hikari.HikariDataSource;
@@ -103,11 +101,6 @@ public class WSProdConfig extends WSBaseConfig {
 	@Override
 	public String getDbType() {
 		return "pgsql";
-	}
-
-	@Override
-	public void configureTasks(ScheduledTaskRegistrar taskRegistrar) {
-
 	}
 
 	@Bean

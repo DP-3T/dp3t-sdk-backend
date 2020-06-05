@@ -21,19 +21,20 @@ import java.time.OffsetDateTime;
 import java.time.ZoneOffset;
 import java.util.Base64;
 import java.util.Date;
-import java.util.GregorianCalendar;
 import java.util.Iterator;
 
 import org.dpppt.backend.sdk.model.ExposeeAuthData;
 import org.dpppt.backend.sdk.model.ExposeeRequest;
 import org.junit.Test;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.http.MediaType;
 import org.springframework.mock.web.MockHttpServletResponse;
 
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 
+@SpringBootTest(properties = { "ws.gaen.randomkeysenabled=true" })
 public class DPPPTControllerNoSecurityTest extends BaseControllerNoSecurityTest {
 	@Test
 	public void testJWT() throws Exception {

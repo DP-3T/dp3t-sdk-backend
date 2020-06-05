@@ -24,7 +24,6 @@ import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.Profile;
 import org.springframework.jdbc.datasource.embedded.EmbeddedDatabaseBuilder;
 import org.springframework.jdbc.datasource.embedded.EmbeddedDatabaseType;
-import org.springframework.scheduling.config.ScheduledTaskRegistrar;
 
 @Configuration
 @Profile("dev")
@@ -40,7 +39,7 @@ public class WSDevConfig extends WSBaseConfig {
 	@Bean
 	@Override
 	public DataSource dataSource() {
-		return new EmbeddedDatabaseBuilder().setType(EmbeddedDatabaseType.HSQL).build();
+		return new EmbeddedDatabaseBuilder().generateUniqueName(true).setType(EmbeddedDatabaseType.HSQL).build();
 	}
 
 	@Bean
@@ -54,11 +53,6 @@ public class WSDevConfig extends WSBaseConfig {
 	@Override
 	public String getDbType() {
 		return "hsqldb";
-	}
-
-	@Override
-	public void configureTasks(ScheduledTaskRegistrar taskRegistrar) {
-
 	}
 
 	@Bean
