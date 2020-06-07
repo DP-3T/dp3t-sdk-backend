@@ -123,7 +123,9 @@
 				<artifactId>spring-boot-maven-plugin</artifactId>
 				<version>${spring-boot-version}</version>
 				<configuration>
-					<mainClass>org.dpppt.backend.sdk.ws.Application</mainClass>
+					<mainClass>${start-class}</mainClass>
+                    <outputDirectory>${project.build.directory}/docker</outputDirectory>
+                    <classifier>exec</classifier>
 				</configuration>
 				<executions>
 					<execution>
@@ -131,6 +133,12 @@
 							<goal>repackage</goal>
 						</goals>
 					</execution>
+                    <execution>
+                        <id>build-info</id>
+                        <goals>
+                            <goal>build-info</goal>
+                        </goals>
+                    </execution>
 				</executions>
 			</plugin>
 			<plugin>
@@ -158,6 +166,35 @@
                     </apiUrls>
                     <title>DP3T API</title>
                 </configuration>
+            </plugin>
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-resources-plugin</artifactId>
+                <configuration>
+                    <encoding>${project.build.sourceEncoding}</encoding>
+                </configuration>
+                <executions>
+                    <execution>
+                        <id>copy-dockerfile</id>
+                        <phase>validate</phase>
+                        <goals>
+                            <goal>copy-resources</goal>
+                        </goals>
+                        <configuration>
+                            <outputDirectory>${project.build.directory}/docker</outputDirectory>
+                            <resources>
+                                <resource>
+                                    <directory>${project.basedir}/src/main/docker</directory>
+                                    <filtering>true</filtering>
+                                </resource>
+                            </resources>
+                            <delimiters>
+                                <delimiter>${*}</delimiter>
+                                <delimiter>@</delimiter>
+                            </delimiters>
+                        </configuration>
+                    </execution>
+                </executions>
             </plugin>
 		</plugins>
 	</build>
