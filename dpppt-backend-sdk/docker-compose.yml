@@ -13,6 +13,8 @@ services:
       DATASOURCE_FLYWAY_LOAD: 'false'
       WS_APP_GAEN_REGION: ch
       WS_HEADERS_DEBUG: 'true'
+    ports:
+      - 8080:8080
     networks:
       service:
 
