@@ -7,12 +7,12 @@ services:
     image: dpppt:backend
     environment:
       TZ: Europe/Madrid
-      POSTGRES_DB: dpppt
       DATASOURCE_URL: jdbc:postgresql://postgres:5432/dpppt
       DATASOURCE_USER: dpppt
       DATASOURCE_PASS: dpppt
       DATASOURCE_FLYWAY_LOAD: 'false'
-      WS_APP_GAEN_REGION: es
+      WS_APP_GAEN_REGION: ch
+      WS_HEADERS_DEBUG: 'true'
     networks:
       service:
 
@@ -24,8 +24,8 @@ services:
       POSTGRES_USER: dpppt
       POSTGRES_PASSWORD: dpppt
       POSTGRES_SCHEMA: public
-#    volumes:
-#      - ./dpppt-backend-sdk-data/src/main/resources/db/migration/pgsql:/docker-entrypoint-initdb.d/
+    volumes:
+      - ./dpppt-backend-sdk-data/src/main/environment/database-creation/db/migration/pgsql:/docker-entrypoint-initdb.d/
     ports:
       - 5432:5432
     networks:

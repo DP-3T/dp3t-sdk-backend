@@ -29,6 +29,7 @@ import org.dpppt.backend.sdk.ws.util.ValidationUtils;
 import org.flywaydb.core.Flyway;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.Profile;
@@ -92,9 +93,17 @@ public class WSProdConfig extends WSBaseConfig {
 
 	@Bean
 	@Override
+	@ConditionalOnProperty(name = "datasource.flyway.load", havingValue = "true", matchIfMissing = true)
 	public Flyway flyway() {
 		Flyway flyWay = Flyway.configure().dataSource(dataSource()).locations("classpath:/db/migration/pgsql").load();
 		flyWay.migrate();
+		return flyWay;
+	}
+
+	@Bean
+	@ConditionalOnProperty(name = "datasource.flyway.load", havingValue = "false", matchIfMissing = true)
+	public Flyway flywayNoLoad() {
+		Flyway flyWay = Flyway.configure().dataSource(dataSource()).locations("classpath:/db/migration/pgsql").load();
 		return flyWay;
 	}
 

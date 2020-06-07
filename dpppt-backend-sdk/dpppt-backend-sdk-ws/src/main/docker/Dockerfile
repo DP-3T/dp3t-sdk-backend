@@ -4,10 +4,10 @@ FROM adoptopenjdk:11-jre-hotspot
 LABEL module.maintainer="DP3T" \
 	  module.name="${project.artifactId}"
 
-COPY  [ "${project.build.finalName}-exec.jar", "/app.jar" ]
+RUN useradd ws
 
-RUN useradd ws \
- && sh -c 'touch /home/ws/app.jar'
+COPY [ "${project.build.finalName}-exec.jar", "/home/ws/app.jar" ]
+COPY [ "application.yaml", "/home/ws/application.yaml" ]
 
 VOLUME [ "/tmp" ]
 
@@ -17,4 +17,4 @@ ENV JAVA_OPTS="$JAVA_OPTS -Xms256M -Xmx1G" \
 USER ws
 EXPOSE ${SERVER_PORT}
 
-ENTRYPOINT java $JAVA_OPTS -Djava.security.egd=file:/dev/./urandom -jar /app.jar
+ENTRYPOINT java $JAVA_OPTS -Djava.security.egd=file:/dev/./urandom -Dspring.config.location=/home/ws/application.yaml -jar /home/ws/app.jar

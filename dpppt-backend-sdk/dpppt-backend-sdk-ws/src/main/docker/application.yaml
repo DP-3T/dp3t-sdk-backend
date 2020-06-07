@@ -1,0 +1,67 @@
+#
+# Copyright (c) 2020 Ubique Innovation AG <https://www.ubique.ch>
+#
+# This Source Code Form is subject to the terms of the Mozilla Public
+# License, v. 2.0. If a copy of the MPL was not distributed with this
+# file, You can obtain one at https://mozilla.org/MPL/2.0/.
+#
+# SPDX-License-Identifier: MPL-2.0
+#
+
+spring:
+  profiles.active: ${SPRING_PROFILES_ACTIVE:prod}
+
+management.endpoints.enabled-by-default: false
+
+server:
+  error.whitelabel.enabled: true
+  compression:
+    enabled: true
+    mime-types:
+      - application/json
+      - application/xml
+      - text/plain
+      - text/xml
+  http2:
+    enabled: true
+  port: ${SERVER_PORT:8080}
+
+#-------------------------------------------------------------------------------
+# JDBC Config
+#-------------------------------------------------------------------------------
+
+datasource:
+  url: ${DATASOURCE_URL:jdbc:postgresql://localhost:5432/dpppt}
+  username: ${DATASOURCE_USER:dpppt}
+  password: ${DATASOURCE_PASS:dpppt}
+  driverClassName: org.postgresql.ds.PGSimpleDataSource
+  failFast: ${DATASOURCE_FAIL_FAST:true}
+  maximumPoolSize: ${DATASOURCE_MAX_POOL_SIZE:5}
+  maxLifetime: ${DATASOURCE_MAX_LIFE_TIME:1700000}
+  idleTimeout: ${DATASOURCE_IDLE_TIMEOUT:600000}
+  connectionTimeout: ${DATASOURCE_CONNECTION_TIMEOUT:30000}
+  flyway.load: ${DATASOURCE_FLYWAY_LOAD:true}
+
+ws:
+  exposedlist:
+    cachecontrol: ${WS_EXPOSEDLIST_CACHECONTROL:300000}
+    batchlength: ${WS_EXPOSEDLIST_BATCHLENGTH:7200000}
+    requestTime: ${WS_EXPOSEDLIST_REQUESTTIME:1500}
+  gaen:
+    randomkeysenabled: ${WS_GAEN_RANDOMKEYSENABLED:false}
+    randomkeyamount: ${WS_GAEN_RANDOMKEYAMOUNT:10}
+  retentiondays: ${WS_RETENTIONDAYS:21}
+  app:
+    source: ${WS_APP_SOURCE:org.dpppt.demo}
+    key_size: ${WS_APP_KEY_SIZE:32}
+    ios.bundleId: ${WS_APP_IOS_BUNDLEID:org.dpppt.ios.demo}
+    android.packageName: ${WS_APP_ANDROID_PACKAGENAME:org.dpppt.android.demo}
+    gaen:
+      keyVersion: ${WS_APP_GAEN_KEYVERSION:v1}
+      keyIdentifier: ${WS_APP_GAEN_KEYIDENTIFIER:228}
+      algorithm: ${WS_APP_GAEN_ALGORITHM:1.2.840.10045.5.3.2}
+      region: ${WS_APP_GAEN_REGION:ch}
+      key_size: ${WS_APP_GAEN_KEY_SIZE:16}
+  headers:
+    protected: ${WS_HEADERS_PROTECTED:}
+    debug: ${WS_HEADERS_DEBUG:false}
