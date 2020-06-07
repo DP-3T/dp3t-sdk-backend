@@ -30,6 +30,7 @@ hs_err_pid*
 **/*.log.*
 **/.vscode
 **/*-local.properties
+**/.factorypath
 
 # intellij
 .idea

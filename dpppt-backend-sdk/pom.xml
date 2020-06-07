@@ -21,12 +21,21 @@
 	<name>DP3T Backend SDK</name>
 
 	<properties>
-		<java-version>11</java-version>
-		<project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
+        <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
+        <project.reporting.outputEncoding>UTF-8</project.reporting.outputEncoding>
+
+        <java-version>11</java-version>
+        <maven.compiler.source>${java-version}</maven.compiler.source>
+        <maven.compiler.target>${java-version}</maven.compiler.target>
+
 		<spring-boot-version>2.2.7.RELEASE</spring-boot-version>
+		<spring-framework-version>5.2.6.RELEASE</spring-framework-version>
+		
 		<itCoverageAgent></itCoverageAgent>
 		<build-helper-maven-plugin.version>1.9.1</build-helper-maven-plugin.version>
 		<jsonwebtoken-version>0.11.1</jsonwebtoken-version>
+		<protobuf-java-version>3.12.1</protobuf-java-version>
+
 		<sonar.host.url>https://sonarcloud.io</sonar.host.url>
 		<sonar.organization>${env.SONAR_ORGANIZATION}</sonar.organization>
 		<sonar.login>${env.SONAR_TOKEN}</sonar.login>
@@ -73,26 +82,18 @@
 
 		<!-- Logging -->
 		<dependency>
-			<groupId>org.slf4j</groupId>
-			<artifactId>slf4j-api</artifactId>
-		</dependency>
+            <groupId>org.springframework.boot</groupId>
+            <artifactId>spring-boot-starter-log4j2</artifactId>
+        </dependency>
 		<dependency>
 			<groupId>org.slf4j</groupId>
 			<artifactId>jcl-over-slf4j</artifactId>
 		</dependency>
-		<!-- LogBack dependencies -->
-		<dependency>
-			<groupId>ch.qos.logback</groupId>
-			<artifactId>logback-core</artifactId>
-		</dependency>
-		<dependency>
-			<groupId>ch.qos.logback</groupId>
-			<artifactId>logback-classic</artifactId>
-		</dependency>
+		
 		<dependency>
 			<groupId>com.google.protobuf</groupId>
 			<artifactId>protobuf-java</artifactId>
-			<version>3.12.2</version>
+			<version>${protobuf-java-version}</version>
 		</dependency>
 
 	</dependencies>
@@ -106,6 +107,28 @@
 				<version>${spring-boot-version}</version>
 				<scope>import</scope>
 			</dependency>
+			<dependency>
+                <groupId>org.springframework.boot</groupId>
+                <artifactId>spring-boot-starter</artifactId>
+                <version>${spring-boot-version}</version>
+                <exclusions>
+                    <exclusion>
+                        <groupId>org.springframework.boot</groupId>
+                        <artifactId>spring-boot-starter-logging</artifactId>
+                    </exclusion>
+                </exclusions>
+            </dependency>
+			<dependency>
+                <groupId>org.springframework</groupId>
+                <artifactId>spring-core</artifactId>
+                <version>${spring-framework-version}</version>
+                <exclusions>
+                    <exclusion>
+                        <groupId>commons-logging</groupId>
+                        <artifactId>commons-logging</artifactId>
+                    </exclusion>
+                </exclusions>
+            </dependency>
 			<dependency>
 				<groupId>io.jsonwebtoken</groupId>
 				<artifactId>jjwt-api</artifactId>
@@ -161,7 +184,15 @@
 								<requireJavaVersion>
 									<version>${java-version}</version>
 								</requireJavaVersion>
+								<bannedDependencies>
+                                    <excludes>
+                                        <exclude>log4j:log4j</exclude>
+                                        <exclude>commons-logging:commons-logging</exclude>
+                                        <exclude>ch.qos.logback:logback-core</exclude>
+                                    </excludes>
+                                </bannedDependencies>
 							</rules>
+							<fail>true</fail>
 						</configuration>
 					</execution>
 				</executions>
@@ -189,6 +220,28 @@
 						</goals>
 						<configuration>
 							<propertyName>failsafeArgLine</propertyName>
+						</configuration>
+					</execution>
+					<execution>
+						<id>prepare-unit-tests</id>
+						<goals>
+							<goal>prepare-agent</goal>
+						</goals>
+						<!--<configuration>-->
+						<!--<destFile>${sonar.jacoco.reportPath}</destFile>-->
+						<!--</configuration>-->
+					</execution>
+
+					<!-- prepare agent for measuring integration tests -->
+					<execution>
+						<id>prepare-agent-coverage</id>
+						<goals>
+							<goal>prepare-agent</goal>
+						</goals>
+						<phase>pre-integration-test</phase>
+						<configuration>
+							<!--<destFile>${sonar.jacoco.itReportPath}</destFile>-->
+							<propertyName>itCoverageAgent</propertyName>
 						</configuration>
 					</execution>
 				</executions>
@@ -220,44 +273,23 @@
 				</executions>
 			</plugin>
 			<plugin>
-				<groupId>org.jacoco</groupId>
-				<artifactId>jacoco-maven-plugin</artifactId>
-				<version>0.8.5</version>
-				<executions>
-					<!-- METHOD 1 -->
-					<!--<execution>-->
-					<!--<id>prepare-agent</id>-->
-					<!--<goals>-->
-					<!--<goal>prepare-agent</goal>-->
-					<!--</goals>-->
-					<!--</execution>-->
-					<!-- prepare agent for measuring unit tests -->
-
-					<!-- METHOD 2 -->
-					<execution>
-						<id>prepare-unit-tests</id>
-						<goals>
-							<goal>prepare-agent</goal>
-						</goals>
-						<!--<configuration>-->
-						<!--<destFile>${sonar.jacoco.reportPath}</destFile>-->
-						<!--</configuration>-->
-					</execution>
-
-					<!-- prepare agent for measuring integration tests -->
-					<execution>
-						<id>prepare-agent</id>
-						<goals>
-							<goal>prepare-agent</goal>
-						</goals>
-						<phase>pre-integration-test</phase>
-						<configuration>
-							<!--<destFile>${sonar.jacoco.itReportPath}</destFile>-->
-							<propertyName>itCoverageAgent</propertyName>
-						</configuration>
-					</execution>
-				</executions>
-			</plugin>
+                <groupId>org.codehaus.mojo</groupId>
+                <artifactId>build-helper-maven-plugin</artifactId>
+                <executions>
+                    <execution>
+                        <id>add-classes</id>
+                        <phase>generate-sources</phase>
+                        <goals>
+                            <goal>add-source</goal>
+                        </goals>
+                        <configuration>
+                            <sources>
+                                <source>${project.build.directory}/generated-sources</source>
+                            </sources>
+                        </configuration>
+                    </execution>
+                </executions>
+            </plugin>
 		</plugins>
 		<pluginManagement>
 			<plugins>
@@ -283,6 +315,16 @@
 					<artifactId>sonar-maven-plugin</artifactId>
 					<version>3.7.0.1746</version>
 				</plugin>
+				<plugin>
+                    <groupId>com.github.os72</groupId>
+                    <artifactId>protoc-jar-maven-plugin</artifactId>
+                    <version>3.11.4</version>
+                </plugin>
+                <plugin>
+                    <groupId>org.codehaus.mojo</groupId>
+                    <artifactId>build-helper-maven-plugin</artifactId>
+                    <version>3.1.0</version>
+                </plugin>
 			</plugins>
 		</pluginManagement>
 	</build>
