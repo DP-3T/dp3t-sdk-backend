@@ -1,10 +1,13 @@
 syntax = "proto3";
+
 package org.dpppt.backend.sdk.model.proto;
+option java_package = "org.dpppt.backend.sdk.model.proto";
+
 message ProtoExposedList {
   int64 batchReleaseTime = 1;
   repeated ProtoExposee exposed = 2;
 }
-message ProtoExposee{
+message ProtoExposee {
   bytes key = 2;
   int64 keyDate = 3;
 }
