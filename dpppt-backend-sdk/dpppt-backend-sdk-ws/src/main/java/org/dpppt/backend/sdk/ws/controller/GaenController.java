@@ -42,6 +42,8 @@ import org.dpppt.backend.sdk.ws.security.signature.ProtoSignature;
 import org.dpppt.backend.sdk.ws.security.signature.ProtoSignature.ProtoSignatureWrapper;
 import org.dpppt.backend.sdk.ws.util.ValidationUtils;
 import org.dpppt.backend.sdk.ws.util.ValidationUtils.BadBatchReleaseTimeException;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.http.CacheControl;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -65,6 +67,7 @@ import io.jsonwebtoken.Jwts;
 @Controller
 @RequestMapping("/v1/gaen")
 public class GaenController {
+	private static final Logger logger = LoggerFactory.getLogger(GaenController.class);
 
 	private final Duration bucketLength;
 	private final Duration requestTime;
@@ -111,6 +114,17 @@ public class GaenController {
 				continue;
 			} else {
 				this.validateRequest.getKeyDate(principal, key);
+				if (key.getRollingPeriod().equals(0)) {
+					//currently only android seems to send 0 which can never be valid, since a non used key should not be submitted
+					//default value according to EN is 144, so just set it to that. If we ever get 0 from iOS we should log it, since
+					//this should not happen
+					key.setRollingPeriod(GaenKey.GaenKeyDefaultRollingPeriod);
+					if(userAgent.toLowerCase().contains("ios")) {
+						logger.error("Received a rolling period of 0 for an iOS User-Agent");
+					}
+				} else if(key.getRollingPeriod() < 0) {
+					return () -> ResponseEntity.status(HttpStatus.BAD_REQUEST).body("Rolling Period MUST NOT be negative.");
+				}
 				nonFakeKeys.add(key);
 			}
 		}
@@ -183,6 +197,17 @@ public class GaenController {
 			}
 		}
 		if (!this.validateRequest.isFakeRequest(principal, gaenSecondDay.getDelayedKey())) {
+			if (gaenSecondDay.getDelayedKey().getRollingPeriod().equals(0)) {
+				//currently only android seems to send 0 which can never be valid, since a non used key should not be submitted
+				//default value according to EN is 144, so just set it to that. If we ever get 0 from iOS we should log it, since
+				//this should not happen
+				gaenSecondDay.getDelayedKey().setRollingPeriod(GaenKey.GaenKeyDefaultRollingPeriod);
+				if(userAgent.toLowerCase().contains("ios")) {
+					logger.error("Received a rolling period of 0 for an iOS User-Agent");
+				}
+			} else if(gaenSecondDay.getDelayedKey().getRollingPeriod() < 0) {
+				return () -> ResponseEntity.status(HttpStatus.BAD_REQUEST).body("Rolling Period MUST NOT be negative.");
+			}
 			List<GaenKey> keys = new ArrayList<>();
 			keys.add(gaenSecondDay.getDelayedKey());
 			dataService.upsertExposees(keys);
