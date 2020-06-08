@@ -8,7 +8,7 @@ import javax.validation.constraints.NotNull;
 public class ExposeeRequestList {
     @NotNull
     @NotEmpty
-    List<ExposedKey> exposedKeys;
+    List<@NotNull ExposedKey> exposedKeys;
 
     private Integer fake = 0;
 
