@@ -212,9 +212,6 @@ public class ProtoSignature {
 
 		var tekList = new ArrayList<TemporaryExposureKeyFormat.TemporaryExposureKey>();
 		for (var key : exposedKeys) {
-			if(key.getRollingPeriod().equals(0)){
-				key.setRollingPeriod(GaenKey.GaenKeyDefaultRollingPeriod);
-			}
 			var protoKey = TemporaryExposureKeyFormat.TemporaryExposureKey.newBuilder()
 					.setKeyData(ByteString.copyFrom(Base64.getDecoder().decode(key.getKeyData())))
 					.setRollingPeriod(key.getRollingPeriod()).setRollingStartIntervalNumber(key.getRollingStartNumber())
