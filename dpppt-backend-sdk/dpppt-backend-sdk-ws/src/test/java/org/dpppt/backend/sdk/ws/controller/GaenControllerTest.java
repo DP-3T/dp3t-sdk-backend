@@ -92,14 +92,14 @@ public class GaenControllerTest extends BaseControllerTest {
 		gaenKey1.setRollingStartNumber(
 				(int) Duration.ofMillis(Instant.now().toEpochMilli()).dividedBy(Duration.ofMinutes(10)));
 		gaenKey1.setKeyData(Base64.getEncoder().encodeToString("testKey32Bytes--".getBytes("UTF-8")));
-		gaenKey1.setRollingPeriod(144);
+		gaenKey1.setRollingPeriod(0);
 		gaenKey1.setFake(0);
 		gaenKey1.setTransmissionRiskLevel(0);
 		var gaenKey2 = new GaenKey();
 		gaenKey2.setRollingStartNumber((int) Duration.ofMillis(Instant.now().minus(Duration.ofDays(1)).toEpochMilli())
 				.dividedBy(Duration.ofMinutes(10)));
 		gaenKey2.setKeyData(Base64.getEncoder().encodeToString("testKey32Bytes--".getBytes("UTF-8")));
-		gaenKey2.setRollingPeriod(144);
+		gaenKey2.setRollingPeriod(0);
 		gaenKey2.setFake(0);
 		gaenKey2.setTransmissionRiskLevel(0);
 		List<GaenKey> exposedKeys = new ArrayList<>();
@@ -767,6 +767,9 @@ public class GaenControllerTest extends BaseControllerTest {
 
 		var list = TemporaryExposureKeyFormat.TEKSignatureList.parseFrom(signatureProto);
 		var export = TemporaryExposureKeyFormat.TemporaryExposureKeyExport.parseFrom(keyProto);
+		for(var key : export.getKeysList()) {
+			assertNotEquals(0, key.getRollingPeriod());
+		}
 		var sig = list.getSignatures(0);
 		java.security.Signature signatureVerifier = java.security.Signature
 				.getInstance(sig.getSignatureInfo().getSignatureAlgorithm().trim());
