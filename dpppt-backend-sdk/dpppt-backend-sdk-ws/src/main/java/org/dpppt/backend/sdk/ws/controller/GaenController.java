@@ -224,7 +224,7 @@ public class GaenController {
 	}
 
 	@GetMapping(value = "/exposed/{keyDate}", produces = "application/zip")
-	public @ResponseBody ResponseEntity<byte[]> getExposedKeys(@PathVariable Long keyDate,
+	public @ResponseBody ResponseEntity<byte[]> getExposedKeys(@PathVariable long keyDate,
 			@RequestParam(required = false) Long publishedafter, WebRequest request)
 			throws BadBatchReleaseTimeException, IOException, InvalidKeyException, SignatureException,
 			NoSuchAlgorithmException {
@@ -258,7 +258,7 @@ public class GaenController {
 	}
 
 	@GetMapping(value = "/exposedjson/{keyDate}", produces = "application/json")
-	public @ResponseBody ResponseEntity<GaenExposedJson> getExposedKeysAsJson(@PathVariable Long keyDate,
+	public @ResponseBody ResponseEntity<GaenExposedJson> getExposedKeysAsJson(@PathVariable long keyDate,
 			@RequestParam(required = false) Long publishedafter, WebRequest request)
 			throws BadBatchReleaseTimeException {
 		if (!validationUtils.isValidKeyDate(keyDate)) {

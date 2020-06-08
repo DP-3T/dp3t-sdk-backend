@@ -156,7 +156,7 @@ public class DPPPTController {
 
 	@CrossOrigin(origins = { "https://editor.swagger.io" })
 	@GetMapping(value = "/exposedjson/{batchReleaseTime}", produces = "application/json")
-	public @ResponseBody ResponseEntity<ExposedOverview> getExposedByDayDate(@PathVariable Long batchReleaseTime,
+	public @ResponseBody ResponseEntity<ExposedOverview> getExposedByDayDate(@PathVariable long batchReleaseTime,
 			WebRequest request) throws BadBatchReleaseTimeException{
 		if(!validationUtils.isValidBatchReleaseTime(batchReleaseTime)) {
 			return ResponseEntity.notFound().build();
@@ -166,12 +166,12 @@ public class DPPPTController {
 		ExposedOverview overview = new ExposedOverview(exposeeList);
 		overview.setBatchReleaseTime(batchReleaseTime);
 		return ResponseEntity.ok().cacheControl(CacheControl.maxAge(Duration.ofMinutes(exposedListCacheContol)))
-				.header("X-BATCH-RELEASE-TIME", batchReleaseTime.toString()).body(overview);
+				.header("X-BATCH-RELEASE-TIME", Long.toString(batchReleaseTime)).body(overview);
 	}
 
 	@CrossOrigin(origins = { "https://editor.swagger.io" })
 	@GetMapping(value = "/exposed/{batchReleaseTime}", produces = "application/x-protobuf")
-	public @ResponseBody ResponseEntity<Exposed.ProtoExposedList> getExposedByBatch(@PathVariable Long batchReleaseTime,
+	public @ResponseBody ResponseEntity<Exposed.ProtoExposedList> getExposedByBatch(@PathVariable long batchReleaseTime,
 			WebRequest request) throws BadBatchReleaseTimeException {
 		if(!validationUtils.isValidBatchReleaseTime(batchReleaseTime)) {
 			return ResponseEntity.notFound().build();
@@ -189,7 +189,7 @@ public class DPPPTController {
 				.setBatchReleaseTime(batchReleaseTime).build();
 
 		return ResponseEntity.ok().cacheControl(CacheControl.maxAge(Duration.ofMinutes(exposedListCacheContol)))
-				.header("X-BATCH-RELEASE-TIME", batchReleaseTime.toString()).body(protoExposee);
+				.header("X-BATCH-RELEASE-TIME", Long.toString(batchReleaseTime)).body(protoExposee);
 	}
 
 	@CrossOrigin(origins = { "https://editor.swagger.io" })
