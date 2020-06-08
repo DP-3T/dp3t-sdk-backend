@@ -150,7 +150,7 @@ In any case the `loadPrivateKey` and `loadPublicKey` functions will iterate thro
 
 - `loadPublicKeyFromX509Certificate`: Loads the public key from a certificate.
 
-### Build
+## Build
 To build you need to install Maven.
 
 ```bash
@@ -160,11 +160,11 @@ mvn install
 
 > Note to run the PostgreSQL unit tests, `dockerd` is needed. If you want to skip those tests add `-DskipTests` to the build command. 
 
-### Run
+## Run
 ```bash
 java -jar dpppt-backend-sdk-ws/target/dpppt-backend-sdk-ws-*.jar
 ```
-### Dockerfiles
+## Dockerfiles
 The dockerfile includes a base jdk image to run the jar. To actually build the docker container, you need to place the generated jar in the bin folder.
 
 ```bash
@@ -179,7 +179,7 @@ cd ws-sdk && docker build -t <the-tag-we-use> .
 docker run -p 80:8080 -v <path_to_logbackxml>:/home/ws/conf/dpppt-backend-sdk-ws-logback.xml -v <path_to_application_properties>:/home/ws/conf/dpppt-backend-sdk-ws.properties <the-tag-we-use>
  ```
 
-### Makefile
+## Makefile
 You can use the provided makefile to build the backend, build a docker image and generate the documentation.
 
 Without a target, the makefile will generate everything except the docker image.
