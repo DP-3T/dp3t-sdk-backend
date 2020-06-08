@@ -26,8 +26,9 @@ DP3T is a free-standing effort, begun at the EPFL and ETHZ, where the protocol w
 Please read the [Contribution Guide](CONTRIBUTING.md) before submitting any pull-request.
 
 ## Introduction
+This documentation describes the backend used for the SwissCovid application. It is focused on providing information for the requests used for the Exposure Notification framework. Although, code of the old format is still provided, no documentation or support is available except the code itself.
 
-### Dependencies
+## Dependencies
 * Spring Boot 2.2.6
 * Java 8 (or higher)
 * Logback
@@ -44,10 +45,60 @@ For development purposes an hsqldb can be used to run the webservice locally. Fo
 
 
 ## Environments
+To control different behaviors, SpringBoot profiles are used. The idea is to provide an abstract base class, which defines everything needed. Such properties can be defined as abstract, and their implementation can be provided in an extended class.
 
-## Legacy Notifications
+#### WSCloud*Config/WSProdConfig/WSDevConfig
+Currently three non-abstract configs (`dev`, `abn` and `prod`) are provided, which are used in the current deployed version of the backend. Those are the CloudConfigs and they are optimized to work with an environment using KeyCloak and CloudFoundry. 
 
-## Exposure Notifications
+Furthermore, two non-abstract configs (`dev`, `prod`) are provided, which implement a basic configuration, and which should work out-of-the-box. It generates new key pairs, used to sign the payload, each time the web service is started. For an example on how to persist the keys across startup, have a look at the cloud configs.
+
+> Note that the `dev` config uses a HSQLDB, which is non-persistent, whereas `prod` needs a running instance of PostgreSQL (either in a docker or native).
+
+If you plan to provide new extensions or make adjustments and want to provide those to the general public, it is recommended to add a new configuration for your specific case. This can be e.g. an abstract class (e.g. WSCloudBaseConfig), which extends the base class providing certain needed keys or functions. If you provide an abstract class, please make sure to add at least one non-abstract class showing the implementation needed.
+
+#### WSJWTConfig
+There is also a possible extension to the base web service provided. The JWT config is intended to implement a possibility to authorize the post requests used to publish the secret keys from the clients. JWTs, which are signed by a health authority, are used. An interface is provided, which can be used to define the behavior of authorization (c.f. the `ValidateRequest` class and its implementation in `NoValidateRequest` and `JWTValidator`). 
+
+## Fake Requests
+Since a client has to send its keys to the backend, it would be possible to filter traffic based on post requests to the backend, in order to find out, which IP addressess are "infected". To minimize such a risk clients will send a fake request, where the time delay is based on a Poisson distribution. 
+
+### Time Delay
+In order to minimize the risk of timing attacks, to find out whether a request was fake or not, a time-delay of 1.5s is  introduced for the `POST` request.
+
+### Constant Payload
+Clients pad the number of keys with fake keys, if not enough keys are provided by the framework (e.g. the app is installed for less than 14 days). On fake keys the web-service should not validate any dates. The key payload though needs to be the exact same size!
+
+## GAEN/DP3T
+We started with the project before Google and Apple announced the Exposure Notifications. Hence, there is a custom format and implementation provided. It is recommended to adopt the new Exposure Notification format, since support on clients is much better.
+
+### Legacy Notifications
+Since the Exposure Notifications format has been adopted, we drop support for legacy notifications. Currently no feature-requests are implemented for the old format, but if a PR is provided, it can still be merged.
+
+By default, the legacy controller (`DPPPTController`) uses the base url `/v1/`.
+
+### Exposure Notifications
+Here an implementation for the [Exposure Notification](https://www.google.com/covid19/exposurenotifications/) Library by Google and Apple is provided. 
+
+By default, the EN controller (`GaenController`) uses the base url `/v1/gaen/`.
+
+The web-service provides three endpoints, which map the Exposure Notification specifications. 
+
+- /v1/gaen/exposed: `POST` Send a list of infected keys. If a JWT is used to authorize the request, send a JWT back to authorize the call of the following day. If the request as a whole is a "fake"-request, all keys need to be fake, otherwise a 400 HttpStatus code is returned.
+
+- /v1/gaen/exposednextday: `POST` Since the EN framework won't give the key of the current day, the upload has to be split into two. This endpoint receives the key of the last day. This endpoint eventually will be removed, as soon as the EN framework is adjusted. If JWT are activated, this endpoint needs the JWT received from a successfull request to `/v1/gaen/exposed`.
+
+- /v1/gaen/exposed/\<timestamp\>?publishedafter=\<publishedAfter\>: `GET` Returns a list of keys, which were used at `timestamp`. Note that `timestamp` needs to be epoch milliseconds. Since the behaviour of Android and iOS aren't the same, the optional `publishedAfter` parameter is added. If set only keys, which were received *after* `publishAfter` are returned. This request returns `ZIP` file containing `export.bin` and `export.sig`, where the keys and the signature are stored, as need by the EN framework. The class for signing and serializing is `ProtoSignature`.
+
+
+Further endpoints are added to the controller for debugging purposes. Those requests can e.g. be blocked by a WAF rule or similiar.
+
+## ETag
+To profit from caching e.g. when all requests are routed through a CDN, an ETag is set. The value of the ETag is the content hash of the protobuf key list. The ETag will change whenever new keys are added.
+
+Note: Since we use ECDSA signatures, the signature would change each time. The same is true for the hash of the HttpPayload.
+
+## Content Signing
+In order to provide authenticity, the HttpPayload is signed. The signature is added as a `Signature` HttpHeader to each 200 or 204 response. The signature consists of a JWT containing the content hash as a claim. Further, if `protected-headers` are added in the controller (and activated through the respective key in the properties file), those headers are signed as well, thus providing the possibility of signing certain request parameters.
 
 ## Swagger
 
@@ -125,7 +176,7 @@ cd ws-sdk && docker build -t <the-tag-we-use> .
 ```
 
 ```bash
-docker run -p 80:8080 <the-tag-we-use>
+docker run -p 80:8080 -v <path_to_logbackxml>:/home/ws/conf/dpppt-backend-sdk-ws-logback.xml -v <path_to_application_properties>:/home/ws/conf/dpppt-backend-sdk-ws.properties <the-tag-we-use>
  ```
 
 ### Makefile
