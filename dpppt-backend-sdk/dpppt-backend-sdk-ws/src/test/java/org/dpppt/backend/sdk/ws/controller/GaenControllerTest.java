@@ -136,6 +136,51 @@ public class GaenControllerTest extends BaseControllerTest {
 	}
 
 	@Test
+	public void testUploadWithNegativeRollingPeriodFails() throws Exception {
+		var requestList = new GaenRequest();
+		var gaenKey1 = new GaenKey();
+		gaenKey1.setRollingStartNumber(
+				(int) Duration.ofMillis(Instant.now().toEpochMilli()).dividedBy(Duration.ofMinutes(10)));
+		gaenKey1.setKeyData(Base64.getEncoder().encodeToString("testKey32Bytes--".getBytes("UTF-8")));
+		gaenKey1.setRollingPeriod(-1);
+		gaenKey1.setFake(0);
+		gaenKey1.setTransmissionRiskLevel(0);
+		var gaenKey2 = new GaenKey();
+		gaenKey2.setRollingStartNumber((int) Duration.ofMillis(Instant.now().minus(Duration.ofDays(1)).toEpochMilli())
+				.dividedBy(Duration.ofMinutes(10)));
+		gaenKey2.setKeyData(Base64.getEncoder().encodeToString("testKey32Bytes--".getBytes("UTF-8")));
+		gaenKey2.setRollingPeriod(-5);
+		gaenKey2.setFake(0);
+		gaenKey2.setTransmissionRiskLevel(0);
+		List<GaenKey> exposedKeys = new ArrayList<>();
+		exposedKeys.add(gaenKey1);
+		exposedKeys.add(gaenKey2);
+		for (int i = 0; i < 12; i++) {
+			var tmpKey = new GaenKey();
+			tmpKey.setRollingStartNumber(
+					(int) Duration.ofMillis(Instant.now().toEpochMilli()).dividedBy(Duration.ofMinutes(10)));
+			tmpKey.setKeyData(Base64.getEncoder().encodeToString("testKey32Bytes--".getBytes("UTF-8")));
+			tmpKey.setRollingPeriod(144);
+			tmpKey.setFake(1);
+			tmpKey.setTransmissionRiskLevel(0);
+			exposedKeys.add(tmpKey);
+		}
+		requestList.setGaenKeys(exposedKeys);
+		var duration = Duration.ofMillis(
+				LocalDate.now(ZoneOffset.UTC).atStartOfDay().plusDays(1).toInstant(ZoneOffset.UTC).toEpochMilli())
+				.dividedBy(Duration.ofMinutes(10));
+		requestList.setDelayedKeyDate((int) duration);
+		gaenKey1.setFake(0);
+		String token = createToken(OffsetDateTime.now().withOffsetSameInstant(ZoneOffset.UTC).plusMinutes(5));
+		MvcResult response = mockMvc.perform(post("/v1/gaen/exposed")
+				.contentType(MediaType.APPLICATION_JSON).header("Authorization", "Bearer " + token)
+				.header("User-Agent", "MockMVC").content(json(requestList))).andExpect(request().asyncStarted())
+				.andReturn();
+
+		mockMvc.perform(asyncDispatch(response)).andExpect(status().isBadRequest());
+	}
+
+	@Test
 	public void testMultipleKeyUploadFake() throws Exception {
 		var requestList = new GaenRequest();
 		var gaenKey1 = new GaenKey();
@@ -594,6 +639,47 @@ public class GaenControllerTest extends BaseControllerTest {
 				.header("Authorization", "Bearer " + jwtString).header("User-Agent", "MockMVC")
 				.content(json(secondDay))).andExpect(request().asyncStarted()).andReturn();
 		mockMvc.perform(asyncDispatch(responseAsync)).andExpect(status().is(200));
+	}
+
+	@Test
+	public void uploadKeysAndUploadKeyNextDayWithNegativeRollingPeriodFails() throws Exception {
+		GaenRequest exposeeRequest = new GaenRequest();
+		List<GaenKey> keys = new ArrayList<>();
+		for (int i = 0; i < 14; i++) {
+			var tmpKey = new GaenKey();
+			tmpKey.setRollingStartNumber((int) Duration.ofMillis(Instant.now().minus(Duration.ofDays(1)).toEpochMilli())
+					.dividedBy(Duration.ofMinutes(10)));
+			tmpKey.setKeyData(Base64.getEncoder().encodeToString("testKey32Bytes--".getBytes("UTF-8")));
+			tmpKey.setRollingPeriod(144);
+			tmpKey.setFake(0);
+			tmpKey.setTransmissionRiskLevel(0);
+			keys.add(tmpKey);
+		}
+		var delayedKeyDateSent = (int) Duration.ofSeconds(LocalDate.now().atStartOfDay(ZoneOffset.UTC).toEpochSecond())
+				.dividedBy(Duration.ofMinutes(10));
+		exposeeRequest.setDelayedKeyDate(delayedKeyDateSent);
+		exposeeRequest.setGaenKeys(keys);
+		String token = createToken(OffsetDateTime.now().withOffsetSameInstant(ZoneOffset.UTC).plusMinutes(5));
+		MvcResult responseAsync = mockMvc.perform(post("/v1/gaen/exposed")
+				.contentType(MediaType.APPLICATION_JSON).header("Authorization", "Bearer " + token)
+				.header("User-Agent", "MockMVC").content(json(exposeeRequest))).andExpect(request().asyncStarted()).andReturn();
+		MockHttpServletResponse response = mockMvc.perform(asyncDispatch(responseAsync)).andExpect(status().is(200)).andReturn().getResponse();
+		assertTrue(response.containsHeader("Authorization"), "Authorization header not found in response");
+		String jwtString = response.getHeader("Authorization").replace("Bearer ", "");
+		Jwt jwtToken = Jwts.parserBuilder().setSigningKey(keyVault.get("nextDayJWT").getPublic()).build()
+				.parse(jwtString);
+		GaenSecondDay secondDay = new GaenSecondDay();
+		var tmpKey = new GaenKey();
+		tmpKey.setRollingStartNumber(delayedKeyDateSent);
+		tmpKey.setKeyData(Base64.getEncoder().encodeToString("testKey32Bytes--".getBytes("UTF-8")));
+		tmpKey.setRollingPeriod(-1);
+		tmpKey.setFake(0);
+		tmpKey.setTransmissionRiskLevel(0);
+		secondDay.setDelayedKey(tmpKey);
+		responseAsync = mockMvc.perform(post("/v1/gaen/exposednextday").contentType(MediaType.APPLICATION_JSON)
+				.header("Authorization", "Bearer " + jwtString).header("User-Agent", "MockMVC")
+				.content(json(secondDay))).andExpect(request().asyncStarted()).andReturn();
+		mockMvc.perform(asyncDispatch(responseAsync)).andExpect(status().isBadRequest());
 	}
 
 	@Test
