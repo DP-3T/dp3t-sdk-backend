@@ -111,6 +111,9 @@ public class GaenController {
 				continue;
 			} else {
 				this.validateRequest.getKeyDate(principal, key);
+				if (key.getRollingPeriod().equals(0)) {
+					key.setRollingPeriod(GaenKey.GaenKeyDefaultRollingPeriod);
+				}
 				nonFakeKeys.add(key);
 			}
 		}
