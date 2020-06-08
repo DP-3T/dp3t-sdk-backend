@@ -794,7 +794,7 @@ public class GaenControllerTest extends BaseControllerTest {
 				byte[] keyBytes = new byte[16];
 				random.nextBytes(keyBytes);
 				key.setKeyData(Base64.getEncoder().encodeToString(keyBytes));
-				key.setRollingPeriod(144);
+				key.setRollingPeriod(0);
 				logger.info("Rolling Start number: " + lastRolling);
 				key.setRollingStartNumber(lastRolling);
 				key.setTransmissionRiskLevel(1);
