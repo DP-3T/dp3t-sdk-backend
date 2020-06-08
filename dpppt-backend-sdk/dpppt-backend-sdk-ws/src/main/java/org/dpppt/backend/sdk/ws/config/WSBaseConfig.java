@@ -92,7 +92,7 @@ public abstract class WSBaseConfig implements SchedulingConfigurer, WebMvcConfig
 	@Value("${ws.gaen.randomkeyamount: 10}")
 	int randomkeyamount;
 
-	@Value("${ws.retentiondays: 21}")
+	@Value("${ws.retentiondays: 14}")
 	int retentionDays;
 
 	@Value("${ws.exposedlist.batchlength: 7200000}")
