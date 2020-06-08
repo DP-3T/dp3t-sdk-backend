@@ -27,9 +27,6 @@ Before you submit a new pull-request, please check the following few things:
 We currently are preparing to go live soon. Hence, we try to keep the changes to a minimum. Since we also heavily rely on public pentesting, we also don't want to introduce new dependencies for no reason.
 
 Changes, which only concern different tooling should have arguments attached. We are using tools and setups we are used to, and if there is no major reason (security issues, performance issues) we probably won't change it.
-## Code of Conduct
-
-Help us keep _fastlane_ open and inclusive. Please read and follow our [Code of Conduct][code of conduct].
 
 ## Above All, Thanks for Your Contributions
 
