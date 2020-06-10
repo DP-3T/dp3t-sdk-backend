@@ -35,10 +35,12 @@ public class JDBCGAENDataServiceImpl implements GAENDataService {
 	private static final String PGSQL = "pgsql";
 	private final String dbType;
 	private final NamedParameterJdbcTemplate jt;
+	private final Duration bucketLength;
 
-	public JDBCGAENDataServiceImpl(String dbType, DataSource dataSource) {
+	public JDBCGAENDataServiceImpl(String dbType, DataSource dataSource, Duration bucketLength) {
 		this.dbType = dbType;
 		this.jt = new NamedParameterJdbcTemplate(dataSource);
+		this.bucketLength = bucketLength;
 	}
 
 	@Override
@@ -46,20 +48,24 @@ public class JDBCGAENDataServiceImpl implements GAENDataService {
 	public void upsertExposees(List<GaenKey> gaenKeys) {
 		String sql = null;
 		if (dbType.equals(PGSQL)) {
-			sql = "insert into t_gaen_exposed (key, rolling_start_number, rolling_period, transmission_risk_level) values (:key, :rolling_start_number, :rolling_period, :transmission_risk_level)"
+			sql = "insert into t_gaen_exposed (key, rolling_start_number, rolling_period, transmission_risk_level, received_at) values (:key, :rolling_start_number, :rolling_period, :transmission_risk_level, :received_at)"
 					+ " on conflict on constraint gaen_exposed_key do nothing";
 		} else {
-			sql = "merge into t_gaen_exposed using (values(cast(:key as varchar(24)), :rolling_start_number, :rolling_period, :transmission_risk_level))"
-					+ " as vals(key, rolling_start_number, rolling_period, transmission_risk_level) on t_gaen_exposed.key = vals.key"
-					+ " when not matched then insert (key, rolling_start_number, rolling_period, transmission_risk_level) values (vals.key, vals.rolling_start_number, vals.rolling_period, transmission_risk_level)";
+			sql = "merge into t_gaen_exposed using (values(cast(:key as varchar(24)), :rolling_start_number, :rolling_period, :transmission_risk_level, :received_at))"
+					+ " as vals(key, rolling_start_number, rolling_period, transmission_risk_level, received_at) on t_gaen_exposed.key = vals.key"
+					+ " when not matched then insert (key, rolling_start_number, rolling_period, transmission_risk_level, received_at) values (vals.key, vals.rolling_start_number, vals.rolling_period, transmission_risk_level, vals.received_at)";
 		}
 		var parameterList = new ArrayList<MapSqlParameterSource>();
+		var nowMillis = System.currentTimeMillis();
+		var receivedAt = (nowMillis/bucketLength.toMillis() + 1) * bucketLength.toMillis() - 1;
 		for (var gaenKey : gaenKeys) {
 			MapSqlParameterSource params = new MapSqlParameterSource();
 			params.addValue("key", gaenKey.getKeyData());
 			params.addValue("rolling_start_number", gaenKey.getRollingStartNumber());
 			params.addValue("rolling_period", gaenKey.getRollingPeriod());
 			params.addValue("transmission_risk_level", gaenKey.getTransmissionRiskLevel());
+			params.addValue("received_at", Date.from(Instant.ofEpochMilli(receivedAt)));
+			
 			parameterList.add(params);
 		}
 		jt.batchUpdate(sql, parameterList.toArray(new MapSqlParameterSource[0]));
