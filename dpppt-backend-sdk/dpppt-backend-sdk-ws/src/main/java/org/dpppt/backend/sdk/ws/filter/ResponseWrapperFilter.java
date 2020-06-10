@@ -88,7 +88,6 @@ public class ResponseWrapperFilter implements Filter {
 				});
 			}
 			catch(Exception ex) {
-				ex.printStackTrace();
 				wrapper.outputData(httpResponse.getOutputStream());
 			}
 
