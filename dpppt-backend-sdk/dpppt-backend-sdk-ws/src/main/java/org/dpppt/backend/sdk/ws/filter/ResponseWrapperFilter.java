@@ -16,6 +16,9 @@ import java.security.PublicKey;
 import java.security.Security;
 import java.util.List;
 
+import javax.servlet.AsyncContext;
+import javax.servlet.AsyncEvent;
+import javax.servlet.AsyncListener;
 import javax.servlet.Filter;
 import javax.servlet.FilterChain;
 import javax.servlet.ServletException;
@@ -51,10 +54,54 @@ public class ResponseWrapperFilter implements Filter {
 	public void doFilter(ServletRequest request, ServletResponse response, FilterChain chain)
 			throws IOException, ServletException {
 		HttpServletResponse httpResponse = (HttpServletResponse) response;
-		SignatureResponseWrapper wrapper = new SignatureResponseWrapper(httpResponse, pair, retentionDays,
-				protectedHeaders, setDebugHeaders);
-		chain.doFilter(request, wrapper);
-		wrapper.outputData(httpResponse.getOutputStream());
+		if(!request.isAsyncSupported()) {
+			SignatureResponseWrapper wrapper = new SignatureResponseWrapper(httpResponse, pair, retentionDays,
+			protectedHeaders, setDebugHeaders);
+			chain.doFilter(request, wrapper);
+			wrapper.outputData(httpResponse.getOutputStream());
+		}
+		else {
+			//request.getAsyncContext().complete();
+			
+			SignatureResponseWrapper wrapper = new SignatureResponseWrapper(httpResponse, pair, retentionDays,
+					protectedHeaders, setDebugHeaders);
+			chain.doFilter(request, wrapper);
+			var asyncContext = AsyncHelper.getAsyncContext(request, response);
+			asyncContext.addListener(new AsyncListener() {
+				@Override
+				public void onComplete(AsyncEvent event) throws IOException {
+					wrapper.outputData(httpResponse.getOutputStream());
+				}
+	
+				@Override
+				public void onTimeout(AsyncEvent event) throws IOException {
+					
+				}
+	
+				@Override
+				public void onError(AsyncEvent event) throws IOException {
+					
+				}
+	
+				@Override
+				public void onStartAsync(AsyncEvent event) throws IOException {
+					
+				}
+			});
+			
+		}
 	}
-
+	public static class AsyncHelper {
+		public static AsyncContext getAsyncContext(ServletRequest request, ServletResponse response) {
+			AsyncContext asyncContext = null;
+			if (request.isAsyncStarted()) {
+				asyncContext = request.getAsyncContext();
+			}
+			else {
+				asyncContext = request.startAsync(request, response);
+				asyncContext.setTimeout(2000);
+			}
+			return asyncContext;
+		}
+	}
 }

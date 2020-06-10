@@ -115,6 +115,7 @@ public class SignatureResponseWrapper extends HttpServletResponseWrapper {
 	public void outputData(OutputStream httpOutput) throws IOException {
 		this.setSignature();
 		httpOutput.write(this.output.toByteArray());
+		httpOutput.flush();
 	}
 
 	private void setSignature() throws IOException {
