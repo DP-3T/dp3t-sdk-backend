@@ -30,7 +30,7 @@ This documentation describes the backend used for the SwissCovid application. It
 
 ## Dependencies
 * Spring Boot 2.2.6
-* Java 8 (or higher)
+* Java 11 (or higher)
 * Logback
 * [Springboot-Swagger-3](https://github.com/Ubique-OSS/springboot-swagger3) (Github Package, plugin dependency)
 
@@ -48,7 +48,7 @@ For development purposes an hsqldb can be used to run the webservice locally. Fo
 To control different behaviors, SpringBoot profiles are used. The idea is to provide an abstract base class, which defines everything needed. Such properties can be defined as abstract, and their implementation can be provided in an extended class.
 
 #### WSCloud*Config/WSProdConfig/WSDevConfig
-Currently three non-abstract configs (`dev`, `abn` and `prod`) are provided, which are used in the current deployed version of the backend. Those are the CloudConfigs and they are optimized to work with an environment using KeyCloak and CloudFoundry. 
+Currently three non-abstract configs (`dev`, `test`, `abn` and `prod`) are provided, which are used in the current deployed version of the backend. Those are the CloudConfigs and they are optimized to work with an environment using KeyCloak and CloudFoundry. 
 
 Furthermore, two non-abstract configs (`dev`, `prod`) are provided, which implement a basic configuration, and which should work out-of-the-box. It generates new key pairs, used to sign the payload, each time the web service is started. For an example on how to persist the keys across startup, have a look at the cloud configs.
 
