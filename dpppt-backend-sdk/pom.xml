@@ -29,6 +29,7 @@
         <maven.compiler.target>${java-version}</maven.compiler.target>
 
 		<spring-boot-version>2.2.7.RELEASE</spring-boot-version>
+		<spring-cloud-version>Hoxton.SR5</spring-cloud-version>
 		<spring-framework-version>5.2.6.RELEASE</spring-framework-version>
 		
 		<itCoverageAgent></itCoverageAgent>
@@ -64,7 +65,6 @@
 			<scope>test</scope>
 		</dependency>
 
-
 		<!-- Apache Commons -->
 		<dependency>
 			<groupId>org.apache.commons</groupId>
@@ -84,9 +84,9 @@
 
 		<!-- Logging -->
 		<dependency>
-            <groupId>org.springframework.boot</groupId>
-            <artifactId>spring-boot-starter-log4j2</artifactId>
-        </dependency>
+			<groupId>org.springframework.boot</groupId>
+			<artifactId>spring-boot-starter-logging</artifactId>
+		</dependency>
 		<dependency>
 			<groupId>org.slf4j</groupId>
 			<artifactId>jcl-over-slf4j</artifactId>
@@ -110,16 +110,12 @@
 				<scope>import</scope>
 			</dependency>
 			<dependency>
-                <groupId>org.springframework.boot</groupId>
-                <artifactId>spring-boot-starter</artifactId>
-                <version>${spring-boot-version}</version>
-                <exclusions>
-                    <exclusion>
-                        <groupId>org.springframework.boot</groupId>
-                        <artifactId>spring-boot-starter-logging</artifactId>
-                    </exclusion>
-                </exclusions>
-            </dependency>
+				<groupId>org.springframework.cloud</groupId>
+				<artifactId>spring-cloud-dependencies</artifactId>
+				<type>pom</type>
+				<version>${spring-cloud-version}</version>
+				<scope>import</scope>
+			</dependency>
 			<dependency>
                 <groupId>org.springframework</groupId>
                 <artifactId>spring-core</artifactId>
@@ -190,7 +186,7 @@
                                     <excludes>
                                         <exclude>log4j:log4j</exclude>
                                         <exclude>commons-logging:commons-logging</exclude>
-                                        <exclude>ch.qos.logback:logback-core</exclude>
+                                        <exclude>org.apache.logging.log4j:log4j-core</exclude>
                                     </excludes>
                                 </bannedDependencies>
 							</rules>

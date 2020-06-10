@@ -26,6 +26,18 @@ server:
     enabled: true
   port: ${SERVER_PORT:8080}
 
+logging:
+  level:
+    root: info
+    org.dpppt: debug
+  pattern:
+    console: '%d %p [%X{X-B3-TraceId:-},%X{X-B3-SpanId:-},%X{X-B3-ParentSpanId:-},%X{X-Span-Export:-}] [%c] - &lt;%m&gt;%n'
+    file: '%d %p [%X{X-B3-TraceId:-},%X{X-B3-SpanId:-},%X{X-B3-ParentSpanId:-},%X{X-Span-Export:-}] [%c] - %m%n'
+ 
+  file:
+    name: dp3t-ws.log
+    max-size: 512KB
+    max-history: 3
 
 #-------------------------------------------------------------------------------
 # JDBC Config
