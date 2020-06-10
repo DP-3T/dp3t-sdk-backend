@@ -64,7 +64,7 @@ public class JDBCGAENDataServiceImpl implements GAENDataService {
 			params.addValue("rolling_start_number", gaenKey.getRollingStartNumber());
 			params.addValue("rolling_period", gaenKey.getRollingPeriod());
 			params.addValue("transmission_risk_level", gaenKey.getTransmissionRiskLevel());
-			params.addValue("received_at", Date.from(Instant.ofEpochMilli(receivedAt)));
+			params.addValue("received_at", new Date(receivedAt));
 			
 			parameterList.add(params);
 		}
