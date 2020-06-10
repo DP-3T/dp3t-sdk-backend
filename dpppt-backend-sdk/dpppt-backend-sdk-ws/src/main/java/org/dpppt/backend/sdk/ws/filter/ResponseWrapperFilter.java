@@ -64,28 +64,34 @@ public class ResponseWrapperFilter implements Filter {
 			SignatureResponseWrapper wrapper = new SignatureResponseWrapper(httpResponse, pair, retentionDays,
 					protectedHeaders, setDebugHeaders);
 			chain.doFilter(request, wrapper);
-			var asyncContext = AsyncHelper.getAsyncContext(request, response);
-			asyncContext.addListener(new AsyncListener() {
-				@Override
-				public void onComplete(AsyncEvent event) throws IOException {
-					wrapper.outputData(httpResponse.getOutputStream());
-				}
-	
-				@Override
-				public void onTimeout(AsyncEvent event) throws IOException {
-					
-				}
-	
-				@Override
-				public void onError(AsyncEvent event) throws IOException {
-					
-				}
-	
-				@Override
-				public void onStartAsync(AsyncEvent event) throws IOException {
-					
-				}
-			});
+			try{
+				request.getAsyncContext().addListener(new AsyncListener() {
+					@Override
+					public void onComplete(AsyncEvent event) throws IOException {
+						wrapper.outputData(httpResponse.getOutputStream());
+					}
+		
+					@Override
+					public void onTimeout(AsyncEvent event) throws IOException {
+						httpResponse.setHeader("test", "tes");
+					}
+		
+					@Override
+					public void onError(AsyncEvent event) throws IOException {
+						httpResponse.setHeader("test", "tes");
+					}
+		
+					@Override
+					public void onStartAsync(AsyncEvent event) throws IOException {
+						httpResponse.setHeader("test", "tes");
+					}
+				});
+			}
+			catch(Exception ex) {
+				ex.printStackTrace();
+				wrapper.outputData(httpResponse.getOutputStream());
+			}
+
 		}
 	}
 	public static class AsyncHelper {

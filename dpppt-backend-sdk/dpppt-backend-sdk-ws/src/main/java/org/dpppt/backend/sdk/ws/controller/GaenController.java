@@ -217,7 +217,7 @@ public class GaenController {
 		}
 		Callable<ResponseEntity<String>> cb = () -> {
 			normalizeRequestTime(now);
-			return ResponseEntity.ok().build();
+			return ResponseEntity.ok().body("OK");
 		};
 		return cb;
 
