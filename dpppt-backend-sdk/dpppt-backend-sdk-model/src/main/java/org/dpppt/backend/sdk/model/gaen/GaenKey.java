@@ -4,6 +4,8 @@ import javax.validation.constraints.NotNull;
 import javax.validation.constraints.Size;
 
 public class GaenKey {
+    public final static Integer GaenKeyDefaultRollingPeriod = 144;
+
     @NotNull
     @Size(min = 24, max = 24)
     String keyData;

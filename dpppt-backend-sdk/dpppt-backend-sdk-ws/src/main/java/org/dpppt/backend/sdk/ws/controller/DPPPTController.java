@@ -14,12 +14,14 @@ import java.time.Duration;
 import java.time.LocalDate;
 import java.time.OffsetDateTime;
 import java.time.ZoneOffset;
+import java.time.format.DateTimeParseException;
 import java.util.ArrayList;
 import java.util.Base64;
 import java.util.List;
 
 import javax.validation.Valid;
 
+import com.fasterxml.jackson.core.JsonProcessingException;
 import org.dpppt.backend.sdk.data.DPPPTDataService;
 import org.dpppt.backend.sdk.model.BucketList;
 import org.dpppt.backend.sdk.model.ExposedOverview;
@@ -36,6 +38,7 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.stereotype.Controller;
+import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.annotation.CrossOrigin;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -153,22 +156,22 @@ public class DPPPTController {
 
 	@CrossOrigin(origins = { "https://editor.swagger.io" })
 	@GetMapping(value = "/exposedjson/{batchReleaseTime}", produces = "application/json")
-	public @ResponseBody ResponseEntity<ExposedOverview> getExposedByDayDate(@PathVariable Long batchReleaseTime,
+	public @ResponseBody ResponseEntity<ExposedOverview> getExposedByDayDate(@PathVariable long batchReleaseTime,
 			WebRequest request) throws BadBatchReleaseTimeException{
 		if(!validationUtils.isValidBatchReleaseTime(batchReleaseTime)) {
 			return ResponseEntity.notFound().build();
 		}
-		
+
 		List<Exposee> exposeeList = dataService.getSortedExposedForBatchReleaseTime(batchReleaseTime, batchLength);
 		ExposedOverview overview = new ExposedOverview(exposeeList);
 		overview.setBatchReleaseTime(batchReleaseTime);
 		return ResponseEntity.ok().cacheControl(CacheControl.maxAge(Duration.ofMinutes(exposedListCacheContol)))
-				.header("X-BATCH-RELEASE-TIME", batchReleaseTime.toString()).body(overview);
+				.header("X-BATCH-RELEASE-TIME", Long.toString(batchReleaseTime)).body(overview);
 	}
 
 	@CrossOrigin(origins = { "https://editor.swagger.io" })
 	@GetMapping(value = "/exposed/{batchReleaseTime}", produces = "application/x-protobuf")
-	public @ResponseBody ResponseEntity<Exposed.ProtoExposedList> getExposedByBatch(@PathVariable Long batchReleaseTime,
+	public @ResponseBody ResponseEntity<Exposed.ProtoExposedList> getExposedByBatch(@PathVariable long batchReleaseTime,
 			WebRequest request) throws BadBatchReleaseTimeException {
 		if(!validationUtils.isValidBatchReleaseTime(batchReleaseTime)) {
 			return ResponseEntity.notFound().build();
@@ -186,7 +189,7 @@ public class DPPPTController {
 				.setBatchReleaseTime(batchReleaseTime).build();
 
 		return ResponseEntity.ok().cacheControl(CacheControl.maxAge(Duration.ofMinutes(exposedListCacheContol)))
-				.header("X-BATCH-RELEASE-TIME", batchReleaseTime.toString()).body(protoExposee);
+				.header("X-BATCH-RELEASE-TIME", Long.toString(batchReleaseTime)).body(protoExposee);
 	}
 
 	@CrossOrigin(origins = { "https://editor.swagger.io" })
@@ -206,20 +209,10 @@ public class DPPPTController {
 		return ResponseEntity.ok(list);
 	}
 
-	@ExceptionHandler(IllegalArgumentException.class)
+	@ExceptionHandler({IllegalArgumentException.class, InvalidDateException.class, JsonProcessingException.class,
+			MethodArgumentNotValidException.class, BadBatchReleaseTimeException.class, DateTimeParseException.class})
 	@ResponseStatus(HttpStatus.BAD_REQUEST)
 	public ResponseEntity<Object> invalidArguments() {
-		return ResponseEntity.badRequest().build();
-	}
-
-	@ExceptionHandler(InvalidDateException.class)
-	@ResponseStatus(HttpStatus.BAD_REQUEST)
-	public ResponseEntity<Object> invalidDate() {
-		return ResponseEntity.badRequest().build();
-	}
-	@ExceptionHandler(BadBatchReleaseTimeException.class)
-	@ResponseStatus(HttpStatus.BAD_REQUEST)
-	public ResponseEntity<Object> invalidBatchReleaseTime() {
 		return ResponseEntity.badRequest().build();
 	}
 
