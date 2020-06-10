@@ -82,7 +82,7 @@ public class JDBCDPPPTDataServiceImpl implements DPPPTDataService {
 
 	@Override
 	@Transactional(readOnly = true)
-	public int getMaxExposedIdForBatchReleaseTime(Long batchReleaseTime, long batchLength) {
+	public int getMaxExposedIdForBatchReleaseTime(long batchReleaseTime, long batchLength) {
 		MapSqlParameterSource params = new MapSqlParameterSource();
 		params.addValue("batchReleaseTime", Date.from(Instant.ofEpochMilli(batchReleaseTime)));
 		params.addValue("startBatch", Date.from(Instant.ofEpochMilli(batchReleaseTime - batchLength)));
@@ -97,7 +97,7 @@ public class JDBCDPPPTDataServiceImpl implements DPPPTDataService {
 
 	@Override
 	@Transactional(readOnly = true)
-	public List<Exposee> getSortedExposedForBatchReleaseTime(Long batchReleaseTime, long batchLength) {
+	public List<Exposee> getSortedExposedForBatchReleaseTime(long batchReleaseTime, long batchLength) {
 		String sql = "select pk_exposed_id, key, key_date from t_exposed where received_at >= :startBatch and received_at < :batchReleaseTime order by pk_exposed_id desc";
 		MapSqlParameterSource params = new MapSqlParameterSource();
 		params.addValue("batchReleaseTime", Date.from(Instant.ofEpochMilli(batchReleaseTime)));

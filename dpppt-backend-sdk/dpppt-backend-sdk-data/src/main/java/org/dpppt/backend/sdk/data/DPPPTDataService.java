@@ -40,7 +40,7 @@ public interface DPPPTDataService {
 	 * @param batchLength
 	 * @return
 	 */
-	int getMaxExposedIdForBatchReleaseTime(Long batchReleaseTime, long batchLength);
+	int getMaxExposedIdForBatchReleaseTime(long batchReleaseTime, long batchLength);
 
 	/**
 	 * Returns all exposees for the given batch.
@@ -49,7 +49,7 @@ public interface DPPPTDataService {
 	 * @param batchLength
 	 * @return
 	 */
-	List<Exposee> getSortedExposedForBatchReleaseTime(Long batchReleaseTime, long batchLength);
+	List<Exposee> getSortedExposedForBatchReleaseTime(long batchReleaseTime, long batchLength);
 
 	/**
 	 * deletes entries older than retentionperiod
