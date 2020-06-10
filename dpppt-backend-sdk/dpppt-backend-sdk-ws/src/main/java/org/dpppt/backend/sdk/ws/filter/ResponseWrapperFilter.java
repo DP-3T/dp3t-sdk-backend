@@ -61,8 +61,6 @@ public class ResponseWrapperFilter implements Filter {
 			wrapper.outputData(httpResponse.getOutputStream());
 		}
 		else {
-			//request.getAsyncContext().complete();
-			
 			SignatureResponseWrapper wrapper = new SignatureResponseWrapper(httpResponse, pair, retentionDays,
 					protectedHeaders, setDebugHeaders);
 			chain.doFilter(request, wrapper);
@@ -88,7 +86,6 @@ public class ResponseWrapperFilter implements Filter {
 					
 				}
 			});
-			
 		}
 	}
 	public static class AsyncHelper {
