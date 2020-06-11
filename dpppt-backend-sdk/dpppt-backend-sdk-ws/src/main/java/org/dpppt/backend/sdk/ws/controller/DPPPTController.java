@@ -59,7 +59,7 @@ public class DPPPTController {
 
 	private final DPPPTDataService dataService;
 	private final String appSource;
-	private final int exposedListCacheContol;
+	private final int exposedListCacheControl;
 	private final ValidateRequest validateRequest;
 	private final ValidationUtils validationUtils;
 	private final long batchLength;
@@ -71,7 +71,7 @@ public class DPPPTController {
 			long requestTime) {
 		this.dataService = dataService;
 		this.appSource = appSource;
-		this.exposedListCacheContol = exposedListCacheControl/1000/60;
+		this.exposedListCacheControl = exposedListCacheControl/1000/60;
 		this.validateRequest = validateRequest;
 		this.validationUtils = validationUtils;
 		this.batchLength = batchLength;
@@ -165,7 +165,7 @@ public class DPPPTController {
 		List<Exposee> exposeeList = dataService.getSortedExposedForBatchReleaseTime(batchReleaseTime, batchLength);
 		ExposedOverview overview = new ExposedOverview(exposeeList);
 		overview.setBatchReleaseTime(batchReleaseTime);
-		return ResponseEntity.ok().cacheControl(CacheControl.maxAge(Duration.ofMinutes(exposedListCacheContol)))
+		return ResponseEntity.ok().cacheControl(CacheControl.maxAge(Duration.ofMinutes(exposedListCacheControl)))
 				.header("X-BATCH-RELEASE-TIME", Long.toString(batchReleaseTime)).body(overview);
 	}
 
@@ -188,7 +188,7 @@ public class DPPPTController {
 		Exposed.ProtoExposedList protoExposee = Exposed.ProtoExposedList.newBuilder().addAllExposed(exposees)
 				.setBatchReleaseTime(batchReleaseTime).build();
 
-		return ResponseEntity.ok().cacheControl(CacheControl.maxAge(Duration.ofMinutes(exposedListCacheContol)))
+		return ResponseEntity.ok().cacheControl(CacheControl.maxAge(Duration.ofMinutes(exposedListCacheControl)))
 				.header("X-BATCH-RELEASE-TIME", Long.toString(batchReleaseTime)).body(protoExposee);
 	}
 
