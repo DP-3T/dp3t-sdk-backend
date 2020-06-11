@@ -16,6 +16,8 @@ import java.security.PublicKey;
 import java.security.Security;
 import java.util.List;
 
+import javax.servlet.AsyncEvent;
+import javax.servlet.AsyncListener;
 import javax.servlet.Filter;
 import javax.servlet.FilterChain;
 import javax.servlet.ServletException;
@@ -51,10 +53,35 @@ public class ResponseWrapperFilter implements Filter {
 	public void doFilter(ServletRequest request, ServletResponse response, FilterChain chain)
 			throws IOException, ServletException {
 		HttpServletResponse httpResponse = (HttpServletResponse) response;
+	
 		SignatureResponseWrapper wrapper = new SignatureResponseWrapper(httpResponse, pair, retentionDays,
 				protectedHeaders, setDebugHeaders);
 		chain.doFilter(request, wrapper);
-		wrapper.outputData(httpResponse.getOutputStream());
-	}
+		try{
+			request.getAsyncContext().addListener(new AsyncListener() {
+				@Override
+				public void onComplete(AsyncEvent event) throws IOException {
+					wrapper.outputData(httpResponse.getOutputStream());
+				}
 
+				@Override
+				public void onTimeout(AsyncEvent event) throws IOException {
+					/// We ignore this function, since the signature is anyways only valid if the request succeeds.
+				}
+				
+				@Override
+				public void onError(AsyncEvent event) throws IOException {
+					/// We ignore this function, since the signature is anyways only valid if the request succeeds.
+				}
+				
+				@Override
+				public void onStartAsync(AsyncEvent event) throws IOException {
+					/// We ignore this function. We don't need any preparation.
+				}
+			});
+		}
+		catch(Exception ex) {
+			wrapper.outputData(httpResponse.getOutputStream());
+		}
+	}
 }
