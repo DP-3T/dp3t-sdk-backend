@@ -148,6 +148,7 @@ public class MultipleJWTConfig {
 		http
 		.sessionManagement().sessionCreationPolicy(SessionCreationPolicy.STATELESS).and()
 		//.regexMatcher("/v1/(exposed|exposedlist|gaen/exposed)")
+		.csrf().disable()
 		.cors()
         .and()
           .authorizeRequests()
