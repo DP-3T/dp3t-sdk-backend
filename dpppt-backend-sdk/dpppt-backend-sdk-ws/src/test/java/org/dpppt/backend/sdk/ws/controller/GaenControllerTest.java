@@ -93,15 +93,16 @@ public class GaenControllerTest extends BaseControllerTest {
 		var gaenKey1 = new GaenKey();
 		var now = System.currentTimeMillis();
 		gaenKey1.setRollingStartNumber(
-				(int) Duration.ofMillis(now).dividedBy(Duration.ofMinutes(10)));
-		gaenKey1.setKeyData(Base64.getEncoder().encodeToString("testKey32Bytes--".getBytes("UTF-8")));
+			(int) Duration.ofMillis(LocalDate.now(ZoneOffset.UTC).minusDays(1).atStartOfDay(ZoneOffset.UTC).toInstant().toEpochMilli())
+			.dividedBy(Duration.ofMinutes(10)));
+		gaenKey1.setKeyData(Base64.getEncoder().encodeToString("testKey32Bytes01".getBytes("UTF-8")));
 		gaenKey1.setRollingPeriod(0);
 		gaenKey1.setFake(0);
 		gaenKey1.setTransmissionRiskLevel(0);
 		var gaenKey2 = new GaenKey();
 		gaenKey2.setRollingStartNumber((int) Duration.ofMillis(LocalDate.now(ZoneOffset.UTC).minusDays(1).atStartOfDay(ZoneOffset.UTC).toInstant().toEpochMilli())
 				.dividedBy(Duration.ofMinutes(10)));
-		gaenKey2.setKeyData(Base64.getEncoder().encodeToString("testKey32Bytes--".getBytes("UTF-8")));
+		gaenKey2.setKeyData(Base64.getEncoder().encodeToString("testKey32Bytes02".getBytes("UTF-8")));
 		gaenKey2.setRollingPeriod(0);
 		gaenKey2.setFake(0);
 		gaenKey2.setTransmissionRiskLevel(0);
@@ -137,11 +138,14 @@ public class GaenControllerTest extends BaseControllerTest {
 						.content(json(requestList)))
 				.andExpect(status().is(401)).andExpect(request().asyncNotStarted()).andExpect(content().string("")).andReturn();
 
-		var result = gaenDataService.getSortedExposedForKeyDate(LocalDate.now(ZoneOffset.UTC).atStartOfDay().toInstant(ZoneOffset.UTC).toEpochMilli(),null, (now / batchLength + 1 )*batchLength);
-		assertEquals(1, result.size());
+		var result = gaenDataService.getSortedExposedForKeyDate(LocalDate.now(ZoneOffset.UTC).minusDays(1).atStartOfDay().toInstant(ZoneOffset.UTC).toEpochMilli(),null, (now / batchLength + 1 )*batchLength);
+		assertEquals(2, result.size());
 		for(var key : result) {
 			assertEquals(Integer.valueOf(144), key.getRollingPeriod());
 		}
+
+		result = gaenDataService.getSortedExposedForKeyDate(LocalDate.now(ZoneOffset.UTC).minusDays(1).atStartOfDay().toInstant(ZoneOffset.UTC).toEpochMilli(),null, (now / batchLength)*batchLength);
+		assertEquals(0, result.size());
 	}
 
 	@Test
