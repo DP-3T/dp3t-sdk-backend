@@ -64,20 +64,19 @@ public class ResponseWrapperFilter implements Filter {
 					wrapper.outputData(httpResponse.getOutputStream());
 				}
 
-				/// We ignore this function, since the signature is anyways only valid if the request succeeds.
 				@Override
 				public void onTimeout(AsyncEvent event) throws IOException {
-					
+					/// We ignore this function, since the signature is anyways only valid if the request succeeds.
 				}
-				/// We ignore this function, since the signature is anyways only valid if the request succeeds.
+				
 				@Override
 				public void onError(AsyncEvent event) throws IOException {
-					
+					/// We ignore this function, since the signature is anyways only valid if the request succeeds.
 				}
-				/// We ignore this function. We don't need any preparation.
+				
 				@Override
 				public void onStartAsync(AsyncEvent event) throws IOException {
-					
+					/// We ignore this function. We don't need any preparation.
 				}
 			});
 		}
