@@ -24,6 +24,7 @@ import java.time.ZoneOffset;
 import java.util.Base64;
 import java.util.Date;
 import java.util.List;
+import java.util.Map;
 
 import javax.servlet.ServletOutputStream;
 import javax.servlet.WriteListener;
@@ -116,6 +117,12 @@ public class SignatureResponseWrapper extends HttpServletResponseWrapper {
 		this.setSignature();
 		httpOutput.write(this.output.toByteArray());
 	}
+	public void setHeaders(Map<String, String> headers) {
+		for(var header : headers.keySet()){
+			this.setHeader(header, headers.get(header));
+			this.setHeader(header, headers.get(header));
+		}
+	}
 
 	private void setSignature() throws IOException {
 		switch(HttpStatus.valueOf(this.getStatus())) {
@@ -160,7 +167,6 @@ public class SignatureResponseWrapper extends HttpServletResponseWrapper {
 			this.setHeader(HEADER_PUBLIC_KEY, getPublicKeyAsPEM());
 		}
 		this.setHeader(HEADER_SIGNATURE, signature);
-
 	}
 
 	private String getPublicKeyAsPEM() throws IOException {

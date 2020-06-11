@@ -14,6 +14,7 @@ import java.security.KeyPair;
 import java.time.Duration;
 import java.time.ZoneOffset;
 import java.util.List;
+import java.util.Map;
 import java.util.TimeZone;
 
 import javax.sql.DataSource;
@@ -76,6 +77,9 @@ public abstract class WSBaseConfig implements SchedulingConfigurer, WebMvcConfig
 	public abstract Flyway flyway();
 
 	public abstract String getDbType();
+
+	@Value("#{${ws.security.headers: {'Content-Security-Policy':\"default-src 'none'; frame-ancestors 'none'\", 'Strict-Transport-Security':'max-age=63072000','X-Content-Type-Options':'nosniff'}}}")
+	Map<String,String> additionalHeaders;
 
 	@Value("${ws.exposedlist.cachecontrol: 300000}")
 	int exposedListCacheControl;
@@ -244,7 +248,7 @@ public abstract class WSBaseConfig implements SchedulingConfigurer, WebMvcConfig
 
 	@Bean
 	public ResponseWrapperFilter hashFilter() {
-		return new ResponseWrapperFilter(keyVault.get("hashFilter"), retentionDays, protectedHeaders, setDebugHeaders);
+		return new ResponseWrapperFilter(keyVault.get("hashFilter"), retentionDays, protectedHeaders, setDebugHeaders, additionalHeaders);
 	}
 
 	public KeyPair getKeyPair(SignatureAlgorithm algorithm) {
