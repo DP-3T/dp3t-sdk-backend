@@ -78,20 +78,20 @@ public class GaenController {
 	private final ValidationUtils validationUtils;
 	private final GAENDataService dataService;
 	private final FakeKeyService fakeKeyService;
-	private final Duration exposedListCacheContol;
+	private final Duration exposedListCacheControl;
 	private final PrivateKey secondDayKey;
 	private final ProtoSignature gaenSigner;
 
 	public GaenController(GAENDataService dataService, FakeKeyService fakeKeyService, ValidateRequest validateRequest,
 			ProtoSignature gaenSigner, ValidationUtils validationUtils, Duration bucketLength, Duration requestTime,
-			Duration exposedListCacheContol, PrivateKey secondDayKey) {
+			Duration exposedListCacheControl, PrivateKey secondDayKey) {
 		this.dataService = dataService;
 		this.fakeKeyService = fakeKeyService;
 		this.bucketLength = bucketLength;
 		this.validateRequest = validateRequest;
 		this.requestTime = requestTime;
 		this.validationUtils = validationUtils;
-		this.exposedListCacheContol = exposedListCacheContol;
+		this.exposedListCacheControl = exposedListCacheControl;
 		this.secondDayKey = secondDayKey;
 		this.gaenSigner = gaenSigner;
 	}
@@ -168,7 +168,7 @@ public class GaenController {
 		}
 		Callable<ResponseEntity<String>> cb = () -> {
 			normalizeRequestTime(now);
-			return responseBuilder.build();
+			return responseBuilder.body("OK");
 		};
 		return cb;
 	}
@@ -217,7 +217,7 @@ public class GaenController {
 		}
 		Callable<ResponseEntity<String>> cb = () -> {
 			normalizeRequestTime(now);
-			return ResponseEntity.ok().build();
+			return ResponseEntity.ok().body("OK");
 		};
 		return cb;
 
@@ -242,7 +242,7 @@ public class GaenController {
 		var exposedKeys = dataService.getSortedExposedForKeyDate(keyDate, publishedafter, publishedUntil);
 		exposedKeys = fakeKeyService.fillUpKeys(exposedKeys, keyDate);
 		if (exposedKeys.isEmpty()) {
-			return ResponseEntity.noContent().cacheControl(CacheControl.maxAge(exposedListCacheContol))
+			return ResponseEntity.noContent().cacheControl(CacheControl.maxAge(exposedListCacheControl))
 					.header("X-PUBLISHED-UNTIL", Long.toString(publishedUntil)).build();
 		}
 
@@ -251,9 +251,9 @@ public class GaenController {
 		if (request.checkNotModified(etag)) {
 			return ResponseEntity.status(HttpStatus.NOT_MODIFIED)
 					.header("X-PUBLISHED-UNTIL", Long.toString(publishedUntil))
-					.cacheControl(CacheControl.maxAge(exposedListCacheContol)).build();
+					.cacheControl(CacheControl.maxAge(exposedListCacheControl)).build();
 		}
-		return ResponseEntity.ok().cacheControl(CacheControl.maxAge(exposedListCacheContol)).eTag(etag)
+		return ResponseEntity.ok().cacheControl(CacheControl.maxAge(exposedListCacheControl)).eTag(etag)
 				.header("X-PUBLISHED-UNTIL", Long.toString(publishedUntil)).body(payload.getZip());
 	}
 
@@ -274,14 +274,14 @@ public class GaenController {
 
 		var exposedKeys = dataService.getSortedExposedForKeyDate(keyDate, publishedafter, publishedUntil);
 		if (exposedKeys.isEmpty()) {
-			return ResponseEntity.noContent().cacheControl(CacheControl.maxAge(exposedListCacheContol))
+			return ResponseEntity.noContent().cacheControl(CacheControl.maxAge(exposedListCacheControl))
 					.header("X-PUBLISHED-UNTIL", Long.toString(publishedUntil)).build();
 		}
 
 		var file = new GaenExposedJson();
 		var header = new Header();
 		file.gaenKeys(exposedKeys).header(header);
-		return ResponseEntity.ok().cacheControl(CacheControl.maxAge(exposedListCacheContol))
+		return ResponseEntity.ok().cacheControl(CacheControl.maxAge(exposedListCacheControl))
 				.header("X-PUBLISHED-UNTIL", Long.toString(publishedUntil)).body(file);
 	}
 
