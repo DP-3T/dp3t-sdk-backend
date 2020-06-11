@@ -73,17 +73,17 @@ public class ResponseWrapperFilter implements Filter {
 		
 					@Override
 					public void onTimeout(AsyncEvent event) throws IOException {
-						httpResponse.setHeader("test", "tes");
+						
 					}
 		
 					@Override
 					public void onError(AsyncEvent event) throws IOException {
-						httpResponse.setHeader("test", "tes");
+						
 					}
 		
 					@Override
 					public void onStartAsync(AsyncEvent event) throws IOException {
-						httpResponse.setHeader("test", "tes");
+						
 					}
 				});
 			}
