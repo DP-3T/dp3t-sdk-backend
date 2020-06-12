@@ -159,7 +159,7 @@ public abstract class WSBaseConfig implements SchedulingConfigurer, WebMvcConfig
 			Flyway flyWay = Flyway.configure().dataSource(fakeDataSource).locations("classpath:/db/migration/hsqldb")
 					.load();
 			flyWay.migrate();
-			GAENDataService fakeGaenService = new JDBCGAENDataServiceImpl("hsql", fakeDataSource);
+			GAENDataService fakeGaenService = new JDBCGAENDataServiceImpl("hsql", fakeDataSource,Duration.ofMillis(batchLength));
 			return new FakeKeyService(fakeGaenService, Integer.valueOf(randomkeyamount),
 					Integer.valueOf(gaenKeySizeBytes), Duration.ofDays(retentionDays), randomkeysenabled);
 		} catch (Exception ex) {
@@ -220,7 +220,7 @@ public abstract class WSBaseConfig implements SchedulingConfigurer, WebMvcConfig
 
 	@Bean
 	public GAENDataService gaenDataService() {
-		return new JDBCGAENDataServiceImpl(getDbType(), dataSource());
+		return new JDBCGAENDataServiceImpl(getDbType(), dataSource(), Duration.ofMillis(batchLength));
 	}
 
 	@Bean
