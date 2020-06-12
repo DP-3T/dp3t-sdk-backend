@@ -240,7 +240,7 @@ public class GaenController {
 		long publishedUntil = now - (now % bucketLength.toMillis());
 
 		var exposedKeys = dataService.getSortedExposedForKeyDate(keyDate, publishedafter, publishedUntil);
-		exposedKeys = fakeKeyService.fillUpKeys(exposedKeys, keyDate);
+		exposedKeys = fakeKeyService.fillUpKeys(exposedKeys, publishedafter, keyDate);
 		if (exposedKeys.isEmpty()) {
 			return ResponseEntity.noContent().cacheControl(CacheControl.maxAge(exposedListCacheControl))
 					.header("X-PUBLISHED-UNTIL", Long.toString(publishedUntil)).build();
