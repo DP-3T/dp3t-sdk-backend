@@ -6,7 +6,6 @@ import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
 import org.springframework.web.servlet.HandlerInterceptor;
-import org.springframework.web.servlet.ModelAndView;
 
 public class HeaderInjector implements HandlerInterceptor {
     private final Map<String,String> headers;
@@ -15,13 +14,13 @@ public class HeaderInjector implements HandlerInterceptor {
     } 
 
     @Override
-    public void postHandle(
-      HttpServletRequest request, HttpServletResponse response, Object handler, 
-      ModelAndView modelAndView) throws Exception {
+    public boolean preHandle(
+      HttpServletRequest request, HttpServletResponse response, Object handler) throws Exception {
         if(headers != null){
             for(var header : headers.keySet()){
                 response.setHeader(header, headers.get(header));
             }
-		}
+        }
+        return true;
       }
 }
