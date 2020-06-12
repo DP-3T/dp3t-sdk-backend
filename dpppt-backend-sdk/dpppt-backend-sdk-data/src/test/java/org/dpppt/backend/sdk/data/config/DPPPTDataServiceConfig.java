@@ -34,6 +34,8 @@ public class DPPPTDataServiceConfig {
 
     @Value("${ws.gaen.randomkeysenabled: true}")
     boolean randomkeysenabled;
+    @Value("${ws.exposedlist.batchlength: 7200000}")
+	long batchLength;
 
     @Autowired
     DataSource dataSource;
@@ -53,7 +55,7 @@ public class DPPPTDataServiceConfig {
 
     @Bean
     public GAENDataService gaenDataService() {
-        return new JDBCGAENDataServiceImpl(dbType, dataSource);
+        return new JDBCGAENDataServiceImpl(dbType, dataSource, Duration.ofMillis(batchLength));
     }
 
     @Bean
@@ -63,7 +65,7 @@ public class DPPPTDataServiceConfig {
 
     @Bean
     public GAENDataService fakeService() {
-        return new JDBCGAENDataServiceImpl("hsql", fakeDataSource());
+        return new JDBCGAENDataServiceImpl("hsql", fakeDataSource(), Duration.ofMillis(batchLength));
     }
 
     @Bean

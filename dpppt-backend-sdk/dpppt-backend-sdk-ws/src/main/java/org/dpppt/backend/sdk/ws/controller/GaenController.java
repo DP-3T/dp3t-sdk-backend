@@ -18,8 +18,8 @@ import java.time.Duration;
 import java.time.Instant;
 import java.time.LocalDate;
 import java.time.ZoneOffset;
+import java.time.format.DateTimeParseException;
 import java.util.ArrayList;
-import java.util.Base64;
 import java.util.Date;
 import java.util.List;
 import java.util.UUID;
@@ -27,6 +27,7 @@ import java.util.concurrent.Callable;
 
 import javax.validation.Valid;
 
+import com.fasterxml.jackson.core.JsonProcessingException;
 import org.dpppt.backend.sdk.data.gaen.FakeKeyService;
 import org.dpppt.backend.sdk.data.gaen.GAENDataService;
 import org.dpppt.backend.sdk.model.gaen.DayBuckets;
@@ -42,12 +43,15 @@ import org.dpppt.backend.sdk.ws.security.signature.ProtoSignature;
 import org.dpppt.backend.sdk.ws.security.signature.ProtoSignature.ProtoSignatureWrapper;
 import org.dpppt.backend.sdk.ws.util.ValidationUtils;
 import org.dpppt.backend.sdk.ws.util.ValidationUtils.BadBatchReleaseTimeException;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.http.CacheControl;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.security.oauth2.jwt.Jwt;
 import org.springframework.stereotype.Controller;
+import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -65,6 +69,7 @@ import io.jsonwebtoken.Jwts;
 @Controller
 @RequestMapping("/v1/gaen")
 public class GaenController {
+	private static final Logger logger = LoggerFactory.getLogger(GaenController.class);
 
 	private final Duration bucketLength;
 	private final Duration requestTime;
@@ -72,20 +77,20 @@ public class GaenController {
 	private final ValidationUtils validationUtils;
 	private final GAENDataService dataService;
 	private final FakeKeyService fakeKeyService;
-	private final Duration exposedListCacheContol;
+	private final Duration exposedListCacheControl;
 	private final PrivateKey secondDayKey;
 	private final ProtoSignature gaenSigner;
 
 	public GaenController(GAENDataService dataService, FakeKeyService fakeKeyService, ValidateRequest validateRequest,
 			ProtoSignature gaenSigner, ValidationUtils validationUtils, Duration bucketLength, Duration requestTime,
-			Duration exposedListCacheContol, PrivateKey secondDayKey) {
+			Duration exposedListCacheControl, PrivateKey secondDayKey) {
 		this.dataService = dataService;
 		this.fakeKeyService = fakeKeyService;
 		this.bucketLength = bucketLength;
 		this.validateRequest = validateRequest;
 		this.requestTime = requestTime;
 		this.validationUtils = validationUtils;
-		this.exposedListCacheContol = exposedListCacheContol;
+		this.exposedListCacheControl = exposedListCacheControl;
 		this.secondDayKey = secondDayKey;
 		this.gaenSigner = gaenSigner;
 	}
@@ -111,6 +116,17 @@ public class GaenController {
 				continue;
 			} else {
 				this.validateRequest.getKeyDate(principal, key);
+				if (key.getRollingPeriod().equals(0)) {
+					//currently only android seems to send 0 which can never be valid, since a non used key should not be submitted
+					//default value according to EN is 144, so just set it to that. If we ever get 0 from iOS we should log it, since
+					//this should not happen
+					key.setRollingPeriod(GaenKey.GaenKeyDefaultRollingPeriod);
+					if(userAgent.toLowerCase().contains("ios")) {
+						logger.error("Received a rolling period of 0 for an iOS User-Agent");
+					}
+				} else if(key.getRollingPeriod() < 0) {
+					return () -> ResponseEntity.status(HttpStatus.BAD_REQUEST).body("Rolling Period MUST NOT be negative.");
+				}
 				nonFakeKeys.add(key);
 			}
 		}
@@ -151,7 +167,7 @@ public class GaenController {
 		}
 		Callable<ResponseEntity<String>> cb = () -> {
 			normalizeRequestTime(now);
-			return responseBuilder.build();
+			return responseBuilder.body("OK");
 		};
 		return cb;
 	}
@@ -183,20 +199,31 @@ public class GaenController {
 			}
 		}
 		if (!this.validateRequest.isFakeRequest(principal, gaenSecondDay.getDelayedKey())) {
+			if (gaenSecondDay.getDelayedKey().getRollingPeriod().equals(0)) {
+				//currently only android seems to send 0 which can never be valid, since a non used key should not be submitted
+				//default value according to EN is 144, so just set it to that. If we ever get 0 from iOS we should log it, since
+				//this should not happen
+				gaenSecondDay.getDelayedKey().setRollingPeriod(GaenKey.GaenKeyDefaultRollingPeriod);
+				if(userAgent.toLowerCase().contains("ios")) {
+					logger.error("Received a rolling period of 0 for an iOS User-Agent");
+				}
+			} else if(gaenSecondDay.getDelayedKey().getRollingPeriod() < 0) {
+				return () -> ResponseEntity.status(HttpStatus.BAD_REQUEST).body("Rolling Period MUST NOT be negative.");
+			}
 			List<GaenKey> keys = new ArrayList<>();
 			keys.add(gaenSecondDay.getDelayedKey());
 			dataService.upsertExposees(keys);
 		}
 		Callable<ResponseEntity<String>> cb = () -> {
 			normalizeRequestTime(now);
-			return ResponseEntity.ok().build();
+			return ResponseEntity.ok().body("OK");
 		};
 		return cb;
 
 	}
 
 	@GetMapping(value = "/exposed/{keyDate}", produces = "application/zip")
-	public @ResponseBody ResponseEntity<byte[]> getExposedKeys(@PathVariable Long keyDate,
+	public @ResponseBody ResponseEntity<byte[]> getExposedKeys(@PathVariable long keyDate,
 			@RequestParam(required = false) Long publishedafter, WebRequest request)
 			throws BadBatchReleaseTimeException, IOException, InvalidKeyException, SignatureException,
 			NoSuchAlgorithmException {
@@ -212,25 +239,20 @@ public class GaenController {
 		long publishedUntil = now - (now % bucketLength.toMillis());
 
 		var exposedKeys = dataService.getSortedExposedForKeyDate(keyDate, publishedafter, publishedUntil);
-		exposedKeys = fakeKeyService.fillUpKeys(exposedKeys, keyDate);
+		exposedKeys = fakeKeyService.fillUpKeys(exposedKeys, publishedafter, keyDate);
 		if (exposedKeys.isEmpty()) {
-			return ResponseEntity.noContent().cacheControl(CacheControl.maxAge(exposedListCacheContol))
+			return ResponseEntity.noContent().cacheControl(CacheControl.maxAge(exposedListCacheControl))
 					.header("X-PUBLISHED-UNTIL", Long.toString(publishedUntil)).build();
 		}
 
 		ProtoSignatureWrapper payload = gaenSigner.getPayload(exposedKeys);
-		String etag = Base64.getEncoder().encodeToString(payload.getHash());
-		if (request.checkNotModified(etag)) {
-			return ResponseEntity.status(HttpStatus.NOT_MODIFIED)
-					.header("X-PUBLISHED-UNTIL", Long.toString(publishedUntil))
-					.cacheControl(CacheControl.maxAge(exposedListCacheContol)).build();
-		}
-		return ResponseEntity.ok().cacheControl(CacheControl.maxAge(exposedListCacheContol)).eTag(etag)
+		
+		return ResponseEntity.ok().cacheControl(CacheControl.maxAge(exposedListCacheControl))
 				.header("X-PUBLISHED-UNTIL", Long.toString(publishedUntil)).body(payload.getZip());
 	}
 
 	@GetMapping(value = "/exposedjson/{keyDate}", produces = "application/json")
-	public @ResponseBody ResponseEntity<GaenExposedJson> getExposedKeysAsJson(@PathVariable Long keyDate,
+	public @ResponseBody ResponseEntity<GaenExposedJson> getExposedKeysAsJson(@PathVariable long keyDate,
 			@RequestParam(required = false) Long publishedafter, WebRequest request)
 			throws BadBatchReleaseTimeException {
 		if (!validationUtils.isValidKeyDate(keyDate)) {
@@ -246,14 +268,14 @@ public class GaenController {
 
 		var exposedKeys = dataService.getSortedExposedForKeyDate(keyDate, publishedafter, publishedUntil);
 		if (exposedKeys.isEmpty()) {
-			return ResponseEntity.noContent().cacheControl(CacheControl.maxAge(exposedListCacheContol))
+			return ResponseEntity.noContent().cacheControl(CacheControl.maxAge(exposedListCacheControl))
 					.header("X-PUBLISHED-UNTIL", Long.toString(publishedUntil)).build();
 		}
 
 		var file = new GaenExposedJson();
 		var header = new Header();
 		file.gaenKeys(exposedKeys).header(header);
-		return ResponseEntity.ok().cacheControl(CacheControl.maxAge(exposedListCacheContol))
+		return ResponseEntity.ok().cacheControl(CacheControl.maxAge(exposedListCacheControl))
 				.header("X-PUBLISHED-UNTIL", Long.toString(publishedUntil)).body(file);
 	}
 
@@ -291,21 +313,10 @@ public class GaenController {
 		}
 	}
 
-	@ExceptionHandler(IllegalArgumentException.class)
+	@ExceptionHandler({IllegalArgumentException.class, InvalidDateException.class, JsonProcessingException.class,
+			MethodArgumentNotValidException.class, BadBatchReleaseTimeException.class, DateTimeParseException.class})
 	@ResponseStatus(HttpStatus.BAD_REQUEST)
 	public ResponseEntity<Object> invalidArguments() {
-		return ResponseEntity.badRequest().build();
-	}
-
-	@ExceptionHandler(InvalidDateException.class)
-	@ResponseStatus(HttpStatus.BAD_REQUEST)
-	public ResponseEntity<Object> invalidDate() {
-		return ResponseEntity.badRequest().build();
-	}
-
-	@ExceptionHandler(BadBatchReleaseTimeException.class)
-	@ResponseStatus(HttpStatus.BAD_REQUEST)
-	public ResponseEntity<Object> invalidBatchReleaseTime() {
 		return ResponseEntity.badRequest().build();
 	}
 }

@@ -1,3 +1,4 @@
+<!-- Issue templates and Contributing guides are taken from the fastlane repository and adjusted for our needs (https://github.com/fastlane/fastlane/tree/master/.github/ISSUE_TEMPLATE) and  -->
 # DP3T-Backend-SDK
 
 ![License: MPL 2.0](https://img.shields.io/badge/License-MPL%202.0-brightgreen.svg)
@@ -5,26 +6,8 @@
 [![Quality Gate Status](https://sonarcloud.io/api/project_badges/measure?project=DP-3T_dp3t-sdk-backend&metric=alert_status)](https://sonarcloud.io/dashboard?id=DP-3T_dp3t-sdk-backend)
 [![Coverage](https://sonarcloud.io/api/project_badges/measure?project=DP-3T_dp3t-sdk-backend&metric=coverage)](https://sonarcloud.io/dashboard?id=DP-3T_dp3t-sdk-backend)
 
-
-## DP3T
-The Decentralised Privacy-Preserving Proximity Tracing (DP3T) project is an open protocol for COVID-19 proximity tracing using Bluetooth Low Energy functionality on mobile devices, which ensures that personal data and computation stay entirely on an individual's phone. It was produced by a core team of over 25 scientists and academic researchers from across Europe. It has also been scrutinized and improved by the wider community.
-
-DP3T is a free-standing effort, begun at the EPFL and ETHZ, where the protocol was produced and where the implementation into an open-sourced app and server is taking place.
-
-
-## Introduction
-This is the first implementation of the DP-3T "low bandwidth" protocol. The current implementation does not use the as yet unreleased "Contact Tracing" API of Apple/Google, and as such, **might suffer from some limitations**. Our "hybrid approach" uses Bluetooth Low Energy (BLE) to exchange EphID's. It uses advertisements whenever possible and falls back to GATT Server connections if transmission/collection of an `EphID` is not possible in this way (e.g., on iOS devices when the app is in background). This approach can result in higher energy consumption and scalability issues and will be replaced by the Apple/Google API.
-
-Our immediate roadmap is: to support the Apple/Google wire protocol, to be forward-compatible, and to support the actual Apple/Google API as soon as it is released to iOS and Android devices.
-
-## Contribution Guide
-The DP3T backend is not yet complete. It has not yet been reviewed or audited for security and compatibility. We are both continuing the development and have started a security review. This project is truly open-source and we welcome any feedback on the code regarding both the implementation and security aspects.
-
-Bugs or potential problems should be reported using Github issues. We welcome all pull requests that improve the quality the source code.
-
-If you provide new extensions and need to adjust the config files, try to add new profiles. This way, we can keep providing a highly modular backend solution. Since every country resp. implementation has different needs, we try not to enforce a certain method.
-
-If you have contributions that include design changes of the currently accepted white paper, please start a discussion there. Since we are trying to release a first, best-effort version soon, we currently cannot accept any PRs that include non-approved design changes.
+## License
+This project is licensed under the terms of the MPL 2 license. See the [LICENSE](LICENSE) file.
 
 ## Repositories
 * Android SDK & Calibration app: [dp3t-sdk-android](https://github.com/DP-3T/dp3t-sdk-android)
@@ -33,29 +16,21 @@ If you have contributions that include design changes of the currently accepted 
 * iOS Demo App: [dp3t-app-ios](https://github.com/DP-3T/dp3t-app-ios)
 * Backend SDK: [dp3t-sdk-backend](https://github.com/DP-3T/dp3t-sdk-backend)
 
-## Work in Progress
-The DP3T-Backend-SDK contains alpha-quality code only and is not yet complete. It has not yet been reviewed or audited for security and compatibility. We are both continuing the development and have started a security review. This project is truly open-source and we welcome any feedback on the code regarding both the implementation and security aspects.
-This repository contains the open prototype SDK, so please focus your feedback for this repository on implementation issues.
+## DP3T
+The Decentralised Privacy-Preserving Proximity Tracing (DP3T) project is an open protocol for COVID-19 proximity tracing using Bluetooth Low Energy functionality on mobile devices, which ensures that personal data and computation stay entirely on an individual's phone. It was produced by a core team of over 25 scientists and academic researchers from across Europe. It has also been scrutinized and improved by the wider community.
 
-## Further Documentation
-The full set of documents for DP3T is at https://github.com/DP-3T/documents. Please refer to the technical documents and whitepapers for a description of the implementation.
+DP3T is a free-standing effort, begun at the EPFL and ETHZ, where the protocol was produced and where the implementation into an open-sourced app and server is taking place.
 
-## Architecture
-A central discovery service is hosted on [Github](https://github.com/DP-3T/dp3t-discovery). This server provides the necessary information for the SDK to initialize itself. After the SDK loads the base URL for its own backend, it will load the infected list from there, as well as post if a user is infected. This will also allow apps to fetch lists from other backend systems participating in this scheme and can handle roaming of users.
+## Contribution Guide
 
-The SDK-Backend provides an interface to publish exposed keys and get a list of exposed keys.
+Please read the [Contribution Guide](CONTRIBUTING.md) before submitting any pull-request.
 
-> Note that the requests on the image are not the actual endpoints in the reference implementation. They differ in the picture to show the possible separation of the two requests. For the actual endpoint paths, refer to the backend documentation further down (e.g. PDF or OpenAPI).
+## Introduction
+This documentation describes the backend used for the SwissCovid application. It is focused on providing information for the requests used for the Exposure Notification framework. Although, code of the old format is still provided, no documentation or support is available except the code itself.
 
-![](documentation/img/dp3t-backend.svg)
-
-### General
-This repository contains a backend implementation (webservice) written with Spring Boot, which implements the specification of the Decentralized Privacy-Preserving Proximity Tracing system.
-
-
-### Dependencies
+## Dependencies
 * Spring Boot 2.2.6
-* Java 8 (or higher)
+* Java 11 (or higher)
 * Logback
 * [Springboot-Swagger-3](https://github.com/Ubique-OSS/springboot-swagger3) (Github Package, plugin dependency)
 
@@ -68,18 +43,12 @@ For development purposes an hsqldb can be used to run the webservice locally. Fo
 
 ![](documentation/img/t_redeem_uuid.svg)
 
-### API
-> Note that currently, documentation cannot be generated automatically. Hence, the generated swagger might not be up-to-date. If you checkout the repo, you can use the make doc command to generate a new swagger file (though without any documentation strings).
 
-The backend API specification is documented here:
-* [PDF](/documentation/documentation.pdf)
-* [Swagger Editor](https://editor.swagger.io/?url=https://raw.githubusercontent.com/DP-3T/dp3t-sdk-backend/develop/documentation/yaml/sdk.yaml)
-
-### Configurations
+## Environments
 To control different behaviors, SpringBoot profiles are used. The idea is to provide an abstract base class, which defines everything needed. Such properties can be defined as abstract, and their implementation can be provided in an extended class.
 
 #### WSCloud*Config/WSProdConfig/WSDevConfig
-Currently three non-abstract configs (`dev`, `abn` and `prod`) are provided, which are used in the current deployed version of the backend. Those are the CloudConfigs and they are optimized to work with an environment using KeyCloak and CloudFoundry. 
+Currently three non-abstract configs (`dev`, `test`, `abn` and `prod`) are provided, which are used in the current deployed version of the backend. Those are the CloudConfigs and they are optimized to work with an environment using KeyCloak and CloudFoundry. 
 
 Furthermore, two non-abstract configs (`dev`, `prod`) are provided, which implement a basic configuration, and which should work out-of-the-box. It generates new key pairs, used to sign the payload, each time the web service is started. For an example on how to persist the keys across startup, have a look at the cloud configs.
 
@@ -90,8 +59,53 @@ If you plan to provide new extensions or make adjustments and want to provide th
 #### WSJWTConfig
 There is also a possible extension to the base web service provided. The JWT config is intended to implement a possibility to authorize the post requests used to publish the secret keys from the clients. JWTs, which are signed by a health authority, are used. An interface is provided, which can be used to define the behavior of authorization (c.f. the `ValidateRequest` class and its implementation in `NoValidateRequest` and `JWTValidator`). 
 
+## Fake Requests
+Since a client has to send its keys to the backend, it would be possible to filter traffic based on post requests to the backend, in order to find out, which IP addressess are "infected". To minimize such a risk clients will send a fake request, where the time delay is based on a Poisson distribution. 
 
-### Public/Private KeyPairs
+### Time Delay
+In order to minimize the risk of timing attacks, to find out whether a request was fake or not, a time-delay of 1.5s is  introduced for the `POST` request.
+
+### Constant Payload
+Clients pad the number of keys with fake keys, if not enough keys are provided by the framework (e.g. the app is installed for less than 14 days). On fake keys the web-service should not validate any dates. The key payload though needs to be the exact same size!
+
+## GAEN/DP3T
+We started with the project before Google and Apple announced the Exposure Notifications. Hence, there is a custom format and implementation provided. It is recommended to adopt the new Exposure Notification format, since support on clients is much better.
+
+### Legacy Notifications
+Since the Exposure Notifications format has been adopted, we drop support for legacy notifications. Currently no feature-requests are implemented for the old format, but if a PR is provided, it can still be merged.
+
+By default, the legacy controller (`DPPPTController`) uses the base url `/v1/`.
+
+### Exposure Notifications
+Here an implementation for the [Exposure Notification](https://www.google.com/covid19/exposurenotifications/) Library by Google and Apple is provided. 
+
+By default, the EN controller (`GaenController`) uses the base url `/v1/gaen/`.
+
+The web-service provides three endpoints, which map the Exposure Notification specifications. 
+
+- /v1/gaen/exposed: `POST` Send a list of infected keys. If a JWT is used to authorize the request, send a JWT back to authorize the call of the following day. If the request as a whole is a "fake"-request, all keys need to be fake, otherwise a 400 HttpStatus code is returned.
+
+- /v1/gaen/exposednextday: `POST` Since the EN framework won't give the key of the current day, the upload has to be split into two. This endpoint receives the key of the last day. This endpoint eventually will be removed, as soon as the EN framework is adjusted. If JWT are activated, this endpoint needs the JWT received from a successfull request to `/v1/gaen/exposed`.
+
+- /v1/gaen/exposed/\<timestamp\>?publishedafter=\<publishedAfter\>: `GET` Returns a list of keys, which were used at `timestamp`. Note that `timestamp` needs to be epoch milliseconds. Since the behaviour of Android and iOS aren't the same, the optional `publishedAfter` parameter is added. If set only keys, which were received *after* `publishAfter` are returned. This request returns `ZIP` file containing `export.bin` and `export.sig`, where the keys and the signature are stored, as need by the EN framework. The class for signing and serializing is `ProtoSignature`.
+
+
+Further endpoints are added to the controller for debugging purposes. Those requests can e.g. be blocked by a WAF rule or similiar.
+
+## ETag
+To profit from caching e.g. when all requests are routed through a CDN, an ETag is set. The value of the ETag is the content hash of the protobuf key list. The ETag will change whenever new keys are added.
+
+Note: Since we use ECDSA signatures, the signature would change each time. The same is true for the hash of the HttpPayload.
+
+## Content Signing
+In order to provide authenticity, the HttpPayload is signed. The signature is added as a `Signature` HttpHeader to each 200 or 204 response. The signature consists of a JWT containing the content hash as a claim. Further, if `protected-headers` are added in the controller (and activated through the respective key in the properties file), those headers are signed as well, thus providing the possibility of signing certain request parameters.
+
+## Swagger
+
+We use [Springboot-Swagger-3](https://github.com/Ubique-OSS/springboot-swagger3) to generate a `YAML` based on settings and controllers found in the project. We include a up-to-date version in each release. Currently they are lacking the documentation, but should provide enough information to use them in [Swagger Editor](https://editor.swagger.io).
+
+## Key Handling
+
 There are multiple ways of generating and using key pairs. In the cloud configs, the public key is read from a certificate provided via SpringBoot value injection. The private key is a PKCS8-PEM encoded private key. In the default configs, the key pairs are generated via helper functions from the JWT-library used.
 
 There are two files, `GenerateKeyPair.java` (outputs directly the keys) and `GenerateKeyPairEC.java` (preferred way of generating key pairs, uses PEM format) to give an idea on how to generate them by yourselves.
@@ -136,34 +150,7 @@ In any case the `loadPrivateKey` and `loadPublicKey` functions will iterate thro
 
 - `loadPublicKeyFromX509Certificate`: Loads the public key from a certificate.
 
-### Build
-The `maven-toolchains-plugin` is used to provide the maven compiler with the correct toolchain. So you may need to add a `toolchains.xml` file to your `~/.m2` maven config folder (or remove the plugin from the `pom.xml`). Here is an example for a mac environment. Make sure to replace `<jdkHome>` with the path to your `JAVA_HOME`.
-
-```xml
-<toolchains>
-<toolchain>
-    <type>jdk</type>
-    <provides>
-      <id>Java11</id>
-      <version>11</version>
-    </provides>
-    <configuration>
-      <jdkHome>/Library/Java/JavaVirtualMachines/jdk-11.0.2.jdk/Contents/Home</jdkHome>
-    </configuration>
-  </toolchain>
-  <toolchain>
-    <type>jdk</type>
-    <provides>
-      <id>Java8</id>
-      <version>8</version>
-    </provides>
-    <configuration>
-      <jdkHome>/Library/Java/JavaVirtualMachines/jdk1.8.0_201.jdk/Contents/Home</jdkHome>
-    </configuration>
-  </toolchain>
-</toolchains>
-```
-
+## Build
 To build you need to install Maven.
 
 ```bash
@@ -173,11 +160,11 @@ mvn install
 
 > Note to run the PostgreSQL unit tests, `dockerd` is needed. If you want to skip those tests add `-DskipTests` to the build command. 
 
-### Run
+## Run
 ```bash
 java -jar dpppt-backend-sdk-ws/target/dpppt-backend-sdk-ws-*.jar
 ```
-### Dockerfiles
+## Dockerfiles
 The dockerfile includes a base jdk image to run the jar. To actually build the docker container, you need to place the generated jar in the bin folder.
 
 ```bash
@@ -189,10 +176,10 @@ cd ws-sdk && docker build -t <the-tag-we-use> .
 ```
 
 ```bash
-docker run -p 80:8080 <the-tag-we-use>
+docker run -p 80:8080 -v <path_to_logbackxml>:/home/ws/conf/dpppt-backend-sdk-ws-logback.xml -v <path_to_application_properties>:/home/ws/conf/dpppt-backend-sdk-ws.properties <the-tag-we-use>
  ```
 
-### Makefile
+## Makefile
 You can use the provided makefile to build the backend, build a docker image and generate the documentation.
 
 Without a target, the makefile will generate everything except the docker image.
@@ -205,7 +192,3 @@ To build the docker image run
 
 ```bash
 make docker-build
-```
-
-## License
-This project is licensed under the terms of the MPL 2 license. See the [LICENSE](LICENSE) file.

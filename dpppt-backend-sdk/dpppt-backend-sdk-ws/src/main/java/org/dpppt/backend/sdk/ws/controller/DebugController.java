@@ -91,7 +91,7 @@ public class DebugController {
     }
 
     @GetMapping(value = "/exposed/{batchReleaseTime}", produces = "application/zip")
-    public @ResponseBody ResponseEntity<byte[]> getExposedKeys(@PathVariable Long batchReleaseTime, WebRequest request)
+    public @ResponseBody ResponseEntity<byte[]> getExposedKeys(@PathVariable long batchReleaseTime, WebRequest request)
             throws BadBatchReleaseTimeException, IOException, InvalidKeyException,
             NoSuchAlgorithmException, SignatureException {
 

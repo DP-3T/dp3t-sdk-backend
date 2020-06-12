@@ -127,6 +127,9 @@
 	</dependencyManagement>
 
 	<build>
+		<finalName>
+			dpppt-backend-sdk-ws
+		</finalName>
 		<plugins>
 			<plugin>
 				<groupId>org.springframework.boot</groupId>

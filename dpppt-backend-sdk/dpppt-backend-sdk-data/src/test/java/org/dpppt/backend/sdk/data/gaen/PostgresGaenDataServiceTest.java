@@ -84,20 +84,22 @@ public class PostgresGaenDataServiceTest {
 		var keysUntilToday = today.minusDays(21);
 
 		var keys = new ArrayList<GaenKey>();
-		var emptyList = fakeKeyService.fillUpKeys(keys,
+		var emptyList = fakeKeyService.fillUpKeys(keys, null,
 				noKeyAtThisDate.atStartOfDay(ZoneOffset.UTC).toInstant().toEpochMilli());
 		assertEquals(0, emptyList.size());
 		do {
 			keys.clear();
-			var list = fakeKeyService.fillUpKeys(keys,
+			var list = fakeKeyService.fillUpKeys(keys, null,
 					keysUntilToday.atStartOfDay(ZoneOffset.UTC).toInstant().toEpochMilli());
 
+			assertEquals(10, list.size());
+			list = fakeKeyService.fillUpKeys(keys, OffsetDateTime.now(ZoneOffset.UTC).plusHours(3).toInstant().toEpochMilli(), keysUntilToday.atStartOfDay(ZoneOffset.UTC).toInstant().toEpochMilli());
 			assertEquals(10, list.size());
 			keysUntilToday = keysUntilToday.plusDays(1);
 		} while (keysUntilToday.isBefore(today));
 
 		keys.clear();
-		emptyList = fakeKeyService.fillUpKeys(keys,
+		emptyList = fakeKeyService.fillUpKeys(keys, null,
 				noKeyAtThisDate.atStartOfDay(ZoneOffset.UTC).toInstant().toEpochMilli());
 		assertEquals(0, emptyList.size());
 	}
