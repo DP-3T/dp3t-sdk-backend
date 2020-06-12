@@ -29,6 +29,7 @@ import org.dpppt.backend.sdk.data.gaen.JDBCGAENDataServiceImpl;
 import org.dpppt.backend.sdk.ws.controller.DPPPTController;
 import org.dpppt.backend.sdk.ws.controller.GaenController;
 import org.dpppt.backend.sdk.ws.filter.ResponseWrapperFilter;
+import org.dpppt.backend.sdk.ws.interceptor.HeaderInjector;
 import org.dpppt.backend.sdk.ws.security.KeyVault;
 import org.dpppt.backend.sdk.ws.security.NoValidateRequest;
 import org.dpppt.backend.sdk.ws.security.ValidateRequest;
@@ -55,6 +56,7 @@ import org.springframework.scheduling.config.IntervalTask;
 import org.springframework.scheduling.config.ScheduledTaskRegistrar;
 import org.springframework.scheduling.support.CronTrigger;
 import org.springframework.web.servlet.config.annotation.AsyncSupportConfigurer;
+import org.springframework.web.servlet.config.annotation.InterceptorRegistry;
 import org.springframework.web.servlet.config.annotation.WebMvcConfigurer;
 
 import com.fasterxml.jackson.annotation.JsonInclude;
@@ -248,7 +250,11 @@ public abstract class WSBaseConfig implements SchedulingConfigurer, WebMvcConfig
 
 	@Bean
 	public ResponseWrapperFilter hashFilter() {
-		return new ResponseWrapperFilter(keyVault.get("hashFilter"), retentionDays, protectedHeaders, setDebugHeaders, additionalHeaders);
+		return new ResponseWrapperFilter(keyVault.get("hashFilter"), retentionDays, protectedHeaders, setDebugHeaders);
+	}
+	@Bean
+	public HeaderInjector securityHeaderInjector(){
+		return new HeaderInjector(additionalHeaders);
 	}
 
 	public KeyPair getKeyPair(SignatureAlgorithm algorithm) {
@@ -283,5 +289,9 @@ public abstract class WSBaseConfig implements SchedulingConfigurer, WebMvcConfig
 
 		var trigger = new CronTrigger("0 0 2 * * *", TimeZone.getTimeZone(ZoneOffset.UTC));
 		taskRegistrar.addCronTask(new CronTask(() -> fakeKeyService().updateFakeKeys(), trigger));
+	}
+	@Override
+	public void addInterceptors(InterceptorRegistry registry) {
+		registry.addInterceptor(securityHeaderInjector());
 	}
 }

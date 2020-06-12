@@ -35,25 +35,19 @@ public class ResponseWrapperFilter implements Filter {
 	private final int retentionDays;
 	private final List<String> protectedHeaders;
 	private final boolean setDebugHeaders;
-	private final Map<String, String> additionalHeaders;
 
 	public PublicKey getPublicKey() {
 		return pair.getPublic();
 	}
 
 	public ResponseWrapperFilter(KeyPair pair, int retentionDays, List<String> protectedHeaders,
-			boolean setDebugHeaders, Map<String,String> additionalHeaders) {
+			boolean setDebugHeaders) {
 		Security.addProvider(new BouncyCastleProvider());
 		Security.setProperty("crypto.policy", "unlimited");
 		this.pair = pair;
 		this.retentionDays = retentionDays;
 		this.protectedHeaders = protectedHeaders;
 		this.setDebugHeaders = setDebugHeaders;
-		this.additionalHeaders = additionalHeaders;
-	}
-
-	private void setHeaders(SignatureResponseWrapper wrapper) {
-		
 	}
 
 	@Override
@@ -63,9 +57,6 @@ public class ResponseWrapperFilter implements Filter {
 	
 		SignatureResponseWrapper wrapper = new SignatureResponseWrapper(httpResponse, pair, retentionDays,
 				protectedHeaders, setDebugHeaders);
-		if(ResponseWrapperFilter.this.additionalHeaders != null){
-			wrapper.setHeaders(additionalHeaders);
-		}
 		chain.doFilter(request, wrapper);
 		try{
 			request.getAsyncContext().addListener(new AsyncListener() {
