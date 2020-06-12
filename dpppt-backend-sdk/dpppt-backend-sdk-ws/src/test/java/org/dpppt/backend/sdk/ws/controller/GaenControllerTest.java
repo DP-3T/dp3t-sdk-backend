@@ -148,7 +148,7 @@ public class GaenControllerTest extends BaseControllerTest {
 		assertEquals(0, result.size());
 	}
 
-	private Map<String, String> headers= Map.of("Content-Security-Policy","default-src 'none'; frame-ancestors 'none'", "Strict-Transport-Security", "max-age=63072000", "X-Content-Type-Options", "nosniff");
+	private Map<String, String> headers= Map.of("X-Content-Type-Options ","nosniff", " X-Frame-Options", "DENY", "X-Xss-Protection", "1; mode=block");
 	@Test
 	public void testSecurityHeaders() throws Exception {
 		MockHttpServletResponse response = mockMvc.perform(get("/v1")).andExpect(status().is2xxSuccessful()).andReturn()

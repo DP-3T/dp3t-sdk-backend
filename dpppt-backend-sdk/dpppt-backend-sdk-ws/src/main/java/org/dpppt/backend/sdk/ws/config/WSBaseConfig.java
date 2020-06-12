@@ -80,7 +80,7 @@ public abstract class WSBaseConfig implements SchedulingConfigurer, WebMvcConfig
 
 	public abstract String getDbType();
 
-	@Value("#{${ws.security.headers: {'Content-Security-Policy':\"default-src 'none'; frame-ancestors 'none'\", 'Strict-Transport-Security':'max-age=63072000','X-Content-Type-Options':'nosniff'}}}")
+	@Value("#{${ws.security.headers: {'X-Content-Type-Options ':'nosniff', 'X-Frame-Options':'DENY','X-Xss-Protection':'1; mode=block'}}}")
 	Map<String,String> additionalHeaders;
 
 	@Value("${ws.exposedlist.cachecontrol: 300000}")
