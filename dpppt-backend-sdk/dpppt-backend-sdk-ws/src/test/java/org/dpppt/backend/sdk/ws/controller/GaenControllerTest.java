@@ -148,7 +148,7 @@ public class GaenControllerTest extends BaseControllerTest {
 		assertEquals(0, result.size());
 	}
 
-	private Map<String, String> headers= Map.of("X-Content-Type-Options","nosniff", " X-Frame-Options", "DENY", "X-Xss-Protection", "1; mode=block");
+	private Map<String, String> headers= Map.of("X-Content-Type-Options","nosniff", "X-Frame-Options", "DENY", "X-Xss-Protection", "1; mode=block");
 	@Test
 	public void testSecurityHeaders() throws Exception {
 		MockHttpServletResponse response = mockMvc.perform(get("/v1")).andExpect(status().is2xxSuccessful()).andReturn()
@@ -163,6 +163,10 @@ public class GaenControllerTest extends BaseControllerTest {
 					+ now.minusDays(8).atStartOfDay(ZoneOffset.UTC).toInstant().toEpochMilli())
 							.header("User-Agent", "MockMVC"))
 			.andExpect(status().is2xxSuccessful()).andReturn().getResponse();
+		for(var header : headers.keySet()) {
+			assertTrue(response.containsHeader(header));
+			assertEquals(headers.get(header), response.getHeader(header));
+		} 
 	}
 
 	@Test
