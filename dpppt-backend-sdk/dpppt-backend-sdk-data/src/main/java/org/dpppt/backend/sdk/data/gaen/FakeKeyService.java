@@ -62,11 +62,11 @@ public class FakeKeyService {
 		this.dataService.cleanDB(Duration.ofDays(0));
 	}
 
-	public List<GaenKey> fillUpKeys(List<GaenKey> keys, Long keyDate) {
+	public List<GaenKey> fillUpKeys(List<GaenKey> keys, Long publishedafter, Long keyDate) {
 		if (!isEnabled) {
 			return keys;
 		}
-		var fakeKeys = this.dataService.getSortedExposedForKeyDate(keyDate, null,
+		var fakeKeys = this.dataService.getSortedExposedForKeyDate(keyDate, publishedafter,
 				LocalDate.now().plusDays(1).atStartOfDay(ZoneOffset.UTC).toInstant().toEpochMilli());
 
 		keys.addAll(fakeKeys);
