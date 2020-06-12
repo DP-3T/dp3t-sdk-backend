@@ -148,6 +148,23 @@ public class GaenControllerTest extends BaseControllerTest {
 		assertEquals(0, result.size());
 	}
 
+	private Map<String, String> headers= Map.of("Content-Security-Policy","default-src 'none'; frame-ancestors 'none'", "Strict-Transport-Security", "max-age=63072000", "X-Content-Type-Options", "nosniff");
+	@Test
+	public void testSecurityHeaders() throws Exception {
+		MockHttpServletResponse response = mockMvc.perform(get("/v1")).andExpect(status().is2xxSuccessful()).andReturn()
+		.getResponse();
+		for(var header : headers.keySet()) {
+			assertTrue(response.containsHeader(header));
+			assertEquals(headers.get(header), response.getHeader(header));
+		} 
+		var now = LocalDate.now(ZoneOffset.UTC);
+		response = mockMvc
+			.perform(get("/v1/gaen/exposed/"
+					+ now.minusDays(8).atStartOfDay(ZoneOffset.UTC).toInstant().toEpochMilli())
+							.header("User-Agent", "MockMVC"))
+			.andExpect(status().is2xxSuccessful()).andReturn().getResponse();
+	}
+
 	@Test
 	public void testUploadWithNegativeRollingPeriodFails() throws Exception {
 		var requestList = new GaenRequest();

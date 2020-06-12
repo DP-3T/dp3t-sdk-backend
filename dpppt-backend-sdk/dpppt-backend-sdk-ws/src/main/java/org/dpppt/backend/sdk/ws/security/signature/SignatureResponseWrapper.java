@@ -24,6 +24,7 @@ import java.time.ZoneOffset;
 import java.util.Base64;
 import java.util.Date;
 import java.util.List;
+import java.util.Map;
 
 import javax.servlet.ServletOutputStream;
 import javax.servlet.WriteListener;
@@ -160,7 +161,6 @@ public class SignatureResponseWrapper extends HttpServletResponseWrapper {
 			this.setHeader(HEADER_PUBLIC_KEY, getPublicKeyAsPEM());
 		}
 		this.setHeader(HEADER_SIGNATURE, signature);
-
 	}
 
 	private String getPublicKeyAsPEM() throws IOException {

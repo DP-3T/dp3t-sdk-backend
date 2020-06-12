@@ -14,6 +14,7 @@ import java.security.KeyPair;
 import java.time.Duration;
 import java.time.ZoneOffset;
 import java.util.List;
+import java.util.Map;
 import java.util.TimeZone;
 
 import javax.sql.DataSource;
@@ -28,6 +29,7 @@ import org.dpppt.backend.sdk.data.gaen.JDBCGAENDataServiceImpl;
 import org.dpppt.backend.sdk.ws.controller.DPPPTController;
 import org.dpppt.backend.sdk.ws.controller.GaenController;
 import org.dpppt.backend.sdk.ws.filter.ResponseWrapperFilter;
+import org.dpppt.backend.sdk.ws.interceptor.HeaderInjector;
 import org.dpppt.backend.sdk.ws.security.KeyVault;
 import org.dpppt.backend.sdk.ws.security.NoValidateRequest;
 import org.dpppt.backend.sdk.ws.security.ValidateRequest;
@@ -54,6 +56,7 @@ import org.springframework.scheduling.config.IntervalTask;
 import org.springframework.scheduling.config.ScheduledTaskRegistrar;
 import org.springframework.scheduling.support.CronTrigger;
 import org.springframework.web.servlet.config.annotation.AsyncSupportConfigurer;
+import org.springframework.web.servlet.config.annotation.InterceptorRegistry;
 import org.springframework.web.servlet.config.annotation.WebMvcConfigurer;
 
 import com.fasterxml.jackson.annotation.JsonInclude;
@@ -76,6 +79,9 @@ public abstract class WSBaseConfig implements SchedulingConfigurer, WebMvcConfig
 	public abstract Flyway flyway();
 
 	public abstract String getDbType();
+
+	@Value("#{${ws.security.headers: {'Content-Security-Policy':\"default-src 'none'; frame-ancestors 'none'\", 'Strict-Transport-Security':'max-age=63072000','X-Content-Type-Options':'nosniff'}}}")
+	Map<String,String> additionalHeaders;
 
 	@Value("${ws.exposedlist.cachecontrol: 300000}")
 	int exposedListCacheControl;
@@ -246,6 +252,10 @@ public abstract class WSBaseConfig implements SchedulingConfigurer, WebMvcConfig
 	public ResponseWrapperFilter hashFilter() {
 		return new ResponseWrapperFilter(keyVault.get("hashFilter"), retentionDays, protectedHeaders, setDebugHeaders);
 	}
+	@Bean
+	public HeaderInjector securityHeaderInjector(){
+		return new HeaderInjector(additionalHeaders);
+	}
 
 	public KeyPair getKeyPair(SignatureAlgorithm algorithm) {
 		logger.warn("USING FALLBACK KEYPAIR. WONT'T PERSIST APP RESTART AND PROBABLY DOES NOT HAVE ENOUGH ENTROPY.");
@@ -279,5 +289,9 @@ public abstract class WSBaseConfig implements SchedulingConfigurer, WebMvcConfig
 
 		var trigger = new CronTrigger("0 0 2 * * *", TimeZone.getTimeZone(ZoneOffset.UTC));
 		taskRegistrar.addCronTask(new CronTask(() -> fakeKeyService().updateFakeKeys(), trigger));
+	}
+	@Override
+	public void addInterceptors(InterceptorRegistry registry) {
+		registry.addInterceptor(securityHeaderInjector());
 	}
 }
