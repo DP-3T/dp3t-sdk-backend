@@ -117,12 +117,6 @@ public class SignatureResponseWrapper extends HttpServletResponseWrapper {
 		this.setSignature();
 		httpOutput.write(this.output.toByteArray());
 	}
-	public void setHeaders(Map<String, String> headers) {
-		for(var header : headers.keySet()){
-			this.setHeader(header, headers.get(header));
-			this.setHeader(header, headers.get(header));
-		}
-	}
 
 	private void setSignature() throws IOException {
 		switch(HttpStatus.valueOf(this.getStatus())) {
