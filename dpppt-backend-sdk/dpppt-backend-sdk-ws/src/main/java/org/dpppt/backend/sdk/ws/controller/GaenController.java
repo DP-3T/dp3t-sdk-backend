@@ -20,7 +20,6 @@ import java.time.LocalDate;
 import java.time.ZoneOffset;
 import java.time.format.DateTimeParseException;
 import java.util.ArrayList;
-import java.util.Base64;
 import java.util.Date;
 import java.util.List;
 import java.util.UUID;
@@ -247,13 +246,8 @@ public class GaenController {
 		}
 
 		ProtoSignatureWrapper payload = gaenSigner.getPayload(exposedKeys);
-		String etag = Base64.getEncoder().encodeToString(payload.getHash());
-		if (request.checkNotModified(etag)) {
-			return ResponseEntity.status(HttpStatus.NOT_MODIFIED)
-					.header("X-PUBLISHED-UNTIL", Long.toString(publishedUntil))
-					.cacheControl(CacheControl.maxAge(exposedListCacheControl)).build();
-		}
-		return ResponseEntity.ok().cacheControl(CacheControl.maxAge(exposedListCacheControl)).eTag(etag)
+		
+		return ResponseEntity.ok().cacheControl(CacheControl.maxAge(exposedListCacheControl))
 				.header("X-PUBLISHED-UNTIL", Long.toString(publishedUntil)).body(payload.getZip());
 	}
 

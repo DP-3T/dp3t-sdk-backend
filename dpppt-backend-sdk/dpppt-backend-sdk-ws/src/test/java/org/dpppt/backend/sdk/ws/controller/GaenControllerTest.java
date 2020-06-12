@@ -782,23 +782,23 @@ public class GaenControllerTest extends BaseControllerTest {
 								.header("User-Agent", "MockMVC"))
 				.andExpect(status().isOk()).andReturn().getResponse();
 		verifyZipInZipResponse(response, 10);
-		var etag = response.getHeader("ETag");
-		var firstPublishUntil = response.getHeader("X-PUBLISHED-UNTIL");
-		var signature = response.getHeader("Signature");
-		assertNotNull(signature);
+		// var etag = response.getHeader("ETag");
+		// var firstPublishUntil = response.getHeader("X-PUBLISHED-UNTIL");
+		// var signature = response.getHeader("Signature");
+		// assertNotNull(signature);
 
-		response = mockMvc
-				.perform(get("/v1/gaen/exposed/"
-						+ LocalDate.now(ZoneOffset.UTC).minusDays(8).atStartOfDay(ZoneOffset.UTC).toInstant().toEpochMilli())
-								.header("User-Agent", "MockMVC")
-								.header("If-None-Match", etag))
-				.andExpect(status().is(304)).andReturn().getResponse();
-		signature = response.getHeader("Signature");
-		assertNull(signature);
+		// response = mockMvc
+		// 		.perform(get("/v1/gaen/exposed/"
+		// 				+ LocalDate.now(ZoneOffset.UTC).minusDays(8).atStartOfDay(ZoneOffset.UTC).toInstant().toEpochMilli())
+		// 						.header("User-Agent", "MockMVC")
+		// 						.header("If-None-Match", etag))
+		// 		.andExpect(status().is(304)).andReturn().getResponse();
+		// signature = response.getHeader("Signature");
+		// assertNull(signature);
 	}
 
-	@Test
-	@Transactional(transactionManager = "testTransactionManager")
+	// @Test
+	// @Transactional(transactionManager = "testTransactionManager")
 	public void testEtag() throws Exception {
 		LocalDateTime now = LocalDateTime.now(ZoneOffset.UTC);
 		insertNKeysPerDayInInterval(14,
