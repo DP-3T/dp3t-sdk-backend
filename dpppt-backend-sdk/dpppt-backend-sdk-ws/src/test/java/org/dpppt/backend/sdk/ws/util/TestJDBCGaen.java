@@ -9,14 +9,18 @@
  */
 package org.dpppt.backend.sdk.ws.util;
 
+import java.time.Instant;
 import java.time.OffsetDateTime;
+import java.time.ZoneOffset;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
 
 import javax.sql.DataSource;
 
+import org.dpppt.backend.sdk.data.gaen.GaenKeyRowMapper;
 import org.dpppt.backend.sdk.model.gaen.GaenKey;
+import org.dpppt.backend.sdk.model.gaen.GaenUnit;
 import org.springframework.jdbc.core.namedparam.MapSqlParameterSource;
 import org.springframework.jdbc.core.namedparam.NamedParameterJdbcTemplate;
 import org.springframework.transaction.annotation.Transactional;
@@ -29,7 +33,31 @@ public class TestJDBCGaen {
 	public TestJDBCGaen(String dbType, DataSource dataSource) {
 		this.dbType = dbType;
 		this.jt = new NamedParameterJdbcTemplate(dataSource);
-    }
+	}
+	
+	@Transactional(readOnly = true)
+	public List<GaenKey> getSortedExposedForKeyDate(Long keyDate, Long publishedAfter, Long publishedUntil) {
+		MapSqlParameterSource params = new MapSqlParameterSource();
+		params.addValue("rollingPeriodStartNumberStart",
+				GaenUnit.TenMinutes.between(Instant.ofEpochMilli(0), Instant.ofEpochMilli(keyDate)));
+		params.addValue("rollingPeriodStartNumberEnd", GaenUnit.TenMinutes.between(Instant.ofEpochMilli(0),
+				Instant.ofEpochMilli(keyDate).atOffset(ZoneOffset.UTC).plusDays(1).toInstant()));
+		params.addValue("publishedUntil", new Date(publishedUntil));
+
+		String sql = "select pk_exposed_id, key, rolling_start_number, rolling_period, transmission_risk_level from t_gaen_exposed where"
+				+ " rolling_start_number >= :rollingPeriodStartNumberStart"
+				+ " and rolling_start_number < :rollingPeriodStartNumberEnd" 
+				+ " and received_at < :publishedUntil";
+
+		if (publishedAfter != null) {
+			params.addValue("publishedAfter", new Date(publishedAfter));
+			sql += " and received_at >= :publishedAfter";
+		}
+		
+		sql += " order by pk_exposed_id desc";
+		
+		return jt.query(sql, params, new GaenKeyRowMapper());
+	}
     
     @Transactional(readOnly = false)
 	public void upsertExposees(List<GaenKey> gaenKeys, OffsetDateTime receivedAt) {

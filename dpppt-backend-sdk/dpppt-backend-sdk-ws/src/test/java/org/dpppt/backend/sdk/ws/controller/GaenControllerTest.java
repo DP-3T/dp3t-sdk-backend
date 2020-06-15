@@ -55,6 +55,7 @@ import org.junit.Test;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.http.MediaType;
 import org.springframework.mock.web.MockHttpServletResponse;
@@ -73,6 +74,7 @@ public class GaenControllerTest extends BaseControllerTest {
 	KeyVault keyVault;
 	@Autowired
 	GAENDataService gaenDataService;
+	Long batchLength = 7200000L;
 
 	private static final Logger logger = LoggerFactory.getLogger(GaenControllerTest.class);
 
@@ -89,16 +91,18 @@ public class GaenControllerTest extends BaseControllerTest {
 	public void testMultipleKeyUpload() throws Exception {
 		var requestList = new GaenRequest();
 		var gaenKey1 = new GaenKey();
+		var now = System.currentTimeMillis();
 		gaenKey1.setRollingStartNumber(
-				(int) Duration.ofMillis(Instant.now().toEpochMilli()).dividedBy(Duration.ofMinutes(10)));
-		gaenKey1.setKeyData(Base64.getEncoder().encodeToString("testKey32Bytes--".getBytes("UTF-8")));
+			(int) Duration.ofMillis(LocalDate.now(ZoneOffset.UTC).minusDays(1).atStartOfDay(ZoneOffset.UTC).toInstant().toEpochMilli())
+			.dividedBy(Duration.ofMinutes(10)));
+		gaenKey1.setKeyData(Base64.getEncoder().encodeToString("testKey32Bytes01".getBytes("UTF-8")));
 		gaenKey1.setRollingPeriod(0);
 		gaenKey1.setFake(0);
 		gaenKey1.setTransmissionRiskLevel(0);
 		var gaenKey2 = new GaenKey();
-		gaenKey2.setRollingStartNumber((int) Duration.ofMillis(Instant.now().minus(Duration.ofDays(1)).toEpochMilli())
+		gaenKey2.setRollingStartNumber((int) Duration.ofMillis(LocalDate.now(ZoneOffset.UTC).minusDays(1).atStartOfDay(ZoneOffset.UTC).toInstant().toEpochMilli())
 				.dividedBy(Duration.ofMinutes(10)));
-		gaenKey2.setKeyData(Base64.getEncoder().encodeToString("testKey32Bytes--".getBytes("UTF-8")));
+		gaenKey2.setKeyData(Base64.getEncoder().encodeToString("testKey32Bytes02".getBytes("UTF-8")));
 		gaenKey2.setRollingPeriod(0);
 		gaenKey2.setFake(0);
 		gaenKey2.setTransmissionRiskLevel(0);
@@ -108,7 +112,7 @@ public class GaenControllerTest extends BaseControllerTest {
 		for (int i = 0; i < 12; i++) {
 			var tmpKey = new GaenKey();
 			tmpKey.setRollingStartNumber(
-					(int) Duration.ofMillis(Instant.now().toEpochMilli()).dividedBy(Duration.ofMinutes(10)));
+					(int) Duration.ofMillis(now).dividedBy(Duration.ofMinutes(10)));
 			tmpKey.setKeyData(Base64.getEncoder().encodeToString("testKey32Bytes--".getBytes("UTF-8")));
 			tmpKey.setRollingPeriod(144);
 			tmpKey.setFake(1);
@@ -133,6 +137,36 @@ public class GaenControllerTest extends BaseControllerTest {
 						.header("Authorization", "Bearer " + jwtToken).header("User-Agent", "MockMVC")
 						.content(json(requestList)))
 				.andExpect(status().is(401)).andExpect(request().asyncNotStarted()).andExpect(content().string("")).andReturn();
+
+		var result = gaenDataService.getSortedExposedForKeyDate(LocalDate.now(ZoneOffset.UTC).minusDays(1).atStartOfDay().toInstant(ZoneOffset.UTC).toEpochMilli(),null, (now / batchLength + 1 )*batchLength);
+		assertEquals(2, result.size());
+		for(var key : result) {
+			assertEquals(Integer.valueOf(144), key.getRollingPeriod());
+		}
+
+		result = gaenDataService.getSortedExposedForKeyDate(LocalDate.now(ZoneOffset.UTC).minusDays(1).atStartOfDay().toInstant(ZoneOffset.UTC).toEpochMilli(),null, (now / batchLength)*batchLength);
+		assertEquals(0, result.size());
+	}
+
+	private Map<String, String> headers= Map.of("X-Content-Type-Options","nosniff", "X-Frame-Options", "DENY", "X-Xss-Protection", "1; mode=block");
+	@Test
+	public void testSecurityHeaders() throws Exception {
+		MockHttpServletResponse response = mockMvc.perform(get("/v1")).andExpect(status().is2xxSuccessful()).andReturn()
+		.getResponse();
+		for(var header : headers.keySet()) {
+			assertTrue(response.containsHeader(header));
+			assertEquals(headers.get(header), response.getHeader(header));
+		} 
+		var now = LocalDate.now(ZoneOffset.UTC);
+		response = mockMvc
+			.perform(get("/v1/gaen/exposed/"
+					+ now.minusDays(8).atStartOfDay(ZoneOffset.UTC).toInstant().toEpochMilli())
+							.header("User-Agent", "MockMVC"))
+			.andExpect(status().is2xxSuccessful()).andReturn().getResponse();
+		for(var header : headers.keySet()) {
+			assertTrue(response.containsHeader(header));
+			assertEquals(headers.get(header), response.getHeader(header));
+		} 
 	}
 
 	@Test
@@ -752,23 +786,23 @@ public class GaenControllerTest extends BaseControllerTest {
 								.header("User-Agent", "MockMVC"))
 				.andExpect(status().isOk()).andReturn().getResponse();
 		verifyZipInZipResponse(response, 10);
-		var etag = response.getHeader("ETag");
-		var firstPublishUntil = response.getHeader("X-PUBLISHED-UNTIL");
-		var signature = response.getHeader("Signature");
-		assertNotNull(signature);
+		// var etag = response.getHeader("ETag");
+		// var firstPublishUntil = response.getHeader("X-PUBLISHED-UNTIL");
+		// var signature = response.getHeader("Signature");
+		// assertNotNull(signature);
 
-		response = mockMvc
-				.perform(get("/v1/gaen/exposed/"
-						+ LocalDate.now(ZoneOffset.UTC).minusDays(8).atStartOfDay(ZoneOffset.UTC).toInstant().toEpochMilli())
-								.header("User-Agent", "MockMVC")
-								.header("If-None-Match", etag))
-				.andExpect(status().is(304)).andReturn().getResponse();
-		signature = response.getHeader("Signature");
-		assertNull(signature);
+		// response = mockMvc
+		// 		.perform(get("/v1/gaen/exposed/"
+		// 				+ LocalDate.now(ZoneOffset.UTC).minusDays(8).atStartOfDay(ZoneOffset.UTC).toInstant().toEpochMilli())
+		// 						.header("User-Agent", "MockMVC")
+		// 						.header("If-None-Match", etag))
+		// 		.andExpect(status().is(304)).andReturn().getResponse();
+		// signature = response.getHeader("Signature");
+		// assertNull(signature);
 	}
 
-	@Test
-	@Transactional(transactionManager = "testTransactionManager")
+	// @Test
+	// @Transactional(transactionManager = "testTransactionManager")
 	public void testEtag() throws Exception {
 		LocalDateTime now = LocalDateTime.now(ZoneOffset.UTC);
 		insertNKeysPerDayInInterval(14,
