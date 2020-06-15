@@ -85,8 +85,12 @@ public class MultipleJWTConfig {
 		}
 
 		private String readAsStringFromInputStreamAndClose(InputStream in) throws IOException {
-			String result = IOUtils.toString(in);
-			in.close();
+			String result = "";
+			try {
+				result = IOUtils.toString(in);
+			} finally {
+				in.close();
+			}
 			return result;
 		}
 	}

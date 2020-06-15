@@ -166,9 +166,12 @@ public class SignatureResponseWrapper extends HttpServletResponseWrapper {
 	private String getPublicKeyAsPEM() throws IOException {
 		StringWriter writer = new StringWriter();
 		PemWriter pemWriter = new PemWriter(writer);
-		pemWriter.writeObject(new PemObject("PUBLIC KEY", pair.getPublic().getEncoded()));
-		pemWriter.flush();
-		pemWriter.close();
+		try {
+			pemWriter.writeObject(new PemObject("PUBLIC KEY", pair.getPublic().getEncoded()));
+			pemWriter.flush();
+		} finally {
+			pemWriter.close();
+		}
 		return Base64Utils.encodeToUrlSafeString(writer.toString().trim().getBytes());
 	}
 
