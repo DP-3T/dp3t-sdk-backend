@@ -38,6 +38,7 @@
 		<protobuf-java-version>3.12.1</protobuf-java-version>
         <postgresql-version>42.2.13</postgresql-version>
 		<snakeyaml-version>1.26</snakeyaml-version>
+        <tomcat.version>9.0.36</tomcat.version>
 
 		<sonar.host.url>https://sonarcloud.io</sonar.host.url>
 		<!--suppress UnresolvedMavenProperty -->
@@ -153,6 +154,21 @@
                 <groupId>org.yaml</groupId>
                 <artifactId>snakeyaml</artifactId>
                 <version>${snakeyaml-version}</version>
+            </dependency>
+			<dependency>
+                <groupId>org.apache.tomcat.embed</groupId>
+                <artifactId>tomcat-embed-core</artifactId>
+                <version>${tomcat.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>org.apache.tomcat.embed</groupId>
+                <artifactId>tomcat-embed-el</artifactId>
+                <version>${tomcat.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>org.apache.tomcat.embed</groupId>
+                <artifactId>tomcat-embed-websocket</artifactId>
+                <version>${tomcat.version}</version>
             </dependency>
 		</dependencies>
 	</dependencyManagement>
