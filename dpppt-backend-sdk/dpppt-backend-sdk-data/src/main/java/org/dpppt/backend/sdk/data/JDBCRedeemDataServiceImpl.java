@@ -10,7 +10,9 @@
 
 package org.dpppt.backend.sdk.data;
 
+import java.time.Clock;
 import java.time.Duration;
+import java.time.LocalDate;
 import java.time.OffsetDateTime;
 import java.time.ZoneOffset;
 import java.util.Date;
@@ -30,6 +32,7 @@ public class JDBCRedeemDataServiceImpl implements RedeemDataService {
 
 	private final NamedParameterJdbcTemplate jt;
 	private final SimpleJdbcInsert reedemUUIDInsert;
+	private Clock currentClock = Clock.systemUTC();
 
 	public JDBCRedeemDataServiceImpl(DataSource dataSource) {
 		this.jt = new NamedParameterJdbcTemplate(dataSource);
@@ -46,16 +49,20 @@ public class JDBCRedeemDataServiceImpl implements RedeemDataService {
 		if (count > 0) {
 			return false;
 		} else {
-			params.addValue("received_at", new Date());
+			// set the received_at to the next day, with no time information
+			// it will stay longer in the DB but we mitigate the risk that the JWT
+			// can be used twice (c.f. testTokensArentDeletedBeforeExpire). 
+			long startOfDay = LocalDate.now(currentClock).atStartOfDay(ZoneOffset.UTC).plusDays(1).toInstant().toEpochMilli();
+			params.addValue("received_at", new Date(startOfDay));
 			reedemUUIDInsert.execute(params);
 			return true;
 		}
 	}
-	
+
 	@Override
 	@Transactional(readOnly = false)
 	public void cleanDB(Duration retentionPeriod) {
-		OffsetDateTime retentionTime = OffsetDateTime.now().withOffsetSameInstant(ZoneOffset.UTC).minus(retentionPeriod);
+		OffsetDateTime retentionTime = OffsetDateTime.now(currentClock).minus(retentionPeriod);
 		logger.info("Cleanup DB entries before: " + retentionTime);
 		MapSqlParameterSource params = new MapSqlParameterSource("retention_time", Date.from(retentionTime.toInstant()));
 		String sqlRedeem = "delete from t_redeem_uuid where received_at < :retention_time";

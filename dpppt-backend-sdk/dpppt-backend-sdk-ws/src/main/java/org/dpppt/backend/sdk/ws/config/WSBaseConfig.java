@@ -283,7 +283,7 @@ public abstract class WSBaseConfig implements SchedulingConfigurer, WebMvcConfig
 			logger.info("Start DB cleanup");
 			dppptSDKDataService().cleanDB(Duration.ofDays(retentionDays));
 			gaenDataService().cleanDB(Duration.ofDays(retentionDays));
-			redeemDataService().cleanDB(Duration.ofDays(1));
+			redeemDataService().cleanDB(Duration.ofDays(2));
 			logger.info("DB cleanup up");
 		}, 60 * 60 * 1000L));
 
