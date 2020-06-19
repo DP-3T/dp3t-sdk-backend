@@ -14,11 +14,13 @@ import static org.junit.Assert.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
+import java.lang.reflect.Field;
 import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Timestamp;
+import java.time.Clock;
 import java.time.Duration;
 import java.time.Instant;
 import java.time.LocalDate;
@@ -32,6 +34,7 @@ import java.util.List;
 
 import javax.sql.DataSource;
 
+import org.dpppt.backend.sdk.data.JDBCRedeemDataServiceImpl;
 import org.dpppt.backend.sdk.data.RedeemDataService;
 import org.dpppt.backend.sdk.data.config.DPPPTDataServiceConfig;
 import org.dpppt.backend.sdk.data.config.FlyWayConfig;
@@ -111,6 +114,41 @@ public class PostgresGaenDataServiceTest {
 		actual = redeemDataService.checkAndInsertPublishUUID("bc77d983-2359-48e8-835a-de673fe53ccb");
 		assertFalse(actual);
 		actual = redeemDataService.checkAndInsertPublishUUID("1c444adb-0924-4dc4-a7eb-1f52aa6b9575");
+		assertTrue(actual);
+	}
+
+	private Field getFieldToClock() throws Exception{
+		Field field = JDBCRedeemDataServiceImpl.class.getDeclaredField("currentClock");
+		field.setAccessible(true);
+		return field;
+	}
+
+	@Test
+	public void testTokensArentDeletedBeforeExpire() throws Exception {
+		var field = getFieldToClock();
+		var localDateNow = LocalDate.now(ZoneOffset.UTC);
+		Clock twoMinutesToMidnight = Clock.fixed(localDateNow.atStartOfDay(ZoneOffset.UTC).plusDays(1).minusMinutes(2).toInstant(), ZoneOffset.UTC);
+		Clock twoMinutesAfterMidnight = Clock.fixed(localDateNow.atStartOfDay(ZoneOffset.UTC).plusDays(1).plusMinutes(2).toInstant(), ZoneOffset.UTC);
+		Clock nextDay = Clock.fixed(localDateNow.atStartOfDay(ZoneOffset.UTC).plusDays(2).plusMinutes(2).toInstant(), ZoneOffset.UTC);
+
+		field.set(redeemDataService, twoMinutesToMidnight);
+
+		boolean actual = redeemDataService.checkAndInsertPublishUUID("bc77d983-2359-48e8-835a-de673fe53ccb");
+		assertTrue(actual);
+
+		//token is still valid for 1 minute
+		field.set(redeemDataService, twoMinutesAfterMidnight);
+		
+		redeemDataService.cleanDB(Duration.ofDays(1));
+		
+		actual = redeemDataService.checkAndInsertPublishUUID("bc77d983-2359-48e8-835a-de673fe53ccb");
+		assertFalse(actual);
+
+		field.set(redeemDataService, nextDay);
+
+		redeemDataService.cleanDB(Duration.ofDays(1));
+
+		actual = redeemDataService.checkAndInsertPublishUUID("bc77d983-2359-48e8-835a-de673fe53ccb");
 		assertTrue(actual);
 	}
 
