@@ -11,7 +11,9 @@
 package org.dpppt.backend.sdk.data;
 
 import java.time.Duration;
+import java.time.LocalDate;
 import java.time.OffsetDateTime;
+import java.time.ZoneId;
 import java.time.ZoneOffset;
 import java.util.Date;
 
@@ -46,12 +48,14 @@ public class JDBCRedeemDataServiceImpl implements RedeemDataService {
 		if (count > 0) {
 			return false;
 		} else {
-			params.addValue("received_at", new Date());
+			// set the received_at to the current day, with no time information
+			long startOfDay = LocalDate.now().atStartOfDay(ZoneOffset.UTC).toInstant().toEpochMilli();
+			params.addValue("received_at", new Date(startOfDay));
 			reedemUUIDInsert.execute(params);
 			return true;
 		}
 	}
-	
+
 	@Override
 	@Transactional(readOnly = false)
 	public void cleanDB(Duration retentionPeriod) {
