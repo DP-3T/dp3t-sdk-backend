@@ -59,14 +59,20 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.http.MediaType;
 import org.springframework.mock.web.MockHttpServletResponse;
+import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.web.servlet.MvcResult;
 import org.springframework.transaction.annotation.Transactional;
 
 import io.jsonwebtoken.Jwt;
 import io.jsonwebtoken.Jwts;
 
+@ActiveProfiles({"actuator-security"})
 @SpringBootTest(properties = { "ws.app.jwt.publickey=classpath://generated_pub.pem",
-		"logging.level.org.springframework.security=DEBUG", "ws.exposedlist.batchlength=7200000", "ws.gaen.randomkeysenabled=true" })
+		"logging.level.org.springframework.security=DEBUG", "ws.exposedlist.batchlength=7200000", "ws.gaen.randomkeysenabled=true",
+	"ws.monitor.prometheus.user=prometheus",
+	"ws.monitor.prometheus.password=prometheus",
+	"management.endpoints.enabled-by-default=true",
+	"management.endpoints.web.exposure.include=*"})
 public class GaenControllerTest extends BaseControllerTest {
 	@Autowired
 	ProtoSignature signer;
@@ -85,6 +91,19 @@ public class GaenControllerTest extends BaseControllerTest {
 
 		assertNotNull(response);
 		assertEquals("Hello from DP3T WS", response.getContentAsString());
+	}
+	@Test
+	public void testActuatorSecurity() throws Exception {
+		var response = mockMvc.perform(get("/actuator/health")).andExpect(status().is2xxSuccessful()).andReturn()
+				.getResponse();
+		response = mockMvc.perform(get("/actuator/loggers")).andExpect(status().is(401)).andReturn()
+		.getResponse();
+		response = mockMvc.perform(get("/actuator/loggers").header("Authorization", "Basic cHJvbWV0aGV1czpwcm9tZXRoZXVz")).andExpect(status().isOk()).andReturn()
+		.getResponse();
+		response = mockMvc.perform(get("/actuator/prometheus")).andExpect(status().is(401)).andReturn()
+		.getResponse();
+		response = mockMvc.perform(get("/actuator/prometheus").header("Authorization", "Basic cHJvbWV0aGV1czpwcm9tZXRoZXVz")).andExpect(status().isOk()).andReturn()
+		.getResponse();
 	}
 
 	@Test
