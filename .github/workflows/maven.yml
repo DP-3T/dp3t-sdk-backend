@@ -59,6 +59,9 @@ jobs:
       run: mvn deploy -Dmaven.test.skip=true --file dpppt-backend-sdk/pom.xml -s $GITHUB_WORKSPACE/settings.xml
       env:
         GITHUB_TOKEN: ${{ github.token }}
+    - name: shasum
+      run: shasum -a 256 dpppt-backend-sdk/dpppt-backend-sdk-ws/target/dpppt-backend-sdk-ws.jar > dpppt-backend-sdk/dpppt-backend-sdk-ws/target/dpppt-backend-sdk-ws.sha256
+      shell: bash
     - name: Create Snapshot Release
       uses: ncipollo/release-action@v1
       if: github.ref == 'refs/heads/develop'
@@ -66,7 +69,7 @@ jobs:
       with:
         name: Snapshot Release ${{ github.ref }}
         tag: SNAPSHOT
-        artifacts: "dpppt-backend-sdk/dpppt-backend-sdk-ws/target/dpppt-backend-sdk-ws.jar,dpppt-backend-sdk/dpppt-backend-sdk-ws/generated/swagger/swagger.yaml"
+        artifacts: "dpppt-backend-sdk/dpppt-backend-sdk-ws/target/dpppt-backend-sdk-ws.jar,dpppt-backend-sdk/dpppt-backend-sdk-ws/target/dpppt-backend-sdk-ws.sha256,dpppt-backend-sdk/dpppt-backend-sdk-ws/generated/swagger/swagger.yaml"
         body: |
             Changes in this Release
             - Snapshot release
