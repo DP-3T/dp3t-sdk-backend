@@ -15,7 +15,6 @@ import java.security.KeyPair;
 import java.security.PublicKey;
 import java.security.Security;
 import java.util.List;
-import java.util.Map;
 
 import javax.servlet.AsyncEvent;
 import javax.servlet.AsyncListener;
