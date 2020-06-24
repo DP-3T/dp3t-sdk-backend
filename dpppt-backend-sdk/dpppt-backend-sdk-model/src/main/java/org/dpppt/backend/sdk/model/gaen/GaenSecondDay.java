@@ -7,7 +7,6 @@ public class GaenSecondDay {
     @NotNull
     @Valid
     private GaenKey delayedKey;
-    private Integer fake;
 
 
     public GaenKey getDelayedKey() {
@@ -16,14 +15,6 @@ public class GaenSecondDay {
 
     public void setDelayedKey(GaenKey delayedKey) {
         this.delayedKey = delayedKey;
-    }
-
-    public Integer getFake() {
-        return this.fake;
-    }
-
-    public void setFake(Integer fake) {
-        this.fake = fake;
     }
 
 }
