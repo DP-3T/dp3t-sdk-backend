@@ -83,19 +83,23 @@ By default, the EN controller (`GaenController`) uses the base url `/v1/gaen/`.
 
 The web-service provides three endpoints, which map the Exposure Notification specifications. 
 
-- /v1/gaen/exposed: `POST` Send a list of infected keys. If a JWT is used to authorize the request, send a JWT back to authorize the call of the following day. If the request as a whole is a "fake"-request, all keys need to be fake, otherwise a 400 HttpStatus code is returned.
+- /v1/gaen/exposed: `POST` Send a list of infected keys. If a JWT is used to authorize the request, send a JWT back to authorize the call of the following day. If the request as a whole is a "fake"-request, meaning the JWT has the "fake" claim set to "1", no keys are inserted.
 
 - /v1/gaen/exposednextday: `POST` Since the EN framework won't give the key of the current day, the upload has to be split into two. This endpoint receives the key of the last day. This endpoint eventually will be removed, as soon as the EN framework is adjusted. If JWT are activated, this endpoint needs the JWT received from a successfull request to `/v1/gaen/exposed`.
 
 - /v1/gaen/exposed/\<timestamp\>?publishedafter=\<publishedAfter\>: `GET` Returns a list of keys, which were used at `timestamp`. Note that `timestamp` needs to be epoch milliseconds. Since the behaviour of Android and iOS aren't the same, the optional `publishedAfter` parameter is added. If set only keys, which were received *after* `publishAfter` are returned. This request returns `ZIP` file containing `export.bin` and `export.sig`, where the keys and the signature are stored, as need by the EN framework. The class for signing and serializing is `ProtoSignature`.
 
-
 Further endpoints are added to the controller for debugging purposes. Those requests can e.g. be blocked by a WAF rule or similiar.
 
-## ETag
-To profit from caching e.g. when all requests are routed through a CDN, an ETag is set. The value of the ETag is the content hash of the protobuf key list. The ETag will change whenever new keys are added.
+## JWT Validation
+In order to prevent replay attacks, a JWT is only valid once. After one usage the "jit" claim is stored temporarily (longer than the validity).
+The JWTs are validated based on the following criterias:
 
-Note: Since we use ECDSA signatures, the signature would change each time. The same is true for the hash of the HttpPayload.
+  - JWT needs an expiresAt claim which is valid
+  - The expiresAt claim should not be longer than the set value in the config
+  - The JWT needs a "jit" claim and the said "jit" should not have been used
+
+
 
 ## Content Signing
 In order to provide authenticity, the HttpPayload is signed. The signature is added as a `Signature` HttpHeader to each 200 or 204 response. The signature consists of a JWT containing the content hash as a claim. Further, if `protected-headers` are added in the controller (and activated through the respective key in the properties file), those headers are signed as well, thus providing the possibility of signing certain request parameters.
