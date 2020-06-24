@@ -28,6 +28,9 @@ Please read the [Contribution Guide](CONTRIBUTING.md) before submitting any pull
 ## Introduction
 This documentation describes the backend used for the SwissCovid application. It is focused on providing information for the requests used for the Exposure Notification framework. Although, code of the old format is still provided, no documentation or support is available except the code itself.
 
+## Reproducible Builds
+In order to have reproducible builds the [io.github.zlika](https://github.com/zlika/reproducible-build-maven-plugin) maven plugin is used. It replaces all timestamp with the timestamp of the last commit, and orders the entries in the JAR alphabetically. The github action then computes the sha256sum of the resulting JAR and adds the output as an build artifact.
+
 ## Dependencies
 * Spring Boot 2.2.6
 * Java 11 (or higher)
