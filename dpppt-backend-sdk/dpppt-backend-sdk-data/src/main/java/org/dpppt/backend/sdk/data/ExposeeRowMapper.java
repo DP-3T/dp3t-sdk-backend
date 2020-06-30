@@ -12,6 +12,8 @@ package org.dpppt.backend.sdk.data;
 
 import java.sql.ResultSet;
 import java.sql.SQLException;
+import java.util.ArrayList;
+import java.util.Arrays;
 
 import org.dpppt.backend.sdk.model.Exposee;
 import org.springframework.jdbc.core.RowMapper;
@@ -23,6 +25,12 @@ public class ExposeeRowMapper implements RowMapper<Exposee> {
 		exposee.setKey(rs.getString("key"));
 		exposee.setId(rs.getInt("pk_exposed_id"));
 		exposee.setKeyDate(rs.getTimestamp("key_date").getTime());
+
+		String list = rs.getString("countries_visited");
+		list = list.replace("[", "");
+		list = list.replace("]", "");
+
+		exposee.setCountryCodeList(new ArrayList<>(Arrays.asList(list)));
 		return exposee;
 	}
 }

@@ -90,7 +90,7 @@ public class DPPPTController {
 			@RequestHeader(value = "User-Agent", required = true) String userAgent,
 			@AuthenticationPrincipal Object principal) throws InvalidDateException {
 		long now = System.currentTimeMillis();
-		if (!this.validateRequest.isValid(principal)) {
+		if (!this.validateRequest.isValid(exposeeRequest)) {
 			return ResponseEntity.status(HttpStatus.FORBIDDEN).build();
 		}
 		if (!validationUtils.isValidBase64Key(exposeeRequest.getKey())) {
@@ -102,6 +102,8 @@ public class DPPPTController {
 		long keyDate = this.validateRequest.getKeyDate(principal, exposeeRequest);
 
 		exposee.setKeyDate(keyDate);
+		exposee.setCountryCodeList(exposeeRequest.getCountryCodeList());
+
 		if (!this.validateRequest.isFakeRequest(principal, exposeeRequest)) {
 			dataService.upsertExposee(exposee, appSource);
 		}
@@ -122,7 +124,7 @@ public class DPPPTController {
 			@RequestHeader(value = "User-Agent", required = true) String userAgent,
 			@AuthenticationPrincipal Object principal) throws InvalidDateException {
 		long now = System.currentTimeMillis();
-		if (!this.validateRequest.isValid(principal)) {
+		if (!this.validateRequest.isValid(exposeeRequests)) {
 			return ResponseEntity.status(HttpStatus.FORBIDDEN).build();
 		}
 

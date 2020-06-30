@@ -12,6 +12,7 @@ package org.dpppt.backend.sdk.model;
 
 import javax.validation.constraints.NotNull;
 import javax.validation.constraints.Size;
+import java.util.ArrayList;
 
 public class ExposeeRequest {
 
@@ -25,6 +26,8 @@ public class ExposeeRequest {
 	private long keyDate;
 
 	private ExposeeAuthData authData;
+
+	private ArrayList<String> countryCodeList;
 
 	public String getKey() {
 		return key;
@@ -56,5 +59,13 @@ public class ExposeeRequest {
 
 	public void setIsFake(Integer fake) {
 		this.fake = fake;
+	}
+
+	public ArrayList<String> getCountryCodeList() {
+		return countryCodeList;
+	}
+
+	public void setCountryCodeList(ArrayList<String> countryCodeList) {
+		this.countryCodeList = countryCodeList;
 	}
 }

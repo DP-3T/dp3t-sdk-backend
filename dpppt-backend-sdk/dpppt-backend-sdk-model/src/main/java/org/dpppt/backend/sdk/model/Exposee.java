@@ -14,6 +14,8 @@ import javax.validation.constraints.NotNull;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
 
+import java.util.ArrayList;
+
 public class Exposee {
 	@JsonIgnore
 	private Integer Id;
@@ -23,6 +25,8 @@ public class Exposee {
 
 	@NotNull
 	private long keyDate;
+
+	private ArrayList<String> countryCodeList;
 
 	public String getKey() {
 		return key;
@@ -47,5 +51,13 @@ public class Exposee {
 
 	public void setKeyDate(long keyDate) {
 		this.keyDate = keyDate;
+	}
+
+	public String getCountryCodeList() {
+		return countryCodeList.toString();
+	}
+
+	public void setCountryCodeList(ArrayList<String> countryCodeList) {
+		this.countryCodeList = countryCodeList;
 	}
 }

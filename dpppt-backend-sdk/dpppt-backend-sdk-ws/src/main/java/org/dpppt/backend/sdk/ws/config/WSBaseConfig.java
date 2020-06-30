@@ -32,6 +32,7 @@ import org.dpppt.backend.sdk.ws.filter.ResponseWrapperFilter;
 import org.dpppt.backend.sdk.ws.interceptor.HeaderInjector;
 import org.dpppt.backend.sdk.ws.security.KeyVault;
 import org.dpppt.backend.sdk.ws.security.NoValidateRequest;
+import org.dpppt.backend.sdk.ws.security.OTPValidateRequest;
 import org.dpppt.backend.sdk.ws.security.ValidateRequest;
 import org.dpppt.backend.sdk.ws.security.signature.ProtoSignature;
 import org.dpppt.backend.sdk.ws.util.ValidationUtils;
@@ -185,10 +186,7 @@ public abstract class WSBaseConfig implements SchedulingConfigurer, WebMvcConfig
 
 	@Bean
 	public DPPPTController dppptSDKController() {
-		ValidateRequest theValidator = requestValidator;
-		if (theValidator == null) {
-			theValidator = new NoValidateRequest();
-		}
+		ValidateRequest theValidator = new OTPValidateRequest();
 		return new DPPPTController(dppptSDKDataService(), appSource, exposedListCacheControl, theValidator,
 				dpptValidationUtils(), batchLength, requestTime);
 	}

@@ -44,17 +44,18 @@ public class JDBCDPPPTDataServiceImpl implements DPPPTDataService {
 	public void upsertExposee(Exposee exposee, String appSource) {
 		String sql = null;
 		if (dbType.equals(PGSQL)) {
-			sql = "insert into t_exposed (key, key_date, app_source) values (:key, :key_date, :app_source)"
+			sql = "insert into t_exposed (key, key_date, countries_visited, app_source) values (:key, :key_date, :countries_visited, :app_source)"
 					+ " on conflict on constraint key do nothing";
 		} else {
-			sql = "merge into t_exposed using (values(cast(:key as varchar(10000)), cast(:key_date as date), cast(:app_source as varchar(50))))"
-					+ " as vals(key, key_date, app_source) on t_exposed.key = vals.key"
-					+ " when not matched then insert (key, key_date, app_source) values (vals.key, vals.key_date, vals.app_source)";
+			sql = "merge into t_exposed using (values(cast(:key as varchar(10000)), cast(:key_date as date), cast(:countries_visited as text), cast(:app_source as varchar(50))))"
+					+ " as vals(key, key_date, countries_visited, app_source) on t_exposed.key = vals.key"
+					+ " when not matched then insert (key, key_date, countries_visited, app_source) values (vals.key, vals.key_date, vals.countries_visited, vals.app_source)";
 		}
 		MapSqlParameterSource params = new MapSqlParameterSource();
 		params.addValue("key", exposee.getKey());
 		params.addValue("app_source", appSource);
 		params.addValue("key_date", new Date(exposee.getKeyDate()));
+		params.addValue("countries_visited", exposee.getCountryCodeList());
 		jt.update(sql, params);
 	}
 	@Override
@@ -98,7 +99,7 @@ public class JDBCDPPPTDataServiceImpl implements DPPPTDataService {
 	@Override
 	@Transactional(readOnly = true)
 	public List<Exposee> getSortedExposedForBatchReleaseTime(long batchReleaseTime, long batchLength) {
-		String sql = "select pk_exposed_id, key, key_date from t_exposed where received_at >= :startBatch and received_at < :batchReleaseTime order by pk_exposed_id desc";
+		String sql = "select pk_exposed_id, key, key_date, countries_visited from t_exposed where received_at >= :startBatch and received_at < :batchReleaseTime order by pk_exposed_id desc";
 		MapSqlParameterSource params = new MapSqlParameterSource();
 		params.addValue("batchReleaseTime", Date.from(Instant.ofEpochMilli(batchReleaseTime)));
 		params.addValue("startBatch", Date.from(Instant.ofEpochMilli(batchReleaseTime - batchLength)));
