@@ -16,7 +16,9 @@ doc: updatedoc swagger la la2 la3
 
 updateproject:
 	mvn -f dpppt-backend-sdk/pom.xml install
+
 updatedoc:
+	mvn -f dpppt-backend-sdk/pom.xml install -Dmaven.test.skip=true
 	mvn springboot-swagger-3:springboot-swagger-3 -f dpppt-backend-sdk/dpppt-backend-sdk-ws/pom.xml
 	cp dpppt-backend-sdk/dpppt-backend-sdk-ws/generated/swagger/swagger.yaml documentation/yaml/sdk.yaml
 

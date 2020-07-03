@@ -37,6 +37,12 @@
 		</dependency>
 
 		<dependency>
+			<groupId>ch.ubique.openapi</groupId>
+			<artifactId>doc-annotations</artifactId>
+			<version>0.0.5</version>
+		</dependency>
+
+		<dependency>
 			<groupId>org.springframework.security</groupId>
 			<artifactId>spring-security-test</artifactId>
 			<scope>test</scope>
@@ -52,7 +58,7 @@
 			<version>0.11.1</version>
 			<type>pom</type>
 		</dependency>
-	
+
 		<dependency>
 			<groupId>io.jsonwebtoken</groupId>
 			<artifactId>jjwt-jackson</artifactId>
@@ -175,6 +181,7 @@
 		</plugins>
 	</build>
 
+
 	<pluginRepositories>
     <pluginRepository>
         <id>github</id>
@@ -185,4 +192,11 @@
     </pluginRepository>
     </pluginRepositories>
 
+    <repositories>
+        <repository>
+            <id>github</id>
+            <name>github</name>
+            <url>https://maven.pkg.github.com/Ubique-OSS/springboot-swagger3-annotations</url>
+        </repository>
+    </repositories>
 </project>
