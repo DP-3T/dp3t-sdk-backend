@@ -251,34 +251,6 @@ public class GaenController {
 				.header("X-PUBLISHED-UNTIL", Long.toString(publishedUntil)).body(payload.getZip());
 	}
 
-	@GetMapping(value = "/exposedjson/{keyDate}", produces = "application/json")
-	public @ResponseBody ResponseEntity<GaenExposedJson> getExposedKeysAsJson(@PathVariable long keyDate,
-			@RequestParam(required = false) Long publishedafter, WebRequest request)
-			throws BadBatchReleaseTimeException {
-		if (!validationUtils.isValidKeyDate(keyDate)) {
-			return ResponseEntity.notFound().build();
-		}
-		if (publishedafter != null && !validationUtils.isValidBatchReleaseTime(publishedafter)) {
-			return ResponseEntity.notFound().build();
-		}
-
-		long now = System.currentTimeMillis();
-		// calculate exposed until bucket
-		long publishedUntil = now - (now % bucketLength.toMillis());
-
-		var exposedKeys = dataService.getSortedExposedForKeyDate(keyDate, publishedafter, publishedUntil);
-		if (exposedKeys.isEmpty()) {
-			return ResponseEntity.noContent().cacheControl(CacheControl.maxAge(exposedListCacheControl))
-					.header("X-PUBLISHED-UNTIL", Long.toString(publishedUntil)).build();
-		}
-
-		var file = new GaenExposedJson();
-		var header = new Header();
-		file.gaenKeys(exposedKeys).header(header);
-		return ResponseEntity.ok().cacheControl(CacheControl.maxAge(exposedListCacheControl))
-				.header("X-PUBLISHED-UNTIL", Long.toString(publishedUntil)).body(file);
-	}
-
 	@GetMapping(value = "/buckets/{dayDateStr}")
 	public @ResponseBody ResponseEntity<DayBuckets> getBuckets(@PathVariable String dayDateStr) {
 		var atStartOfDay = LocalDate.parse(dayDateStr).atStartOfDay().toInstant(ZoneOffset.UTC)
