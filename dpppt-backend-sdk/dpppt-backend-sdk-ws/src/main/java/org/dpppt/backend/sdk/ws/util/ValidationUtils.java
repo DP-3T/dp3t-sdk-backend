@@ -11,6 +11,8 @@ package org.dpppt.backend.sdk.ws.util;
 
 import java.time.Duration;
 import java.time.Instant;
+import java.time.LocalDateTime;
+import java.time.LocalTime;
 import java.time.OffsetDateTime;
 import java.time.ZoneOffset;
 import java.util.Base64;
@@ -55,7 +57,7 @@ public class ValidationUtils {
 	 * @return
 	 */
 	public boolean isValidKeyDate(long keyDate) {
-		return (Instant.ofEpochMilli(keyDate).atOffset(ZoneOffset.UTC).getHour() == 0);
+		return LocalDateTime.ofInstant(Instant.ofEpochMilli(keyDate), ZoneOffset.UTC).toLocalTime().equals(LocalTime.MIDNIGHT);
 	}
 
 	public boolean isValidBatchReleaseTime(long batchReleaseTime) throws BadBatchReleaseTimeException {
