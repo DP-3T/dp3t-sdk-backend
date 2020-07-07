@@ -35,7 +35,26 @@ In order to have reproducible builds the [io.github.zlika](https://github.com/zl
 * Spring Boot 2.2.6
 * Java 11 (or higher)
 * Logback
-* [Springboot-Swagger-3](https://github.com/Ubique-OSS/springboot-swagger3) (Github Package, plugin dependency)
+* [Springboot-Swagger-3](https://github.com/Ubique-OSS/springboot-swagger3)
+
+### GitHub Packages
+Parts of the Maven build depends on artifacts, that are hosted on [GitHub Packages](https://help.github.com/en/packages). To gain access, a personal access token is required: 
+
+* Issue a personal access token from https://github.com/settings/tokens and be sure to assign the `read:packages` scope to it. 
+* Append the server configuration to your local Maven settings.xml, in most cases `~/.m2/settings.xml`. In the servers tag, add a child server tag with the id `github`, replacing `GITHUB_USERNAME` with your GitHub username, and `PERSONAL_ACCESS_TOKEN` with your personal access token.
+    ```xml 
+    ...
+    <servers>
+        <server>
+               <id>github</id>
+               <username>GITHUB_USERNAME</username>
+               <password>PERSONAL_ACCESS_TOKEN</password>
+             </server>
+         </servers>
+    ...
+    ``` 
+
+Please consult the [official documentation](https://help.github.com/en/packages/using-github-packages-with-your-projects-ecosystem/configuring-apache-maven-for-use-with-github-packages) for further maven specific instructions. 
 
 ### Database
 For development purposes an hsqldb can be used to run the webservice locally. For production systems, it is recommended to connect to a PostgreSQL dabatase (cluster if possible). There are two tables storing keys, one for the DP3T vendor independent format, one for the Google/Apple approach format. Further, to protect against JWT replay attacks a third table stores the JTI temporarily. The schemas are as following :
