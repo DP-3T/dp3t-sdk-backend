@@ -57,7 +57,7 @@ public class ValidationUtils {
 	}
 
 	/**
-	 * Check if the given date is in the range of [now - retentionPeriod ... now], exclusive
+	 * Check if the given date is in the range of [now - retentionPeriod ... now], inclusive
 	 *
 	 * @param timestamp to verify
 	 * @return if the date is in the range
@@ -84,7 +84,7 @@ public class ValidationUtils {
 
 	/**
 	 * Check if the given batchReleaseTime is the beginning of a batch, and if it is between
-	 * [now - retentionPeriod ... now], exclusive.
+	 * [now - retentionPeriod ... now], inclusive.
 	 *
 	 * @param batchReleaseTime in milliseconds since Unix epoch (1970-01-01)
 	 * @return if batchReleaseTime is in range

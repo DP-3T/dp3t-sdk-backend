@@ -37,7 +37,7 @@ public interface DPPPTDataService {
 	 * Returns the maximum id of the stored exposed entries fo the given batch.
 	 * 
 	 * @param batchReleaseTime in milliseconds since the start of the Unix Epoch, must be a multiple of
-	 * @param batchLength im milliseconds
+	 * @param batchLength in milliseconds
 	 * @return the maximum id of the stored exposed entries fo the given batch
 	 */
 	int getMaxExposedIdForBatchReleaseTime(long batchReleaseTime, long batchLength);
@@ -46,7 +46,7 @@ public interface DPPPTDataService {
 	 * Returns all exposees for the given batch.
 	 *
 	 * @param batchReleaseTime in milliseconds since the start of the Unix Epoch, must be a multiple of
-	 * @param batchLength im milliseconds
+	 * @param batchLength in milliseconds
 	 * @return all exposees for the given batch
 	 */
 	List<Exposee> getSortedExposedForBatchReleaseTime(long batchReleaseTime, long batchLength);
