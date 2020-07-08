@@ -44,10 +44,7 @@ public class ValidationUtils {
 		if (timestamp.isAfter(Instant.now().atOffset(ZoneOffset.UTC))) {
 			return false;
 		}
-		if (timestamp.isBefore(Instant.now().atOffset(ZoneOffset.UTC).minus(retentionPeriod))) {
-			return false;
-		}
-		return true;
+		return !timestamp.isBefore(Instant.now().atOffset(ZoneOffset.UTC).minus(retentionPeriod));
 	}
 
 	/**
@@ -64,14 +61,7 @@ public class ValidationUtils {
 		if (batchReleaseTime % batchLength != 0) {
 			throw new BadBatchReleaseTimeException();
 		}
-		if (batchReleaseTime > OffsetDateTime.now().withOffsetSameInstant(ZoneOffset.UTC).toInstant().toEpochMilli()) {
-			return false;
-		}
-		if (batchReleaseTime < OffsetDateTime.now().withOffsetSameInstant(ZoneOffset.UTC).minus(retentionPeriod)
-				.toInstant().toEpochMilli()) {
-			return false;
-		}
-		return true;
+		return this.isDateInRange(OffsetDateTime.ofInstant(Instant.ofEpochMilli(batchReleaseTime), ZoneOffset.UTC));
 	}
 
 	public class BadBatchReleaseTimeException extends Exception {
