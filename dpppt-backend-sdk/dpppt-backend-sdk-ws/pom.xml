@@ -39,7 +39,7 @@
 		<dependency>
 			<groupId>ch.ubique.openapi</groupId>
 			<artifactId>doc-annotations</artifactId>
-			<version>0.0.5</version>
+			<version>1.0.1</version>
 		</dependency>
 
 		<dependency>
@@ -155,7 +155,7 @@
 			<plugin>
                 <groupId>ch.ubique.openapi</groupId>
                 <artifactId>springboot-swagger-3</artifactId>
-                <version>1.2.4</version>
+                <version>1.2.8</version>
                 <configuration>
                     <apiVersion>1.0-gapple</apiVersion>
                     <basePackages>
@@ -183,20 +183,24 @@
 
 
 	<pluginRepositories>
-    <pluginRepository>
-        <id>github</id>
-          <name>GitHub OWNER Apache Maven Packages</name>
-          <url>https://maven.pkg.github.com/Ubique-OSS/springboot-swagger3</url>
-           <releases><enabled>true</enabled></releases>
-          <snapshots><enabled>true</enabled></snapshots>
-    </pluginRepository>
+		<pluginRepository>
+			<snapshots>
+				<enabled>false</enabled>
+			</snapshots>
+			<id>ubique-oss-springboot-swagger3</id>
+			<name>bintray</name>
+			<url>https://dl.bintray.com/ubique-oss/springboot-swagger3</url>
+		</pluginRepository>
     </pluginRepositories>
 
     <repositories>
         <repository>
-            <id>github</id>
-            <name>github</name>
-            <url>https://maven.pkg.github.com/Ubique-OSS/springboot-swagger3-annotations</url>
-        </repository>
+			<snapshots>
+				<enabled>false</enabled>
+			</snapshots>
+			<id>ubique-oss-springboot-swagger3</id>
+			<name>bintray</name>
+			<url>https://dl.bintray.com/ubique-oss/springboot-swagger3</url>
+		</repository>
     </repositories>
 </project>
