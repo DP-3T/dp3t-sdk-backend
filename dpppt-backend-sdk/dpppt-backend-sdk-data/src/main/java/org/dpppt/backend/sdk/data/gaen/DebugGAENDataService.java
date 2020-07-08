@@ -18,19 +18,19 @@ import org.dpppt.backend.sdk.model.gaen.GaenKey;
 public interface DebugGAENDataService {
 
 	/**
-	 * Upserts the given list of exposed keys in the debug store
+	 * Upserts (Update or Inserts) the given list of exposed keys in the debug store
 	 * 
-	 * @param device name
-	 * @param key    the list of exposed keys to upsert
+	 * @param deviceName name of the device
+	 * @param keys    the list of exposed keys to upsert
 	 */
 	void upsertExposees(String deviceName, List<GaenKey> keys);
 
 	/**
-	 * Returns all exposeed keys for the given batch from the debug store.
+	 * Returns all exposed keys for the given batch from the debug store.
 	 * 
-	 * @param batchReleaseTime
-	 * @param batchLength
-	 * @return
+	 * @param batchReleaseTime in milliseconds since the beginning of the Unix epoch (1970-01-01)
+	 * @param batchLength in milliseconds
+	 * @return all exposed keys for the given batch from the debug store
 	 */
 	Map<String, List<GaenKey>> getSortedExposedForBatchReleaseTime(Long batchReleaseTime, long batchLength);
 

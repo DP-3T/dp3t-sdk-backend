@@ -18,7 +18,7 @@ import org.dpppt.backend.sdk.model.Exposee;
 public interface DPPPTDataService {
 
 	/**
-	 * Upserts the given exposee
+	 * Upserts (Update or Inserts) the given exposee
 	 * 
 	 * @param exposee   the exposee to upsert
 	 * @param appSource the app name
@@ -26,9 +26,9 @@ public interface DPPPTDataService {
 	void upsertExposee(Exposee exposee, String appSource);
 
 	/**
-	 * Upserts the given exposees (if keys cannot be derived from one master key)
+	 * Upserts (Update or Inserts) the given exposees (if keys cannot be derived from one master key)
 	 * 
-	 * @param exposeex  the list of exposees to upsert
+	 * @param exposees  the list of exposees to upsert
 	 * @param appSource the app name
 	 */
 	void upsertExposees(List<Exposee> exposees, String appSource);
@@ -36,25 +36,25 @@ public interface DPPPTDataService {
 	/**
 	 * Returns the maximum id of the stored exposed entries fo the given batch.
 	 * 
-	 * @param batchReleaseTime
-	 * @param batchLength
-	 * @return
+	 * @param batchReleaseTime in milliseconds since the start of the Unix Epoch, must be a multiple of
+	 * @param batchLength im milliseconds
+	 * @return the maximum id of the stored exposed entries fo the given batch
 	 */
 	int getMaxExposedIdForBatchReleaseTime(long batchReleaseTime, long batchLength);
 
 	/**
 	 * Returns all exposees for the given batch.
-	 * 
-	 * @param batchReleaseTime
-	 * @param batchLength
-	 * @return
+	 *
+	 * @param batchReleaseTime in milliseconds since the start of the Unix Epoch, must be a multiple of
+	 * @param batchLength im milliseconds
+	 * @return all exposees for the given batch
 	 */
 	List<Exposee> getSortedExposedForBatchReleaseTime(long batchReleaseTime, long batchLength);
 
 	/**
 	 * deletes entries older than retentionperiod
 	 * 
-	 * @param retentionPeriod
+	 * @param retentionPeriod duration of retention period for exposed keys
 	 */
 	void cleanDB(Duration retentionPeriod);
 
