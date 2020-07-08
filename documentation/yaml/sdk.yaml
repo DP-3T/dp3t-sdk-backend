@@ -157,102 +157,103 @@ paths:
   /v1/gaen/exposed:
     post:
       summary: addExposed
-      description: addExposed
+      description: Send exposed keys to server - includes a fix for the fact that
+        GAEN doesn't give access to the current day's exposed key
       responses:
         '200':
-          description: ''
+          description: The exposed keys have been stored in the database
           content:
             application/json:
               schema:
                 type: string
+        '400':
+          description: '- Invalid base64 encoding in GaenRequest- negative rolling
+            period- fake claim with non-fake keys'
+        '403':
+          description: Authentication failed
       requestBody:
         required: true
         content:
           application/json:
             schema:
               $ref: '#/components/schemas/org.dpppt.backend.sdk.model.gaen.GaenRequest'
-        description: N/A
+        description: The GaenRequest contains the SecretKey from the guessed infection
+          date, the infection date itself, and some authentication data to verify
+          the test result
       parameters:
       - name: User-Agent
         in: header
-        description: ''
+        description: App Identifier (PackageName/BundleIdentifier) + App-Version +
+          OS (Android/iOS) + OS-Version
+        example: ch.ubique.android.starsdk;1.0;iOS;13.3
         required: true
         schema:
           type: string
   /v1/gaen/exposednextday:
     post:
       summary: addExposedSecond
-      description: addExposedSecond
+      description: Allows the client to send the last exposed key of the infection
+        to the backend server. The JWT must come from a previous call to /exposed
       responses:
         '200':
-          description: ''
+          description: The exposed key has been stored in the backend
           content:
             application/json:
               schema:
                 type: string
+        '400':
+          description: '- Ivnalid base64 encoded Temporary Exposure Key- TEK-date
+            does not match delayedKeyDAte claim in Jwt- TEK has negative rolling period'
+        '403':
+          description: No delayedKeyDate claim in authentication
       requestBody:
         required: true
         content:
           application/json:
             schema:
               $ref: '#/components/schemas/org.dpppt.backend.sdk.model.gaen.GaenSecondDay'
-        description: N/A
+        description: The last exposed key of the user
       parameters:
       - name: User-Agent
         in: header
-        description: ''
+        description: App Identifier (PackageName/BundleIdentifier) + App-Version +
+          OS (Android/iOS) + OS-Version
+        example: ch.ubique.android.starsdk;1.0;iOS;13.3
         required: true
         schema:
           type: string
   /v1/gaen/exposed/{keyDate}:
     get:
       summary: getExposedKeys
-      description: getExposedKeys
+      description: Request the exposed key from a given date
       responses:
         '200':
-          description: ''
+          description: zipped export.bin and export.sig of all keys in that interval
           content:
             application/zip:
               schema:
                 type: string
                 format: binary
+        '404':
+          description: '- invalid starting key date, doesn''t point to midnight UTC-
+            _publishedAfter_ is not at the beginning of a batch release time, currently
+            2h'
       parameters:
       - name: keyDate
         in: path
-        description: ''
+        description: Requested date for Exposed Keys retrieval, in milliseconds since
+          Unix epoch (1970-01-01). It must indicate the beginning of a TEKRollingPeriod,
+          currently midnight UTC.
+        example: '1593043200000'
         required: true
         schema:
           type: integer
           format: long
       - name: publishedafter
         in: query
-        description: ''
-        required: false
-        schema:
-          type: integer
-          format: long
-  /v1/gaen/exposedjson/{keyDate}:
-    get:
-      summary: getExposedKeysAsJson
-      description: getExposedKeysAsJson
-      responses:
-        '200':
-          description: ''
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/org.dpppt.backend.sdk.model.gaen.GaenExposedJson'
-      parameters:
-      - name: keyDate
-        in: path
-        description: ''
-        required: true
-        schema:
-          type: integer
-          format: long
-      - name: publishedafter
-        in: query
-        description: ''
+        description: Restrict returned Exposed Keys to dates after this parameter.
+          Given in milliseconds since Unix epoch (1970-01-01).
+        example: '1593043200000'
         required: false
         schema:
           type: integer
@@ -260,18 +261,22 @@ paths:
   /v1/gaen/buckets/{dayDateStr}:
     get:
       summary: getBuckets
-      description: getBuckets
+      description: Request the available release batch times for a given day
       responses:
         '200':
-          description: ''
+          description: zipped export.bin and export.sig of all keys in that interval
           content:
             application/json:
               schema:
                 $ref: '#/components/schemas/org.dpppt.backend.sdk.model.gaen.DayBuckets'
+        '404':
+          description: invalid starting key date, points outside of the retention
+            range
       parameters:
       - name: dayDateStr
         in: path
-        description: ''
+        description: Starting date for exposed key retrieval, as ISO-8601 format
+        example: '2020-06-27'
         required: true
         schema:
           type: string
@@ -353,23 +358,19 @@ components:
         dayTimestamp:
           type: integer
           format: long
+          description: The day of all buckets, as midnight in milliseconds since the
+            Unix epoch (1970-01-01)
+          example: '1593043200000'
         day:
           type: string
+          description: The day as given by the request in /v1/gaen/buckets/{dayDateStr}
+          example: '2020-06-27'
         relativeUrls:
           type: array
           items:
             type: string
-    org.dpppt.backend.sdk.model.gaen.GaenExposedJson:
-      type: object
-      required:
-      - gaenKeys
-      properties:
-        gaenKeys:
-          type: array
-          items:
-            $ref: '#/components/schemas/org.dpppt.backend.sdk.model.gaen.GaenKey'
-        header:
-          $ref: '#/components/schemas/org.dpppt.backend.sdk.model.gaen.Header'
+          description: Relative URLs for the available release buckets
+          example: '[''/exposed/1593043200000'', ''/exposed/1593046800000'''
     org.dpppt.backend.sdk.model.gaen.GaenKey:
       type: object
       required:
@@ -380,14 +381,28 @@ components:
       properties:
         keyData:
           type: string
+          description: Represents the 16-byte Temporary Exposure Key in base64
+          example: ''
         rollingStartNumber:
           type: integer
+          description: The ENIntervalNumber as number of 10-minute intervals since
+            the Unix epoch (1970-01-01)
+          example: ''
         rollingPeriod:
           type: integer
+          description: The TEKRollingPeriod indicates for how many 10-minute intervals
+            the Temporary Exposure Key is valid
+          example: ''
         transmissionRiskLevel:
           type: integer
+          description: According to the Google API description a value between 0 and
+            4096, with higher values indicating a higher risk
+          example: ''
         fake:
           type: integer
+          description: If fake = 0, the key is a valid key. If fake = 1, the key will
+            be discarded.
+          example: ''
     org.dpppt.backend.sdk.model.gaen.GaenRequest:
       type: object
       required:
@@ -398,8 +413,14 @@ components:
           type: array
           items:
             $ref: '#/components/schemas/org.dpppt.backend.sdk.model.gaen.GaenKey'
+          description: 14 Temporary Exposure keys - zero or more of them might be
+            fake keys
+          example: ''
         delayedKeyDate:
           type: integer
+          description: Unknown - has something to do with GAEN not exposing the current
+            day's key and that the current day's key will be delivered with 24h delay
+          example: ''
     org.dpppt.backend.sdk.model.gaen.GaenSecondDay:
       type: object
       required:
@@ -407,21 +428,6 @@ components:
       properties:
         delayedKey:
           $ref: '#/components/schemas/org.dpppt.backend.sdk.model.gaen.GaenKey'
-    org.dpppt.backend.sdk.model.gaen.Header:
-      type: object
-      properties:
-        startTimestamp:
-          type: integer
-          format: long
-        endTimestamp:
-          type: integer
-          format: long
-        region:
-          type: string
-        batchNum:
-          type: integer
-        batchSize:
-          type: integer
     org.dpppt.backend.sdk.model.proto.Exposed.ProtoExposedList:
       type: object
       properties:
