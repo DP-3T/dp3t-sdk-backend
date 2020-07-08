@@ -41,10 +41,11 @@ public class ValidationUtils {
 	}
 
 	public boolean isDateInRange(OffsetDateTime timestamp) {
-		if (timestamp.isAfter(Instant.now().atOffset(ZoneOffset.UTC))) {
-			return false;
-		}
-		return !timestamp.isBefore(Instant.now().atOffset(ZoneOffset.UTC).minus(retentionPeriod));
+		OffsetDateTime now = Instant.now().atOffset(ZoneOffset.UTC);
+		OffsetDateTime retention = now.minus(retentionPeriod);
+		// This should use timestamp.isAfterOrEqual(retention), but this method does not exist.
+		// Because _now_ has a resolution of 1 millisecond, this precision is acceptable.
+		return timestamp.isAfter(retention) && timestamp.isBefore(now);
 	}
 
 	/**
