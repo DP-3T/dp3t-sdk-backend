@@ -145,7 +145,7 @@ public class GaenController {
 				ZoneOffset.UTC);
 
 		var nowDay = LocalDate.now(ZoneOffset.UTC);
-		if (!delayedKeyDate.isAfter(nowDay.minusDays(1)) && delayedKeyDate.isBefore(nowDay.plusDays(1))) {
+		if (delayedKeyDate.isBefore(nowDay.minusDays(1)) || delayedKeyDate.isAfter(nowDay.plusDays(1))) {
 			return () -> {
 				return ResponseEntity.badRequest().body("delayedKeyDate date must be between yesterday and tomorrow");
 			};
