@@ -11,7 +11,6 @@
 package org.dpppt.backend.sdk.ws.security;
 
 import java.time.Duration;
-import java.time.Instant;
 
 import org.dpppt.backend.sdk.data.RedeemDataService;
 import org.springframework.security.oauth2.core.OAuth2Error;
@@ -40,7 +39,8 @@ public class JWTValidator implements OAuth2TokenValidator<Jwt> {
             //it is a fakte token, but we still assume it is valid
             return OAuth2TokenValidatorResult.success();
         }
-        if (token.getExpiresAt() == null || Instant.now().plus(maxJwtValidity).isBefore(token.getExpiresAt())) {
+        //make sure the token has an expiration date AND is not valid for more than maxJwtValidity
+        if (token.getExpiresAt() == null || token.getIssuedAt().plus(maxJwtValidity).isBefore(token.getExpiresAt())) {
             return OAuth2TokenValidatorResult.failure(new OAuth2Error(OAuth2ErrorCodes.INVALID_REQUEST));
         }
         if(token.containsClaim(UUID_CLAIM) && this.dataService.checkAndInsertPublishUUID(token.getClaim(UUID_CLAIM))) {
