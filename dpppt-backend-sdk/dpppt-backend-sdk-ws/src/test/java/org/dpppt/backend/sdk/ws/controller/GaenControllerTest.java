@@ -48,6 +48,7 @@ import org.dpppt.backend.sdk.data.gaen.GAENDataService;
 import org.dpppt.backend.sdk.model.gaen.GaenKey;
 import org.dpppt.backend.sdk.model.gaen.GaenRequest;
 import org.dpppt.backend.sdk.model.gaen.GaenSecondDay;
+import org.dpppt.backend.sdk.model.gaen.GaenUnit;
 import org.dpppt.backend.sdk.model.gaen.proto.TemporaryExposureKeyFormat;
 import org.dpppt.backend.sdk.ws.security.KeyVault;
 import org.dpppt.backend.sdk.ws.security.signature.ProtoSignature;
@@ -55,18 +56,23 @@ import org.junit.Test;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.http.MediaType;
 import org.springframework.mock.web.MockHttpServletResponse;
+import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.web.servlet.MvcResult;
 import org.springframework.transaction.annotation.Transactional;
 
 import io.jsonwebtoken.Jwt;
 import io.jsonwebtoken.Jwts;
 
+@ActiveProfiles({"actuator-security"})
 @SpringBootTest(properties = { "ws.app.jwt.publickey=classpath://generated_pub.pem",
-		"logging.level.org.springframework.security=DEBUG", "ws.exposedlist.batchlength=7200000", "ws.gaen.randomkeysenabled=true" })
+		"logging.level.org.springframework.security=DEBUG", "ws.exposedlist.batchlength=7200000", "ws.gaen.randomkeysenabled=true",
+	"ws.monitor.prometheus.user=prometheus",
+	"ws.monitor.prometheus.password=prometheus",
+	"management.endpoints.enabled-by-default=true",
+	"management.endpoints.web.exposure.include=*"})
 public class GaenControllerTest extends BaseControllerTest {
 	@Autowired
 	ProtoSignature signer;
@@ -85,6 +91,19 @@ public class GaenControllerTest extends BaseControllerTest {
 
 		assertNotNull(response);
 		assertEquals("Hello from DP3T WS", response.getContentAsString());
+	}
+	@Test
+	public void testActuatorSecurity() throws Exception {
+		var response = mockMvc.perform(get("/actuator/health")).andExpect(status().is2xxSuccessful()).andReturn()
+				.getResponse();
+		response = mockMvc.perform(get("/actuator/loggers")).andExpect(status().is(401)).andReturn()
+		.getResponse();
+		response = mockMvc.perform(get("/actuator/loggers").header("Authorization", "Basic cHJvbWV0aGV1czpwcm9tZXRoZXVz")).andExpect(status().isOk()).andReturn()
+		.getResponse();
+		response = mockMvc.perform(get("/actuator/prometheus")).andExpect(status().is(401)).andReturn()
+		.getResponse();
+		response = mockMvc.perform(get("/actuator/prometheus").header("Authorization", "Basic cHJvbWV0aGV1czpwcm9tZXRoZXVz")).andExpect(status().isOk()).andReturn()
+		.getResponse();
 	}
 
 	@Test
@@ -715,6 +734,71 @@ public class GaenControllerTest extends BaseControllerTest {
 				.content(json(secondDay))).andExpect(request().asyncStarted()).andReturn();
 		mockMvc.perform(asyncDispatch(responseAsync)).andExpect(status().isBadRequest());
 	}
+
+	@Test
+	public void delayedKeyDateBoundaryCheck() throws Exception {
+		GaenRequest exposeeRequest = new GaenRequest();
+		List<GaenKey> keys = new ArrayList<>();
+		for (int i = 0; i < 14; i++) {
+			var tmpKey = new GaenKey();
+			tmpKey.setRollingStartNumber((int) Duration.ofMillis(Instant.now().minus(Duration.ofDays(1)).toEpochMilli())
+					.dividedBy(Duration.ofMinutes(10)));
+			tmpKey.setKeyData(Base64.getEncoder().encodeToString("testKey32Bytes--".getBytes("UTF-8")));
+			tmpKey.setRollingPeriod(144);
+			tmpKey.setFake(0);
+			tmpKey.setTransmissionRiskLevel(0);
+			keys.add(tmpKey);
+		}
+		Map<Integer, Boolean> tests = Map.of(-2, false,
+				-1, true,
+				0, true,
+				1, true,
+				2, false);
+		for (Map.Entry<Integer, Boolean> t : tests.entrySet()) {
+			Integer offset = t.getKey();
+			Boolean pass = t.getValue();
+			logger.info("Testing offset {} which should pass {}", offset, pass);
+			var delayedKeyDateSent = (int) Duration.ofSeconds(LocalDate.now().atStartOfDay(ZoneOffset.UTC).plusDays(offset)
+					.toEpochSecond()).dividedBy(Duration.ofMinutes(10));
+			exposeeRequest.setDelayedKeyDate(delayedKeyDateSent);
+			exposeeRequest.setGaenKeys(keys);
+			String token = createToken(OffsetDateTime.now().withOffsetSameInstant(ZoneOffset.UTC).plusMinutes(5));
+			MvcResult responseAsync = mockMvc.perform(post("/v1/gaen/exposed")
+					.contentType(MediaType.APPLICATION_JSON).header("Authorization", "Bearer " + token)
+					.header("User-Agent", "MockMVC").content(json(exposeeRequest))).andExpect(request().asyncStarted()).andReturn();
+			if (pass) {
+				mockMvc.perform(asyncDispatch(responseAsync)).andExpect(status().is(200)).andReturn().getResponse();
+			} else {
+				mockMvc.perform(asyncDispatch(responseAsync)).andExpect(status().is(400)).andReturn().getResponse();
+			}
+		}
+	}
+
+	@Test
+	public void testTokenValiditySurpassesMaxJwtValidity() throws Exception{
+		GaenRequest exposeeRequest = new GaenRequest();
+		List<GaenKey> keys = new ArrayList<>();
+		for (int i = 0; i < 14; i++) {
+			var tmpKey = new GaenKey();
+			tmpKey.setRollingStartNumber((int) Duration.ofMillis(Instant.now().minus(Duration.ofDays(1)).toEpochMilli())
+					.dividedBy(Duration.ofMinutes(10)));
+			tmpKey.setKeyData(Base64.getEncoder().encodeToString("testKey32Bytes--".getBytes("UTF-8")));
+			tmpKey.setRollingPeriod(144);
+			tmpKey.setFake(0);
+			tmpKey.setTransmissionRiskLevel(0);
+			keys.add(tmpKey);
+		}
+		exposeeRequest.setGaenKeys(keys);
+		var delayedKeyDateSent = (int) Duration.ofSeconds(LocalDate.now().atStartOfDay(ZoneOffset.UTC).plusDays(1)
+		.toEpochSecond()).dividedBy(GaenUnit.TenMinutes.getDuration());
+		exposeeRequest.setDelayedKeyDate(delayedKeyDateSent);
+		int maxJWTValidityInMinutes = 60;
+		String token = createToken(OffsetDateTime.now().withOffsetSameInstant(ZoneOffset.UTC).plusMinutes(maxJWTValidityInMinutes + 1));
+
+		mockMvc.perform(post("/v1/gaen/exposed")
+						.contentType(MediaType.APPLICATION_JSON).header("Authorization", "Bearer " + token)
+						.header("User-Agent", "MockMVC").content(json(exposeeRequest))).andExpect(status().is(401));
+}
 
 	@Test
 	public void testDebugController() throws Exception {

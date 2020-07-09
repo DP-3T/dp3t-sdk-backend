@@ -31,12 +31,10 @@ import com.fasterxml.jackson.core.JsonProcessingException;
 import org.dpppt.backend.sdk.data.gaen.FakeKeyService;
 import org.dpppt.backend.sdk.data.gaen.GAENDataService;
 import org.dpppt.backend.sdk.model.gaen.DayBuckets;
-import org.dpppt.backend.sdk.model.gaen.GaenExposedJson;
 import org.dpppt.backend.sdk.model.gaen.GaenKey;
 import org.dpppt.backend.sdk.model.gaen.GaenRequest;
 import org.dpppt.backend.sdk.model.gaen.GaenSecondDay;
 import org.dpppt.backend.sdk.model.gaen.GaenUnit;
-import org.dpppt.backend.sdk.model.gaen.Header;
 import org.dpppt.backend.sdk.ws.security.ValidateRequest;
 import org.dpppt.backend.sdk.ws.security.ValidateRequest.InvalidDateException;
 import org.dpppt.backend.sdk.ws.security.signature.ProtoSignature;
@@ -101,16 +99,12 @@ public class GaenController {
 			@AuthenticationPrincipal Object principal) throws InvalidDateException {
 		var now = Instant.now().toEpochMilli();
 		if (!this.validateRequest.isValid(principal)) {
-			return () -> {
-				return ResponseEntity.status(HttpStatus.FORBIDDEN).build();
-			};
+			return () -> ResponseEntity.status(HttpStatus.FORBIDDEN).build();
 		}
 		List<GaenKey> nonFakeKeys = new ArrayList<>();
 		for (var key : gaenRequest.getGaenKeys()) {
 			if (!validationUtils.isValidBase64Key(key.getKeyData())) {
-				return () -> {
-					return new ResponseEntity<>("No valid base64 key", HttpStatus.BAD_REQUEST);
-				};
+				return () -> new ResponseEntity<>("No valid base64 key", HttpStatus.BAD_REQUEST);
 			}
 			if (this.validateRequest.isFakeRequest(principal, key)) {
 				continue;
@@ -132,9 +126,7 @@ public class GaenController {
 		}
 		if (principal instanceof Jwt && ((Jwt) principal).containsClaim("fake")
 				&& ((Jwt) principal).getClaim("fake").equals("1") && !nonFakeKeys.isEmpty()) {
-			return () -> {
-				return ResponseEntity.badRequest().body("Claim is fake but list contains non fake keys");
-			};
+			return () -> ResponseEntity.badRequest().body("Claim is fake but list contains non fake keys");
 		}
 		if (!nonFakeKeys.isEmpty()) {
 			dataService.upsertExposees(nonFakeKeys);
@@ -145,10 +137,8 @@ public class GaenController {
 				ZoneOffset.UTC);
 
 		var nowDay = LocalDate.now(ZoneOffset.UTC);
-		if (!delayedKeyDate.isAfter(nowDay.minusDays(1)) && delayedKeyDate.isBefore(nowDay.plusDays(1))) {
-			return () -> {
-				return ResponseEntity.badRequest().body("delayedKeyDate date must be between yesterday and tomorrow");
-			};
+		if (delayedKeyDate.isBefore(nowDay.minusDays(1)) || delayedKeyDate.isAfter(nowDay.plusDays(1))) {
+			return () -> ResponseEntity.badRequest().body("delayedKeyDate date must be between yesterday and tomorrow");
 		}
 
 		var responseBuilder = ResponseEntity.ok();
@@ -180,22 +170,16 @@ public class GaenController {
 		var now = Instant.now().toEpochMilli();
 
 		if (!validationUtils.isValidBase64Key(gaenSecondDay.getDelayedKey().getKeyData())) {
-			return () -> {
-				return new ResponseEntity<>("No valid base64 key", HttpStatus.BAD_REQUEST);
-			};
+			return () -> new ResponseEntity<>("No valid base64 key", HttpStatus.BAD_REQUEST);
 		}
 		if (principal instanceof Jwt && !((Jwt) principal).containsClaim("delayedKeyDate")) {
-			return () -> {
-				return ResponseEntity.status(HttpStatus.FORBIDDEN).body("claim does not contain delayedKeyDate");
-			};
+			return () -> ResponseEntity.status(HttpStatus.FORBIDDEN).body("claim does not contain delayedKeyDate");
 		}
 		if (principal instanceof Jwt) {
 			var jwt = (Jwt) principal;
 			var claimKeyDate = Integer.parseInt(jwt.getClaimAsString("delayedKeyDate"));
 			if (!gaenSecondDay.getDelayedKey().getRollingStartNumber().equals(Integer.valueOf(claimKeyDate))) {
-				return () -> {
-					return ResponseEntity.badRequest().body("keyDate does not match claim keyDate");
-				};
+				return () -> ResponseEntity.badRequest().body("keyDate does not match claim keyDate");
 			}
 		}
 		if (!this.validateRequest.isFakeRequest(principal, gaenSecondDay.getDelayedKey())) {
@@ -249,34 +233,6 @@ public class GaenController {
 		
 		return ResponseEntity.ok().cacheControl(CacheControl.maxAge(exposedListCacheControl))
 				.header("X-PUBLISHED-UNTIL", Long.toString(publishedUntil)).body(payload.getZip());
-	}
-
-	@GetMapping(value = "/exposedjson/{keyDate}", produces = "application/json")
-	public @ResponseBody ResponseEntity<GaenExposedJson> getExposedKeysAsJson(@PathVariable long keyDate,
-			@RequestParam(required = false) Long publishedafter, WebRequest request)
-			throws BadBatchReleaseTimeException {
-		if (!validationUtils.isValidKeyDate(keyDate)) {
-			return ResponseEntity.notFound().build();
-		}
-		if (publishedafter != null && !validationUtils.isValidBatchReleaseTime(publishedafter)) {
-			return ResponseEntity.notFound().build();
-		}
-
-		long now = System.currentTimeMillis();
-		// calculate exposed until bucket
-		long publishedUntil = now - (now % bucketLength.toMillis());
-
-		var exposedKeys = dataService.getSortedExposedForKeyDate(keyDate, publishedafter, publishedUntil);
-		if (exposedKeys.isEmpty()) {
-			return ResponseEntity.noContent().cacheControl(CacheControl.maxAge(exposedListCacheControl))
-					.header("X-PUBLISHED-UNTIL", Long.toString(publishedUntil)).build();
-		}
-
-		var file = new GaenExposedJson();
-		var header = new Header();
-		file.gaenKeys(exposedKeys).header(header);
-		return ResponseEntity.ok().cacheControl(CacheControl.maxAge(exposedListCacheControl))
-				.header("X-PUBLISHED-UNTIL", Long.toString(publishedUntil)).body(file);
 	}
 
 	@GetMapping(value = "/buckets/{dayDateStr}")

@@ -4,10 +4,9 @@ import java.util.List;
 
 public class DayBuckets {
 	
-	Long dayTimestamp;
-    String day;
-    List<String> relativeUrls;
-
+	private Long dayTimestamp;
+    private String day;
+    private List<String> relativeUrls;
 
     public String getDay() {
         return this.day;

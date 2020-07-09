@@ -18,36 +18,36 @@ import org.dpppt.backend.sdk.model.gaen.GaenKey;
 public interface GAENDataService {
 
 	/**
-	 * Upserts the given list of exposed keys
+	 * Upserts (Update or Inserts) the given list of exposed keys
 	 * 
-	 * @param key the list of exposed keys to upsert
+	 * @param keys the list of exposed keys to upsert
 	 */
 	void upsertExposees(List<GaenKey> keys);
 
 	/**
 	 * Returns the maximum id of the stored exposed entries for the given batch.
 	 * 
-	 * @param batchReleaseTime
-	 * @param publishedAfter
-	 * @param publishedUntil
-	 * @return
+	 * @param keyDate in milliseconds since Unix epoch (1970-01-01)
+	 * @param publishedAfter in milliseconds since Unix epoch
+	 * @param publishedUntil in milliseconds since Unix epoch
+	 * @return the maximum id of the stored exposed entries for the given batch
 	 */
 	int getMaxExposedIdForKeyDate(Long keyDate, Long publishedAfter, Long publishedUntil);
 
 	/**
 	 * Returns all exposeed keys for the given batch.
-	 * 
-	 * @param batchReleaseTime
-	 * @param publishedAfter
-	 * @param publishedUntil
-	 * @return
+	 *
+	 * @param keyDate in milliseconds since Unix epoch (1970-01-01)
+	 * @param publishedAfter in milliseconds since Unix epoch
+	 * @param publishedUntil in milliseconds since Unix epoch
+	 * @return all exposeed keys for the given batch
 	 */
 	List<GaenKey> getSortedExposedForKeyDate(Long keyDate, Long publishedAfter, Long publishedUntil);
 
 	/**
 	 * deletes entries older than retentionperiod
 	 * 
-	 * @param retentionPeriod
+	 * @param retentionPeriod in milliseconds
 	 */
 	void cleanDB(Duration retentionPeriod);
 }

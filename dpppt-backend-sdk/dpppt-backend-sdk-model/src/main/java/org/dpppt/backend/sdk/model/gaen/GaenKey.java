@@ -8,20 +8,18 @@ public class GaenKey {
 
     @NotNull
     @Size(min = 24, max = 24)
-    String keyData;
+    private String keyData;
 
     @NotNull
-    Integer rollingStartNumber;
+    private Integer rollingStartNumber;
 
     @NotNull
-    Integer rollingPeriod;
+    private Integer rollingPeriod;
 
     @NotNull
-    Integer transmissionRiskLevel;
+    private Integer transmissionRiskLevel;
 
-    Integer fake = 0;
-
-
+    private Integer fake = 0;
 
     public GaenKey() {
     }

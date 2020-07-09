@@ -242,6 +242,66 @@
 					</execution>
 				</executions>
 			</plugin>
+
+			<plugin>
+				<groupId>pl.project13.maven</groupId>
+				<artifactId>git-commit-id-plugin</artifactId>
+				<executions>
+				  <execution>
+					<id>retrieve-git-info</id>
+					<phase>prepare-package</phase>
+					<goals>
+					  <goal>revision</goal>
+					</goals>
+				  </execution>
+				</executions>
+				<configuration>
+				  <injectAllReactorProjects>true</injectAllReactorProjects>
+				  <runOnlyOnce>true</runOnlyOnce>
+				  <skipPoms>false</skipPoms>
+				  <dateFormat>yyyyMMddHHmmss</dateFormat>
+				  <dateFormatTimeZone>UTC</dateFormatTimeZone>
+				</configuration>
+			  </plugin>
+			  
+			  <plugin>
+				<groupId>org.apache.maven.plugins</groupId>
+				<artifactId>maven-jar-plugin</artifactId>
+				<configuration>
+				  <archive>
+					<manifestEntries>
+					  <Last-Commit-Id>${git.commit.id}</Last-Commit-Id>
+					  <Last-Commit-Time>${git.commit.time}</Last-Commit-Time>
+					  <Reproducible-Build>true</Reproducible-Build>
+					</manifestEntries>
+				  </archive>
+				</configuration>
+			  </plugin>
+			  
+			  <plugin>
+				<groupId>io.github.zlika</groupId>
+				<artifactId>reproducible-build-maven-plugin</artifactId>
+				<version>0.12</version>
+				<executions>
+				  <execution>
+					<id>strip-jaxb</id>
+					<goals>
+					  <goal>strip-jaxb</goal>
+					</goals>
+				  </execution>
+				  <execution>
+					<id>strip-jar</id>
+					<goals>
+					  <goal>strip-jar</goal>
+					</goals>
+					<configuration>
+					  <zipDateTime>${git.commit.time}</zipDateTime>
+					  <!-- Set custom date/time format pattern, "yyyyMMddHHmmss" by default -->
+					  <!-- <zipDateTimeFormatPattern>yyyyMMddHHmmss</zipDateTimeFormatPattern> -->
+					</configuration>
+				  </execution>
+				</executions>
+			  </plugin>
 		</plugins>
 		<pluginManagement>
 			<plugins>

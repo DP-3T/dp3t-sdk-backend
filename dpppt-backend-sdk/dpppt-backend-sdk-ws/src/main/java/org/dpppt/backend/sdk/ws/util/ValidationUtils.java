@@ -11,21 +11,39 @@ package org.dpppt.backend.sdk.ws.util;
 
 import java.time.Duration;
 import java.time.Instant;
+import java.time.LocalDateTime;
+import java.time.LocalTime;
 import java.time.OffsetDateTime;
 import java.time.ZoneOffset;
 import java.util.Base64;
 
+/**
+ * Offers a set of methods to validate the incoming requests from the mobile devices.
+ */
 public class ValidationUtils {
 	private final int KEY_LENGTH_BYTES;
 	private final Duration retentionPeriod;
 	private final Long batchLength;
 
+	/**
+	 * Initialize the validator with the current parameters in use.
+	 *
+	 * @param keyLengthBytes how long the exposed keys are, in bytes
+	 * @param retentionPeriod period during which the exposed keys are stored, before they are deleted
+	 * @param batchLength time in milliseconds that exposed keys are hidden before being served, in order to prevent timing attacks
+	 */
 	public ValidationUtils(int keyLengthBytes, Duration retentionPeriod, Long batchLength) {
 		this.KEY_LENGTH_BYTES = keyLengthBytes;
 		this.retentionPeriod = retentionPeriod;
 		this.batchLength = batchLength;
 	}
 
+	/**
+	 * Check the validty of a base64 value
+	 *
+	 * @param value representation of a base64 value
+	 * @return if _value_ is a valid representation
+	 */
 	public boolean isValidBase64Key(String value) {
 		try {
 			byte[] key = Base64.getDecoder().decode(value);
@@ -38,38 +56,43 @@ public class ValidationUtils {
 		}
 	}
 
+	/**
+	 * Check if the given date is in the range of [now - retentionPeriod ... now], inclusive
+	 *
+	 * @param timestamp to verify
+	 * @return if the date is in the range
+	 */
 	public boolean isDateInRange(OffsetDateTime timestamp) {
-		if (timestamp.isAfter(Instant.now().atOffset(ZoneOffset.UTC))) {
-			return false;
-		}
-		if (timestamp.isBefore(Instant.now().atOffset(ZoneOffset.UTC).minus(retentionPeriod))) {
-			return false;
-		}
-		return true;
+		OffsetDateTime now = Instant.now().atOffset(ZoneOffset.UTC);
+		OffsetDateTime retention = now.minus(retentionPeriod);
+		// This should use timestamp.isAfterOrEqual(retention), but this method does not exist.
+		// Because _now_ has a resolution of 1 millisecond, this precision is acceptable.
+		return timestamp.isAfter(retention) && timestamp.isBefore(now);
 	}
 
 	/**
-	 * Check if the given timestamp is a valid key date: Must be midnight utc.
+	 * Check if the given timestamp is a valid key date: Must be midnight UTC.
 	 * 
-	 * @param keyDate
-	 * @return
+	 * @param keyDate in milliseconds since Unix epoch (1970-01-01)
+	 * @return if keyDate represents midnight UTC
 	 */
 	public boolean isValidKeyDate(long keyDate) {
-		return (Instant.ofEpochMilli(keyDate).atOffset(ZoneOffset.UTC).getHour() == 0);
+		return LocalDateTime.ofInstant(Instant.ofEpochMilli(keyDate), ZoneOffset.UTC).toLocalTime().equals(LocalTime.MIDNIGHT);
 	}
 
+	/**
+	 * Check if the given batchReleaseTime is the beginning of a batch, and if it is between
+	 * [now - retentionPeriod ... now], inclusive.
+	 *
+	 * @param batchReleaseTime in milliseconds since Unix epoch (1970-01-01)
+	 * @return if batchReleaseTime is in range
+	 * @throws BadBatchReleaseTimeException if batchReleaseTime is not on a batch boundary
+	 */
 	public boolean isValidBatchReleaseTime(long batchReleaseTime) throws BadBatchReleaseTimeException {
 		if (batchReleaseTime % batchLength != 0) {
 			throw new BadBatchReleaseTimeException();
 		}
-		if (batchReleaseTime > OffsetDateTime.now().withOffsetSameInstant(ZoneOffset.UTC).toInstant().toEpochMilli()) {
-			return false;
-		}
-		if (batchReleaseTime < OffsetDateTime.now().withOffsetSameInstant(ZoneOffset.UTC).minus(retentionPeriod)
-				.toInstant().toEpochMilli()) {
-			return false;
-		}
-		return true;
+		return this.isDateInRange(OffsetDateTime.ofInstant(Instant.ofEpochMilli(batchReleaseTime), ZoneOffset.UTC));
 	}
 
 	public class BadBatchReleaseTimeException extends Exception {
