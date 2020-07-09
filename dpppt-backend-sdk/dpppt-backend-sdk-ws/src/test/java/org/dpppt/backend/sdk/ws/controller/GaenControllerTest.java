@@ -754,26 +754,24 @@ public class GaenControllerTest extends BaseControllerTest {
 				0, true,
 				1, true,
 				2, false);
-		tests.forEach((offset, pass) -> {
+		for (Map.Entry<Integer, Boolean> t : tests.entrySet()) {
+			Integer offset = t.getKey();
+			Boolean pass = t.getValue();
 			logger.info("Testing offset {} which should pass {}", offset, pass);
-			try {
-				var delayedKeyDateSent = (int) Duration.ofSeconds(LocalDate.now().atStartOfDay(ZoneOffset.UTC).plusDays(offset)
-						.toEpochSecond()).dividedBy(Duration.ofMinutes(10));
-				exposeeRequest.setDelayedKeyDate(delayedKeyDateSent);
-				exposeeRequest.setGaenKeys(keys);
-				String token = createToken(OffsetDateTime.now().withOffsetSameInstant(ZoneOffset.UTC).plusMinutes(5));
-				MvcResult responseAsync = mockMvc.perform(post("/v1/gaen/exposed")
-						.contentType(MediaType.APPLICATION_JSON).header("Authorization", "Bearer " + token)
-						.header("User-Agent", "MockMVC").content(json(exposeeRequest))).andExpect(request().asyncStarted()).andReturn();
-				if (pass) {
-					mockMvc.perform(asyncDispatch(responseAsync)).andExpect(status().is(200)).andReturn().getResponse();
-				} else {
-					mockMvc.perform(asyncDispatch(responseAsync)).andExpect(status().is(400)).andReturn().getResponse();
-				}
-			} catch(Exception e){
-				logger.error(e.toString());
+			var delayedKeyDateSent = (int) Duration.ofSeconds(LocalDate.now().atStartOfDay(ZoneOffset.UTC).plusDays(offset)
+					.toEpochSecond()).dividedBy(Duration.ofMinutes(10));
+			exposeeRequest.setDelayedKeyDate(delayedKeyDateSent);
+			exposeeRequest.setGaenKeys(keys);
+			String token = createToken(OffsetDateTime.now().withOffsetSameInstant(ZoneOffset.UTC).plusMinutes(5));
+			MvcResult responseAsync = mockMvc.perform(post("/v1/gaen/exposed")
+					.contentType(MediaType.APPLICATION_JSON).header("Authorization", "Bearer " + token)
+					.header("User-Agent", "MockMVC").content(json(exposeeRequest))).andExpect(request().asyncStarted()).andReturn();
+			if (pass) {
+				mockMvc.perform(asyncDispatch(responseAsync)).andExpect(status().is(200)).andReturn().getResponse();
+			} else {
+				mockMvc.perform(asyncDispatch(responseAsync)).andExpect(status().is(400)).andReturn().getResponse();
 			}
-		});
+		}
 	}
 
 	@Test
