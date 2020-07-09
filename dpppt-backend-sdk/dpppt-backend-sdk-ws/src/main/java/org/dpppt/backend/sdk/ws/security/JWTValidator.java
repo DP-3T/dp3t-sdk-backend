@@ -39,7 +39,7 @@ public class JWTValidator implements OAuth2TokenValidator<Jwt> {
             //it is a fakte token, but we still assume it is valid
             return OAuth2TokenValidatorResult.success();
         }
-        //make sure the token has an expiration date AND is not valid for more than 3 days
+        //make sure the token has an expiration date AND is not valid for more than maxJwtValidity
         if (token.getExpiresAt() == null || token.getIssuedAt().plus(maxJwtValidity).isBefore(token.getExpiresAt())) {
             return OAuth2TokenValidatorResult.failure(new OAuth2Error(OAuth2ErrorCodes.INVALID_REQUEST));
         }

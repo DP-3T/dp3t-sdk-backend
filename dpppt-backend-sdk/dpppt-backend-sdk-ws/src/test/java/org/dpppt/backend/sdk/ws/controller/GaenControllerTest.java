@@ -48,6 +48,7 @@ import org.dpppt.backend.sdk.data.gaen.GAENDataService;
 import org.dpppt.backend.sdk.model.gaen.GaenKey;
 import org.dpppt.backend.sdk.model.gaen.GaenRequest;
 import org.dpppt.backend.sdk.model.gaen.GaenSecondDay;
+import org.dpppt.backend.sdk.model.gaen.GaenUnit;
 import org.dpppt.backend.sdk.model.gaen.proto.TemporaryExposureKeyFormat;
 import org.dpppt.backend.sdk.ws.security.KeyVault;
 import org.dpppt.backend.sdk.ws.security.signature.ProtoSignature;
@@ -55,7 +56,6 @@ import org.junit.Test;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.http.MediaType;
 import org.springframework.mock.web.MockHttpServletResponse;
@@ -736,7 +736,7 @@ public class GaenControllerTest extends BaseControllerTest {
 	}
 
 	@Test
-	public void delayedKeyDateBounaryCheck() throws Exception {
+	public void delayedKeyDateBoundaryCheck() throws Exception {
 		GaenRequest exposeeRequest = new GaenRequest();
 		List<GaenKey> keys = new ArrayList<>();
 		for (int i = 0; i < 14; i++) {
@@ -775,6 +775,32 @@ public class GaenControllerTest extends BaseControllerTest {
 			}
 		});
 	}
+
+	@Test
+	public void testTokenValiditySurpassesMaxJwtValidity() throws Exception{
+		GaenRequest exposeeRequest = new GaenRequest();
+		List<GaenKey> keys = new ArrayList<>();
+		for (int i = 0; i < 14; i++) {
+			var tmpKey = new GaenKey();
+			tmpKey.setRollingStartNumber((int) Duration.ofMillis(Instant.now().minus(Duration.ofDays(1)).toEpochMilli())
+					.dividedBy(Duration.ofMinutes(10)));
+			tmpKey.setKeyData(Base64.getEncoder().encodeToString("testKey32Bytes--".getBytes("UTF-8")));
+			tmpKey.setRollingPeriod(144);
+			tmpKey.setFake(0);
+			tmpKey.setTransmissionRiskLevel(0);
+			keys.add(tmpKey);
+		}
+		exposeeRequest.setGaenKeys(keys);
+		var delayedKeyDateSent = (int) Duration.ofSeconds(LocalDate.now().atStartOfDay(ZoneOffset.UTC).plusDays(1)
+		.toEpochSecond()).dividedBy(GaenUnit.TenMinutes.getDuration());
+		exposeeRequest.setDelayedKeyDate(delayedKeyDateSent);
+		int maxJWTValidityInMinutes = 60;
+		String token = createToken(OffsetDateTime.now().withOffsetSameInstant(ZoneOffset.UTC).plusMinutes(maxJWTValidityInMinutes + 1));
+
+		mockMvc.perform(post("/v1/gaen/exposed")
+						.contentType(MediaType.APPLICATION_JSON).header("Authorization", "Bearer " + token)
+						.header("User-Agent", "MockMVC").content(json(exposeeRequest))).andExpect(status().is(401));
+}
 
 	@Test
 	public void testDebugController() throws Exception {
