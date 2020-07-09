@@ -62,6 +62,7 @@ public class DPPPTController {
 	private final int exposedListCacheControl;
 	private final ValidateRequest validateRequest;
 	private final ValidationUtils validationUtils;
+	// time in milliseconds that exposed keys are hidden before being served, in order to prevent timing attacks
 	private final long batchLength;
 	private final long requestTime;
 
