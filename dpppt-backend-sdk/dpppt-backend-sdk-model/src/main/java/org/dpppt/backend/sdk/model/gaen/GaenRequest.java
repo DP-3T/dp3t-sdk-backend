@@ -12,10 +12,10 @@ public class GaenRequest {
     @NotEmpty
     @Valid
     @Size(min = 14, max = 14)
-    List<GaenKey> gaenKeys;
+    private List<GaenKey> gaenKeys;
 
     @NotNull
-    Integer delayedKeyDate;
+    private Integer delayedKeyDate;
 
     public List<GaenKey> getGaenKeys() {
         return this.gaenKeys;

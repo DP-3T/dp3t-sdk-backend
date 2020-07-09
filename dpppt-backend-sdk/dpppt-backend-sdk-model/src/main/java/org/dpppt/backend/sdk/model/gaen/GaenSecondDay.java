@@ -8,7 +8,6 @@ public class GaenSecondDay {
     @Valid
     private GaenKey delayedKey;
 
-
     public GaenKey getDelayedKey() {
         return this.delayedKey;
     }
