@@ -49,8 +49,7 @@ public class GaenUnit implements TemporalUnit {
 
 	@Override
 	public long between(Temporal temporal1Inclusive, Temporal temporal2Exclusive) {
-		var between = ChronoUnit.MINUTES.between(temporal1Inclusive, temporal2Exclusive) / GAEN_MINUTES;
-		return between;
+		return ChronoUnit.MINUTES.between(temporal1Inclusive, temporal2Exclusive) / GAEN_MINUTES;
 	}
 
 }
