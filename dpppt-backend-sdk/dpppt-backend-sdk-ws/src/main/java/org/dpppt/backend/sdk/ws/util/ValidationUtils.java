@@ -63,13 +63,11 @@ public class ValidationUtils {
 	 * @return if the date is in the range
 	 */
 	public boolean isDateInRange(OffsetDateTime timestamp) {
-		if (timestamp.isAfter(Instant.now().atOffset(ZoneOffset.UTC))) {
-			return false;
-		}
-		if (timestamp.isBefore(Instant.now().atOffset(ZoneOffset.UTC).minus(retentionPeriod))) {
-			return false;
-		}
-		return true;
+		OffsetDateTime now = Instant.now().atOffset(ZoneOffset.UTC);
+		OffsetDateTime retention = now.minus(retentionPeriod);
+		// This should use timestamp.isAfterOrEqual(retention), but this method does not exist.
+		// Because _now_ has a resolution of 1 millisecond, this precision is acceptable.
+		return timestamp.isAfter(retention) && timestamp.isBefore(now);
 	}
 
 	/**
@@ -94,14 +92,7 @@ public class ValidationUtils {
 		if (batchReleaseTime % batchLength != 0) {
 			throw new BadBatchReleaseTimeException();
 		}
-		if (batchReleaseTime > OffsetDateTime.now().withOffsetSameInstant(ZoneOffset.UTC).toInstant().toEpochMilli()) {
-			return false;
-		}
-		if (batchReleaseTime < OffsetDateTime.now().withOffsetSameInstant(ZoneOffset.UTC).minus(retentionPeriod)
-				.toInstant().toEpochMilli()) {
-			return false;
-		}
-		return true;
+		return this.isDateInRange(OffsetDateTime.ofInstant(Instant.ofEpochMilli(batchReleaseTime), ZoneOffset.UTC));
 	}
 
 	public class BadBatchReleaseTimeException extends Exception {
