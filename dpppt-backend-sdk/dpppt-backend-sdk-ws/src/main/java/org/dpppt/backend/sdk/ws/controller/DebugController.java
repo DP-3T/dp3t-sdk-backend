@@ -121,7 +121,7 @@ public class DebugController {
         var dayBuckets = new DayBuckets();
 
         String controllerMapping = this.getClass().getAnnotation(RequestMapping.class).value()[0];
-        dayBuckets.day(dayDateStr).relativeUrls(relativeUrls);
+        dayBuckets.setDay(dayDateStr).setRelativeUrls(relativeUrls);
 
         while (atStartOfDay.toInstant().toEpochMilli() < Math.min(now.toInstant().toEpochMilli(),
                 end.toInstant().toEpochMilli())) {

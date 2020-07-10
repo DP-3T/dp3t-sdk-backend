@@ -20,17 +20,17 @@ public class DayBuckets {
 		return dayTimestamp;
 	}
 
-    public DayBuckets day(String day) {
+    public DayBuckets setDay(String day) {
         this.day = day;
         return this;
     }
 
-    public DayBuckets relativeUrls(List<String> relativeUrls) {
+    public DayBuckets setRelativeUrls(List<String> relativeUrls) {
         this.relativeUrls = relativeUrls;
         return this;
     }
     
-    public DayBuckets dayTimestamp(Long dayTimestamp) {
+    public DayBuckets setDayTimestamp(Long dayTimestamp) {
     	this.dayTimestamp = dayTimestamp;
     	return this;
     }
