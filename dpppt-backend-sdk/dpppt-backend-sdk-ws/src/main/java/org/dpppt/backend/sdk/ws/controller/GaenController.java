@@ -248,7 +248,7 @@ public class GaenController {
 		var dayBuckets = new DayBuckets();
 
 		String controllerMapping = this.getClass().getAnnotation(RequestMapping.class).value()[0];
-		dayBuckets.day(dayDateStr).relativeUrls(relativeUrls).dayTimestamp(atStartOfDay.toInstant().toEpochMilli());
+		dayBuckets.setDay(dayDateStr).setRelativeUrls(relativeUrls).setDayTimestamp(atStartOfDay.toInstant().toEpochMilli());
 
 		while (atStartOfDay.toInstant().toEpochMilli() < Math.min(now.toInstant().toEpochMilli(),
 				end.toInstant().toEpochMilli())) {
