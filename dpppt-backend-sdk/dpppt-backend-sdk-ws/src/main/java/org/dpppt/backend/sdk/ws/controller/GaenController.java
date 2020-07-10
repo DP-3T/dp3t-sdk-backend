@@ -60,7 +60,6 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.ResponseBody;
 import org.springframework.web.bind.annotation.ResponseStatus;
-import org.springframework.web.context.request.WebRequest;
 
 import io.jsonwebtoken.Jwts;
 
@@ -95,12 +94,13 @@ public class GaenController {
 
 	@PostMapping(value = "/exposed")
 	public @ResponseBody Callable<ResponseEntity<String>> addExposed(@Valid @RequestBody GaenRequest gaenRequest,
-			@RequestHeader(value = "User-Agent", required = true) String userAgent,
+			@RequestHeader(value = "User-Agent") String userAgent,
 			@AuthenticationPrincipal Object principal) throws InvalidDateException {
 		var now = Instant.now().toEpochMilli();
 		if (!this.validateRequest.isValid(principal)) {
 			return () -> ResponseEntity.status(HttpStatus.FORBIDDEN).build();
 		}
+
 		List<GaenKey> nonFakeKeys = new ArrayList<>();
 		for (var key : gaenRequest.getGaenKeys()) {
 			if (!validationUtils.isValidBase64Key(key.getKeyData())) {
@@ -108,22 +108,23 @@ public class GaenController {
 			}
 			if (this.validateRequest.isFakeRequest(principal, key)) {
 				continue;
-			} else {
-				this.validateRequest.getKeyDate(principal, key);
-				if (key.getRollingPeriod().equals(0)) {
-					//currently only android seems to send 0 which can never be valid, since a non used key should not be submitted
-					//default value according to EN is 144, so just set it to that. If we ever get 0 from iOS we should log it, since
-					//this should not happen
-					key.setRollingPeriod(GaenKey.GaenKeyDefaultRollingPeriod);
-					if(userAgent.toLowerCase().contains("ios")) {
-						logger.error("Received a rolling period of 0 for an iOS User-Agent");
-					}
-				} else if(key.getRollingPeriod() < 0) {
-					return () -> ResponseEntity.status(HttpStatus.BAD_REQUEST).body("Rolling Period MUST NOT be negative.");
-				}
-				nonFakeKeys.add(key);
 			}
+
+			this.validateRequest.getKeyDate(principal, key);
+			if (key.getRollingPeriod().equals(0)) {
+				//currently only android seems to send 0 which can never be valid, since a non used key should not be submitted
+				//default value according to EN is 144, so just set it to that. If we ever get 0 from iOS we should log it, since
+				//this should not happen
+				key.setRollingPeriod(GaenKey.GaenKeyDefaultRollingPeriod);
+				if (userAgent.toLowerCase().contains("ios")) {
+					logger.error("Received a rolling period of 0 for an iOS User-Agent");
+				}
+			} else if (key.getRollingPeriod() < 0) {
+				return () -> ResponseEntity.status(HttpStatus.BAD_REQUEST).body("Rolling Period MUST NOT be negative.");
+			}
+			nonFakeKeys.add(key);
 		}
+
 		if (principal instanceof Jwt && ((Jwt) principal).containsClaim("fake")
 				&& ((Jwt) principal).getClaim("fake").equals("1") && !nonFakeKeys.isEmpty()) {
 			return () -> ResponseEntity.badRequest().body("Claim is fake but list contains non fake keys");
@@ -165,8 +166,8 @@ public class GaenController {
 	@PostMapping(value = "/exposednextday")
 	public @ResponseBody Callable<ResponseEntity<String>> addExposedSecond(
 			@Valid @RequestBody GaenSecondDay gaenSecondDay,
-			@RequestHeader(value = "User-Agent", required = true) String userAgent,
-			@AuthenticationPrincipal Object principal) throws InvalidDateException {
+			@RequestHeader(value = "User-Agent") String userAgent,
+			@AuthenticationPrincipal Object principal) {
 		var now = Instant.now().toEpochMilli();
 
 		if (!validationUtils.isValidBase64Key(gaenSecondDay.getDelayedKey().getKeyData())) {
@@ -178,7 +179,7 @@ public class GaenController {
 		if (principal instanceof Jwt) {
 			var jwt = (Jwt) principal;
 			var claimKeyDate = Integer.parseInt(jwt.getClaimAsString("delayedKeyDate"));
-			if (!gaenSecondDay.getDelayedKey().getRollingStartNumber().equals(Integer.valueOf(claimKeyDate))) {
+			if (!gaenSecondDay.getDelayedKey().getRollingStartNumber().equals(claimKeyDate)) {
 				return () -> ResponseEntity.badRequest().body("keyDate does not match claim keyDate");
 			}
 		}
@@ -198,17 +199,16 @@ public class GaenController {
 			keys.add(gaenSecondDay.getDelayedKey());
 			dataService.upsertExposees(keys);
 		}
-		Callable<ResponseEntity<String>> cb = () -> {
+		return () -> {
 			normalizeRequestTime(now);
 			return ResponseEntity.ok().body("OK");
 		};
-		return cb;
 
 	}
 
 	@GetMapping(value = "/exposed/{keyDate}", produces = "application/zip")
 	public @ResponseBody ResponseEntity<byte[]> getExposedKeys(@PathVariable long keyDate,
-			@RequestParam(required = false) Long publishedafter, WebRequest request)
+			@RequestParam(required = false) Long publishedafter)
 			throws BadBatchReleaseTimeException, IOException, InvalidKeyException, SignatureException,
 			NoSuchAlgorithmException {
 		if (!validationUtils.isValidKeyDate(keyDate)) {
@@ -265,7 +265,7 @@ public class GaenController {
 		try {
 			Thread.sleep(Math.max(requestTime.minusMillis(duration).toMillis(), 0));
 		} catch (Exception ex) {
-
+			logger.error("Couldn't equalize request time: {}", ex.toString());
 		}
 	}
 
