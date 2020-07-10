@@ -35,12 +35,12 @@ public class JDBCGAENDataServiceImpl implements GAENDataService {
 	private static final String PGSQL = "pgsql";
 	private final String dbType;
 	private final NamedParameterJdbcTemplate jt;
-	private final Duration bucketLength;
+	private final Duration releaseBucketDuration;
 
-	public JDBCGAENDataServiceImpl(String dbType, DataSource dataSource, Duration bucketLength) {
+	public JDBCGAENDataServiceImpl(String dbType, DataSource dataSource, Duration releaseBucketDuration) {
 		this.dbType = dbType;
 		this.jt = new NamedParameterJdbcTemplate(dataSource);
-		this.bucketLength = bucketLength;
+		this.releaseBucketDuration = releaseBucketDuration;
 	}
 
 	@Override
@@ -57,7 +57,7 @@ public class JDBCGAENDataServiceImpl implements GAENDataService {
 		}
 		var parameterList = new ArrayList<MapSqlParameterSource>();
 		var nowMillis = System.currentTimeMillis();
-		var receivedAt = (nowMillis/bucketLength.toMillis() + 1) * bucketLength.toMillis() - 1;
+		var receivedAt = (nowMillis/releaseBucketDuration.toMillis() + 1) * releaseBucketDuration.toMillis() - 1;
 		for (var gaenKey : gaenKeys) {
 			MapSqlParameterSource params = new MapSqlParameterSource();
 			params.addValue("key", gaenKey.getKeyData());

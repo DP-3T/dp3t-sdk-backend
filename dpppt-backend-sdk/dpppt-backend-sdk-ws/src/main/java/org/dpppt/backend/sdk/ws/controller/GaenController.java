@@ -69,7 +69,7 @@ import io.jsonwebtoken.Jwts;
 public class GaenController {
 	private static final Logger logger = LoggerFactory.getLogger(GaenController.class);
 
-	private final Duration bucketLength;
+	private final Duration releaseBucketDuration;
 	private final Duration requestTime;
 	private final ValidateRequest validateRequest;
 	private final ValidationUtils validationUtils;
@@ -80,11 +80,11 @@ public class GaenController {
 	private final ProtoSignature gaenSigner;
 
 	public GaenController(GAENDataService dataService, FakeKeyService fakeKeyService, ValidateRequest validateRequest,
-			ProtoSignature gaenSigner, ValidationUtils validationUtils, Duration bucketLength, Duration requestTime,
-			Duration exposedListCacheControl, PrivateKey secondDayKey) {
+						  ProtoSignature gaenSigner, ValidationUtils validationUtils, Duration releaseBucketDuration, Duration requestTime,
+						  Duration exposedListCacheControl, PrivateKey secondDayKey) {
 		this.dataService = dataService;
 		this.fakeKeyService = fakeKeyService;
-		this.bucketLength = bucketLength;
+		this.releaseBucketDuration = releaseBucketDuration;
 		this.validateRequest = validateRequest;
 		this.requestTime = requestTime;
 		this.validationUtils = validationUtils;
@@ -220,7 +220,7 @@ public class GaenController {
 
 		long now = System.currentTimeMillis();
 		// calculate exposed until bucket
-		long publishedUntil = now - (now % bucketLength.toMillis());
+		long publishedUntil = now - (now % releaseBucketDuration.toMillis());
 
 		var exposedKeys = dataService.getSortedExposedForKeyDate(keyDate, publishedafter, publishedUntil);
 		exposedKeys = fakeKeyService.fillUpKeys(exposedKeys, publishedafter, keyDate);
@@ -253,7 +253,7 @@ public class GaenController {
 		while (atStartOfDay.toInstant().toEpochMilli() < Math.min(now.toInstant().toEpochMilli(),
 				end.toInstant().toEpochMilli())) {
 			relativeUrls.add(controllerMapping + "/exposed" + "/" + atStartOfDay.toInstant().toEpochMilli());
-			atStartOfDay = atStartOfDay.plus(this.bucketLength);
+			atStartOfDay = atStartOfDay.plus(this.releaseBucketDuration);
 		}
 
 		return ResponseEntity.ok(dayBuckets);

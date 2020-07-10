@@ -68,7 +68,7 @@ import io.jsonwebtoken.Jwts;
 
 @ActiveProfiles({"actuator-security"})
 @SpringBootTest(properties = { "ws.app.jwt.publickey=classpath://generated_pub.pem",
-		"logging.level.org.springframework.security=DEBUG", "ws.exposedlist.batchlength=7200000", "ws.gaen.randomkeysenabled=true",
+		"logging.level.org.springframework.security=DEBUG", "ws.exposedlist.releaseBucketDuration=7200000", "ws.gaen.randomkeysenabled=true",
 	"ws.monitor.prometheus.user=prometheus",
 	"ws.monitor.prometheus.password=prometheus",
 	"management.endpoints.enabled-by-default=true",
@@ -80,7 +80,7 @@ public class GaenControllerTest extends BaseControllerTest {
 	KeyVault keyVault;
 	@Autowired
 	GAENDataService gaenDataService;
-	Long batchLength = 7200000L;
+	Long releaseBucketDuration = 7200000L;
 
 	private static final Logger logger = LoggerFactory.getLogger(GaenControllerTest.class);
 
@@ -157,13 +157,13 @@ public class GaenControllerTest extends BaseControllerTest {
 						.content(json(requestList)))
 				.andExpect(status().is(401)).andExpect(request().asyncNotStarted()).andExpect(content().string("")).andReturn();
 
-		var result = gaenDataService.getSortedExposedForKeyDate(LocalDate.now(ZoneOffset.UTC).minusDays(1).atStartOfDay().toInstant(ZoneOffset.UTC).toEpochMilli(),null, (now / batchLength + 1 )*batchLength);
+		var result = gaenDataService.getSortedExposedForKeyDate(LocalDate.now(ZoneOffset.UTC).minusDays(1).atStartOfDay().toInstant(ZoneOffset.UTC).toEpochMilli(),null, (now / releaseBucketDuration + 1 )*releaseBucketDuration);
 		assertEquals(2, result.size());
 		for(var key : result) {
 			assertEquals(Integer.valueOf(144), key.getRollingPeriod());
 		}
 
-		result = gaenDataService.getSortedExposedForKeyDate(LocalDate.now(ZoneOffset.UTC).minusDays(1).atStartOfDay().toInstant(ZoneOffset.UTC).toEpochMilli(),null, (now / batchLength)*batchLength);
+		result = gaenDataService.getSortedExposedForKeyDate(LocalDate.now(ZoneOffset.UTC).minusDays(1).atStartOfDay().toInstant(ZoneOffset.UTC).toEpochMilli(),null, (now / releaseBucketDuration)*releaseBucketDuration);
 		assertEquals(0, result.size());
 	}
 
