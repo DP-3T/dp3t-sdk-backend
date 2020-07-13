@@ -122,7 +122,7 @@ public class GaenController {
                     String userAgent,
 			@AuthenticationPrincipal
             @Documentation(description = "JWT token that can be verified by the backend server")
-                    Object principal) throws InvalidDateException {
+                    Object principal) {
 		var now = Instant.now().toEpochMilli();
 		if (!this.validateRequest.isValid(principal)) {
 			return () -> ResponseEntity.status(HttpStatus.FORBIDDEN).build();
@@ -335,16 +335,17 @@ public class GaenController {
 		}
 	}
 
-	private Boolean hasNegativeRollingPeriod(GaenKey key) {
+	private boolean hasNegativeRollingPeriod(GaenKey key) {
+		Integer rollingPeriod = key.getRollingPeriod();
 		if (key.getRollingPeriod() < 0) {
-			logger.error("Detected key with negative rolling period {}", key.getRollingPeriod().toString());
+			logger.error("Detected key with negative rolling period {}", rollingPeriod);
 			return true;
 		} else {
 			return false;
 		}
 	}
 
-	private Boolean hasInvalidKeyDate(Object principal, GaenKey key) {
+	private boolean hasInvalidKeyDate(Object principal, GaenKey key) {
 		try { 
 			this.validateRequest.getKeyDate(principal, key);
 		}
