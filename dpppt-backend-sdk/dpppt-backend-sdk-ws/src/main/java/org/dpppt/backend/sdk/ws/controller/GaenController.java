@@ -27,6 +27,7 @@ import java.util.concurrent.Callable;
 
 import javax.validation.Valid;
 
+import ch.ubique.openapi.docannotations.Documentation;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import org.dpppt.backend.sdk.data.gaen.FakeKeyService;
 import org.dpppt.backend.sdk.data.gaen.GAENDataService;
@@ -65,10 +66,19 @@ import io.jsonwebtoken.Jwts;
 
 @Controller
 @RequestMapping("/v1/gaen")
+@Documentation(description = "The GAEN endpoint for the mobile clients")
+/**
+ * The GaenController defines the API endpoints for the mobile clients to access the GAEN functionality of the
+ * red backend.
+ * Clients can send new Exposed Keys, or request the existing Exposed Keys.
+ */
 public class GaenController {
 	private static final Logger logger = LoggerFactory.getLogger(GaenController.class);
 
+	// releaseBucketDuration is used to delay the publishing of Exposed Keys by splitting the database up into batches of keys
+	// in releaseBucketDuration duration. The current batch is never published, only previous batches are published.
 	private final Duration releaseBucketDuration;
+
 	private final Duration requestTime;
 	private final ValidateRequest validateRequest;
 	private final ValidationUtils validationUtils;
@@ -93,9 +103,26 @@ public class GaenController {
 	}
 
 	@PostMapping(value = "/exposed")
-	public @ResponseBody Callable<ResponseEntity<String>> addExposed(@Valid @RequestBody GaenRequest gaenRequest,
-			@RequestHeader(value = "User-Agent") String userAgent,
-			@AuthenticationPrincipal Object principal) throws InvalidDateException {
+	@Documentation(
+			description = "Send exposed keys to server - includes a fix for the fact that GAEN doesn't give access to the current day's exposed key",
+			responses = {
+					"200=>The exposed keys have been stored in the database",
+					"400=> " +
+                            "- Invalid base64 encoding in GaenRequest" +
+                            "- negative rolling period" +
+                            "- fake claim with non-fake keys",
+					"403=>Authentication failed"
+			})
+	public @ResponseBody Callable<ResponseEntity<String>> addExposed(
+	        @Valid @RequestBody
+			@Documentation(description = "The GaenRequest contains the SecretKey from the guessed infection date, the infection date itself, and some authentication data to verify the test result")
+			        GaenRequest gaenRequest,
+			@RequestHeader(value = "User-Agent")
+            @Documentation(description = "App Identifier (PackageName/BundleIdentifier) + App-Version + OS (Android/iOS) + OS-Version", example = "ch.ubique.android.starsdk;1.0;iOS;13.3")
+                    String userAgent,
+			@AuthenticationPrincipal
+            @Documentation(description = "JWT token that can be verified by the backend server")
+                    Object principal) throws InvalidDateException {
 		var now = Instant.now().toEpochMilli();
 		if (!this.validateRequest.isValid(principal)) {
 			return () -> ResponseEntity.status(HttpStatus.FORBIDDEN).build();
@@ -163,10 +190,25 @@ public class GaenController {
 	}
 
 	@PostMapping(value = "/exposednextday")
+    @Documentation(description = "Allows the client to send the last exposed key of the infection to the backend server. The JWT must come from a previous call to /exposed",
+	responses = {
+    		"200=>The exposed key has been stored in the backend",
+			"400=>" +
+					"- Ivnalid base64 encoded Temporary Exposure Key" +
+					"- TEK-date does not match delayedKeyDAte claim in Jwt" +
+					"- TEK has negative rolling period",
+			"403=>No delayedKeyDate claim in authentication"
+	})
 	public @ResponseBody Callable<ResponseEntity<String>> addExposedSecond(
-			@Valid @RequestBody GaenSecondDay gaenSecondDay,
-			@RequestHeader(value = "User-Agent") String userAgent,
-			@AuthenticationPrincipal Object principal) {
+			@Valid @RequestBody
+            @Documentation(description = "The last exposed key of the user")
+                    GaenSecondDay gaenSecondDay,
+            @Documentation(description = "App Identifier (PackageName/BundleIdentifier) + App-Version + OS (Android/iOS) + OS-Version", example = "ch.ubique.android.starsdk;1.0;iOS;13.3")
+			@RequestHeader(value = "User-Agent")
+                    String userAgent,
+			@AuthenticationPrincipal
+            @Documentation(description = "JWT token that can be verified by the backend server, must have been created by /v1/gaen/exposed and contain the delayedKeyDate")
+                    Object principal) {
 		var now = Instant.now().toEpochMilli();
 
 		if (!validationUtils.isValidBase64Key(gaenSecondDay.getDelayedKey().getKeyData())) {
@@ -182,11 +224,12 @@ public class GaenController {
 				return () -> ResponseEntity.badRequest().body("keyDate does not match claim keyDate");
 			}
 		}
+
 		if (!this.validateRequest.isFakeRequest(principal, gaenSecondDay.getDelayedKey())) {
 			if (gaenSecondDay.getDelayedKey().getRollingPeriod().equals(0)) {
-				//currently only android seems to send 0 which can never be valid, since a non used key should not be submitted
-				//default value according to EN is 144, so just set it to that. If we ever get 0 from iOS we should log it, since
-				//this should not happen
+				// currently only android seems to send 0 which can never be valid, since a non used key should not be submitted
+				// default value according to EN is 144, so just set it to that. If we ever get 0 from iOS we should log it, since
+				// this should not happen
 				gaenSecondDay.getDelayedKey().setRollingPeriod(GaenKey.GaenKeyDefaultRollingPeriod);
 				if(userAgent.toLowerCase().contains("ios")) {
 					logger.error("Received a rolling period of 0 for an iOS User-Agent");
@@ -198,6 +241,7 @@ public class GaenController {
 			keys.add(gaenSecondDay.getDelayedKey());
 			dataService.upsertExposees(keys);
 		}
+
 		return () -> {
 			normalizeRequestTime(now);
 			return ResponseEntity.ok().body("OK");
@@ -206,8 +250,22 @@ public class GaenController {
 	}
 
 	@GetMapping(value = "/exposed/{keyDate}", produces = "application/zip")
-	public @ResponseBody ResponseEntity<byte[]> getExposedKeys(@PathVariable long keyDate,
-			@RequestParam(required = false) Long publishedafter)
+	@Documentation(description = "Request the exposed key from a given date",
+	responses = {
+			"200=>zipped export.bin and export.sig of all keys in that interval",
+			"404=>" +
+					"- invalid starting key date, doesn't point to midnight UTC" +
+					"- _publishedAfter_ is not at the beginning of a batch release time, currently 2h",
+	})
+	public @ResponseBody ResponseEntity<byte[]> getExposedKeys(
+			@PathVariable
+			@Documentation(description = "Requested date for Exposed Keys retrieval, in milliseconds since Unix epoch (1970-01-01). It must indicate the beginning of a TEKRollingPeriod, currently midnight UTC.",
+					example = "1593043200000")
+					long keyDate,
+			@RequestParam(required = false)
+			@Documentation(description = "Restrict returned Exposed Keys to dates after this parameter. Given in milliseconds since Unix epoch (1970-01-01).",
+					example = "1593043200000")
+					Long publishedafter)
 			throws BadBatchReleaseTimeException, IOException, InvalidKeyException, SignatureException,
 			NoSuchAlgorithmException {
 		if (!validationUtils.isValidKeyDate(keyDate)) {
@@ -235,7 +293,16 @@ public class GaenController {
 	}
 
 	@GetMapping(value = "/buckets/{dayDateStr}")
-	public @ResponseBody ResponseEntity<DayBuckets> getBuckets(@PathVariable String dayDateStr) {
+	@Documentation(description = "Request the available release batch times for a given day",
+			responses = {
+					"200=>zipped export.bin and export.sig of all keys in that interval",
+					"404=>invalid starting key date, points outside of the retention range"
+			})
+	public @ResponseBody ResponseEntity<DayBuckets> getBuckets(
+			@PathVariable
+			@Documentation(description = "Starting date for exposed key retrieval, as ISO-8601 format",
+				example = "2020-06-27")
+					String dayDateStr) {
 		var atStartOfDay = LocalDate.parse(dayDateStr).atStartOfDay().toInstant(ZoneOffset.UTC)
 				.atOffset(ZoneOffset.UTC);
 		var end = atStartOfDay.plusDays(1);

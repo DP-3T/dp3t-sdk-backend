@@ -30,7 +30,7 @@ public class ValidationUtils {
 	 *
 	 * @param keyLengthBytes how long the exposed keys are, in bytes
 	 * @param retentionPeriod period during which the exposed keys are stored, before they are deleted
-	 * @param releaseBucketDuration time in milliseconds that exposed keys are hidden before being served, in order to prevent timing attacks
+	 * @param releaseBucketDuration maximum time in milliseconds that exposed keys are hidden before being served, in order to prevent timing attacks
 	 */
 	public ValidationUtils(int keyLengthBytes, Duration retentionPeriod, Long releaseBucketDuration) {
 		this.KEY_LENGTH_BYTES = keyLengthBytes;
