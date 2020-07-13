@@ -16,13 +16,11 @@ import javax.validation.constraints.Size;
  * client can set _delayedKeyDate_ to indicate a delayed key.
  */
 public class GaenRequest {
-    //TODO: needs to be adjusted properly after upgrading. (should ensure that payload stays sonstant)
     @NotNull
     @NotEmpty
     @Valid
     @Size(min = 14, max = 30)
-    @Documentation(description = "Between 14 and 30 Temporary Exposure keys - zero or more of them might be fake keys. With the 1.5 update we could run into the situation of more than 14 keys.")
-
+    @Documentation(description = "Between 14 and 30 Temporary Exposure Keys - zero or more of them might be fake keys. Starting with EN 1.5 it is possible that clients send more than 14 keys.")
     private List<GaenKey> gaenKeys;
 
     @NotNull
