@@ -139,15 +139,15 @@ public class DPPPTControllerNoSecurityTest extends BaseControllerNoSecurityTest 
 		Iterator<JsonNode> buckets = mapper.readTree(response.getContentAsString()).get("buckets").elements();
 		Long first = buckets.next().asLong();
 		Long next = buckets.next().asLong();
-		Long batchLength = next - first;
+		Long releaseBucketDuration = next - first;
 		long future = (long) Math
 				.floor(OffsetDateTime.now().withOffsetSameInstant(ZoneOffset.UTC).plusDays(1).toInstant().toEpochMilli()
-						/ batchLength)
-				* batchLength;
+						/ releaseBucketDuration)
+				* releaseBucketDuration;
 		long past = (long) Math.floor(
 				OffsetDateTime.now().withOffsetSameInstant(ZoneOffset.UTC).minusYears(1).toInstant().toEpochMilli()
-						/ batchLength)
-				* batchLength;
+						/ releaseBucketDuration)
+				* releaseBucketDuration;
 
 		response = mockMvc.perform(get("/v1/exposed/" + Long.toString(future))).andExpect(status().isNotFound())
 				.andReturn().getResponse();

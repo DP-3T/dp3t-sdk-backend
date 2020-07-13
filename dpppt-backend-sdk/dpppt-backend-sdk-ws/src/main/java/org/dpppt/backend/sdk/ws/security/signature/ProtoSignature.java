@@ -50,12 +50,12 @@ public class ProtoSignature {
 	private final String keyVersion;
 	private final String keyVerificationId;
 	private final String gaenRegion;
-	private final Duration bucketLength;
+	private final Duration releaseBucketDuration;
 
 	public Map<String, String> oidToJavaSignature = Map.of("1.2.840.10045.4.3.2", "SHA256withECDSA");
 
 	public ProtoSignature(String algorithm, KeyPair keyPair, String appBundleId, String apkPackage, String keyVersion,
-			String keyVerificationId, String gaenRegion, Duration bucketLength) {
+			String keyVerificationId, String gaenRegion, Duration releaseBucketDuration) {
 		this.keyPair = keyPair;
 		this.algorithm = algorithm.trim();
 		this.appBundleId = appBundleId;
@@ -63,7 +63,7 @@ public class ProtoSignature {
 		this.keyVerificationId = keyVerificationId;
 		this.keyVersion = keyVersion;
 		this.gaenRegion = gaenRegion;
-		this.bucketLength = bucketLength;
+		this.releaseBucketDuration = releaseBucketDuration;
 	}
 
 	/**
@@ -223,7 +223,7 @@ public class ProtoSignature {
 
 		file.setRegion(gaenRegion).setBatchNum(1).setBatchSize(1)
 				.setStartTimestamp(batchReleaseTimeDuration.toSeconds())
-				.setEndTimestamp(batchReleaseTimeDuration.toSeconds() + bucketLength.toSeconds());
+				.setEndTimestamp(batchReleaseTimeDuration.toSeconds() + releaseBucketDuration.toSeconds());
 
 		file.addSignatureInfos(tekSignature());
 

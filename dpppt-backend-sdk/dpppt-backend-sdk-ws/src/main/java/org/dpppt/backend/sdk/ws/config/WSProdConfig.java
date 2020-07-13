@@ -138,8 +138,8 @@ public class WSProdConfig extends WSBaseConfig {
 	@Profile("debug")
 	@Configuration
 	public static class DebugConfig {
-		@Value("${ws.exposedlist.debug.batchlength: 86400000}")
-		long batchLength;
+		@Value("${ws.exposedlist.debug.releaseBucketDuration: 86400000}")
+		long releaseBucketDuration;
 	
 		@Value("${ws.exposedlist.debug.requestTime: 1500}")
 		long requestTime;
@@ -178,7 +178,7 @@ public class WSProdConfig extends WSBaseConfig {
 		}
 		@Bean
 		DebugController debugController() {
-			return new DebugController(dataService(),gaenSigner,backupValidator, gaenValidationUtils,Duration.ofMillis(batchLength), Duration.ofMillis(requestTime));
+			return new DebugController(dataService(),gaenSigner,backupValidator, gaenValidationUtils,Duration.ofMillis(releaseBucketDuration), Duration.ofMillis(requestTime));
 		}
 	}
 
