@@ -25,11 +25,11 @@ public interface GAENDataService {
 	 */
 	void upsertExposees(List<GaenKey> keys);
 
-		/**
-	 * Upserts (Update or Inserts) the given list of exposed keys, simulating a later insertion (google releases same day keys with rollingPeriod < 144 but apple can't handle that)
+	/**
+	 * Upserts (Update or Inserts) the given list of exposed keys, with delayed release of same day TEKs
 	 * 
 	 * @param keys the list of exposed keys to upsert
-	 * @param delayedReceivedAt the timestamp to use for the "simulated" received at (if null use now rounded to next bucket)
+	 * @param delayedReceivedAt the timestamp to use for the delayed release (if null use now rounded to next bucket)
 	 */
 	void upsertExposeesDelayed(List<GaenKey> keys, OffsetDateTime delayedReceivedAt);
 
@@ -59,6 +59,4 @@ public interface GAENDataService {
 	 * @param retentionPeriod in milliseconds
 	 */
 	void cleanDB(Duration retentionPeriod);
-
-	
 }
