@@ -106,19 +106,9 @@ public class GaenController {
 			if (!validationUtils.isValidBase64Key(key.getKeyData())) {
 				return () -> new ResponseEntity<>("No valid base64 key", HttpStatus.BAD_REQUEST);
 			}
-			if (this.validateRequest.isFakeRequest(principal, key)) {
-				continue;
-			}
-			if (key.getRollingPeriod() < 0) {
-				logger.error("Rolling Period MUST NOT be negative.");
-				continue;
-			}
-			//just skip key if something is invalid
-			try { 
-				this.validateRequest.getKeyDate(principal, key);
-			}
-			catch (InvalidDateException invalidDate) {
-				logger.error(invalidDate.getLocalizedMessage());
+			if (this.validateRequest.isFakeRequest(principal, key) 
+				|| hasNegativeRollingPeriod(key)
+				|| hasInvalidKeyDate(principal, key)) {
 				continue;
 			}
 
@@ -276,6 +266,26 @@ public class GaenController {
 		} catch (Exception ex) {
 			logger.error("Couldn't equalize request time: {}", ex.toString());
 		}
+	}
+
+	private Boolean hasNegativeRollingPeriod(GaenKey key) {
+		if (key.getRollingPeriod() < 0) {
+			logger.error("Detected key with negative rolling period {}", key.getRollingPeriod().toString());
+			return true;
+		} else {
+			return false;
+		}
+	}
+
+	private Boolean hasInvalidKeyDate(Object principal, GaenKey key) {
+		try { 
+			this.validateRequest.getKeyDate(principal, key);
+		}
+		catch (InvalidDateException invalidDate) {
+			logger.error(invalidDate.getLocalizedMessage());
+			return true;
+		}
+		return false;
 	}
 
 	@ExceptionHandler({IllegalArgumentException.class, InvalidDateException.class, JsonProcessingException.class,
