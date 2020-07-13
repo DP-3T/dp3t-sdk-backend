@@ -23,6 +23,13 @@
 		<sonar.projectKey>DP-3T_dp3t-sdk-model</sonar.projectKey>
 	</properties>
 	<dependencies>
+
+		<dependency>
+			<groupId>ch.ubique.openapi</groupId>
+			<artifactId>doc-annotations</artifactId>
+			<version>1.0.1</version>
+		</dependency>
+
 		<dependency>
 			<groupId>com.fasterxml.jackson.core</groupId>
 			<artifactId>jackson-annotations</artifactId>
@@ -55,4 +62,15 @@
 			<scope>test</scope>
 		</dependency>
 	</dependencies>
+
+	<repositories>
+		<repository>
+			<snapshots>
+				<enabled>false</enabled>
+			</snapshots>
+			<id>ubique-oss-springboot-swagger3</id>
+			<name>bintray</name>
+			<url>https://dl.bintray.com/ubique-oss/springboot-swagger3</url>
+		</repository>
+	</repositories>
 </project>

@@ -83,7 +83,7 @@
 			<artifactId>spring-security-oauth2</artifactId>
 			<version>2.4.0.RELEASE</version>
 		</dependency>
-		<!-- d3pt models -->
+		<!-- dp3t models -->
 		<dependency>
 			<groupId>org.dpppt</groupId>
 			<artifactId>dpppt-backend-sdk-model</artifactId>
@@ -180,7 +180,6 @@
             </plugin>
 		</plugins>
 	</build>
-
 
 	<pluginRepositories>
 		<pluginRepository>
