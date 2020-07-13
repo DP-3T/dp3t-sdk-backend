@@ -13,7 +13,6 @@ package org.dpppt.backend.sdk.ws.controller;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotEquals;
 import static org.junit.Assert.assertNotNull;
-import static org.junit.Assert.assertNull;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.asyncDispatch;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
@@ -73,6 +72,7 @@ import io.jsonwebtoken.Jwts;
 	"ws.monitor.prometheus.password=prometheus",
 	"management.endpoints.enabled-by-default=true",
 	"management.endpoints.web.exposure.include=*"})
+@Transactional
 public class GaenControllerTest extends BaseControllerTest {
 	@Autowired
 	ProtoSignature signer;
@@ -175,15 +175,17 @@ public class GaenControllerTest extends BaseControllerTest {
 	}
 
 	@Test
+	@Transactional
 	public void testMultipleKeyUpload() throws Exception {
 		testNKeys(14, true);
 	}
-
 	@Test
+	@Transactional
 	public void testCanUploadMoreThan14Keys() throws Exception {
 		testNKeys(30, true);
 	}
 	@Test
+	@Transactional
 	public void testCannotUploadMoreThan30Keys() throws Exception {
 		testNKeys(31,false);
 		testNKeys(100,false);
