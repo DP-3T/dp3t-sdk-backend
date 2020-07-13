@@ -13,7 +13,6 @@ package org.dpppt.backend.sdk.ws.controller;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotEquals;
 import static org.junit.Assert.assertNotNull;
-import static org.junit.Assert.assertNull;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.asyncDispatch;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
@@ -73,6 +72,7 @@ import io.jsonwebtoken.Jwts;
 	"ws.monitor.prometheus.password=prometheus",
 	"management.endpoints.enabled-by-default=true",
 	"management.endpoints.web.exposure.include=*"})
+@Transactional
 public class GaenControllerTest extends BaseControllerTest {
 	@Autowired
 	ProtoSignature signer;
@@ -106,8 +106,7 @@ public class GaenControllerTest extends BaseControllerTest {
 		.getResponse();
 	}
 
-	@Test
-	public void testMultipleKeyUpload() throws Exception {
+	private void testNKeys(int n, boolean shouldSucceed) throws Exception{
 		var requestList = new GaenRequest();
 		var gaenKey1 = new GaenKey();
 		var now = System.currentTimeMillis();
@@ -128,7 +127,7 @@ public class GaenControllerTest extends BaseControllerTest {
 		List<GaenKey> exposedKeys = new ArrayList<>();
 		exposedKeys.add(gaenKey1);
 		exposedKeys.add(gaenKey2);
-		for (int i = 0; i < 12; i++) {
+		for (int i = 0; i < n-2; i++) {
 			var tmpKey = new GaenKey();
 			tmpKey.setRollingStartNumber(
 					(int) Duration.ofMillis(now).dividedBy(Duration.ofMinutes(10)));
@@ -145,12 +144,20 @@ public class GaenControllerTest extends BaseControllerTest {
 		requestList.setDelayedKeyDate((int) duration);
 		gaenKey1.setFake(0);
 		String token = createToken(OffsetDateTime.now().withOffsetSameInstant(ZoneOffset.UTC).plusMinutes(5));
-		MvcResult response = mockMvc.perform(post("/v1/gaen/exposed")
-				.contentType(MediaType.APPLICATION_JSON).header("Authorization", "Bearer " + token)
-				.header("User-Agent", "MockMVC").content(json(requestList))).andExpect(request().asyncStarted())
-				.andReturn();
+		var requestBuilder = mockMvc.perform(post("/v1/gaen/exposed")
+		.contentType(MediaType.APPLICATION_JSON).header("Authorization", "Bearer " + token)
+		.header("User-Agent", "MockMVC").content(json(requestList)));
+		MvcResult response;
 
-		mockMvc.perform(asyncDispatch(response)).andExpect(status().is2xxSuccessful());
+		if(shouldSucceed) {
+			response = requestBuilder.andExpect(request().asyncStarted())
+			.andReturn();
+			mockMvc.perform(asyncDispatch(response)).andExpect(status().is2xxSuccessful());
+		}
+		else {
+			response = requestBuilder.andExpect(status().is(400)).andReturn();
+			return;
+		}
 		response = mockMvc
 				.perform(post("/v1/gaen/exposed").contentType(MediaType.APPLICATION_JSON)
 						.header("Authorization", "Bearer " + jwtToken).header("User-Agent", "MockMVC")
@@ -166,6 +173,25 @@ public class GaenControllerTest extends BaseControllerTest {
 		result = gaenDataService.getSortedExposedForKeyDate(LocalDate.now(ZoneOffset.UTC).minusDays(1).atStartOfDay().toInstant(ZoneOffset.UTC).toEpochMilli(),null, (now / releaseBucketDuration)*releaseBucketDuration);
 		assertEquals(0, result.size());
 	}
+
+	@Test
+	@Transactional
+	public void testMultipleKeyUpload() throws Exception {
+		testNKeys(14, true);
+	}
+	@Test
+	@Transactional
+	public void testCanUploadMoreThan14Keys() throws Exception {
+		testNKeys(30, true);
+	}
+	@Test
+	@Transactional
+	public void testCannotUploadMoreThan30Keys() throws Exception {
+		testNKeys(31,false);
+		testNKeys(100,false);
+		testNKeys(1000,false);
+	}
+
 
 	private Map<String, String> headers= Map.of("X-Content-Type-Options","nosniff", "X-Frame-Options", "DENY", "X-Xss-Protection", "1; mode=block");
 	@Test

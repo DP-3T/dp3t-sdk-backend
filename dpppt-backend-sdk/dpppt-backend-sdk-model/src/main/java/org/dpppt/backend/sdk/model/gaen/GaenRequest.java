@@ -19,8 +19,8 @@ public class GaenRequest {
     @NotNull
     @NotEmpty
     @Valid
-    @Size(min = 14, max = 14)
-    @Documentation(description = "14 Temporary Exposure keys - zero or more of them might be fake keys")
+    @Size(min = 14, max = 30)
+    @Documentation(description = "Between 14 and 30 Temporary Exposure Keys - zero or more of them might be fake keys. Starting with EN 1.5 it is possible that clients send more than 14 keys.")
     private List<GaenKey> gaenKeys;
 
     @NotNull
