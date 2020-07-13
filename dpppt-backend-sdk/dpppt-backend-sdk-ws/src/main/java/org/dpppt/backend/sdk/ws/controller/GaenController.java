@@ -109,8 +109,19 @@ public class GaenController {
 			if (this.validateRequest.isFakeRequest(principal, key)) {
 				continue;
 			}
+			if (key.getRollingPeriod() < 0) {
+				logger.error("Rolling Period MUST NOT be negative.");
+				continue;
+			}
+			//just skip key if something is invalid
+			try { 
+				this.validateRequest.getKeyDate(principal, key);
+			}
+			catch (InvalidDateException invalidDate) {
+				logger.error(invalidDate.getLocalizedMessage());
+				continue;
+			}
 
-			this.validateRequest.getKeyDate(principal, key);
 			if (key.getRollingPeriod().equals(0)) {
 				//currently only android seems to send 0 which can never be valid, since a non used key should not be submitted
 				//default value according to EN is 144, so just set it to that. If we ever get 0 from iOS we should log it, since
@@ -119,8 +130,6 @@ public class GaenController {
 				if (userAgent.toLowerCase().contains("ios")) {
 					logger.error("Received a rolling period of 0 for an iOS User-Agent");
 				}
-			} else if (key.getRollingPeriod() < 0) {
-				return () -> ResponseEntity.status(HttpStatus.BAD_REQUEST).body("Rolling Period MUST NOT be negative.");
 			}
 			nonFakeKeys.add(key);
 		}

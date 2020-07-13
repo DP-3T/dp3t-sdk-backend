@@ -167,6 +167,62 @@ public class GaenControllerTest extends BaseControllerTest {
 		assertEquals(0, result.size());
 	}
 
+	@Test
+	public void testAllKeysWrongButStill200() throws Exception {
+		var requestList = new GaenRequest();
+		var gaenKey1 = new GaenKey();
+		var now = System.currentTimeMillis();
+		gaenKey1.setRollingStartNumber(
+			(int) Duration.ofMillis(LocalDate.now(ZoneOffset.UTC).minusDays(30).atStartOfDay(ZoneOffset.UTC).toInstant().toEpochMilli())
+			.dividedBy(Duration.ofMinutes(10)));
+		gaenKey1.setKeyData(Base64.getEncoder().encodeToString("testKey32Bytes01".getBytes("UTF-8")));
+		gaenKey1.setRollingPeriod(0);
+		gaenKey1.setFake(0);
+		gaenKey1.setTransmissionRiskLevel(0);
+		var gaenKey2 = new GaenKey();
+		gaenKey2.setRollingStartNumber((int) Duration.ofMillis(LocalDate.now(ZoneOffset.UTC).minusDays(1).atStartOfDay(ZoneOffset.UTC).toInstant().toEpochMilli())
+				.dividedBy(Duration.ofMinutes(10)));
+		gaenKey2.setKeyData(Base64.getEncoder().encodeToString("testKey32Bytes02".getBytes("UTF-8")));
+		gaenKey2.setRollingPeriod(-10);
+		gaenKey2.setFake(0);
+		gaenKey2.setTransmissionRiskLevel(0);
+		List<GaenKey> exposedKeys = new ArrayList<>();
+		exposedKeys.add(gaenKey1);
+		exposedKeys.add(gaenKey2);
+		for (int i = 0; i < 12; i++) {
+			var tmpKey = new GaenKey();
+			tmpKey.setRollingStartNumber(
+					(int) Duration.ofMillis(now).plusDays(10).dividedBy(Duration.ofMinutes(10)));
+			tmpKey.setKeyData(Base64.getEncoder().encodeToString("testKey32Bytes--".getBytes("UTF-8")));
+			tmpKey.setRollingPeriod(144);
+			tmpKey.setFake(0);
+			tmpKey.setTransmissionRiskLevel(0);
+			exposedKeys.add(tmpKey);
+		}
+		requestList.setGaenKeys(exposedKeys);
+		var duration = Duration.ofMillis(
+				LocalDate.now(ZoneOffset.UTC).atStartOfDay().plusDays(1).toInstant(ZoneOffset.UTC).toEpochMilli())
+				.dividedBy(Duration.ofMinutes(10));
+		requestList.setDelayedKeyDate((int) duration);
+		gaenKey1.setFake(0);
+		String token = createToken(OffsetDateTime.now().withOffsetSameInstant(ZoneOffset.UTC).plusMinutes(5));
+		MvcResult response = mockMvc.perform(post("/v1/gaen/exposed")
+				.contentType(MediaType.APPLICATION_JSON).header("Authorization", "Bearer " + token)
+				.header("User-Agent", "MockMVC").content(json(requestList))).andExpect(request().asyncStarted())
+				.andReturn();
+
+		mockMvc.perform(asyncDispatch(response)).andExpect(status().is2xxSuccessful());
+		response = mockMvc
+				.perform(post("/v1/gaen/exposed").contentType(MediaType.APPLICATION_JSON)
+						.header("Authorization", "Bearer " + jwtToken).header("User-Agent", "MockMVC")
+						.content(json(requestList)))
+				.andExpect(status().is(401)).andExpect(request().asyncNotStarted()).andExpect(content().string("")).andReturn();
+
+		var result = gaenDataService.getSortedExposedForKeyDate(LocalDate.now(ZoneOffset.UTC).minusDays(1).atStartOfDay().toInstant(ZoneOffset.UTC).toEpochMilli(),null, (now / releaseBucketDuration + 1 )*releaseBucketDuration);
+		//all keys are in compatible
+		assertEquals(0, result.size());
+	}
+
 	private Map<String, String> headers= Map.of("X-Content-Type-Options","nosniff", "X-Frame-Options", "DENY", "X-Xss-Protection", "1; mode=block");
 	@Test
 	public void testSecurityHeaders() throws Exception {
