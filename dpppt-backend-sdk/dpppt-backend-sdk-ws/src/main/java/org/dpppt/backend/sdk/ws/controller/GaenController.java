@@ -149,20 +149,22 @@ public class GaenController {
 			}
 			
 			if(delayTodaysKeys) {
-				//always set rollingStartNumber to default as long as we have to use the apple workaround
+				// Additionally to delaying keys this feature also make sure rolling period is always set to 144 
+				// to make sure iOS 13.5.x does not ignore the TEK.
 				key.setRollingPeriod(GaenKey.GaenKeyDefaultRollingPeriod);
 
 				var rollingStartNumberDuration = Duration.of(key.getRollingStartNumber(), GaenUnit.TenMinutes).toMillis();
 				var rollingStartNumberInstant = Instant.ofEpochMilli(rollingStartNumberDuration);
 				var rollingStartDate = LocalDate.ofInstant(rollingStartNumberInstant, ZoneOffset.UTC);
-				//if the date is today, delay keys and set rollingPeriod to 144
+				// If this is a same day TEK we are delaying its release
 				if(LocalDate.now(ZoneOffset.UTC).isEqual(rollingStartDate)) {
 					nonFakeKeysDelayed.add(key);
-					//We already added a key so continue
-					continue;
+				} else {
+					nonFakeKeys.add(key);
 				}
+			} else {
+				nonFakeKeys.add(key);
 			}
-			nonFakeKeys.add(key);
 		}
 
 		if (principal instanceof Jwt && ((Jwt) principal).containsClaim("fake")
@@ -173,6 +175,7 @@ public class GaenController {
 			dataService.upsertExposees(nonFakeKeys);
 		}
 		if (!nonFakeKeysDelayed.isEmpty()) {
+			// Hold back same day TEKs until 02:00 UTC of the next day (as RPIs are accepted by EN up to 2h after rolling period)
 			var tomorrowAt2AM = LocalDate.now(ZoneOffset.UTC)
 										.plusDays(1)
 										.atStartOfDay(ZoneOffset.UTC)
