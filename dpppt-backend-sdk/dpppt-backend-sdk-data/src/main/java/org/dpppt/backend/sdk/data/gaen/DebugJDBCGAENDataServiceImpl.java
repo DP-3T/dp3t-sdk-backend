@@ -65,11 +65,11 @@ public class DebugJDBCGAENDataServiceImpl implements DebugGAENDataService {
 
 	@Override
 	@Transactional(readOnly = true)
-	public Map<String, List<GaenKey>> getSortedExposedForBatchReleaseTime(Long batchReleaseTime, long batchLength) {
+	public Map<String, List<GaenKey>> getSortedExposedForBatchReleaseTime(Long batchReleaseTime, long releaseBucketDuration) {
 		String sql = "select pk_exposed_id, device_name, key, rolling_start_number, rolling_period, transmission_risk_level from t_debug_gaen_exposed where received_at >= :startBatch and received_at < :batchReleaseTime order by pk_exposed_id desc";
 		MapSqlParameterSource params = new MapSqlParameterSource();
 		params.addValue("batchReleaseTime", Date.from(Instant.ofEpochMilli(batchReleaseTime)));
-		params.addValue("startBatch", Date.from(Instant.ofEpochMilli(batchReleaseTime - batchLength)));
+		params.addValue("startBatch", Date.from(Instant.ofEpochMilli(batchReleaseTime - releaseBucketDuration)));
 		return jt.query(sql, params, new DebugGaenKeyResultSetExtractor());
 	}
 
