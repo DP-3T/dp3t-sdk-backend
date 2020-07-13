@@ -8,10 +8,11 @@ import javax.validation.constraints.NotNull;
 import javax.validation.constraints.Size;
 
 public class GaenRequest {
+    //TODO: needs to be adjusted properly after upgrading. (should ensure that payload stays sonstant)
     @NotNull
     @NotEmpty
     @Valid
-    @Size(min = 14, max = 14)
+    @Size(min = 14, max = 30)
     private List<GaenKey> gaenKeys;
 
     @NotNull
