@@ -24,7 +24,7 @@ public class GaenRequest {
     private List<GaenKey> gaenKeys;
 
     @NotNull
-    @Documentation(description = "Unknown - has something to do with GAEN not exposing the current day's key and that the current day's key will be delivered with 24h delay")
+    @Documentation(description = "Prior to version 1.5 Exposure Keys for the day of report weren't available (since they were still used throughout this day RPI=144), so the submission of the last key had to be delayed. This Unix timestamp in milliseconds specifies, which key date the last key (which will be submitted on the next day) will have. The backend then issues a JWT to allow the submission of this last key with specified key date. This should not be necessary after the Exposure Framework is able to send and handle keys with RollingPeriod < 144 (e.g. only valid until submission).")
     private Integer delayedKeyDate;
 
     public List<GaenKey> getGaenKeys() {
