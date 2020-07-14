@@ -127,10 +127,11 @@ public class GaenController {
             @Documentation(description = "JWT token that can be verified by the backend server")
                     Object principal) {
 		var now = Instant.now().toEpochMilli();
+		var today = LocalDate.now(ZoneOffset.UTC);
 		if (!this.validateRequest.isValid(principal)) {
 			return () -> ResponseEntity.status(HttpStatus.FORBIDDEN).build();
 		}
-
+		
 		List<GaenKey> nonFakeKeys = new ArrayList<>();
 		List<GaenKey> nonFakeKeysDelayed = new ArrayList<>();
 		for (var key : gaenRequest.getGaenKeys()) {
@@ -157,7 +158,7 @@ public class GaenController {
 				var rollingStartNumberInstant = Instant.ofEpochMilli(rollingStartNumberDuration);
 				var rollingStartDate = LocalDate.ofInstant(rollingStartNumberInstant, ZoneOffset.UTC);
 				// If this is a same day TEK we are delaying its release
-				if(LocalDate.now(ZoneOffset.UTC).isEqual(rollingStartDate)) {
+				if(today.isEqual(rollingStartDate)) {
 					nonFakeKeysDelayed.add(key);
 				} else {
 					nonFakeKeys.add(key);
@@ -176,10 +177,10 @@ public class GaenController {
 		}
 		if (!nonFakeKeysDelayed.isEmpty()) {
 			// Hold back same day TEKs until 02:00 UTC of the next day (as RPIs are accepted by EN up to 2h after rolling period)
-			var tomorrowAt2AM = LocalDate.now(ZoneOffset.UTC)
-										.plusDays(1)
-										.atStartOfDay(ZoneOffset.UTC)
-										.plusHours(2)
+			var tomorrowAt2AM = today
+									.plusDays(1)
+									.atStartOfDay(ZoneOffset.UTC)
+									.plusHours(2)
 								.toOffsetDateTime();
 			dataService.upsertExposeesDelayed(nonFakeKeysDelayed, tomorrowAt2AM);
 		}
@@ -188,8 +189,7 @@ public class GaenController {
 		var delayedKeyDate = LocalDate.ofInstant(Instant.ofEpochMilli(delayedKeyDateDuration.toMillis()),
 				ZoneOffset.UTC);
 
-		var nowDay = LocalDate.now(ZoneOffset.UTC);
-		if (delayedKeyDate.isBefore(nowDay.minusDays(1)) || delayedKeyDate.isAfter(nowDay.plusDays(1))) {
+		if (delayedKeyDate.isBefore(today.minusDays(1)) || delayedKeyDate.isAfter(today.plusDays(1))) {
 			return () -> ResponseEntity.badRequest().body("delayedKeyDate date must be between yesterday and tomorrow");
 		}
 
