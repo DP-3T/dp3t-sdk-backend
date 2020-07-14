@@ -29,9 +29,9 @@ public interface DebugGAENDataService {
 	 * Returns all exposed keys for the given batch from the debug store.
 	 * 
 	 * @param batchReleaseTime in milliseconds since the beginning of the Unix epoch (1970-01-01)
-	 * @param batchLength in milliseconds
+	 * @param releaseBucketDuration in milliseconds
 	 * @return all exposed keys for the given batch from the debug store
 	 */
-	Map<String, List<GaenKey>> getSortedExposedForBatchReleaseTime(Long batchReleaseTime, long batchLength);
+	Map<String, List<GaenKey>> getSortedExposedForBatchReleaseTime(Long batchReleaseTime, long releaseBucketDuration);
 
 }
