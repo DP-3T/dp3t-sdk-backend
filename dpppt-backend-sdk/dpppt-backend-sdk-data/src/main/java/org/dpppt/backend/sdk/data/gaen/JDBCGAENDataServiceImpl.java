@@ -63,7 +63,12 @@ public class JDBCGAENDataServiceImpl implements GAENDataService {
 		}
 		var parameterList = new ArrayList<MapSqlParameterSource>();
 		var nowMillis = System.currentTimeMillis();
-		//if delayedReceivedAt is supplied use it
+		// if delayedReceivedAt is supplied use it
+		// else we calculate the last moment of the  current  bucket like this:
+		// currentBucketNumber = Floor(now/releaseBucketDuration)
+		// nextBucketNumber = currentBucketNumber + 1
+		// nextBucket = nextBucketNumber * releaseBucketDuration
+		// Since we have millisecond precision => lastMomentOfCurrentBucket = nextBucket - 1
 		var receivedAt = delayedReceivedAt == null? (nowMillis/releaseBucketDuration.toMillis() + 1) * releaseBucketDuration.toMillis() - 1 : delayedReceivedAt.toInstant().toEpochMilli(); 
 		for (var gaenKey : gaenKeys) {
 			MapSqlParameterSource params = new MapSqlParameterSource();

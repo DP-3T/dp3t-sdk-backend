@@ -150,8 +150,9 @@ public class GaenController {
 			}
 			
 			if(delayTodaysKeys) {
-				// Additionally to delaying keys this feature also make sure rolling period is always set to 144 
-				// to make sure iOS 13.5.x does not ignore the TEK.
+				// Additionally to delaying keys this feature also makes sure rolling period is always set to 144 
+				// to make sure iOS 13.5.x does not ignore the TEK. The calculations of the RPIs should still be true,
+				// though more keys might be checked.
 				key.setRollingPeriod(GaenKey.GaenKeyDefaultRollingPeriod);
 
 				var rollingStartNumberDuration = Duration.of(key.getRollingStartNumber(), GaenUnit.TenMinutes).toMillis();
