@@ -16,7 +16,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 public class FakeKeyService {
-	
+
 	private final GAENDataService dataService;
 	private final Integer minNumOfKeys;
 	private final SecureRandom random;
@@ -49,7 +49,14 @@ public class FakeKeyService {
 				random.nextBytes(keyData);
 				var keyGAENTime = (int) Duration.ofSeconds(tmpDate.toEpochSecond(LocalTime.MIDNIGHT, ZoneOffset.UTC))
 						.dividedBy(GaenUnit.TenMinutes.getDuration());
-				var key = new GaenKey(Base64.getEncoder().encodeToString(keyData), keyGAENTime, 144, 0);
+
+				int rollingPeriod = 144;
+				// make sure that no key is added that is valid in the future.
+				if (tmpDate.equals(currentKeyDate)) {
+					rollingPeriod = 0;
+				}
+
+				var key = new GaenKey(Base64.getEncoder().encodeToString(keyData), keyGAENTime, rollingPeriod, 0);
 				keys.add(key);
 			}
 			this.dataService.upsertExposees(keys);

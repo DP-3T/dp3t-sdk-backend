@@ -49,6 +49,8 @@ import org.dpppt.backend.sdk.model.gaen.GaenRequest;
 import org.dpppt.backend.sdk.model.gaen.GaenSecondDay;
 import org.dpppt.backend.sdk.model.gaen.GaenUnit;
 import org.dpppt.backend.sdk.model.gaen.proto.TemporaryExposureKeyFormat;
+import org.dpppt.backend.sdk.model.gaen.proto.TemporaryExposureKeyFormat.TEKSignatureList;
+import org.dpppt.backend.sdk.model.gaen.proto.TemporaryExposureKeyFormat.TemporaryExposureKeyExport;
 import org.dpppt.backend.sdk.ws.security.KeyVault;
 import org.dpppt.backend.sdk.ws.security.signature.ProtoSignature;
 import org.junit.Test;
@@ -958,7 +960,7 @@ public class GaenControllerTest extends BaseControllerTest {
 		Long publishedUntil = Long.parseLong(response.getHeader("X-PUBLISHED-UNTIL"));
 		assertTrue(publishedUntil < System.currentTimeMillis(), "Published until must be in the past");
 
-		verifyZipResponse(response, 20);
+		verifyZipResponse(response, 20, 144);
 
 		// request again the keys with date date 1 day ago. with publish until, so that
 		// we only get the second batch.
@@ -971,31 +973,29 @@ public class GaenControllerTest extends BaseControllerTest {
 				.andExpect(status().is2xxSuccessful()).andReturn().getResponse();
 
 		//we always have 10
-		verifyZipResponse(responseWithPublishedAfter, 15);
+		verifyZipResponse(responseWithPublishedAfter, 15, 144);
 	}
 
 	@Test
 	@Transactional(transactionManager = "testTransactionManager")
-	public void testNonEmptyResponseAnd304() throws Exception {
+	public void testNonEmptyResponse() throws Exception {
 		MockHttpServletResponse response = mockMvc
 				.perform(get("/v1/gaen/exposed/"
 						+ LocalDate.now(ZoneOffset.UTC).minusDays(8).atStartOfDay(ZoneOffset.UTC).toInstant().toEpochMilli())
 								.header("User-Agent", "MockMVC"))
 				.andExpect(status().isOk()).andReturn().getResponse();
-		verifyZipInZipResponse(response, 10);
-		// var etag = response.getHeader("ETag");
-		// var firstPublishUntil = response.getHeader("X-PUBLISHED-UNTIL");
-		// var signature = response.getHeader("Signature");
-		// assertNotNull(signature);
-
-		// response = mockMvc
-		// 		.perform(get("/v1/gaen/exposed/"
-		// 				+ LocalDate.now(ZoneOffset.UTC).minusDays(8).atStartOfDay(ZoneOffset.UTC).toInstant().toEpochMilli())
-		// 						.header("User-Agent", "MockMVC")
-		// 						.header("If-None-Match", etag))
-		// 		.andExpect(status().is(304)).andReturn().getResponse();
-		// signature = response.getHeader("Signature");
-		// assertNull(signature);
+		verifyZipResponse(response, 10, 144);
+	}
+	
+	@Test
+	@Transactional(transactionManager = "testTransactionManager")
+	public void testNonEmptyResponseAndCurrentDayRandomKeyRollingPeriod() throws Exception {
+		MockHttpServletResponse response = mockMvc
+				.perform(get("/v1/gaen/exposed/"
+						+ LocalDate.now(ZoneOffset.UTC).atStartOfDay(ZoneOffset.UTC).toInstant().toEpochMilli())
+								.header("User-Agent", "MockMVC"))
+				.andExpect(status().isOk()).andReturn().getResponse();
+		verifyZipResponse(response, 10, 0);
 	}
 
 	// @Test
@@ -1053,7 +1053,7 @@ public class GaenControllerTest extends BaseControllerTest {
 		}
 	}
 
-	private void verifyZipResponse(MockHttpServletResponse response, int expectKeyCount)
+	private void verifyZipResponse(MockHttpServletResponse response, int expectKeyCount, int expectedRollingPeriod)
 			throws IOException, NoSuchAlgorithmException, InvalidKeyException, SignatureException {
 		ByteArrayInputStream baisOuter = new ByteArrayInputStream(response.getContentAsByteArray());
 		ZipInputStream zipOuter = new ZipInputStream(baisOuter);
@@ -1082,10 +1082,10 @@ public class GaenControllerTest extends BaseControllerTest {
 		assertTrue(foundData, "export.bin not found in zip");
 		assertTrue(foundSignature, "export.sig not found in zip");
 
-		var list = TemporaryExposureKeyFormat.TEKSignatureList.parseFrom(signatureProto);
-		var export = TemporaryExposureKeyFormat.TemporaryExposureKeyExport.parseFrom(keyProto);
+		TEKSignatureList list = TemporaryExposureKeyFormat.TEKSignatureList.parseFrom(signatureProto);
+		TemporaryExposureKeyExport export = TemporaryExposureKeyFormat.TemporaryExposureKeyExport.parseFrom(keyProto);
 		for(var key : export.getKeysList()) {
-			assertNotEquals(0, key.getRollingPeriod());
+			assertEquals(expectedRollingPeriod, key.getRollingPeriod());
 		}
 		var sig = list.getSignatures(0);
 		java.security.Signature signatureVerifier = java.security.Signature
