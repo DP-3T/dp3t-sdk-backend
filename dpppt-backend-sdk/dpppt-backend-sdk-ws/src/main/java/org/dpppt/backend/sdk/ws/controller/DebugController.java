@@ -20,6 +20,7 @@ import org.dpppt.backend.sdk.model.gaen.GaenRequest;
 import org.dpppt.backend.sdk.ws.security.ValidateRequest;
 import org.dpppt.backend.sdk.ws.security.ValidateRequest.InvalidDateException;
 import org.dpppt.backend.sdk.ws.security.signature.ProtoSignature;
+import org.dpppt.backend.sdk.ws.util.UTCInstant;
 import org.dpppt.backend.sdk.ws.util.ValidationUtils;
 import org.dpppt.backend.sdk.ws.util.ValidationUtils.BadBatchReleaseTimeException;
 import org.springframework.http.HttpStatus;
@@ -111,9 +112,9 @@ public class DebugController {
 
     @GetMapping(value = "/buckets/{dayDateStr}")
     public @ResponseBody ResponseEntity<DayBuckets> getBuckets(@PathVariable String dayDateStr) {
-        var atStartOfDay = LocalDate.parse(dayDateStr).atStartOfDay().toInstant(ZoneOffset.UTC).atOffset(ZoneOffset.UTC);
+        var atStartOfDay = UTCInstant.parseDate(dayDateStr);
         var end = atStartOfDay.plusDays(1);
-        var now = Instant.now().atOffset(ZoneOffset.UTC);
+        var now = UTCInstant.now();
         // if (!validationUtils.isDateInRange(atStartOfDay)) {
         //     return ResponseEntity.notFound().build();
         // }
@@ -123,9 +124,9 @@ public class DebugController {
         String controllerMapping = this.getClass().getAnnotation(RequestMapping.class).value()[0];
         dayBuckets.setDay(dayDateStr).setRelativeUrls(relativeUrls);
 
-        while (atStartOfDay.toInstant().toEpochMilli() < Math.min(now.toInstant().toEpochMilli(),
-                end.toInstant().toEpochMilli())) {
-            relativeUrls.add(controllerMapping + "/exposed" + "/" + atStartOfDay.toInstant().toEpochMilli());
+        while (atStartOfDay.getTimestamp() < Math.min(now.getTimestamp(),
+                end.getTimestamp())) {
+            relativeUrls.add(controllerMapping + "/exposed" + "/" + atStartOfDay.getTimestamp());
             atStartOfDay = atStartOfDay.plus(this.releaseBucketDuration);
         }
 
@@ -133,7 +134,7 @@ public class DebugController {
     }
 
     private void normalizeRequestTime(long now) {
-        long after = Instant.now().toEpochMilli();
+        long after = UTCInstant.now().getTimestamp();
         long duration = after - now;
         try {
             Thread.sleep(Math.max(requestTime.minusMillis(duration).toMillis(), 0));
