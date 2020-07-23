@@ -290,13 +290,14 @@ public class GaenController {
 					Long publishedafter)
 			throws BadBatchReleaseTimeException, IOException, InvalidKeyException, SignatureException,
 			NoSuchAlgorithmException {
-		if (!validationUtils.isValidKeyDate(keyDate)) {
-			return ResponseEntity.notFound().build();
-		}
-		if (publishedafter != null && !validationUtils.isValidBatchReleaseTime(publishedafter)) {
-			return ResponseEntity.notFound().build();
-		}
 		var utcNow = UTCInstant.now();
+		if (!validationUtils.isValidKeyDate(UTCInstant.ofEpochMillis(keyDate))) {
+			return ResponseEntity.notFound().build();
+		}
+		if (publishedafter != null && !validationUtils.isValidBatchReleaseTime(UTCInstant.ofEpochMillis(publishedafter), utcNow)) {
+			return ResponseEntity.notFound().build();
+		}
+		
 		long now = utcNow.getTimestamp();
 		// calculate exposed until bucket
 		long publishedUntil = now - (now % releaseBucketDuration.toMillis());
@@ -328,7 +329,7 @@ public class GaenController {
 		var atStartOfDay = UTCInstant.parseDate(dayDateStr);
 		var end = atStartOfDay.plusDays(1);
 		var now = UTCInstant.now();
-		if (!validationUtils.isDateInRange(atStartOfDay.getOffsetDateTime())) {
+		if (!validationUtils.isDateInRange(atStartOfDay, now)) {
 			return ResponseEntity.notFound().build();
 		}
 		var relativeUrls = new ArrayList<String>();

@@ -16,6 +16,10 @@ public class UTCInstant {
     private final long timestamp;
     private static Clock currentClock = Clock.systemUTC();
 
+    public static UTCInstant midnight() {
+        return new UTCInstant(LocalDateTime.now(currentClock).toInstant(ZoneOffset.UTC));
+    }
+
     public UTCInstant(long timestamp) {
         this.timestamp = timestamp;
     }

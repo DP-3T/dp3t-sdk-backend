@@ -17,6 +17,7 @@ import java.time.ZoneOffset;
 import org.dpppt.backend.sdk.model.ExposeeRequest;
 import org.dpppt.backend.sdk.model.gaen.GaenKey;
 import org.dpppt.backend.sdk.model.gaen.GaenUnit;
+import org.dpppt.backend.sdk.ws.util.UTCInstant;
 
 public class NoValidateRequest implements ValidateRequest {
 
@@ -27,26 +28,25 @@ public class NoValidateRequest implements ValidateRequest {
 
 	@Override
 	public long getKeyDate(Object authObject, Object others) throws InvalidDateException {
+		var utcNow = UTCInstant.now();
 		if (others instanceof ExposeeRequest) {
 			ExposeeRequest request = ((ExposeeRequest) others);
-			if (request.getKeyDate() < OffsetDateTime.now().minusDays(21).toInstant().toEpochMilli()) {
+			if (request.getKeyDate() < utcNow.minusDays(21).getTimestamp()) {
 				throw new InvalidDateException();
-			} else if (request.getKeyDate() > OffsetDateTime.now().withOffsetSameInstant(ZoneOffset.UTC).toInstant()
-					.toEpochMilli()) {
+			} else if (request.getKeyDate() > utcNow.getTimestamp()) {
 				throw new InvalidDateException();
 			}
 			return request.getKeyDate();
 		}
 		if (others instanceof GaenKey) {
 			GaenKey key = ((GaenKey) others);
-			var requestDate = Duration.of(key.getRollingStartNumber(), GaenUnit.TenMinutes);
-			if (requestDate.toMillis() < OffsetDateTime.now().minusDays(21).toInstant().toEpochMilli()) {
+			var requestDate = UTCInstant.of(key.getRollingStartNumber(), GaenUnit.TenMinutes);
+			if (requestDate.isBeforeExact(utcNow.minusDays(21))) {
 				throw new InvalidDateException();
-			} else if (requestDate.toMillis() > OffsetDateTime.now().withOffsetSameInstant(ZoneOffset.UTC).toInstant()
-					.toEpochMilli()) {
+			} else if (requestDate.isAfterExact(utcNow)) {
 				throw new InvalidDateException();
 			}
-			return requestDate.toMillis();
+			return requestDate.getTimestamp();
 		}
 		throw new IllegalArgumentException();
 	}

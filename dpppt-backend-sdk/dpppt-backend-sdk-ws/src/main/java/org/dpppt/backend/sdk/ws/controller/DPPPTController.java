@@ -191,7 +191,8 @@ public class DPPPTController {
                                                                                          example = "1593043200000")
                                                                                          long batchReleaseTime,
 			WebRequest request) throws BadBatchReleaseTimeException{
-		if(!validationUtils.isValidBatchReleaseTime(batchReleaseTime)) {
+		var now = UTCInstant.now();
+		if(!validationUtils.isValidBatchReleaseTime(UTCInstant.ofEpochMillis(batchReleaseTime), now)) {
 			return ResponseEntity.notFound().build();
 		}
 
@@ -214,7 +215,8 @@ public class DPPPTController {
                                                                                                 example = "1593043200000")
                                                                                                 long batchReleaseTime,
 			WebRequest request) throws BadBatchReleaseTimeException {
-		if(!validationUtils.isValidBatchReleaseTime(batchReleaseTime)) {
+		var now = UTCInstant.now();
+		if(!validationUtils.isValidBatchReleaseTime(UTCInstant.ofEpochMillis(batchReleaseTime), now)) {
 			return ResponseEntity.notFound().build();
 		}
 
