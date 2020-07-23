@@ -31,6 +31,7 @@ import org.dpppt.backend.sdk.model.ExposeeRequestList;
 import org.dpppt.backend.sdk.model.proto.Exposed;
 import org.dpppt.backend.sdk.ws.security.ValidateRequest;
 import org.dpppt.backend.sdk.ws.security.ValidateRequest.InvalidDateException;
+import org.dpppt.backend.sdk.ws.util.UTCInstant;
 import org.dpppt.backend.sdk.ws.util.ValidationUtils;
 import org.dpppt.backend.sdk.ws.util.ValidationUtils.BadBatchReleaseTimeException;
 import org.springframework.http.CacheControl;
@@ -241,13 +242,13 @@ public class DPPPTController {
 	public @ResponseBody ResponseEntity<BucketList> getListOfBuckets(@PathVariable
                                                                          @Documentation(description = "The date starting when to return the available buckets, in ISO8601 date format", example = "2019-01-31")
                                                                                  String dayDateStr) {
-		OffsetDateTime day = LocalDate.parse(dayDateStr).atStartOfDay().atOffset(ZoneOffset.UTC);
-		OffsetDateTime currentBucket = day;
-		OffsetDateTime now = OffsetDateTime.now().withOffsetSameInstant(ZoneOffset.UTC);
+		var day = UTCInstant.parseDate(dayDateStr);
+		var currentBucket = day;
+		var now = UTCInstant.now();
 		List<Long> bucketList = new ArrayList<>();
-		while (currentBucket.toInstant().toEpochMilli() < Math.min(day.plusDays(1).toInstant().toEpochMilli(),
-				now.toInstant().toEpochMilli())) {
-			bucketList.add(currentBucket.toInstant().toEpochMilli());
+		while (currentBucket.getTimestamp() < Math.min(day.plusDays(1).getTimestamp(),
+				now.getTimestamp())) {
+			bucketList.add(currentBucket.getTimestamp());
 			currentBucket = currentBucket.plusSeconds(releaseBucketDuration / 1000);
 		}
 		BucketList list = new BucketList();

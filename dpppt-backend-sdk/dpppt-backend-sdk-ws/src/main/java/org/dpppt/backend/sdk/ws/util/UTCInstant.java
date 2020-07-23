@@ -74,17 +74,29 @@ public class UTCInstant {
     public UTCInstant minus(Duration duration){
         return new UTCInstant(this.timestamp - duration.toMillis());
     } 
-    public UTCInstant plusDays(int days){
+    public UTCInstant plusDays(long days){
         return new UTCInstant(this.timestamp + Duration.ofDays(days).toMillis());
     } 
-    public UTCInstant minusDays(int days){
+    public UTCInstant minusDays(long days){
         return new UTCInstant(this.timestamp - Duration.ofDays(days).toMillis());
     } 
-    public UTCInstant plusHours(int hours){
+    public UTCInstant plusHours(long hours){
         return new UTCInstant(this.timestamp + Duration.ofHours(hours).toMillis());
     } 
-    public UTCInstant minusHours(int hours){
+    public UTCInstant minusHours(long hours){
         return new UTCInstant(this.timestamp - Duration.ofHours(hours).toMillis());
+    } 
+    public UTCInstant plusMinutes(long minutes){
+        return new UTCInstant(this.timestamp + Duration.ofMinutes(minutes).toMillis());
+    } 
+    public UTCInstant minusMinutes(long minutes){
+        return new UTCInstant(this.timestamp - Duration.ofMinutes(minutes).toMillis());
+    } 
+    public UTCInstant plusSeconds(long seconds){
+        return new UTCInstant(this.timestamp + Duration.ofSeconds(seconds).toMillis());
+    } 
+    public UTCInstant minusSeconds(long seconds){
+        return new UTCInstant(this.timestamp - Duration.ofSeconds(seconds).toMillis());
     } 
 
     public boolean isMidnight() {
