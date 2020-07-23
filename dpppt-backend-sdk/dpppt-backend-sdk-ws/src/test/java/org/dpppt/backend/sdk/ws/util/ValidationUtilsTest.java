@@ -3,9 +3,8 @@ package org.dpppt.backend.sdk.ws.util;
 import static org.junit.Assert.assertEquals;
 
 import java.time.Duration;
-import java.time.LocalDate;
-import java.time.LocalTime;
-import java.time.ZoneOffset;
+
+import org.dpppt.backend.sdk.utils.UTCInstant;
 
 import org.junit.Test;
 
@@ -22,6 +21,6 @@ public class ValidationUtilsTest {
         assertEquals(false, validationUtils.isValidKeyDate(midnight.plusMinutes(1)));
         assertEquals(false, validationUtils.isValidKeyDate(midnight.plusHours(1)));
         
-        assertEquals(true, LocalTime.MIDNIGHT.equals(midnight.getLocalTime()));
+        assertEquals(true, UTCInstant.midnight().isSameDate(midnight));
     }
 }

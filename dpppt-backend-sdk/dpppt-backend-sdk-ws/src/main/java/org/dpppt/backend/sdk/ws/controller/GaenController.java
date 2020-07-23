@@ -40,7 +40,7 @@ import org.dpppt.backend.sdk.ws.security.ValidateRequest;
 import org.dpppt.backend.sdk.ws.security.ValidateRequest.InvalidDateException;
 import org.dpppt.backend.sdk.ws.security.signature.ProtoSignature;
 import org.dpppt.backend.sdk.ws.security.signature.ProtoSignature.ProtoSignatureWrapper;
-import org.dpppt.backend.sdk.ws.util.UTCInstant;
+import org.dpppt.backend.sdk.utils.UTCInstant;
 import org.dpppt.backend.sdk.ws.util.ValidationUtils;
 import org.dpppt.backend.sdk.ws.util.ValidationUtils.BadBatchReleaseTimeException;
 import org.slf4j.Logger;

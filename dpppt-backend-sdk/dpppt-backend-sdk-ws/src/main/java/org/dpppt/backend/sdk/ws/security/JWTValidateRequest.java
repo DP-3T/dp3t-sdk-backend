@@ -16,7 +16,7 @@ import java.time.ZoneOffset;
 
 import org.dpppt.backend.sdk.model.ExposeeRequest;
 import org.dpppt.backend.sdk.model.ExposeeRequestList;
-import org.dpppt.backend.sdk.ws.util.UTCInstant;
+import org.dpppt.backend.sdk.utils.UTCInstant;
 import org.springframework.security.oauth2.jwt.Jwt;
 
 public class JWTValidateRequest implements ValidateRequest {

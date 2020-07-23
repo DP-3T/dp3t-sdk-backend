@@ -1,4 +1,4 @@
-package org.dpppt.backend.sdk.ws.util;
+package org.dpppt.backend.sdk.utils;
 
 import java.time.Clock;
 import java.time.Duration;
@@ -9,6 +9,7 @@ import java.time.LocalTime;
 import java.time.OffsetDateTime;
 import java.time.ZoneOffset;
 import java.time.temporal.TemporalUnit;
+import java.util.Date;
 
 import org.dpppt.backend.sdk.model.gaen.GaenUnit;
 
@@ -51,6 +52,10 @@ public class UTCInstant {
     public static UTCInstant parseDate(String dateString) {
         var timestamp = LocalDate.parse(dateString).atStartOfDay().toInstant(ZoneOffset.UTC).toEpochMilli();
         return new UTCInstant(timestamp);
+    }
+
+    public Date getDate() {
+        return Date.from(getInstant());
     }
 
     public Instant getInstant() {

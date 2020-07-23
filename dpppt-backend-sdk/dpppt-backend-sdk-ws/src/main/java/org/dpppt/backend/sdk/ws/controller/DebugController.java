@@ -6,8 +6,6 @@ import java.security.NoSuchAlgorithmException;
 import java.security.SignatureException;
 import java.time.Duration;
 import java.time.Instant;
-import java.time.LocalDate;
-import java.time.ZoneOffset;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -20,7 +18,7 @@ import org.dpppt.backend.sdk.model.gaen.GaenRequest;
 import org.dpppt.backend.sdk.ws.security.ValidateRequest;
 import org.dpppt.backend.sdk.ws.security.ValidateRequest.InvalidDateException;
 import org.dpppt.backend.sdk.ws.security.signature.ProtoSignature;
-import org.dpppt.backend.sdk.ws.util.UTCInstant;
+import org.dpppt.backend.sdk.utils.UTCInstant;
 import org.dpppt.backend.sdk.ws.util.ValidationUtils;
 import org.dpppt.backend.sdk.ws.util.ValidationUtils.BadBatchReleaseTimeException;
 import org.springframework.http.HttpStatus;

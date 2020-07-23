@@ -9,12 +9,8 @@
  */
 package org.dpppt.backend.sdk.ws.util;
 
+import org.dpppt.backend.sdk.utils.UTCInstant;
 import java.time.Duration;
-import java.time.Instant;
-import java.time.LocalDateTime;
-import java.time.LocalTime;
-import java.time.OffsetDateTime;
-import java.time.ZoneOffset;
 import java.util.Base64;
 
 /**

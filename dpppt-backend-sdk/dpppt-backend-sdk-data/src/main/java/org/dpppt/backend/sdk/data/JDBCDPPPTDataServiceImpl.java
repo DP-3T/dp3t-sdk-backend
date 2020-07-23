@@ -11,16 +11,13 @@
 package org.dpppt.backend.sdk.data;
 
 import java.time.Duration;
-import java.time.Instant;
-import java.time.OffsetDateTime;
-import java.time.ZoneOffset;
 import java.util.ArrayList;
-import java.util.Date;
 import java.util.List;
 
 import javax.sql.DataSource;
 
 import org.dpppt.backend.sdk.model.Exposee;
+import org.dpppt.backend.sdk.utils.UTCInstant;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.jdbc.core.namedparam.MapSqlParameterSource;
@@ -54,7 +51,7 @@ public class JDBCDPPPTDataServiceImpl implements DPPPTDataService {
 		MapSqlParameterSource params = new MapSqlParameterSource();
 		params.addValue("key", exposee.getKey());
 		params.addValue("app_source", appSource);
-		params.addValue("key_date", new Date(exposee.getKeyDate()));
+		params.addValue("key_date", UTCInstant.ofEpochMillis(exposee.getKeyDate()).getDate());
 		jt.update(sql, params);
 	}
 	@Override
@@ -74,7 +71,7 @@ public class JDBCDPPPTDataServiceImpl implements DPPPTDataService {
 			MapSqlParameterSource params = new MapSqlParameterSource();
 			params.addValue("key", exposee.getKey());
 			params.addValue("app_source", appSource);
-			params.addValue("key_date", new Date(exposee.getKeyDate()));
+			params.addValue("key_date",  UTCInstant.ofEpochMillis(exposee.getKeyDate()).getDate());
 			parameterList.add(params);
 		}
 		jt.batchUpdate(sql, parameterList.toArray(new MapSqlParameterSource[0]));
@@ -84,8 +81,8 @@ public class JDBCDPPPTDataServiceImpl implements DPPPTDataService {
 	@Transactional(readOnly = true)
 	public int getMaxExposedIdForBatchReleaseTime(long batchReleaseTime, long releaseBucketDuration) {
 		MapSqlParameterSource params = new MapSqlParameterSource();
-		params.addValue("batchReleaseTime", Date.from(Instant.ofEpochMilli(batchReleaseTime)));
-		params.addValue("startBatch", Date.from(Instant.ofEpochMilli(batchReleaseTime - releaseBucketDuration)));
+		params.addValue("batchReleaseTime", UTCInstant.ofEpochMillis(batchReleaseTime).getDate());
+		params.addValue("startBatch", UTCInstant.ofEpochMillis(batchReleaseTime - releaseBucketDuration).getDate());
 		String sql = "select max(pk_exposed_id) from t_exposed where received_at >= :startBatch and received_at < :batchReleaseTime";
 		Integer maxId = jt.queryForObject(sql, params, Integer.class);
 		if (maxId == null) {
@@ -100,17 +97,17 @@ public class JDBCDPPPTDataServiceImpl implements DPPPTDataService {
 	public List<Exposee> getSortedExposedForBatchReleaseTime(long batchReleaseTime, long releaseBucketDuration) {
 		String sql = "select pk_exposed_id, key, key_date from t_exposed where received_at >= :startBatch and received_at < :batchReleaseTime order by pk_exposed_id desc";
 		MapSqlParameterSource params = new MapSqlParameterSource();
-		params.addValue("batchReleaseTime", Date.from(Instant.ofEpochMilli(batchReleaseTime)));
-		params.addValue("startBatch", Date.from(Instant.ofEpochMilli(batchReleaseTime - releaseBucketDuration)));
+		params.addValue("batchReleaseTime", UTCInstant.ofEpochMillis(batchReleaseTime).getDate());
+		params.addValue("startBatch", UTCInstant.ofEpochMillis(batchReleaseTime - releaseBucketDuration).getDate());
 		return jt.query(sql, params, new ExposeeRowMapper());
 	}
 
 	@Override
 	@Transactional(readOnly = false)
 	public void cleanDB(Duration retentionPeriod) {
-		OffsetDateTime retentionTime = OffsetDateTime.now().withOffsetSameInstant(ZoneOffset.UTC).minus(retentionPeriod);
+		var retentionTime = UTCInstant.midnight().minus(retentionPeriod);
 		logger.info("Cleanup DB entries before: " + retentionTime);
-		MapSqlParameterSource params = new MapSqlParameterSource("retention_time", Date.from(retentionTime.toInstant()));
+		MapSqlParameterSource params = new MapSqlParameterSource("retention_time", retentionTime.getDate());
 		String sqlExposed = "delete from t_exposed where received_at < :retention_time";
 		jt.update(sqlExposed, params);
 	}

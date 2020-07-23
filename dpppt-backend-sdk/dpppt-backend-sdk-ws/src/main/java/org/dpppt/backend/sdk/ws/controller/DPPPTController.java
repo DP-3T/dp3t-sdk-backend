@@ -11,9 +11,6 @@
 package org.dpppt.backend.sdk.ws.controller;
 
 import java.time.Duration;
-import java.time.LocalDate;
-import java.time.OffsetDateTime;
-import java.time.ZoneOffset;
 import java.time.format.DateTimeParseException;
 import java.util.ArrayList;
 import java.util.Base64;
@@ -31,7 +28,7 @@ import org.dpppt.backend.sdk.model.ExposeeRequestList;
 import org.dpppt.backend.sdk.model.proto.Exposed;
 import org.dpppt.backend.sdk.ws.security.ValidateRequest;
 import org.dpppt.backend.sdk.ws.security.ValidateRequest.InvalidDateException;
-import org.dpppt.backend.sdk.ws.util.UTCInstant;
+import org.dpppt.backend.sdk.utils.UTCInstant;
 import org.dpppt.backend.sdk.ws.util.ValidationUtils;
 import org.dpppt.backend.sdk.ws.util.ValidationUtils.BadBatchReleaseTimeException;
 import org.springframework.http.CacheControl;

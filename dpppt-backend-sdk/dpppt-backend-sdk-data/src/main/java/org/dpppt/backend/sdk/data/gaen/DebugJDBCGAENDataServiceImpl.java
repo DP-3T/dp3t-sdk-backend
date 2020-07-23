@@ -10,15 +10,14 @@
 
 package org.dpppt.backend.sdk.data.gaen;
 
-import java.time.Instant;
 import java.util.ArrayList;
-import java.util.Date;
 import java.util.List;
 import java.util.Map;
 
 import javax.sql.DataSource;
 
 import org.dpppt.backend.sdk.model.gaen.GaenKey;
+import org.dpppt.backend.sdk.utils.UTCInstant;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.jdbc.core.namedparam.MapSqlParameterSource;
@@ -68,8 +67,8 @@ public class DebugJDBCGAENDataServiceImpl implements DebugGAENDataService {
 	public Map<String, List<GaenKey>> getSortedExposedForBatchReleaseTime(Long batchReleaseTime, long releaseBucketDuration) {
 		String sql = "select pk_exposed_id, device_name, key, rolling_start_number, rolling_period, transmission_risk_level from t_debug_gaen_exposed where received_at >= :startBatch and received_at < :batchReleaseTime order by pk_exposed_id desc";
 		MapSqlParameterSource params = new MapSqlParameterSource();
-		params.addValue("batchReleaseTime", Date.from(Instant.ofEpochMilli(batchReleaseTime)));
-		params.addValue("startBatch", Date.from(Instant.ofEpochMilli(batchReleaseTime - releaseBucketDuration)));
+		params.addValue("batchReleaseTime", UTCInstant.ofEpochMillis(batchReleaseTime).getDate());
+		params.addValue("startBatch", UTCInstant.ofEpochMillis(batchReleaseTime - releaseBucketDuration).getDate());
 		return jt.query(sql, params, new DebugGaenKeyResultSetExtractor());
 	}
 
