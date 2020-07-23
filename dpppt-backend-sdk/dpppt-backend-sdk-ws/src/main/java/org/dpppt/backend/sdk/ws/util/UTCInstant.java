@@ -38,6 +38,13 @@ public class UTCInstant {
         var nowTimestamp = currentClock.millis();
         return new UTCInstant(nowTimestamp);
     }
+    public static UTCInstant of(long amount, TemporalUnit unit) {
+        return new UTCInstant(amount, unit);
+    }
+    public static UTCInstant parseDate(String dateString) {
+        var timestamp = LocalDate.parse(dateString).atStartOfDay().toInstant(ZoneOffset.UTC).toEpochMilli();
+        return new UTCInstant(timestamp);
+    }
 
     public Instant getInstant() {
         return Instant.ofEpochMilli(this.timestamp);
@@ -51,12 +58,35 @@ public class UTCInstant {
     public LocalDateTime getLocalDateTime() {
         return LocalDateTime.ofInstant(getInstant(), ZoneOffset.UTC);
     }
+    public UTCInstant atStartOfDay() {
+        return new UTCInstant(getLocalDate().atStartOfDay().toInstant(ZoneOffset.UTC).toEpochMilli());
+    }
     public LocalDate getLocalDate() {
         return getLocalDateTime().toLocalDate();
     }
     public LocalTime getLocalTime() {
         return getLocalDateTime().toLocalTime();
     }
+
+    public UTCInstant plus(Duration duration){
+        return new UTCInstant(this.timestamp + duration.toMillis());
+    } 
+    public UTCInstant minus(Duration duration){
+        return new UTCInstant(this.timestamp - duration.toMillis());
+    } 
+    public UTCInstant plusDays(int days){
+        return new UTCInstant(this.timestamp + Duration.ofDays(days).toMillis());
+    } 
+    public UTCInstant minusDays(int days){
+        return new UTCInstant(this.timestamp - Duration.ofDays(days).toMillis());
+    } 
+    public UTCInstant plusHours(int hours){
+        return new UTCInstant(this.timestamp + Duration.ofHours(hours).toMillis());
+    } 
+    public UTCInstant minusHours(int hours){
+        return new UTCInstant(this.timestamp - Duration.ofHours(hours).toMillis());
+    } 
+
     public boolean isMidnight() {
         return getLocalTime().equals(LocalTime.MIDNIGHT);
     }
@@ -65,6 +95,15 @@ public class UTCInstant {
     }
     public long get10MinutesSince1970() {
         return getDuration().dividedBy(GaenUnit.TenMinutes.getDuration());
+    }
+
+
+
+    public boolean isSameDate(UTCInstant other) {
+        return this.getLocalDate().isEqual(other.getLocalDate());
+    }
+    public boolean isSameTime(UTCInstant other) {
+        return this.getLocalTime().equals(other.getLocalTime());
     }
 
     public boolean isBeforeExact(UTCInstant other) {
@@ -78,6 +117,12 @@ public class UTCInstant {
     }
     public boolean isAfterDate(UTCInstant other) {
         return this.getLocalDate().isAfter(other.getLocalDate());
+    }
+    public boolean isBeforeDate(LocalDate other) {
+        return this.getLocalDate().isBefore(other);
+    }
+    public boolean isAfterDate(LocalDate other) {
+        return this.getLocalDate().isAfter(other);
     }
     public boolean isBeforeTime(UTCInstant other) {
         return this.getLocalTime().isBefore(other.getLocalTime());
