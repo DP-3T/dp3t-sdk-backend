@@ -16,6 +16,7 @@ import java.time.ZoneOffset;
 
 import org.dpppt.backend.sdk.model.ExposeeRequest;
 import org.dpppt.backend.sdk.model.ExposeeRequestList;
+import org.dpppt.backend.sdk.ws.util.UTCInstant;
 import org.springframework.security.oauth2.jwt.Jwt;
 
 public class JWTValidateRequest implements ValidateRequest {
@@ -33,20 +34,21 @@ public class JWTValidateRequest implements ValidateRequest {
 	public long getKeyDate(Object authObject, Object others) throws InvalidDateException {
 		if (authObject instanceof Jwt) {
 			Jwt token = (Jwt) authObject;
-			long jwtKeyDate = LocalDate.parse(token.getClaim("onset")).atStartOfDay().atOffset(ZoneOffset.UTC).toInstant().toEpochMilli();
+			var jwtKeyDate = UTCInstant.parseDate(token.getClaim("onset"));
+			var utcNow = UTCInstant.now();
 			if (others instanceof ExposeeRequest) {
 				ExposeeRequest request = (ExposeeRequest) others;
-				if (request.getKeyDate() > System.currentTimeMillis()) {
+				if (request.getKeyDate() > utcNow.getTimestamp()){
 					throw new InvalidDateException();
-				} else if (request.getKeyDate() < jwtKeyDate) {
+				} else if (request.getKeyDate() < jwtKeyDate.getTimestamp()) {
 					throw new InvalidDateException();
 				} 
 				else if(request.getKeyDate() < OffsetDateTime.now().minusDays(21).toInstant().toEpochMilli()) {
 					throw new InvalidDateException();
 				}
-				jwtKeyDate = request.getKeyDate();
+				jwtKeyDate = UTCInstant.ofEpochMillis(request.getKeyDate());
 			}
-			return jwtKeyDate;
+			return jwtKeyDate.getTimestamp();
 		}
 		throw new IllegalArgumentException();
 	}

@@ -18,6 +18,7 @@ import java.time.ZoneOffset;
 import org.dpppt.backend.sdk.model.gaen.GaenKey;
 import org.dpppt.backend.sdk.model.gaen.GaenUnit;
 import org.dpppt.backend.sdk.ws.security.ValidateRequest;
+import org.dpppt.backend.sdk.ws.util.UTCInstant;
 import org.springframework.security.oauth2.jwt.Jwt;
 
 public class JWTValidateRequest implements ValidateRequest {
@@ -35,21 +36,23 @@ public class JWTValidateRequest implements ValidateRequest {
 	public long getKeyDate(Object authObject, Object others) throws InvalidDateException {
 		if (authObject instanceof Jwt) {
 			Jwt token = (Jwt) authObject;
-			long jwtKeyDate = LocalDate.parse(token.getClaim("onset")).atStartOfDay().atOffset(ZoneOffset.UTC).toInstant().toEpochMilli();
+			var jwtKeyDate = UTCInstant.parseDate(token.getClaim("onset"));
+			var utcNow = UTCInstant.now();
 			if (others instanceof GaenKey) {
                 GaenKey request = (GaenKey) others;
-                var keyDate = Duration.of(request.getRollingStartNumber(), GaenUnit.TenMinutes);
-				if (keyDate.toMillis() > System.currentTimeMillis()) {
+                var keyDate = UTCInstant.of(request.getRollingStartNumber(), GaenUnit.TenMinutes);
+				if (keyDate.isAfterExact(utcNow)) {
 					throw new InvalidDateException();
-				} else if (keyDate.toMillis() < jwtKeyDate) {
+				} else if (keyDate.isBeforeExact(jwtKeyDate)) {
 					throw new InvalidDateException();
 				} 
-				else if(keyDate.toMillis() < OffsetDateTime.now().minusDays(21).toInstant().toEpochMilli()) {
+				//TODO: fix 14 to retentionPeriod Constant
+				else if(keyDate.isBeforeExact(utcNow.minusDays(14))) {
 					throw new InvalidDateException();
 				}
-				jwtKeyDate = keyDate.toMillis();
+				jwtKeyDate = keyDate;
 			}
-			return jwtKeyDate;
+			return jwtKeyDate.getTimestamp();
 		}
 		throw new IllegalArgumentException();
 	}

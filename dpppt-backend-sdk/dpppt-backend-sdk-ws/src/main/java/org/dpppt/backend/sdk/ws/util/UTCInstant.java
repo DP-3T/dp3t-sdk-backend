@@ -41,6 +41,9 @@ public class UTCInstant {
     public static UTCInstant of(long amount, TemporalUnit unit) {
         return new UTCInstant(amount, unit);
     }
+    public static UTCInstant ofEpochMillis(long epochMillis){
+        return new UTCInstant(epochMillis);
+    }
     public static UTCInstant parseDate(String dateString) {
         var timestamp = LocalDate.parse(dateString).atStartOfDay().toInstant(ZoneOffset.UTC).toEpochMilli();
         return new UTCInstant(timestamp);
