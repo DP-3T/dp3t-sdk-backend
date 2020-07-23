@@ -106,8 +106,8 @@ public class JDBCGAENDataServiceImpl implements GAENDataService {
 	public List<GaenKey> getSortedExposedForKeyDate(Long keyDate, Long publishedAfter, Long publishedUntil) {
 		MapSqlParameterSource params = new MapSqlParameterSource();
 		params.addValue("rollingPeriodStartNumberStart", UTCInstant.ofEpochMillis(keyDate).get10MinutesSince1970());
-		params.addValue("rollingPeriodStartNumberEnd", UTCInstant.ofEpochMillis(keyDate).get10MinutesSince1970());
-		params.addValue("publishedUntil", UTCInstant.ofEpochMillis(publishedAfter).getDate());
+		params.addValue("rollingPeriodStartNumberEnd", UTCInstant.ofEpochMillis(keyDate).plusDays(1).get10MinutesSince1970());
+		params.addValue("publishedUntil", UTCInstant.ofEpochMillis(publishedUntil).getDate());
 
 		String sql = "select pk_exposed_id, key, rolling_start_number, rolling_period, transmission_risk_level from t_gaen_exposed where"
 				+ " rolling_start_number >= :rollingPeriodStartNumberStart"

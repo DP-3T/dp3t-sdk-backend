@@ -10,10 +10,6 @@
 
 package org.dpppt.backend.sdk.ws.security;
 
-import java.time.LocalDate;
-import java.time.OffsetDateTime;
-import java.time.ZoneOffset;
-
 import org.dpppt.backend.sdk.model.ExposeeRequest;
 import org.dpppt.backend.sdk.model.ExposeeRequestList;
 import org.dpppt.backend.sdk.utils.UTCInstant;
@@ -43,7 +39,7 @@ public class JWTValidateRequest implements ValidateRequest {
 				} else if (request.getKeyDate() < jwtKeyDate.getTimestamp()) {
 					throw new InvalidDateException();
 				} 
-				else if(request.getKeyDate() < OffsetDateTime.now().minusDays(21).toInstant().toEpochMilli()) {
+				else if(request.getKeyDate() < UTCInstant.now().minusDays(21).getTimestamp()) {
 					throw new InvalidDateException();
 				}
 				jwtKeyDate = UTCInstant.ofEpochMillis(request.getKeyDate());

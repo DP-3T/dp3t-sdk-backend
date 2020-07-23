@@ -18,7 +18,7 @@ public class UTCInstant {
     private static Clock currentClock = Clock.systemUTC();
 
     public static UTCInstant midnight() {
-        return new UTCInstant(LocalDateTime.now(currentClock).toInstant(ZoneOffset.UTC));
+        return new UTCInstant(LocalDateTime.now(currentClock).toInstant(ZoneOffset.UTC)).atStartOfDay();
     }
 
     public UTCInstant(long timestamp) {
@@ -39,6 +39,9 @@ public class UTCInstant {
     public static void setClock(Clock clock) {
         currentClock = clock;
     }
+    public static void resetClock() {
+        currentClock = Clock.systemUTC();
+    }
     public static UTCInstant now() {
         var nowTimestamp = currentClock.millis();
         return new UTCInstant(nowTimestamp);
@@ -51,6 +54,10 @@ public class UTCInstant {
     }
     public static UTCInstant parseDate(String dateString) {
         var timestamp = LocalDate.parse(dateString).atStartOfDay().toInstant(ZoneOffset.UTC).toEpochMilli();
+        return new UTCInstant(timestamp);
+    }
+    public static UTCInstant parseDateTime(String dateString) {
+        var timestamp = LocalDateTime.parse(dateString).toInstant(ZoneOffset.UTC).toEpochMilli();
         return new UTCInstant(timestamp);
     }
 

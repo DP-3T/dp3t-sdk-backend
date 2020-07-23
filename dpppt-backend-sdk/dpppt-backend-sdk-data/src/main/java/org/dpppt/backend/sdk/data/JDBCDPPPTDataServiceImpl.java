@@ -105,7 +105,8 @@ public class JDBCDPPPTDataServiceImpl implements DPPPTDataService {
 	@Override
 	@Transactional(readOnly = false)
 	public void cleanDB(Duration retentionPeriod) {
-		var retentionTime = UTCInstant.midnight().minus(retentionPeriod);
+		//TODO: should that be now or midnight?
+		var retentionTime = UTCInstant.now().minus(retentionPeriod);
 		logger.info("Cleanup DB entries before: " + retentionTime);
 		MapSqlParameterSource params = new MapSqlParameterSource("retention_time", retentionTime.getDate());
 		String sqlExposed = "delete from t_exposed where received_at < :retention_time";

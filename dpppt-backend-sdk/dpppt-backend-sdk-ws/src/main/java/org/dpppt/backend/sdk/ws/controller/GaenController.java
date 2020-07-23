@@ -16,8 +16,6 @@ import java.security.PrivateKey;
 import java.security.SignatureException;
 import java.time.Duration;
 import java.time.Instant;
-import java.time.LocalDate;
-import java.time.ZoneOffset;
 import java.time.format.DateTimeParseException;
 import java.util.ArrayList;
 import java.util.Date;
@@ -176,11 +174,9 @@ public class GaenController {
 		}
 		if (!nonFakeKeysDelayed.isEmpty()) {
 			// Hold back same day TEKs until 02:00 UTC of the next day (as RPIs are accepted by EN up to 2h after rolling period)
-			var tomorrowAt2AM = utcNow.getLocalDate()
+			var tomorrowAt2AM = utcNow.atStartOfDay()
 										.plusDays(1)
-										.atStartOfDay(ZoneOffset.UTC)
-										.plusHours(2)
-								.toOffsetDateTime();
+										.plusHours(2);
 			dataService.upsertExposeesDelayed(nonFakeKeysDelayed, tomorrowAt2AM);
 		}
 
