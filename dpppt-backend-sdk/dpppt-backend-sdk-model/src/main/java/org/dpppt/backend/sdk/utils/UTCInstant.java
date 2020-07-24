@@ -17,8 +17,11 @@ public class UTCInstant {
     private final long timestamp;
     private static Clock currentClock = Clock.systemUTC();
 
-    public static UTCInstant midnight() {
+    public static UTCInstant today() {
         return new UTCInstant(LocalDateTime.now(currentClock).toInstant(ZoneOffset.UTC)).atStartOfDay();
+    }
+    public static UTCInstant midnight1970(){
+        return new UTCInstant(0);
     }
 
     public UTCInstant(long timestamp) {
@@ -68,8 +71,11 @@ public class UTCInstant {
     public Instant getInstant() {
         return Instant.ofEpochMilli(this.timestamp);
     }
-    public Duration getDuration() {
-        return Duration.ofMillis(this.timestamp);
+    public Duration getDuration(long since) {
+        return Duration.ofMillis(since);
+    }
+    public Duration getDuration(UTCInstant since) {
+        return Duration.ofMillis(this.timestamp-since.timestamp);
     }
     public OffsetDateTime getOffsetDateTime() {
         return OffsetDateTime.ofInstant(getInstant(), ZoneOffset.UTC);
@@ -133,7 +139,7 @@ public class UTCInstant {
         return timestamp;
     }
     public long get10MinutesSince1970() {
-        return getDuration().dividedBy(GaenUnit.TenMinutes.getDuration());
+        return getDuration(midnight1970()).dividedBy(GaenUnit.TenMinutes.getDuration());
     }
 
 
