@@ -93,6 +93,14 @@ public class UTCInstant {
     public UTCInstant minus(Duration duration){
         return new UTCInstant(this.timestamp - duration.toMillis());
     } 
+    //TODO: Fix for leap year and stuff
+    public UTCInstant plusYears(long years){
+        return new UTCInstant(this.timestamp + Duration.ofDays(years * 365).toMillis());
+    } 
+    //TODO: Fix for leap year and stuff
+    public UTCInstant minusYears(long years){
+        return new UTCInstant(this.timestamp - Duration.ofDays(years * 365).toMillis());
+    } 
     public UTCInstant plusDays(long days){
         return new UTCInstant(this.timestamp + Duration.ofDays(days).toMillis());
     } 

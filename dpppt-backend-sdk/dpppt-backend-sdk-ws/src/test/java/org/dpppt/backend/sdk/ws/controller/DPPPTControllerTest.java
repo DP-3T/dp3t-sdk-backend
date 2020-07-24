@@ -17,9 +17,6 @@ import static org.springframework.test.web.servlet.request.MockMvcRequestBuilder
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.content;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
-import java.time.LocalDate;
-import java.time.OffsetDateTime;
-import java.time.ZoneOffset;
 import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
 import java.util.Base64;
@@ -29,6 +26,7 @@ import org.dpppt.backend.sdk.model.ExposedKey;
 import org.dpppt.backend.sdk.model.ExposeeAuthData;
 import org.dpppt.backend.sdk.model.ExposeeRequest;
 import org.dpppt.backend.sdk.model.ExposeeRequestList;
+import org.dpppt.backend.sdk.utils.UTCInstant;
 import org.junit.Test;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.http.MediaType;
@@ -47,13 +45,15 @@ public class DPPPTControllerTest extends BaseControllerTest {
 
 	@Test
 	public void testJWT() throws Exception {
+		var utcNow = UTCInstant.now();
+		var midnight = UTCInstant.midnight();
 		ExposeeRequest exposeeRequest = new ExposeeRequest();
 		exposeeRequest.setAuthData(new ExposeeAuthData());
 		exposeeRequest
-				.setKeyDate(OffsetDateTime.now().withOffsetSameInstant(ZoneOffset.UTC).toInstant().toEpochMilli());
+				.setKeyDate(utcNow.getTimestamp());
 		exposeeRequest.setKey(Base64.getEncoder().encodeToString("testKey32Bytes--testKey32Bytes--".getBytes("UTF-8")));
 		exposeeRequest.setIsFake(0);
-		String token = createToken(OffsetDateTime.now().withOffsetSameInstant(ZoneOffset.UTC).plusMinutes(5));
+		String token = createToken(utcNow.plusMinutes(5));
 		MockHttpServletResponse response = mockMvc.perform(
 				post("/v1/exposed").contentType(MediaType.APPLICATION_JSON).header("Authorization", "Bearer " + token)
 						.header("User-Agent", "MockMVC").content(json(exposeeRequest)))
@@ -68,17 +68,19 @@ public class DPPPTControllerTest extends BaseControllerTest {
 
 	@Test
 	public void testMultipleKeyUpload() throws Exception {
+		var utcNow = UTCInstant.now();
+		var midnight = UTCInstant.midnight();
 		var requestList = new ExposeeRequestList();
 		var exposedKey1 = new ExposedKey();
-		exposedKey1.setKeyDate(OffsetDateTime.now(ZoneOffset.UTC).toInstant().toEpochMilli());
+		exposedKey1.setKeyDate(utcNow.getTimestamp());
 		exposedKey1.setKey(Base64.getEncoder().encodeToString("testKey32Bytes--testKey32Bytes--".getBytes("UTF-8")));
 		var exposedKey2 = new ExposedKey();
-		exposedKey2.setKeyDate(OffsetDateTime.now(ZoneOffset.UTC).minusDays(1).toInstant().toEpochMilli());
+		exposedKey2.setKeyDate(utcNow.minusDays(1).getTimestamp());
 		exposedKey2.setKey(Base64.getEncoder().encodeToString("testKey32Bytes--testKey32Bytes--".getBytes("UTF-8")));
 		List<ExposedKey> exposedKeys = List.of(exposedKey1, exposedKey2);
 		requestList.setExposedKeys(exposedKeys);
 		requestList.setFake(0);
-		String token = createToken(OffsetDateTime.now().withOffsetSameInstant(ZoneOffset.UTC).plusMinutes(5));
+		String token = createToken(utcNow.plusMinutes(5));
 		MockHttpServletResponse response = mockMvc.perform(post("/v1/exposedlist")
 				.contentType(MediaType.APPLICATION_JSON).header("Authorization", "Bearer " + token)
 				.header("User-Agent", "MockMVC").content(json(requestList))).andExpect(status().is2xxSuccessful())
@@ -92,17 +94,19 @@ public class DPPPTControllerTest extends BaseControllerTest {
 
 	@Test
 	public void testMultipleKeyFakeUpload() throws Exception {
+		var utcNow = UTCInstant.now();
+		var midnight = UTCInstant.midnight();
 		var requestList = new ExposeeRequestList();
 		var exposedKey1 = new ExposedKey();
-		exposedKey1.setKeyDate(OffsetDateTime.now(ZoneOffset.UTC).toInstant().toEpochMilli());
+		exposedKey1.setKeyDate(utcNow.getTimestamp());
 		exposedKey1.setKey(Base64.getEncoder().encodeToString("testKey32Bytes--testKey32Bytes--".getBytes("UTF-8")));
 		var exposedKey2 = new ExposedKey();
-		exposedKey2.setKeyDate(OffsetDateTime.now(ZoneOffset.UTC).minusDays(1).toInstant().toEpochMilli());
+		exposedKey2.setKeyDate(utcNow.minusDays(1).getTimestamp());
 		exposedKey2.setKey(Base64.getEncoder().encodeToString("testKey32Bytes--testKey32Bytes--".getBytes("UTF-8")));
 		List<ExposedKey> exposedKeys = List.of(exposedKey1, exposedKey2);
 		requestList.setExposedKeys(exposedKeys);
 		requestList.setFake(1);
-		String token = createToken(OffsetDateTime.now().withOffsetSameInstant(ZoneOffset.UTC).plusMinutes(5));
+		String token = createToken(utcNow.plusMinutes(5));
 		MockHttpServletResponse response = mockMvc.perform(post("/v1/exposedlist")
 				.contentType(MediaType.APPLICATION_JSON).header("Authorization", "Bearer " + token)
 				.header("User-Agent", "MockMVC").content(json(requestList))).andExpect(status().is2xxSuccessful())
@@ -116,11 +120,13 @@ public class DPPPTControllerTest extends BaseControllerTest {
 
 	@Test
 	public void testMultipleKeyNonEmptyUpload() throws Exception {
+		var utcNow = UTCInstant.now();
+		var midnight = UTCInstant.midnight();
 		var requestList = new ExposeeRequestList();
 		List<ExposedKey> exposedKeys = new ArrayList<ExposedKey>();
 		requestList.setExposedKeys(exposedKeys);
 		requestList.setFake(0);
-		String token = createToken(OffsetDateTime.now().withOffsetSameInstant(ZoneOffset.UTC).plusMinutes(5));
+		String token = createToken(utcNow.plusMinutes(5));
 		MockHttpServletResponse response = mockMvc.perform(post("/v1/exposedlist")
 				.contentType(MediaType.APPLICATION_JSON).header("Authorization", "Bearer " + token)
 				.header("User-Agent", "MockMVC").content(json(requestList))).andExpect(status().is(400)).andReturn()
@@ -134,10 +140,12 @@ public class DPPPTControllerTest extends BaseControllerTest {
 
 	@Test
 	public void testMultipleKeyNonNullUpload() throws Exception {
+		var utcNow = UTCInstant.now();
+		var midnight = UTCInstant.midnight();
 		var requestList = new ExposeeRequestList();
 		List<ExposedKey> exposedKeys = new ArrayList<ExposedKey>();
 		requestList.setFake(0);
-		String token = createToken(OffsetDateTime.now().withOffsetSameInstant(ZoneOffset.UTC).plusMinutes(5));
+		String token = createToken(utcNow.plusMinutes(5));
 		MockHttpServletResponse response = mockMvc.perform(post("/v1/exposedlist")
 				.contentType(MediaType.APPLICATION_JSON).header("Authorization", "Bearer " + token)
 				.header("User-Agent", "MockMVC").content(json(requestList))).andExpect(status().is(400)).andReturn()
@@ -151,13 +159,15 @@ public class DPPPTControllerTest extends BaseControllerTest {
 
 	@Test
 	public void keyNeedsToBeBase64() throws Exception {
+		var utcNow = UTCInstant.now();
+		var midnight = UTCInstant.midnight();
 		ExposeeRequest exposeeRequest = new ExposeeRequest();
 		exposeeRequest.setAuthData(new ExposeeAuthData());
 		exposeeRequest
-				.setKeyDate(OffsetDateTime.now().withOffsetSameInstant(ZoneOffset.UTC).toInstant().toEpochMilli());
+				.setKeyDate(utcNow.getTimestamp());
 		exposeeRequest.setKey("testKey32Bytes--testKey32Bytes--");
 		exposeeRequest.setIsFake(1);
-		String token = createToken(true, OffsetDateTime.now().withOffsetSameInstant(ZoneOffset.UTC).plusMinutes(5));
+		String token = createToken(true, utcNow.plusMinutes(5));
 		MockHttpServletResponse response = mockMvc.perform(
 				post("/v1/exposed").contentType(MediaType.APPLICATION_JSON).header("Authorization", "Bearer " + token)
 						.header("User-Agent", "MockMVC").content(json(exposeeRequest)))
@@ -166,13 +176,15 @@ public class DPPPTControllerTest extends BaseControllerTest {
 
 	@Test
 	public void testJWTFake() throws Exception {
+		var utcNow = UTCInstant.now();
+		var midnight = UTCInstant.midnight();
 		ExposeeRequest exposeeRequest = new ExposeeRequest();
 		exposeeRequest.setAuthData(new ExposeeAuthData());
 		exposeeRequest
-				.setKeyDate(OffsetDateTime.now().withOffsetSameInstant(ZoneOffset.UTC).toInstant().toEpochMilli());
+				.setKeyDate(utcNow.getTimestamp());
 		exposeeRequest.setKey(Base64.getEncoder().encodeToString("testKey32Bytes--testKey32Bytes--".getBytes("UTF-8")));
 		exposeeRequest.setIsFake(1);
-		String token = createToken(true, OffsetDateTime.now().withOffsetSameInstant(ZoneOffset.UTC).plusMinutes(5));
+		String token = createToken(true, utcNow.plusMinutes(5));
 		MockHttpServletResponse response = mockMvc.perform(
 				post("/v1/exposed").contentType(MediaType.APPLICATION_JSON).header("Authorization", "Bearer " + token)
 						.header("User-Agent", "MockMVC").content(json(exposeeRequest)))
@@ -186,14 +198,15 @@ public class DPPPTControllerTest extends BaseControllerTest {
 
 	@Test
 	public void cannotUseKeyDateBeforeOnset() throws Exception {
+		var utcNow = UTCInstant.now();
+		var midnight = UTCInstant.midnight();
 		ExposeeRequest exposeeRequest = new ExposeeRequest();
 		exposeeRequest.setAuthData(new ExposeeAuthData());
-		exposeeRequest.setKeyDate(
-				LocalDate.now().minusDays(2).atStartOfDay().atOffset(ZoneOffset.UTC).toInstant().toEpochMilli());
+		exposeeRequest.setKeyDate(UTCInstant.midnight().minusDays(2).getTimestamp());
 		exposeeRequest.setKey(Base64.getEncoder().encodeToString("testKey32Bytes--testKey32Bytes--".getBytes("UTF-8")));
 		exposeeRequest.setIsFake(1);
-		String token = createToken(OffsetDateTime.now().withOffsetSameInstant(ZoneOffset.UTC).plusMinutes(5),
-				LocalDate.now().format(DateTimeFormatter.ISO_DATE));
+		String token = createToken(UTCInstant.now().plusMinutes(5),
+				UTCInstant.now().getLocalDate().format(DateTimeFormatter.ISO_DATE));
 		MockHttpServletResponse response = mockMvc.perform(
 				post("/v1/exposed").contentType(MediaType.APPLICATION_JSON).header("Authorization", "Bearer " + token)
 						.header("User-Agent", "MockMVC").content(json(exposeeRequest)))
@@ -202,13 +215,15 @@ public class DPPPTControllerTest extends BaseControllerTest {
 
 	@Test
 	public void cannotUseSameTokenTwice() throws Exception {
+		var utcNow = UTCInstant.now();
+		var midnight = UTCInstant.midnight();
 		ExposeeRequest exposeeRequest = new ExposeeRequest();
 		exposeeRequest.setAuthData(new ExposeeAuthData());
 		exposeeRequest
-				.setKeyDate(OffsetDateTime.now().withOffsetSameInstant(ZoneOffset.UTC).toInstant().toEpochMilli());
+				.setKeyDate(utcNow.getTimestamp());
 		exposeeRequest.setKey(Base64.getEncoder().encodeToString("testKey32Bytes--testKey32Bytes--".getBytes("UTF-8")));
 		exposeeRequest.setIsFake(0);
-		String token = createToken(OffsetDateTime.now().withOffsetSameInstant(ZoneOffset.UTC).plusMinutes(5));
+		String token = createToken(utcNow.plusMinutes(5));
 
 		MockHttpServletResponse response = mockMvc.perform(
 				post("/v1/exposed").contentType(MediaType.APPLICATION_JSON).header("Authorization", "Bearer " + token)
@@ -224,13 +239,15 @@ public class DPPPTControllerTest extends BaseControllerTest {
 
 	@Test
 	public void canUseSameTokenTwiceIfFake() throws Exception {
+		var utcNow = UTCInstant.now();
+		var midnight = UTCInstant.midnight();
 		ExposeeRequest exposeeRequest = new ExposeeRequest();
 		exposeeRequest.setAuthData(new ExposeeAuthData());
 		exposeeRequest
-				.setKeyDate(OffsetDateTime.now().withOffsetSameInstant(ZoneOffset.UTC).toInstant().toEpochMilli());
+				.setKeyDate(utcNow.getTimestamp());
 		exposeeRequest.setKey(Base64.getEncoder().encodeToString("testKey32Bytes--testKey32Bytes--".getBytes("UTF-8")));
 		exposeeRequest.setIsFake(1);
-		String token = createToken(true, OffsetDateTime.now().withOffsetSameInstant(ZoneOffset.UTC).plusMinutes(5));
+		String token = createToken(true, utcNow.plusMinutes(5));
 
 		MockHttpServletResponse response = mockMvc.perform(
 				post("/v1/exposed").contentType(MediaType.APPLICATION_JSON).header("Authorization", "Bearer " + token)
@@ -246,13 +263,15 @@ public class DPPPTControllerTest extends BaseControllerTest {
 
 	@Test
 	public void cannotUseExpiredToken() throws Exception {
+		var utcNow = UTCInstant.now();
+		var midnight = UTCInstant.midnight();
 		ExposeeRequest exposeeRequest = new ExposeeRequest();
 		exposeeRequest.setAuthData(new ExposeeAuthData());
 		exposeeRequest
-				.setKeyDate(OffsetDateTime.now().withOffsetSameInstant(ZoneOffset.UTC).toInstant().toEpochMilli());
+				.setKeyDate(utcNow.getTimestamp());
 		exposeeRequest.setKey(Base64.getEncoder().encodeToString("testKey32Bytes--testKey32Bytes--".getBytes("UTF-8")));
 		exposeeRequest.setIsFake(0);
-		String token = createToken(OffsetDateTime.now().withOffsetSameInstant(ZoneOffset.UTC).minusMinutes(5));
+		String token = createToken(utcNow.minusMinutes(5));
 
 		MockHttpServletResponse response = mockMvc
 				.perform(post("/v1/exposed").contentType(MediaType.APPLICATION_JSON)
@@ -263,14 +282,15 @@ public class DPPPTControllerTest extends BaseControllerTest {
 
 	@Test
 	public void cannotUseKeyDateInFuture() throws Exception {
+		var utcNow = UTCInstant.now();
+		var midnight = UTCInstant.midnight();
 		ExposeeRequest exposeeRequest = new ExposeeRequest();
 		exposeeRequest.setAuthData(new ExposeeAuthData());
-		exposeeRequest.setKeyDate(
-				OffsetDateTime.now().plusDays(2).withOffsetSameInstant(ZoneOffset.UTC).toInstant().toEpochMilli());
+		exposeeRequest.setKeyDate(UTCInstant.now().plusDays(2).getTimestamp());
 		exposeeRequest.setKey(Base64.getEncoder().encodeToString("testKey32Bytes--testKey32Bytes--".getBytes("UTF-8")));
 
 		exposeeRequest.setIsFake(0);
-		String token = createToken(OffsetDateTime.now().withOffsetSameInstant(ZoneOffset.UTC).plusMinutes(5));
+		String token = createToken(UTCInstant.now().plusMinutes(5));
 
 		MockHttpServletResponse response = mockMvc
 				.perform(post("/v1/exposed").contentType(MediaType.APPLICATION_JSON)
@@ -284,11 +304,11 @@ public class DPPPTControllerTest extends BaseControllerTest {
 		ExposeeRequest exposeeRequest = new ExposeeRequest();
 		exposeeRequest.setAuthData(new ExposeeAuthData());
 		exposeeRequest.setKeyDate(
-				OffsetDateTime.now().withOffsetSameInstant(ZoneOffset.UTC).minusDays(22).toInstant().toEpochMilli());
+				UTCInstant.now().minusDays(22).getTimestamp());
 
 		exposeeRequest.setKey(Base64.getEncoder().encodeToString("testKey32Bytes--testKey32Bytes--".getBytes("UTF-8")));
 		exposeeRequest.setIsFake(0);
-		String token = createToken(OffsetDateTime.now().withOffsetSameInstant(ZoneOffset.UTC).plusMinutes(5),
+		String token = createToken(UTCInstant.now().plusMinutes(5),
 				"2020-01-01");
 
 		MockHttpServletResponse response = mockMvc
@@ -300,13 +320,15 @@ public class DPPPTControllerTest extends BaseControllerTest {
 
 	@Test
 	public void cannotUseTokenWithWrongScope() throws Exception {
+		var utcNow = UTCInstant.now();
+		var midnight = UTCInstant.midnight();
 		ExposeeRequest exposeeRequest = new ExposeeRequest();
 		exposeeRequest.setAuthData(new ExposeeAuthData());
 		exposeeRequest
-				.setKeyDate(OffsetDateTime.now().withOffsetSameInstant(ZoneOffset.UTC).toInstant().toEpochMilli());
+				.setKeyDate(utcNow.getTimestamp());
 		exposeeRequest.setKey(Base64.getEncoder().encodeToString("testKey32Bytes--testKey32Bytes--".getBytes("UTF-8")));
 		exposeeRequest.setIsFake(0);
-		String token = createTokenWithScope(OffsetDateTime.now().withOffsetSameInstant(ZoneOffset.UTC).plusMinutes(5),
+		String token = createTokenWithScope(utcNow.plusMinutes(5),
 				"not-exposed");
 
 		MockHttpServletResponse response = mockMvc
@@ -325,13 +347,15 @@ public class DPPPTControllerTest extends BaseControllerTest {
 
 	@Test
 	public void cannotUsedLongLivedToken() throws Exception {
+		var utcNow = UTCInstant.now();
+		var midnight = UTCInstant.midnight();
 		ExposeeRequest exposeeRequest = new ExposeeRequest();
 		exposeeRequest.setAuthData(new ExposeeAuthData());
 		exposeeRequest
-				.setKeyDate(OffsetDateTime.now().withOffsetSameInstant(ZoneOffset.UTC).toInstant().toEpochMilli());
+				.setKeyDate(utcNow.getTimestamp());
 		exposeeRequest.setKey(Base64.getEncoder().encodeToString("testKey32Bytes--testKey32Bytes--".getBytes("UTF-8")));
 		exposeeRequest.setIsFake(0);
-		String token = createToken(OffsetDateTime.now(ZoneOffset.UTC).plusDays(90)); // very late expiration date
+		String token = createToken(utcNow.plusDays(90)); // very late expiration date
 		MockHttpServletResponse response = mockMvc
 				.perform(post("/v1/exposed").contentType(MediaType.APPLICATION_JSON)
 						.header("Authorization", "Bearer " + token).header("User-Agent", "MockMVC")

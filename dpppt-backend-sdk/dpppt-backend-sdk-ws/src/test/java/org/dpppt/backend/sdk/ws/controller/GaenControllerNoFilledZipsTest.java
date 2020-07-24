@@ -1,8 +1,5 @@
 package org.dpppt.backend.sdk.ws.controller;
 
-import java.time.LocalDate;
-import java.time.ZoneOffset;
-
 import org.junit.Test;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.mock.web.MockHttpServletResponse;
@@ -14,6 +11,8 @@ import static org.junit.Assert.assertNull;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
+import org.dpppt.backend.sdk.utils.UTCInstant;
+
 @SpringBootTest(properties = {
         "ws.app.jwt.publickey=classpath://generated_pub.pem",
         "logging.level.org.springframework.security=DEBUG", "ws.exposedlist.releaseBucketDuration=7200000",
@@ -23,8 +22,7 @@ public class GaenControllerNoFilledZipsTest extends BaseControllerTest {
 	@Transactional
 	public void testEmptyResponseWhenNoZipFill() throws Exception {
 		MockHttpServletResponse response = mockMvc
-				.perform(get("/v1/gaen/exposed/"
-						+ LocalDate.now(ZoneOffset.UTC).minusDays(8).atStartOfDay(ZoneOffset.UTC).toInstant().toEpochMilli())
+				.perform(get("/v1/gaen/exposed/" + UTCInstant.midnight().minusDays(8).getTimestamp())
 								.header("User-Agent", "MockMVC"))
 				.andExpect(status().isNoContent()).andReturn().getResponse();
 		
