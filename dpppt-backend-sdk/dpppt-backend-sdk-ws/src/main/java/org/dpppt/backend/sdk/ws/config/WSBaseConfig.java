@@ -201,7 +201,7 @@ public abstract class WSBaseConfig implements SchedulingConfigurer, WebMvcConfig
 	public InsertManager insertManager() {
 		var manager = new InsertManager(gaenDataService());
 		manager.addFilter(new RollingStartNumberAfterDayAfterTomorrow());
-		manager.addFilter(new RollingStartNumberBeforeRetentionDay());
+		manager.addFilter(new RollingStartNumberBeforeRetentionDay(gaenValidationUtils()));
 		return manager;
 	}
 	@ConditionalOnProperty(
@@ -251,7 +251,7 @@ public abstract class WSBaseConfig implements SchedulingConfigurer, WebMvcConfig
 		if (theValidator == null) {
 			theValidator = backupValidator();
 		}
-		return new GaenController(gaenDataService(), fakeKeyService(), theValidator, gaenSigner(),
+		return new GaenController(insertManager(),gaenDataService(), fakeKeyService(), theValidator, gaenSigner(),
 				gaenValidationUtils(), Duration.ofMillis(releaseBucketDuration), Duration.ofMillis(requestTime),
 				Duration.ofMillis(exposedListCacheControl), keyVault.get("nextDayJWT").getPrivate(), delayTodaysKeys);
 	}

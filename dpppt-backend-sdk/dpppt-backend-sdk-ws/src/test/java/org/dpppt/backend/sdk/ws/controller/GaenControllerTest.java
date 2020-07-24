@@ -156,7 +156,7 @@ public class GaenControllerTest extends BaseControllerTest {
 		String token = createToken(OffsetDateTime.now().withOffsetSameInstant(ZoneOffset.UTC).plusMinutes(5));
 		var requestBuilder = mockMvc.perform(post("/v1/gaen/exposed")
 		.contentType(MediaType.APPLICATION_JSON).header("Authorization", "Bearer " + token)
-		.header("User-Agent", "MockMVC").content(json(requestList)));
+		.header("User-Agent", "ch.admin.bag.dp3t.dev;1.0.7;1595591959493;Android;29").content(json(requestList)));
 		MvcResult response;
 
 		if(shouldSucceed) {
@@ -170,7 +170,7 @@ public class GaenControllerTest extends BaseControllerTest {
 		}
 		response = mockMvc
 				.perform(post("/v1/gaen/exposed").contentType(MediaType.APPLICATION_JSON)
-						.header("Authorization", "Bearer " + jwtToken).header("User-Agent", "MockMVC")
+						.header("Authorization", "Bearer " + jwtToken).header("User-Agent", "ch.admin.bag.dp3t.dev;1.0.7;1595591959493;Android;29")
 						.content(json(requestList)))
 				.andExpect(status().is(401)).andExpect(request().asyncNotStarted()).andExpect(content().string("")).andReturn();
 
@@ -230,13 +230,13 @@ public class GaenControllerTest extends BaseControllerTest {
 		String token = createToken(OffsetDateTime.now().withOffsetSameInstant(ZoneOffset.UTC).plusMinutes(5));
 		MvcResult response = mockMvc.perform(post("/v1/gaen/exposed")
 				.contentType(MediaType.APPLICATION_JSON).header("Authorization", "Bearer " + token)
-				.header("User-Agent", "MockMVC").content(json(requestList))).andExpect(request().asyncStarted())
+				.header("User-Agent", "ch.admin.bag.dp3t.dev;1.0.7;1595591959493;Android;29").content(json(requestList))).andExpect(request().asyncStarted())
 				.andReturn();
 
 		mockMvc.perform(asyncDispatch(response)).andExpect(status().is2xxSuccessful());
 		response = mockMvc
 				.perform(post("/v1/gaen/exposed").contentType(MediaType.APPLICATION_JSON)
-						.header("Authorization", "Bearer " + jwtToken).header("User-Agent", "MockMVC")
+						.header("Authorization", "Bearer " + jwtToken).header("User-Agent", "ch.admin.bag.dp3t.dev;1.0.7;1595591959493;Android;29")
 						.content(json(requestList)))
 				.andExpect(status().is(401)).andExpect(request().asyncNotStarted()).andExpect(content().string("")).andReturn();
 
@@ -276,7 +276,7 @@ public class GaenControllerTest extends BaseControllerTest {
 		response = mockMvc
 			.perform(get("/v1/gaen/exposed/"
 					+ now.minusDays(8).atStartOfDay(ZoneOffset.UTC).toInstant().toEpochMilli())
-							.header("User-Agent", "MockMVC"))
+							.header("User-Agent", "ch.admin.bag.dp3t.dev;1.0.7;1595591959493;Android;29"))
 			.andExpect(status().is2xxSuccessful()).andReturn().getResponse();
 		for(var header : headers.keySet()) {
 			assertTrue(response.containsHeader(header));
@@ -324,7 +324,7 @@ public class GaenControllerTest extends BaseControllerTest {
 		String token = createToken(OffsetDateTime.now().withOffsetSameInstant(ZoneOffset.UTC).plusMinutes(5));
 		MvcResult response = mockMvc.perform(post("/v1/gaen/exposed")
 				.contentType(MediaType.APPLICATION_JSON).header("Authorization", "Bearer " + token)
-				.header("User-Agent", "MockMVC").content(json(requestList))).andExpect(request().asyncStarted())
+				.header("User-Agent", "ch.admin.bag.dp3t.dev;1.0.7;1595591959493;Android;29").content(json(requestList))).andExpect(request().asyncStarted())
 				.andReturn();
 
 		mockMvc.perform(asyncDispatch(response)).andExpect(status().is(200));
@@ -378,12 +378,12 @@ public class GaenControllerTest extends BaseControllerTest {
 		String token = createToken(true, OffsetDateTime.now().withOffsetSameInstant(ZoneOffset.UTC).plusMinutes(5));
 		MvcResult responseAsync = mockMvc.perform(post("/v1/gaen/exposed")
 				.contentType(MediaType.APPLICATION_JSON).header("Authorization", "Bearer " + token)
-				.header("User-Agent", "MockMVC").content(json(requestList))).andExpect(request().asyncStarted())
+				.header("User-Agent", "ch.admin.bag.dp3t.dev;1.0.7;1595591959493;Android;29").content(json(requestList))).andExpect(request().asyncStarted())
 				.andReturn();
 		mockMvc.perform(asyncDispatch(responseAsync)).andExpect(status().is2xxSuccessful());
 		MockHttpServletResponse response = mockMvc
 				.perform(post("/v1/gaen/exposedlist").contentType(MediaType.APPLICATION_JSON)
-						.header("Authorization", "Bearer " + jwtToken).header("User-Agent", "MockMVC")
+						.header("Authorization", "Bearer " + jwtToken).header("User-Agent", "ch.admin.bag.dp3t.dev;1.0.7;1595591959493;Android;29")
 						.content(json(requestList)))
 				.andExpect(status().is(401)).andExpect(content().string("")).andReturn().getResponse();
 	}
@@ -429,12 +429,12 @@ public class GaenControllerTest extends BaseControllerTest {
 		String token = createToken(true, OffsetDateTime.now().withOffsetSameInstant(ZoneOffset.UTC).plusMinutes(5));
 		MvcResult responseAsync = mockMvc.perform(post("/v1/gaen/exposed")
 				.contentType(MediaType.APPLICATION_JSON).header("Authorization", "Bearer " + token)
-				.header("User-Agent", "MockMVC").content(json(requestList))).andExpect(request().asyncStarted())
+				.header("User-Agent", "ch.admin.bag.dp3t.dev;1.0.7;1595591959493;Android;29").content(json(requestList))).andExpect(request().asyncStarted())
 				.andReturn();
 		mockMvc.perform(asyncDispatch(responseAsync)).andExpect(status().is2xxSuccessful());
 		MockHttpServletResponse response = mockMvc
 				.perform(post("/v1/gaen/exposedlist").contentType(MediaType.APPLICATION_JSON)
-						.header("Authorization", "Bearer " + jwtToken).header("User-Agent", "MockMVC")
+						.header("Authorization", "Bearer " + jwtToken).header("User-Agent", "ch.admin.bag.dp3t.dev;1.0.7;1595591959493;Android;29")
 						.content(json(requestList)))
 				.andExpect(status().is(401)).andExpect(content().string("")).andReturn().getResponse();
 	}
@@ -480,12 +480,12 @@ public class GaenControllerTest extends BaseControllerTest {
 		String token = createToken(false, OffsetDateTime.now().withOffsetSameInstant(ZoneOffset.UTC).plusMinutes(5));
 		MvcResult responseAsync = mockMvc.perform(post("/v1/gaen/exposed")
 				.contentType(MediaType.APPLICATION_JSON).header("Authorization", "Bearer " + token)
-				.header("User-Agent", "MockMVC").content(json(requestList))).andExpect(request().asyncStarted())
+				.header("User-Agent", "ch.admin.bag.dp3t.dev;1.0.7;1595591959493;Android;29").content(json(requestList))).andExpect(request().asyncStarted())
 				.andReturn();
 		mockMvc.perform(asyncDispatch(responseAsync)).andExpect(status().is2xxSuccessful());
 		MockHttpServletResponse response = mockMvc
 				.perform(post("/v1/gaen/exposedlist").contentType(MediaType.APPLICATION_JSON)
-						.header("Authorization", "Bearer " + jwtToken).header("User-Agent", "MockMVC")
+						.header("Authorization", "Bearer " + jwtToken).header("User-Agent", "ch.admin.bag.dp3t.dev;1.0.7;1595591959493;Android;29")
 						.content(json(requestList)))
 				.andExpect(status().is(401)).andExpect(content().string("")).andReturn().getResponse();
 	}
@@ -498,11 +498,11 @@ public class GaenControllerTest extends BaseControllerTest {
 		String token = createToken(OffsetDateTime.now().withOffsetSameInstant(ZoneOffset.UTC).plusMinutes(5));
 		MvcResult responseAsync = mockMvc.perform(post("/v1/gaen/exposed")
 				.contentType(MediaType.APPLICATION_JSON).header("Authorization", "Bearer " + token)
-				.header("User-Agent", "MockMVC").content(json(requestList))).andExpect(request().asyncNotStarted()).andExpect(status().is(400)).andReturn();
+				.header("User-Agent", "ch.admin.bag.dp3t.dev;1.0.7;1595591959493;Android;29").content(json(requestList))).andExpect(request().asyncNotStarted()).andExpect(status().is(400)).andReturn();
 		
 		MockHttpServletResponse response = mockMvc
 				.perform(post("/v1/gaen/exposedlist").contentType(MediaType.APPLICATION_JSON)
-						.header("Authorization", "Bearer " + jwtToken).header("User-Agent", "MockMVC")
+						.header("Authorization", "Bearer " + jwtToken).header("User-Agent", "ch.admin.bag.dp3t.dev;1.0.7;1595591959493;Android;29")
 						.content(json(requestList)))
 				.andExpect(status().is(401)).andExpect(content().string("")).andReturn().getResponse();
 	}
@@ -518,11 +518,11 @@ public class GaenControllerTest extends BaseControllerTest {
 		String token = createToken(OffsetDateTime.now().withOffsetSameInstant(ZoneOffset.UTC).plusMinutes(5));
 		MvcResult responseAsync = mockMvc.perform(post("/v1/gaen/exposed")
 				.contentType(MediaType.APPLICATION_JSON).header("Authorization", "Bearer " + token)
-				.header("User-Agent", "MockMVC").content(json(requestList))).andExpect(request().asyncNotStarted()).andExpect(status().is(400)).andReturn();
+				.header("User-Agent", "ch.admin.bag.dp3t.dev;1.0.7;1595591959493;Android;29").content(json(requestList))).andExpect(request().asyncNotStarted()).andExpect(status().is(400)).andReturn();
 
 		MockHttpServletResponse response = mockMvc
 				.perform(post("/v1/gaen/exposedlist").contentType(MediaType.APPLICATION_JSON)
-						.header("Authorization", "Bearer " + jwtToken).header("User-Agent", "MockMVC")
+						.header("Authorization", "Bearer " + jwtToken).header("User-Agent", "ch.admin.bag.dp3t.dev;1.0.7;1595591959493;Android;29")
 						.content(json(requestList)))
 				.andExpect(status().is(401)).andExpect(content().string("")).andReturn().getResponse();
 	}
@@ -558,7 +558,7 @@ public class GaenControllerTest extends BaseControllerTest {
 		String token = createToken(true, OffsetDateTime.now().withOffsetSameInstant(ZoneOffset.UTC).plusMinutes(5));
 		MvcResult response = mockMvc.perform(post("/v1/gaen/exposed")
 				.contentType(MediaType.APPLICATION_JSON).header("Authorization", "Bearer " + token)
-				.header("User-Agent", "MockMVC").content(json(exposeeRequest))).andExpect(request().asyncStarted()).andReturn();
+				.header("User-Agent", "ch.admin.bag.dp3t.dev;1.0.7;1595591959493;Android;29").content(json(exposeeRequest))).andExpect(request().asyncStarted()).andReturn();
 				//.getResponse();
 		mockMvc.perform(asyncDispatch(response)).andExpect(status().is(400));
 	}
@@ -596,7 +596,7 @@ public class GaenControllerTest extends BaseControllerTest {
 				LocalDate.now().format(DateTimeFormatter.ISO_DATE));
 		MvcResult response = mockMvc.perform(post("/v1/gaen/exposed")
 				.contentType(MediaType.APPLICATION_JSON).header("Authorization", "Bearer " + token)
-				.header("User-Agent", "MockMVC").content(json(exposeeRequest))).andExpect(request().asyncStarted()).andExpect(status().is(200)).andReturn();
+				.header("User-Agent", "ch.admin.bag.dp3t.dev;1.0.7;1595591959493;Android;29").content(json(exposeeRequest))).andExpect(request().asyncStarted()).andExpect(status().is(200)).andReturn();
 		var result = gaenDataService.getSortedExposedForKeyDate(LocalDate.now(ZoneOffset.UTC).minusDays(2).atStartOfDay().toInstant(ZoneOffset.UTC).toEpochMilli(),null, (now / releaseBucketDuration + 1 )*releaseBucketDuration);
 		assertEquals(0, result.size());
 	}
@@ -633,7 +633,7 @@ public class GaenControllerTest extends BaseControllerTest {
 
 		MvcResult response = mockMvc
 				.perform(post("/v1/gaen/exposed").contentType(MediaType.APPLICATION_JSON)
-						.header("Authorization", "Bearer " + token).header("User-Agent", "MockMVC")
+						.header("Authorization", "Bearer " + token).header("User-Agent", "ch.admin.bag.dp3t.dev;1.0.7;1595591959493;Android;29")
 						.content(json(exposeeRequest)))
 				.andExpect(request().asyncNotStarted()).andExpect(status().is4xxClientError()).andReturn();
 	}
@@ -671,7 +671,7 @@ public class GaenControllerTest extends BaseControllerTest {
 
 		MvcResult response = mockMvc
 				.perform(post("/v1/gaen/exposed").contentType(MediaType.APPLICATION_JSON)
-						.header("Authorization", "Bearer " + token).header("User-Agent", "MockMVC")
+						.header("Authorization", "Bearer " + token).header("User-Agent", "ch.admin.bag.dp3t.dev;1.0.7;1595591959493;Android;29")
 						.content(json(exposeeRequest)))
 				.andExpect(request().asyncStarted()).andExpect(status().is(200)).andReturn();
 		var result = gaenDataService.getSortedExposedForKeyDate(LocalDate.now(ZoneOffset.UTC).plusDays(2).atStartOfDay().toInstant(ZoneOffset.UTC).toEpochMilli(),null, (now / releaseBucketDuration + 1 )*releaseBucketDuration);
@@ -712,7 +712,7 @@ public class GaenControllerTest extends BaseControllerTest {
 
 		MvcResult response = mockMvc
 				.perform(post("/v1/gaen/exposed").contentType(MediaType.APPLICATION_JSON)
-						.header("Authorization", "Bearer " + token).header("User-Agent", "MockMVC")
+						.header("Authorization", "Bearer " + token).header("User-Agent", "ch.admin.bag.dp3t.dev;1.0.7;1595591959493;Android;29")
 						.content(json(exposeeRequest)))
 				.andExpect(request().asyncStarted()).andExpect(status().is(200)).andReturn();
 		var result = gaenDataService.getSortedExposedForKeyDate(LocalDate.now(ZoneOffset.UTC).minusDays(22).atStartOfDay().toInstant(ZoneOffset.UTC).toEpochMilli(),null, (now / releaseBucketDuration + 1 )*releaseBucketDuration);
@@ -752,7 +752,7 @@ public class GaenControllerTest extends BaseControllerTest {
 
 		MvcResult response = mockMvc
 				.perform(post("/v1/gaen/exposed").contentType(MediaType.APPLICATION_JSON)
-						.header("Authorization", "Bearer " + token).header("User-Agent", "MockMVC")
+						.header("Authorization", "Bearer " + token).header("User-Agent", "ch.admin.bag.dp3t.dev;1.0.7;1595591959493;Android;29")
 						.content(json(exposeeRequest)))
 						.andExpect(request().asyncStarted())
 				.andReturn();
@@ -760,7 +760,7 @@ public class GaenControllerTest extends BaseControllerTest {
 		// Also for a 403 response, the token cannot be used a 2nd time
 		response = mockMvc
 				.perform(post("/v1/gaen/exposed").contentType(MediaType.APPLICATION_JSON)
-						.header("Authorization", "Bearer " + token).header("User-Agent", "MockMVC")
+						.header("Authorization", "Bearer " + token).header("User-Agent", "ch.admin.bag.dp3t.dev;1.0.7;1595591959493;Android;29")
 						.content(json(exposeeRequest)))
 						.andExpect(request().asyncNotStarted()).andExpect(status().is(401)).andExpect(content().string(""))
 				.andReturn();
@@ -787,7 +787,7 @@ public class GaenControllerTest extends BaseControllerTest {
 		String token = createToken(OffsetDateTime.now().withOffsetSameInstant(ZoneOffset.UTC).plusMinutes(5));
 		MvcResult responseAsync = mockMvc.perform(post("/v1/gaen/exposed")
 				.contentType(MediaType.APPLICATION_JSON).header("Authorization", "Bearer " + token)
-				.header("User-Agent", "MockMVC").content(json(exposeeRequest))).andExpect(request().asyncStarted()).andReturn();
+				.header("User-Agent", "ch.admin.bag.dp3t.dev;1.0.7;1595591959493;Android;29").content(json(exposeeRequest))).andExpect(request().asyncStarted()).andReturn();
 		MockHttpServletResponse response = mockMvc.perform(asyncDispatch(responseAsync)).andExpect(status().is(200)).andReturn().getResponse();
 		assertTrue(response.containsHeader("Authorization"), "Authorization header not found in response");
 		String jwtString = response.getHeader("Authorization").replace("Bearer ", "");
@@ -802,7 +802,7 @@ public class GaenControllerTest extends BaseControllerTest {
 		tmpKey.setTransmissionRiskLevel(0);
 		secondDay.setDelayedKey(tmpKey);
 		responseAsync = mockMvc.perform(post("/v1/gaen/exposednextday").contentType(MediaType.APPLICATION_JSON)
-				.header("Authorization", "Bearer " + jwtString).header("User-Agent", "MockMVC")
+				.header("Authorization", "Bearer " + jwtString).header("User-Agent", "ch.admin.bag.dp3t.dev;1.0.7;1595591959493;Android;29")
 				.content(json(secondDay))).andExpect(request().asyncStarted()).andReturn();
 		mockMvc.perform(asyncDispatch(responseAsync)).andExpect(status().is(200));
 	}
@@ -828,7 +828,7 @@ public class GaenControllerTest extends BaseControllerTest {
 		String token = createToken(OffsetDateTime.now().withOffsetSameInstant(ZoneOffset.UTC).plusMinutes(5));
 		MvcResult responseAsync = mockMvc.perform(post("/v1/gaen/exposed")
 				.contentType(MediaType.APPLICATION_JSON).header("Authorization", "Bearer " + token)
-				.header("User-Agent", "MockMVC").content(json(exposeeRequest))).andExpect(request().asyncStarted()).andReturn();
+				.header("User-Agent", "ch.admin.bag.dp3t.dev;1.0.7;1595591959493;Android;29").content(json(exposeeRequest))).andExpect(request().asyncStarted()).andReturn();
 		MockHttpServletResponse response = mockMvc.perform(asyncDispatch(responseAsync)).andExpect(status().is(200)).andReturn().getResponse();
 		assertTrue(response.containsHeader("Authorization"), "Authorization header not found in response");
 		String jwtString = response.getHeader("Authorization").replace("Bearer ", "");
@@ -843,7 +843,7 @@ public class GaenControllerTest extends BaseControllerTest {
 		tmpKey.setTransmissionRiskLevel(0);
 		secondDay.setDelayedKey(tmpKey);
 		responseAsync = mockMvc.perform(post("/v1/gaen/exposednextday").contentType(MediaType.APPLICATION_JSON)
-				.header("Authorization", "Bearer " + jwtString).header("User-Agent", "MockMVC")
+				.header("Authorization", "Bearer " + jwtString).header("User-Agent", "ch.admin.bag.dp3t.dev;1.0.7;1595591959493;Android;29")
 				.content(json(secondDay))).andExpect(request().asyncStarted()).andReturn();
 		mockMvc.perform(asyncDispatch(responseAsync)).andExpect(status().isBadRequest());
 	}
@@ -878,7 +878,7 @@ public class GaenControllerTest extends BaseControllerTest {
 			String token = createToken(OffsetDateTime.now().withOffsetSameInstant(ZoneOffset.UTC).plusMinutes(5));
 			MvcResult responseAsync = mockMvc.perform(post("/v1/gaen/exposed")
 					.contentType(MediaType.APPLICATION_JSON).header("Authorization", "Bearer " + token)
-					.header("User-Agent", "MockMVC").content(json(exposeeRequest))).andExpect(request().asyncStarted()).andReturn();
+					.header("User-Agent", "ch.admin.bag.dp3t.dev;1.0.7;1595591959493;Android;29").content(json(exposeeRequest))).andExpect(request().asyncStarted()).andReturn();
 			if (pass) {
 				mockMvc.perform(asyncDispatch(responseAsync)).andExpect(status().is(200)).andReturn().getResponse();
 			} else {
@@ -910,7 +910,7 @@ public class GaenControllerTest extends BaseControllerTest {
 
 		mockMvc.perform(post("/v1/gaen/exposed")
 						.contentType(MediaType.APPLICATION_JSON).header("Authorization", "Bearer " + token)
-						.header("User-Agent", "MockMVC").content(json(exposeeRequest))).andExpect(status().is(401));
+						.header("User-Agent", "ch.admin.bag.dp3t.dev;1.0.7;1595591959493;Android;29").content(json(exposeeRequest))).andExpect(status().is(401));
 }
 
 	@Test
@@ -926,7 +926,7 @@ public class GaenControllerTest extends BaseControllerTest {
 		MockHttpServletResponse response = mockMvc
 				.perform(get("/v1/debug/exposed/"
 						+ now.toLocalDate().atStartOfDay(ZoneOffset.UTC).toInstant().toEpochMilli())
-								.header("User-Agent", "MockMVC"))
+								.header("User-Agent", "ch.admin.bag.dp3t.dev;1.0.7;1595591959493;Android;29"))
 				.andExpect(status().is2xxSuccessful()).andReturn().getResponse();
 
 		verifyZipInZipResponse(response, 0);
@@ -952,7 +952,7 @@ public class GaenControllerTest extends BaseControllerTest {
 		MockHttpServletResponse response = mockMvc
 				.perform(get("/v1/gaen/exposed/"
 						+ now.minusDays(8).toLocalDate().atStartOfDay(ZoneOffset.UTC).toInstant().toEpochMilli())
-								.header("User-Agent", "MockMVC"))
+								.header("User-Agent", "ch.admin.bag.dp3t.dev;1.0.7;1595591959493;Android;29"))
 				.andExpect(status().is2xxSuccessful()).andReturn().getResponse();
 
 		Long publishedUntil = Long.parseLong(response.getHeader("X-PUBLISHED-UNTIL"));
@@ -966,7 +966,7 @@ public class GaenControllerTest extends BaseControllerTest {
 		MockHttpServletResponse responseWithPublishedAfter = mockMvc
 				.perform(get("/v1/gaen/exposed/"
 						+ now.minusDays(8).toLocalDate().atStartOfDay(ZoneOffset.UTC).toInstant().toEpochMilli())
-								.header("User-Agent", "MockMVC").param("publishedafter",
+								.header("User-Agent", "ch.admin.bag.dp3t.dev;1.0.7;1595591959493;Android;29").param("publishedafter",
 										Long.toString(bucketAfterSecondRelease)))
 				.andExpect(status().is2xxSuccessful()).andReturn().getResponse();
 
@@ -980,7 +980,7 @@ public class GaenControllerTest extends BaseControllerTest {
 		MockHttpServletResponse response = mockMvc
 				.perform(get("/v1/gaen/exposed/"
 						+ LocalDate.now(ZoneOffset.UTC).minusDays(8).atStartOfDay(ZoneOffset.UTC).toInstant().toEpochMilli())
-								.header("User-Agent", "MockMVC"))
+								.header("User-Agent", "ch.admin.bag.dp3t.dev;1.0.7;1595591959493;Android;29"))
 				.andExpect(status().isOk()).andReturn().getResponse();
 		verifyZipInZipResponse(response, 10);
 		// var etag = response.getHeader("ETag");
@@ -991,7 +991,7 @@ public class GaenControllerTest extends BaseControllerTest {
 		// response = mockMvc
 		// 		.perform(get("/v1/gaen/exposed/"
 		// 				+ LocalDate.now(ZoneOffset.UTC).minusDays(8).atStartOfDay(ZoneOffset.UTC).toInstant().toEpochMilli())
-		// 						.header("User-Agent", "MockMVC")
+		// 						.header("User-Agent", "ch.admin.bag.dp3t.dev;1.0.7;1595591959493;Android;29")
 		// 						.header("If-None-Match", etag))
 		// 		.andExpect(status().is(304)).andReturn().getResponse();
 		// signature = response.getHeader("Signature");
@@ -1013,7 +1013,7 @@ public class GaenControllerTest extends BaseControllerTest {
 		MockHttpServletResponse response = mockMvc
 				.perform(get("/v1/gaen/exposed/"
 						+ now.minusDays(8).toLocalDate().atStartOfDay(ZoneOffset.UTC).toInstant().toEpochMilli())
-								.header("User-Agent", "MockMVC"))
+								.header("User-Agent", "ch.admin.bag.dp3t.dev;1.0.7;1595591959493;Android;29"))
 				.andExpect(status().is2xxSuccessful()).andReturn().getResponse();
 
 		Long publishedUntil = Long.parseLong(response.getHeader("X-PUBLISHED-UNTIL"));
@@ -1023,7 +1023,7 @@ public class GaenControllerTest extends BaseControllerTest {
 		response = mockMvc
 				.perform(get("/v1/gaen/exposed/"
 						+ now.minusDays(8).toLocalDate().atStartOfDay(ZoneOffset.UTC).toInstant().toEpochMilli())
-								.header("User-Agent", "MockMVC"))
+								.header("User-Agent", "ch.admin.bag.dp3t.dev;1.0.7;1595591959493;Android;29"))
 				.andExpect(status().is2xxSuccessful()).andReturn().getResponse();
 
 		publishedUntil = Long.parseLong(response.getHeader("X-PUBLISHED-UNTIL"));
@@ -1036,7 +1036,7 @@ public class GaenControllerTest extends BaseControllerTest {
 				response = mockMvc
 				.perform(get("/v1/gaen/exposed/"
 						+ now.minusDays(8).toLocalDate().atStartOfDay(ZoneOffset.UTC).toInstant().toEpochMilli())
-								.header("User-Agent", "MockMVC"))
+								.header("User-Agent", "ch.admin.bag.dp3t.dev;1.0.7;1595591959493;Android;29"))
 				.andExpect(status().is2xxSuccessful()).andReturn().getResponse();
 
 		publishedUntil = Long.parseLong(response.getHeader("X-PUBLISHED-UNTIL"));

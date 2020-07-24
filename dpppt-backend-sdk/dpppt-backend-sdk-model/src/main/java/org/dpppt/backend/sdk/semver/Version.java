@@ -11,7 +11,7 @@ public class Version implements Comparable<Version> {
     private String metaInfo = "";
     private String platform = "";
 
-    private final Pattern semVerPattern = Pattern.compile("^(?:(?<platform>ios|android)-)?(?<major>0|[1-9]\\d*)\\.(?<minor>0|[1-9]\\d*)\\.(?<patch>0|[1-9]\\d*)(?:-(?<prerelease>(?:0|[1-9]\\d*|\\d*[a-zA-Z-][0-9a-zA-Z-]*)(?:\\.(?:0|[1-9]\\d*|\\d*[a-zA-Z-][0-9a-zA-Z-]*))*))?(?:\\+(?<buildmetadata>[0-9a-zA-Z-]+(?:\\.[0-9a-zA-Z-]+)*))?$");
+    private final Pattern semVerPattern = Pattern.compile("^(?:(?<platform>ios|android)-)?(?<major>0|[1-9]\\d*)(\\.(?<minor>0|[1-9]\\d*))?(\\.(?<patch>0|[1-9]\\d*))?(?:-(?<prerelease>(?:0|[1-9]\\d*|\\d*[a-zA-Z-][0-9a-zA-Z-]*)(?:\\.(?:0|[1-9]\\d*|\\d*[a-zA-Z-][0-9a-zA-Z-]*))*))?(?:\\+(?<buildmetadata>[0-9a-zA-Z-]+(?:\\.[0-9a-zA-Z-]+)*))?$");
 
     public Version() {
     }
@@ -21,12 +21,19 @@ public class Version implements Comparable<Version> {
             this.setInvalidValue();
             return;
         }
+        this.major = -1;
+        this.minor = 0;
+        this.patch = 0;
 
         var matches = semVerPattern.matcher(versionString.trim());
         if(matches.find()) {
             this.major = Integer.parseInt(matches.group("major"));
+            if(matches.group("minor") != null) {
             this.minor = Integer.parseInt(matches.group("minor"));
+            }
+            if(matches.group("patch") != null) {
             this.patch = Integer.parseInt(matches.group("patch"));
+            }
             if(matches.group("platform") != null) {
                 this.platform = matches.group("platform");
             }

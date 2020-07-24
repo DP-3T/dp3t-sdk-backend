@@ -14,8 +14,10 @@ import org.dpppt.backend.sdk.ws.util.ValidationUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 
 public class RollingStartNumberBeforeRetentionDay implements InsertionFilter {
-    @Autowired
-    ValidationUtils validationUtils;
+    private final ValidationUtils validationUtils;
+    public RollingStartNumberBeforeRetentionDay(ValidationUtils validationUtils) {
+        this.validationUtils = validationUtils;
+    }
     @Override
     public List<GaenKey> filter(long now, List<GaenKey> content, OSType osType, Version osVersion, Version appVersion) {
         return content.stream().filter(key -> {

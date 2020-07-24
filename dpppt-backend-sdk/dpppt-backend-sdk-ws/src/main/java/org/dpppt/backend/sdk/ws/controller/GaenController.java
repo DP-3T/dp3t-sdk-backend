@@ -36,6 +36,8 @@ import org.dpppt.backend.sdk.model.gaen.GaenKey;
 import org.dpppt.backend.sdk.model.gaen.GaenRequest;
 import org.dpppt.backend.sdk.model.gaen.GaenSecondDay;
 import org.dpppt.backend.sdk.model.gaen.GaenUnit;
+import org.dpppt.backend.sdk.ws.insertmanager.InsertManager;
+import org.dpppt.backend.sdk.ws.insertmanager.OSType;
 import org.dpppt.backend.sdk.ws.security.ValidateRequest;
 import org.dpppt.backend.sdk.ws.security.ValidateRequest.InvalidDateException;
 import org.dpppt.backend.sdk.ws.security.signature.ProtoSignature;
@@ -82,6 +84,7 @@ public class GaenController {
 	private final Duration requestTime;
 	private final ValidateRequest validateRequest;
 	private final ValidationUtils validationUtils;
+	private final InsertManager insertManager;
 	private final GAENDataService dataService;
 	private final FakeKeyService fakeKeyService;
 	private final Duration exposedListCacheControl;
@@ -90,9 +93,10 @@ public class GaenController {
 
 	private final boolean delayTodaysKeys;
 
-	public GaenController(GAENDataService dataService, FakeKeyService fakeKeyService, ValidateRequest validateRequest,
+	public GaenController(InsertManager insertManager, GAENDataService dataService, FakeKeyService fakeKeyService, ValidateRequest validateRequest,
 						  ProtoSignature gaenSigner, ValidationUtils validationUtils, Duration releaseBucketDuration, Duration requestTime,
 						  Duration exposedListCacheControl, PrivateKey secondDayKey, boolean delayTodaysKeys) {
+		this.insertManager = insertManager;
 		this.dataService = dataService;
 		this.fakeKeyService = fakeKeyService;
 		this.releaseBucketDuration = releaseBucketDuration;
@@ -132,7 +136,6 @@ public class GaenController {
 		}
 
 		List<GaenKey> nonFakeKeys = new ArrayList<>();
-		List<GaenKey> nonFakeKeysDelayed = new ArrayList<>();
 		for (var key : gaenRequest.getGaenKeys()) {
 			if (!validationUtils.isValidBase64Key(key.getKeyData())) {
 				return () -> new ResponseEntity<>("No valid base64 key", HttpStatus.BAD_REQUEST);
@@ -142,29 +145,7 @@ public class GaenController {
 				|| hasInvalidKeyDate(principal, key)) {
 				continue;
 			}
-
-			if (key.getRollingPeriod().equals(0)) {
-				logger.error("RollingPeriod should NOT be 0, fixing it and using 144");
-				key.setRollingPeriod(GaenKey.GaenKeyDefaultRollingPeriod);
-			}
-			
-			if(delayTodaysKeys) {
-				// Additionally to delaying keys this feature also make sure rolling period is always set to 144 
-				// to make sure iOS 13.5.x does not ignore the TEK.
-				key.setRollingPeriod(GaenKey.GaenKeyDefaultRollingPeriod);
-
-				var rollingStartNumberDuration = Duration.of(key.getRollingStartNumber(), GaenUnit.TenMinutes).toMillis();
-				var rollingStartNumberInstant = Instant.ofEpochMilli(rollingStartNumberDuration);
-				var rollingStartDate = LocalDate.ofInstant(rollingStartNumberInstant, ZoneOffset.UTC);
-				// If this is a same day TEK we are delaying its release
-				if(LocalDate.now(ZoneOffset.UTC).isEqual(rollingStartDate)) {
-					nonFakeKeysDelayed.add(key);
-				} else {
-					nonFakeKeys.add(key);
-				}
-			} else {
-				nonFakeKeys.add(key);
-			}
+			nonFakeKeys.add(key);
 		}
 
 		if (principal instanceof Jwt && ((Jwt) principal).containsClaim("fake")
@@ -172,16 +153,8 @@ public class GaenController {
 			return () -> ResponseEntity.badRequest().body("Claim is fake but list contains non fake keys");
 		}
 		if (!nonFakeKeys.isEmpty()) {
-			dataService.upsertExposees(nonFakeKeys);
-		}
-		if (!nonFakeKeysDelayed.isEmpty()) {
-			// Hold back same day TEKs until 02:00 UTC of the next day (as RPIs are accepted by EN up to 2h after rolling period)
-			var tomorrowAt2AM = LocalDate.now(ZoneOffset.UTC)
-										.plusDays(1)
-										.atStartOfDay(ZoneOffset.UTC)
-										.plusHours(2)
-								.toOffsetDateTime();
-			dataService.upsertExposeesDelayed(nonFakeKeysDelayed, tomorrowAt2AM);
+			//dataService.upsertExposees(nonFakeKeys);
+			insertManager.insertIntoDatabase(nonFakeKeys, userAgent);
 		}
 
 		var delayedKeyDateDuration = Duration.of(gaenRequest.getDelayedKeyDate(), GaenUnit.TenMinutes);
@@ -264,7 +237,7 @@ public class GaenController {
 			}
 			List<GaenKey> keys = new ArrayList<>();
 			keys.add(gaenSecondDay.getDelayedKey());
-			dataService.upsertExposees(keys);
+			insertManager.insertIntoDatabase(keys, userAgent);
 		}
 
 		return () -> {
