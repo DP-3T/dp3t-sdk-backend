@@ -954,13 +954,13 @@ public class GaenControllerTest extends BaseControllerTest {
 				.andExpect(status().is2xxSuccessful()).andReturn().getResponse();
 
 		Long publishedUntil = Long.parseLong(response.getHeader("X-PUBLISHED-UNTIL"));
-		assertTrue(publishedUntil < System.currentTimeMillis(), "Published until must be in the past");
+		assertTrue(publishedUntil < now.getTimestamp(), "Published until must be in the past");
 
 		verifyZipResponse(response, 20);
 
 		// request again the keys with date date 1 day ago. with publish until, so that
 		// we only get the second batch.
-		var bucketAfterSecondRelease = Duration.ofMillis(now.getTimestamp()).minusDays(1).plusHours(10).dividedBy(Duration.ofHours(2)) * 2*60*60*1000;
+		var bucketAfterSecondRelease = Duration.ofMillis(midnight.getTimestamp()).minusDays(1).plusHours(12).dividedBy(Duration.ofHours(2)) * 2*60*60*1000;
 		MockHttpServletResponse responseWithPublishedAfter = mockMvc
 				.perform(get("/v1/gaen/exposed/"
 						+ midnight.minusDays(8).getTimestamp())
@@ -969,7 +969,7 @@ public class GaenControllerTest extends BaseControllerTest {
 				.andExpect(status().is2xxSuccessful()).andReturn().getResponse();
 
 		//we always have 10
-		verifyZipResponse(responseWithPublishedAfter, 15);
+		verifyZipResponse(responseWithPublishedAfter, 10);
 	}
 
 	@Test
@@ -1104,7 +1104,7 @@ public class GaenControllerTest extends BaseControllerTest {
 	private void insertNKeysPerDayInIntervalWithDebugFlag(int n, UTCInstant start, UTCInstant end, UTCInstant receivedAt, boolean debug) throws Exception {
 		var current = start;
 		Map<Integer, Integer> rollingToCount = new HashMap<>();
-		while (current.isBeforeDate(end)) {
+		while (current.isBeforeExact(end)) {
 			List<GaenKey> keys = new ArrayList<>();
 			SecureRandom random = new SecureRandom();
 			int lastRolling = (int)start.get10MinutesSince1970();

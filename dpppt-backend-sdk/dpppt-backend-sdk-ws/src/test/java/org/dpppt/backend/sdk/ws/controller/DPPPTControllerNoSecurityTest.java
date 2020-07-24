@@ -75,7 +75,7 @@ public class DPPPTControllerNoSecurityTest extends BaseControllerNoSecurityTest 
 	public void keyDateNotInTheFuture() throws Exception {
 		ExposeeRequest exposeeRequest = new ExposeeRequest();
 		exposeeRequest.setAuthData(new ExposeeAuthData());
-		exposeeRequest.setKeyDate(UTCInstant.midnight().plusMinutes(1).getTimestamp());
+		exposeeRequest.setKeyDate(UTCInstant.midnight().plusDays(1).plusMinutes(1).getTimestamp());
 		exposeeRequest.setKey(Base64.getEncoder().encodeToString("testKey32Bytes--testKey32Bytes--".getBytes("UTF-8")));
 
 		MockHttpServletResponse response = mockMvc
