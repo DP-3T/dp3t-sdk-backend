@@ -1131,9 +1131,9 @@ public class GaenControllerTest extends BaseControllerTest {
 				
 			}
 			if(debug) {
-				testGaenDataService.upsertExposeesDebug(keys, receivedAt.getOffsetDateTime());
+				testGaenDataService.upsertExposeesDebug(keys, receivedAt);
 			} else {
-				testGaenDataService.upsertExposees(keys, receivedAt.getOffsetDateTime());
+				testGaenDataService.upsertExposees(keys, receivedAt);
 			}
 			current = current.plusDays(1);
 		}
