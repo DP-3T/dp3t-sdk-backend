@@ -59,7 +59,7 @@ public class DebugController {
             @RequestHeader(value = "User-Agent", required = true) String userAgent,
             @RequestHeader(value = "X-Device-Name", required = true) String deviceName,
             @AuthenticationPrincipal Object principal) throws InvalidDateException {
-        var now = Instant.now().toEpochMilli();
+        var now = UTCInstant.now();
         if (!this.validateRequest.isValid(principal)) {
             return ResponseEntity.status(HttpStatus.FORBIDDEN).build();
         }
@@ -68,7 +68,7 @@ public class DebugController {
             if (!validationUtils.isValidBase64Key(key.getKeyData())) {
                 return new ResponseEntity<>("No valid base64 key", HttpStatus.BAD_REQUEST);
             }
-            this.validateRequest.getKeyDate(principal, key);
+            this.validateRequest.getKeyDate(now, principal, key);
             if (this.validateRequest.isFakeRequest(principal, key)) {
                 continue;
             } else {
@@ -85,7 +85,7 @@ public class DebugController {
        
         var responseBuilder = ResponseEntity.ok();
 
-        normalizeRequestTime(now);
+        normalizeRequestTime(now.getTimestamp());
         return responseBuilder.build();
     }
 

@@ -102,7 +102,7 @@ public class DPPPTController {
             @Documentation(description = "App Identifier (PackageName/BundleIdentifier) + App-Version + OS (Android/iOS) + OS-Version", example = "ch.ubique.android.starsdk;1.0;iOS;13.3")
                     String userAgent,
 			@AuthenticationPrincipal Object principal) throws InvalidDateException {
-		long now = System.currentTimeMillis();
+		var now = UTCInstant.now();
 		if (!this.validateRequest.isValid(principal)) {
 			return ResponseEntity.status(HttpStatus.FORBIDDEN).build();
 		}
@@ -112,7 +112,7 @@ public class DPPPTController {
 		// TODO: should we give that information?
 		Exposee exposee = new Exposee();
 		exposee.setKey(exposeeRequest.getKey());
-		long keyDate = this.validateRequest.getKeyDate(principal, exposeeRequest);
+		long keyDate = this.validateRequest.getKeyDate(now, principal, exposeeRequest);
 
 		exposee.setKeyDate(keyDate);
 		if (!this.validateRequest.isFakeRequest(principal, exposeeRequest)) {
@@ -120,7 +120,7 @@ public class DPPPTController {
 		}
 
 		long after = System.currentTimeMillis();
-		long duration = after - now;
+		long duration = after - now.getTimestamp();
 		try {
 			Thread.sleep(Math.max(this.requestTime - duration, 0));
 		} catch (Exception ex) {
@@ -143,7 +143,7 @@ public class DPPPTController {
             @Documentation(description = "App Identifier (PackageName/BundleIdentifier) + App-Version + OS (Android/iOS) + OS-Version", example = "ch.ubique.android.starsdk;1.0;iOS;13.3")
                     String userAgent,
 			@AuthenticationPrincipal Object principal) throws InvalidDateException {
-		long now = System.currentTimeMillis();
+		var now = UTCInstant.now();
 		if (!this.validateRequest.isValid(principal)) {
 			return ResponseEntity.status(HttpStatus.FORBIDDEN).build();
 		}
@@ -156,7 +156,7 @@ public class DPPPTController {
 
 			Exposee exposee = new Exposee();
 			exposee.setKey(exposedKey.getKey());
-			long keyDate = this.validateRequest.getKeyDate(principal, exposedKey);
+			long keyDate = this.validateRequest.getKeyDate(now, principal, exposedKey);
 
 			exposee.setKeyDate(keyDate);
 			exposees.add(exposee);
@@ -167,7 +167,7 @@ public class DPPPTController {
 		}
 
 		long after = System.currentTimeMillis();
-		long duration = after - now;
+		long duration = after - now.getTimestamp();
 		try {
 			Thread.sleep(Math.max(this.requestTime - duration, 0));
 		} catch (Exception ex) {

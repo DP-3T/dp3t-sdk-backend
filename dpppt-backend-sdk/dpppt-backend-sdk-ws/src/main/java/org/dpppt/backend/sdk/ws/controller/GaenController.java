@@ -126,7 +126,6 @@ public class GaenController {
             @Documentation(description = "JWT token that can be verified by the backend server")
                     Object principal) {
 		var utcNow = UTCInstant.now();
-		var now = utcNow.getTimestamp();
 		if (!this.validateRequest.isValid(principal)) {
 			return () -> ResponseEntity.status(HttpStatus.FORBIDDEN).build();
 		}
@@ -139,7 +138,7 @@ public class GaenController {
 			}
 			if (this.validateRequest.isFakeRequest(principal, key) 
 				|| hasNegativeRollingPeriod(key)
-				|| hasInvalidKeyDate(principal, key)) {
+				|| hasInvalidKeyDate(utcNow, principal, key)) {
 				continue;
 			}
 
@@ -200,7 +199,7 @@ public class GaenController {
 			responseBuilder.header("Authorization", "Bearer " + jwt);
 		}
 		Callable<ResponseEntity<String>> cb = () -> {
-			normalizeRequestTime(now);
+			normalizeRequestTime(utcNow.getTimestamp());
 			return responseBuilder.body("OK");
 		};
 		return cb;
@@ -227,7 +226,6 @@ public class GaenController {
             @Documentation(description = "JWT token that can be verified by the backend server, must have been created by /v1/gaen/exposed and contain the delayedKeyDate")
                     Object principal) {
 		var utcNow = UTCInstant.now();
-		var now = utcNow.getTimestamp();
 
 		if (!validationUtils.isValidBase64Key(gaenSecondDay.getDelayedKey().getKeyData())) {
 			return () -> new ResponseEntity<>("No valid base64 key", HttpStatus.BAD_REQUEST);
@@ -261,7 +259,7 @@ public class GaenController {
 		}
 
 		return () -> {
-			normalizeRequestTime(now);
+			normalizeRequestTime(utcNow.getTimestamp());
 			return ResponseEntity.ok().body("OK");
 		};
 
@@ -363,9 +361,9 @@ public class GaenController {
 		}
 	}
 
-	private boolean hasInvalidKeyDate(Object principal, GaenKey key) {
+	private boolean hasInvalidKeyDate(UTCInstant now,Object principal, GaenKey key) {
 		try { 
-			this.validateRequest.getKeyDate(principal, key);
+			this.validateRequest.getKeyDate(now,principal, key);
 		}
 		catch (InvalidDateException invalidDate) {
 			logger.error(invalidDate.getLocalizedMessage());
