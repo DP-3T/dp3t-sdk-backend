@@ -69,6 +69,17 @@ public class ValidationUtils {
 		// Because _now_ has a resolution of 1 millisecond, this precision is acceptable.
 		return timestamp.isAfter(retention) && timestamp.isBefore(now);
 	}
+	/**
+	 * Check if the given date is before now - retentionPeriod ... now
+	 *
+	 * @param timestamp to verify
+	 * @return if the date is in the range
+	 */
+	public boolean isBeforeRetention(OffsetDateTime timestamp){
+		OffsetDateTime now = Instant.now().atOffset(ZoneOffset.UTC);
+		OffsetDateTime retention = now.minus(retentionPeriod);
+		return timestamp.isAfter(retention);
+	}
 
 	/**
 	 * Check if the given timestamp is a valid key date: Must be midnight UTC.

@@ -29,6 +29,11 @@ import org.dpppt.backend.sdk.data.gaen.JDBCGAENDataServiceImpl;
 import org.dpppt.backend.sdk.ws.controller.DPPPTController;
 import org.dpppt.backend.sdk.ws.controller.GaenController;
 import org.dpppt.backend.sdk.ws.filter.ResponseWrapperFilter;
+import org.dpppt.backend.sdk.ws.insertmanager.InsertManager;
+import org.dpppt.backend.sdk.ws.insertmanager.insertionfilters.IOSLegacyProblemRPLT144;
+import org.dpppt.backend.sdk.ws.insertmanager.insertionfilters.OldAndroid0RPFilter;
+import org.dpppt.backend.sdk.ws.insertmanager.insertionfilters.RollingStartNumberAfterDayAfterTomorrow;
+import org.dpppt.backend.sdk.ws.insertmanager.insertionfilters.RollingStartNumberBeforeRetentionDay;
 import org.dpppt.backend.sdk.ws.interceptor.HeaderInjector;
 import org.dpppt.backend.sdk.ws.security.KeyVault;
 import org.dpppt.backend.sdk.ws.security.NoValidateRequest;
@@ -40,7 +45,10 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.boot.autoconfigure.condition.ConditionalOnBean;
+import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 import org.springframework.context.annotation.Bean;
+import org.springframework.context.annotation.Conditional;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.Lazy;
 import org.springframework.http.converter.HttpMessageConverter;
@@ -130,6 +138,11 @@ public abstract class WSBaseConfig implements SchedulingConfigurer, WebMvcConfig
 	String gaenAlgorithm;
 	@Value("${ws.app.gaen.delayTodaysKeys: false}")
 	boolean delayTodaysKeys;
+	@Value("${ws.app.gaen.ioslegacy: true}")
+	boolean iosLegacy;
+	@Value("${ws.app.gaen.androidBug: true}")
+	boolean androidBug;
+
 
 	@Autowired(required = false)
 	ValidateRequest requestValidator;
@@ -184,6 +197,33 @@ public abstract class WSBaseConfig implements SchedulingConfigurer, WebMvcConfig
 			throw new RuntimeException("Cannot initialize signer for protobuf");
 		}
 	}
+	@Bean
+	public InsertManager insertManager() {
+		var manager = new InsertManager(gaenDataService());
+		manager.addFilter(new RollingStartNumberAfterDayAfterTomorrow());
+		manager.addFilter(new RollingStartNumberBeforeRetentionDay());
+		return manager;
+	}
+	@ConditionalOnProperty(
+    value="ws.app.gaen.androidBug", 
+    havingValue = "true", 
+	matchIfMissing = true)
+	@Bean public OldAndroid0RPFilter oldAndroid0RPFilter(InsertManager manager){
+		var androidFilter = new OldAndroid0RPFilter();
+		manager.addFilter(androidFilter);
+		return androidFilter;
+	}
+	
+	@ConditionalOnProperty(
+    value="ws.app.gaen.ioslegacy", 
+    havingValue = "true", 
+	matchIfMissing = true)
+	@Bean public IOSLegacyProblemRPLT144 iosLegacyProblemRPLT144(InsertManager manager){
+		var iosFilter = new IOSLegacyProblemRPLT144();
+		manager.addFilter(iosFilter);
+		return iosFilter;
+	}
+
 
 	@Bean
 	public DPPPTController dppptSDKController() {
