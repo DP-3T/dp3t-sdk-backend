@@ -38,7 +38,7 @@ public class DPPPTControllerNoSecurityTest extends BaseControllerNoSecurityTest 
 	public void testJWT() throws Exception {
 		ExposeeRequest exposeeRequest = new ExposeeRequest();
 		exposeeRequest.setAuthData(new ExposeeAuthData());
-		exposeeRequest.setKeyDate(UTCInstant.midnight().getTimestamp());
+		exposeeRequest.setKeyDate(UTCInstant.today().getTimestamp());
 		exposeeRequest.setKey(Base64.getEncoder().encodeToString("testKey32Bytes--testKey32Bytes--".getBytes("UTF-8")));
 		exposeeRequest.setIsFake(0);
 		MockHttpServletResponse response = mockMvc.perform(post("/v1/exposed").contentType(MediaType.APPLICATION_JSON)
@@ -50,7 +50,7 @@ public class DPPPTControllerNoSecurityTest extends BaseControllerNoSecurityTest 
 	public void testJWTFake() throws Exception {
 		ExposeeRequest exposeeRequest = new ExposeeRequest();
 		exposeeRequest.setAuthData(new ExposeeAuthData());
-		exposeeRequest.setKeyDate(UTCInstant.midnight().getTimestamp());
+		exposeeRequest.setKeyDate(UTCInstant.today().getTimestamp());
 		exposeeRequest.setKey(Base64.getEncoder().encodeToString("testKey32Bytes--testKey32Bytes--".getBytes("UTF-8")));
 		exposeeRequest.setIsFake(1);
 		MockHttpServletResponse response = mockMvc.perform(post("/v1/exposed").contentType(MediaType.APPLICATION_JSON)
@@ -62,7 +62,7 @@ public class DPPPTControllerNoSecurityTest extends BaseControllerNoSecurityTest 
 	public void keyDateNotOlderThan21Days() throws Exception {
 		ExposeeRequest exposeeRequest = new ExposeeRequest();
 		exposeeRequest.setAuthData(new ExposeeAuthData());
-		exposeeRequest.setKeyDate(UTCInstant.midnight().minusDays(21).getTimestamp());
+		exposeeRequest.setKeyDate(UTCInstant.today().minusDays(21).getTimestamp());
 		exposeeRequest.setKey(Base64.getEncoder().encodeToString("testKey32Bytes--testKey32Bytes--".getBytes("UTF-8")));
 
 		MockHttpServletResponse response = mockMvc
@@ -75,7 +75,7 @@ public class DPPPTControllerNoSecurityTest extends BaseControllerNoSecurityTest 
 	public void keyDateNotInTheFuture() throws Exception {
 		ExposeeRequest exposeeRequest = new ExposeeRequest();
 		exposeeRequest.setAuthData(new ExposeeAuthData());
-		exposeeRequest.setKeyDate(UTCInstant.midnight().plusDays(1).plusMinutes(1).getTimestamp());
+		exposeeRequest.setKeyDate(UTCInstant.today().plusDays(1).plusMinutes(1).getTimestamp());
 		exposeeRequest.setKey(Base64.getEncoder().encodeToString("testKey32Bytes--testKey32Bytes--".getBytes("UTF-8")));
 
 		MockHttpServletResponse response = mockMvc
@@ -89,7 +89,7 @@ public class DPPPTControllerNoSecurityTest extends BaseControllerNoSecurityTest 
 		ExposeeRequest exposeeRequest = new ExposeeRequest();
 		exposeeRequest.setAuthData(new ExposeeAuthData());
 		exposeeRequest
-				.setKeyDate(UTCInstant.midnight().getTimestamp());
+				.setKeyDate(UTCInstant.today().getTimestamp());
 		exposeeRequest.setKey(Base64.getEncoder().encodeToString("testKey32Bytes--testKey32Bytes--".getBytes("UTF-8")));
 
 		MockHttpServletResponse response = mockMvc.perform(post("/v1/exposed").contentType(MediaType.APPLICATION_JSON)
@@ -158,7 +158,7 @@ public class DPPPTControllerNoSecurityTest extends BaseControllerNoSecurityTest 
 
 	private String getDateStringOfYesterday(){
 		SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd");
-		Date yesterday = UTCInstant.midnight().minusDays(1).getDate();
+		Date yesterday = UTCInstant.today().minusDays(1).getDate();
 		return sdf.format(yesterday);
 	}
 }

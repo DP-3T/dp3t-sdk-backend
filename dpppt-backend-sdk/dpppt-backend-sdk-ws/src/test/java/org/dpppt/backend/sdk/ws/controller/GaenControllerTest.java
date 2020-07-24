@@ -258,7 +258,7 @@ public class GaenControllerTest extends BaseControllerTest {
 			assertEquals(headers.get(header), response.getHeader(header));
 		} 
 		var now = UTCInstant.now();
-		var midnight = UTCInstant.midnight();
+		var midnight = UTCInstant.today();
 		response = mockMvc
 			.perform(get("/v1/gaen/exposed/"
 					+ midnight.minusDays(8).getTimestamp())
@@ -969,7 +969,7 @@ public class GaenControllerTest extends BaseControllerTest {
 				.andExpect(status().is2xxSuccessful()).andReturn().getResponse();
 
 		//we always have 10
-		verifyZipResponse(responseWithPublishedAfter, 10);
+		verifyZipResponse(responseWithPublishedAfter, 15);
 	}
 
 	@Test

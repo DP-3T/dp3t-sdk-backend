@@ -78,7 +78,7 @@ public class PostgresGaenDataServiceTest {
 
 	@Test
 	public void testFakeKeyContainsKeysForLast21Days() {
-		var today = UTCInstant.midnight();
+		var today = UTCInstant.today();
 		var noKeyAtThisDate = today.minusDays(22);
 		var keysUntilToday = today.minusDays(21);
 
@@ -115,7 +115,7 @@ public class PostgresGaenDataServiceTest {
 
 	@Test
 	public void testTokensArentDeletedBeforeExpire() throws Exception {
-		var localDateNow = UTCInstant.midnight();
+		var localDateNow = UTCInstant.today();
 		Clock twoMinutesToMidnight = Clock.fixed(localDateNow.plusDays(1).minusMinutes(2).getInstant(), ZoneOffset.UTC);
 		Clock twoMinutesAfterMidnight = Clock.fixed(localDateNow.plusDays(1).plusMinutes(2).getInstant(), ZoneOffset.UTC);
 		Clock nextDay = Clock.fixed(localDateNow.plusDays(2).plusMinutes(2).getInstant(), ZoneOffset.UTC);
@@ -166,7 +166,7 @@ public class PostgresGaenDataServiceTest {
 	@Test
 	public void upsert() throws Exception {
 		var tmpKey = new GaenKey();
-		tmpKey.setRollingStartNumber((int) UTCInstant.midnight().minus(Duration.ofDays(1)).get10MinutesSince1970());
+		tmpKey.setRollingStartNumber((int) UTCInstant.today().minus(Duration.ofDays(1)).get10MinutesSince1970());
 		tmpKey.setKeyData(Base64.getEncoder().encodeToString("testKey32Bytes--".getBytes("UTF-8")));
 		tmpKey.setRollingPeriod(144);
 		tmpKey.setFake(0);
@@ -181,7 +181,7 @@ public class PostgresGaenDataServiceTest {
 		long publishedUntil = now - (now % BATCH_LENGTH.toMillis()) + BATCH_LENGTH.toMillis();
 
 		var returnedKeys = gaenDataService.getSortedExposedForKeyDate(
-				UTCInstant.midnight().minus(Duration.ofDays(1)).getTimestamp(), null,
+				UTCInstant.today().minus(Duration.ofDays(1)).getTimestamp(), null,
 				publishedUntil);
 
 		assertEquals(keys.size(), returnedKeys.size());

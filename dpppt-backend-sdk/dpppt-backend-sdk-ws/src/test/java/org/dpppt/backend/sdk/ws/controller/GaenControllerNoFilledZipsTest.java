@@ -22,7 +22,7 @@ public class GaenControllerNoFilledZipsTest extends BaseControllerTest {
 	@Transactional
 	public void testEmptyResponseWhenNoZipFill() throws Exception {
 		MockHttpServletResponse response = mockMvc
-				.perform(get("/v1/gaen/exposed/" + UTCInstant.midnight().minusDays(8).getTimestamp())
+				.perform(get("/v1/gaen/exposed/" + UTCInstant.today().minusDays(8).getTimestamp())
 								.header("User-Agent", "MockMVC"))
 				.andExpect(status().isNoContent()).andReturn().getResponse();
 		

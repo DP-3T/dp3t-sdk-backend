@@ -46,7 +46,7 @@ public class JDBCRedeemDataServiceImpl implements RedeemDataService {
 			// set the received_at to the next day, with no time information
 			// it will stay longer in the DB but we mitigate the risk that the JWT
 			// can be used twice (c.f. testTokensArentDeletedBeforeExpire). 
-			var startOfDay = UTCInstant.midnight().plusDays(1);
+			var startOfDay = UTCInstant.today().plusDays(1);
 			params.addValue("received_at", startOfDay.getDate());
 			reedemUUIDInsert.execute(params);
 			return true;

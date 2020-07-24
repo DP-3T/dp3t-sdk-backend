@@ -46,7 +46,7 @@ public class DPPPTControllerTest extends BaseControllerTest {
 	@Test
 	public void testJWT() throws Exception {
 		var utcNow = UTCInstant.now();
-		var midnight = UTCInstant.midnight();
+		var midnight = UTCInstant.today();
 		ExposeeRequest exposeeRequest = new ExposeeRequest();
 		exposeeRequest.setAuthData(new ExposeeAuthData());
 		exposeeRequest
@@ -69,7 +69,7 @@ public class DPPPTControllerTest extends BaseControllerTest {
 	@Test
 	public void testMultipleKeyUpload() throws Exception {
 		var utcNow = UTCInstant.now();
-		var midnight = UTCInstant.midnight();
+		var midnight = UTCInstant.today();
 		var requestList = new ExposeeRequestList();
 		var exposedKey1 = new ExposedKey();
 		exposedKey1.setKeyDate(utcNow.getTimestamp());
@@ -95,7 +95,7 @@ public class DPPPTControllerTest extends BaseControllerTest {
 	@Test
 	public void testMultipleKeyFakeUpload() throws Exception {
 		var utcNow = UTCInstant.now();
-		var midnight = UTCInstant.midnight();
+		var midnight = UTCInstant.today();
 		var requestList = new ExposeeRequestList();
 		var exposedKey1 = new ExposedKey();
 		exposedKey1.setKeyDate(utcNow.getTimestamp());
@@ -121,7 +121,7 @@ public class DPPPTControllerTest extends BaseControllerTest {
 	@Test
 	public void testMultipleKeyNonEmptyUpload() throws Exception {
 		var utcNow = UTCInstant.now();
-		var midnight = UTCInstant.midnight();
+		var midnight = UTCInstant.today();
 		var requestList = new ExposeeRequestList();
 		List<ExposedKey> exposedKeys = new ArrayList<ExposedKey>();
 		requestList.setExposedKeys(exposedKeys);
@@ -141,7 +141,7 @@ public class DPPPTControllerTest extends BaseControllerTest {
 	@Test
 	public void testMultipleKeyNonNullUpload() throws Exception {
 		var utcNow = UTCInstant.now();
-		var midnight = UTCInstant.midnight();
+		var midnight = UTCInstant.today();
 		var requestList = new ExposeeRequestList();
 		List<ExposedKey> exposedKeys = new ArrayList<ExposedKey>();
 		requestList.setFake(0);
@@ -160,7 +160,7 @@ public class DPPPTControllerTest extends BaseControllerTest {
 	@Test
 	public void keyNeedsToBeBase64() throws Exception {
 		var utcNow = UTCInstant.now();
-		var midnight = UTCInstant.midnight();
+		var midnight = UTCInstant.today();
 		ExposeeRequest exposeeRequest = new ExposeeRequest();
 		exposeeRequest.setAuthData(new ExposeeAuthData());
 		exposeeRequest
@@ -177,7 +177,7 @@ public class DPPPTControllerTest extends BaseControllerTest {
 	@Test
 	public void testJWTFake() throws Exception {
 		var utcNow = UTCInstant.now();
-		var midnight = UTCInstant.midnight();
+		var midnight = UTCInstant.today();
 		ExposeeRequest exposeeRequest = new ExposeeRequest();
 		exposeeRequest.setAuthData(new ExposeeAuthData());
 		exposeeRequest
@@ -199,10 +199,10 @@ public class DPPPTControllerTest extends BaseControllerTest {
 	@Test
 	public void cannotUseKeyDateBeforeOnset() throws Exception {
 		var utcNow = UTCInstant.now();
-		var midnight = UTCInstant.midnight();
+		var midnight = UTCInstant.today();
 		ExposeeRequest exposeeRequest = new ExposeeRequest();
 		exposeeRequest.setAuthData(new ExposeeAuthData());
-		exposeeRequest.setKeyDate(UTCInstant.midnight().minusDays(2).getTimestamp());
+		exposeeRequest.setKeyDate(UTCInstant.today().minusDays(2).getTimestamp());
 		exposeeRequest.setKey(Base64.getEncoder().encodeToString("testKey32Bytes--testKey32Bytes--".getBytes("UTF-8")));
 		exposeeRequest.setIsFake(1);
 		String token = createToken(UTCInstant.now().plusMinutes(5),
@@ -216,7 +216,7 @@ public class DPPPTControllerTest extends BaseControllerTest {
 	@Test
 	public void cannotUseSameTokenTwice() throws Exception {
 		var utcNow = UTCInstant.now();
-		var midnight = UTCInstant.midnight();
+		var midnight = UTCInstant.today();
 		ExposeeRequest exposeeRequest = new ExposeeRequest();
 		exposeeRequest.setAuthData(new ExposeeAuthData());
 		exposeeRequest
@@ -240,7 +240,7 @@ public class DPPPTControllerTest extends BaseControllerTest {
 	@Test
 	public void canUseSameTokenTwiceIfFake() throws Exception {
 		var utcNow = UTCInstant.now();
-		var midnight = UTCInstant.midnight();
+		var midnight = UTCInstant.today();
 		ExposeeRequest exposeeRequest = new ExposeeRequest();
 		exposeeRequest.setAuthData(new ExposeeAuthData());
 		exposeeRequest
@@ -264,7 +264,7 @@ public class DPPPTControllerTest extends BaseControllerTest {
 	@Test
 	public void cannotUseExpiredToken() throws Exception {
 		var utcNow = UTCInstant.now();
-		var midnight = UTCInstant.midnight();
+		var midnight = UTCInstant.today();
 		ExposeeRequest exposeeRequest = new ExposeeRequest();
 		exposeeRequest.setAuthData(new ExposeeAuthData());
 		exposeeRequest
@@ -283,7 +283,7 @@ public class DPPPTControllerTest extends BaseControllerTest {
 	@Test
 	public void cannotUseKeyDateInFuture() throws Exception {
 		var utcNow = UTCInstant.now();
-		var midnight = UTCInstant.midnight();
+		var midnight = UTCInstant.today();
 		ExposeeRequest exposeeRequest = new ExposeeRequest();
 		exposeeRequest.setAuthData(new ExposeeAuthData());
 		exposeeRequest.setKeyDate(UTCInstant.now().plusDays(2).getTimestamp());
@@ -321,7 +321,7 @@ public class DPPPTControllerTest extends BaseControllerTest {
 	@Test
 	public void cannotUseTokenWithWrongScope() throws Exception {
 		var utcNow = UTCInstant.now();
-		var midnight = UTCInstant.midnight();
+		var midnight = UTCInstant.today();
 		ExposeeRequest exposeeRequest = new ExposeeRequest();
 		exposeeRequest.setAuthData(new ExposeeAuthData());
 		exposeeRequest
@@ -348,7 +348,7 @@ public class DPPPTControllerTest extends BaseControllerTest {
 	@Test
 	public void cannotUsedLongLivedToken() throws Exception {
 		var utcNow = UTCInstant.now();
-		var midnight = UTCInstant.midnight();
+		var midnight = UTCInstant.today();
 		ExposeeRequest exposeeRequest = new ExposeeRequest();
 		exposeeRequest.setAuthData(new ExposeeAuthData());
 		exposeeRequest

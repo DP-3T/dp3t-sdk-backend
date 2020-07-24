@@ -12,7 +12,7 @@ public class ValidationUtilsTest {
     @Test
     public void testOnlyMidnightIsValid() throws Exception {
         var validationUtils = new ValidationUtils(16, Duration.ofDays(14), Duration.ofHours(2).toMillis());
-        var midnight = UTCInstant.midnight();
+        var midnight = UTCInstant.today();
         assertEquals(true, validationUtils.isValidKeyDate(midnight));
         assertEquals(false, validationUtils.isValidKeyDate(midnight.minusSeconds(1)));
         assertEquals(false, validationUtils.isValidKeyDate(midnight.minusMinutes(1)));
@@ -21,6 +21,6 @@ public class ValidationUtilsTest {
         assertEquals(false, validationUtils.isValidKeyDate(midnight.plusMinutes(1)));
         assertEquals(false, validationUtils.isValidKeyDate(midnight.plusHours(1)));
         
-        assertEquals(true, UTCInstant.midnight().isSameDate(midnight));
+        assertEquals(true, UTCInstant.today().isSameDate(midnight));
     }
 }
