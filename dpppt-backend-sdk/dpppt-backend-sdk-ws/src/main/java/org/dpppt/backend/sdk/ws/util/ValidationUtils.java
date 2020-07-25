@@ -70,10 +70,8 @@ public class ValidationUtils {
 	 * @param timestamp to verify
 	 * @return if the date is in the range
 	 */
-	public boolean isBeforeRetention(OffsetDateTime timestamp){
-		OffsetDateTime now = Instant.now().atOffset(ZoneOffset.UTC);
-		OffsetDateTime retention = now.minus(retentionPeriod);
-		return timestamp.isBefore(retention);
+	public boolean isBeforeRetention(UTCInstant timestamp, UTCInstant now){
+		return timestamp.isBeforeDate(now.minus(retentionPeriod));
 	}
 
 	/**

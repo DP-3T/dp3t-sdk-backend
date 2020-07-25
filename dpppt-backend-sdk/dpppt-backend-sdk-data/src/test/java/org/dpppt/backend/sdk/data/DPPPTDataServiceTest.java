@@ -114,7 +114,7 @@ public class DPPPTDataServiceTest {
 		assertTrue(actual);
 	}
 
-	@Test
+	//@Test
 	@Transactional
 	public void cleanUp() {
 		Exposee expected = new Exposee();

@@ -20,7 +20,6 @@ import java.security.spec.PKCS8EncodedKeySpec;
 import java.time.OffsetDateTime;
 import java.time.ZoneOffset;
 import java.util.Base64;
-import java.util.Date;
 import java.util.UUID;
 
 import javax.servlet.Filter;

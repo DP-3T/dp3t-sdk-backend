@@ -115,7 +115,7 @@ public class DPPPTController {
 		// TODO: should we give that information?
 		Exposee exposee = new Exposee();
 		exposee.setKey(exposeeRequest.getKey());
-		long keyDate = this.validateRequest.validateKeyDate(principal, exposeeRequest);
+		long keyDate = this.validateRequest.validateKeyDate(now, principal, exposeeRequest);
 
 		exposee.setKeyDate(keyDate);
 		if (!this.validateRequest.isFakeRequest(principal, exposeeRequest)) {
@@ -160,7 +160,7 @@ public class DPPPTController {
 
 			Exposee exposee = new Exposee();
 			exposee.setKey(exposedKey.getKey());
-			long keyDate = this.validateRequest.validateKeyDate(principal, exposedKey);
+			long keyDate = this.validateRequest.validateKeyDate(now, principal, exposedKey);
 
 			exposee.setKeyDate(keyDate);
 			exposees.add(exposee);

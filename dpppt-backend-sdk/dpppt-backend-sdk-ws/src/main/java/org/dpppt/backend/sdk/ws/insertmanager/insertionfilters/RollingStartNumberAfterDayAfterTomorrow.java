@@ -8,15 +8,15 @@ import java.util.stream.Collectors;
 
 import org.dpppt.backend.sdk.model.gaen.GaenKey;
 import org.dpppt.backend.sdk.semver.Version;
+import org.dpppt.backend.sdk.utils.UTCInstant;
 import org.dpppt.backend.sdk.ws.insertmanager.OSType;
 
 public class RollingStartNumberAfterDayAfterTomorrow implements InsertionFilter{
 
     @Override
-    public List<GaenKey> filter(long now, List<GaenKey> content, OSType osType, Version osVersion, Version appVersion, Object principal) {
+    public List<GaenKey> filter(UTCInstant now, List<GaenKey> content, OSType osType, Version osVersion, Version appVersion, Object principal) {
         return content.stream().filter(key -> {
-            var today = LocalDateTime.ofEpochSecond(now/1000, 0, ZoneOffset.UTC);
-            if(key.getRollingStartNumber() >= today.toLocalDate().toEpochSecond(LocalTime.MIDNIGHT, ZoneOffset.UTC) + 2 * 144){
+            if(key.getRollingStartNumber() >= now.plusDays(2).atStartOfDay().get10MinutesSince1970()){
                 return false;
             }
             return true;

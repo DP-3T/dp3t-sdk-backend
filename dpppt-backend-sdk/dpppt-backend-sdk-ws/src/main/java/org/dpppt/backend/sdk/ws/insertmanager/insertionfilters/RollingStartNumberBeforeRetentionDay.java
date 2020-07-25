@@ -9,6 +9,7 @@ import java.util.stream.Collectors;
 import org.dpppt.backend.sdk.model.gaen.GaenKey;
 import org.dpppt.backend.sdk.model.gaen.GaenUnit;
 import org.dpppt.backend.sdk.semver.Version;
+import org.dpppt.backend.sdk.utils.UTCInstant;
 import org.dpppt.backend.sdk.ws.insertmanager.OSType;
 import org.dpppt.backend.sdk.ws.util.ValidationUtils;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -19,11 +20,10 @@ public class RollingStartNumberBeforeRetentionDay implements InsertionFilter {
         this.validationUtils = validationUtils;
     }
     @Override
-    public List<GaenKey> filter(long now, List<GaenKey> content, OSType osType, Version osVersion, Version appVersion, Object principal) {
+    public List<GaenKey> filter(UTCInstant now, List<GaenKey> content, OSType osType, Version osVersion, Version appVersion, Object principal) {
         return content.stream().filter(key -> {
-            var rp = key.getRollingStartNumber();
-            var timestamp = OffsetDateTime.ofInstant(Instant.ofEpochMilli(rp * GaenUnit.TenMinutes.getDuration().toMillis()), ZoneOffset.UTC);
-            if(validationUtils.isBeforeRetention(timestamp)){
+            var timestamp = UTCInstant.of(key.getRollingStartNumber(), GaenUnit.TenMinutes);
+            if(validationUtils.isBeforeRetention(timestamp, now)){
                 return false;
             }
             return true;

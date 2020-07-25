@@ -69,7 +69,7 @@ public class DebugController {
             if (!validationUtils.isValidBase64Key(key.getKeyData())) {
                 return new ResponseEntity<>("No valid base64 key", HttpStatus.BAD_REQUEST);
             }
-            this.validateRequest.validateKeyDate(principal, key);
+            this.validateRequest.validateKeyDate(now, principal, key);
             if (this.validateRequest.isFakeRequest(principal, key)) {
                 continue;
             } else {

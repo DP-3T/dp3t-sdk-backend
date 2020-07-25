@@ -5,6 +5,7 @@ import java.util.stream.Collectors;
 
 import org.dpppt.backend.sdk.model.gaen.GaenKey;
 import org.dpppt.backend.sdk.semver.Version;
+import org.dpppt.backend.sdk.utils.UTCInstant;
 import org.dpppt.backend.sdk.ws.insertmanager.OSType;
 import org.dpppt.backend.sdk.ws.security.ValidateRequest;
 import org.dpppt.backend.sdk.ws.security.ValidateRequest.ClaimIsBeforeOnsetException;
@@ -17,11 +18,11 @@ public class KeysNotMatchingJWTFilter implements InsertionFilter {
     }
 
     @Override
-    public List<GaenKey> filter(long now, List<GaenKey> content, OSType osType, Version osVersion, Version appVersion,
+    public List<GaenKey> filter(UTCInstant now, List<GaenKey> content, OSType osType, Version osVersion, Version appVersion,
             Object principal) {
         return content.stream().filter((key) -> {
             try {
-                validateRequest.validateKeyDate(principal, key);
+                validateRequest.validateKeyDate(now, principal, key);
                 return true;
             }
             catch(InvalidDateException | ClaimIsBeforeOnsetException es) {

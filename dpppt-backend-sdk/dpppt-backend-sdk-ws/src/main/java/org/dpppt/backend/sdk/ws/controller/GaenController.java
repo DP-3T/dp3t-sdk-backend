@@ -136,7 +136,7 @@ public class GaenController {
 		this.validateRequest.isValid(principal);
 
 		if(!jwtIsFake(principal)) {
-			insertManager.insertIntoDatabase(gaenRequest.getGaenKeys(), userAgent, principal);
+			insertManager.insertIntoDatabase(gaenRequest.getGaenKeys(), userAgent, principal, utcNow);
 		}
 
 		var delayedKeyDateUTCInstant = UTCInstant.of(gaenRequest.getDelayedKeyDate(), GaenUnit.TenMinutes);
@@ -200,7 +200,7 @@ public class GaenController {
 		if (!this.validateRequest.isFakeRequest(principal, gaenSecondDay.getDelayedKey())) {
 			List<GaenKey> keys = new ArrayList<>();
 			keys.add(gaenSecondDay.getDelayedKey());
-			insertManager.insertIntoDatabase(keys, userAgent, principal);
+			insertManager.insertIntoDatabase(keys, userAgent, principal, utcNow);
 		}
 
 		return () -> {

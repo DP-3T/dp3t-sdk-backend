@@ -6,6 +6,7 @@ import java.util.List;
 import org.dpppt.backend.sdk.data.gaen.GAENDataService;
 import org.dpppt.backend.sdk.model.gaen.GaenKey;
 import org.dpppt.backend.sdk.semver.Version;
+import org.dpppt.backend.sdk.utils.UTCInstant;
 import org.dpppt.backend.sdk.ws.insertmanager.insertionfilters.InsertionFilter;
 
 public class InsertManager {
@@ -17,11 +18,10 @@ public class InsertManager {
     public void addFilter(InsertionFilter filter) {
         filterList.add(filter);
     }
-    public void insertIntoDatabase(List<GaenKey> keys, String header, Object principal){
+    public void insertIntoDatabase(List<GaenKey> keys, String header, Object principal, UTCInstant now){
         if(keys.isEmpty()) {
             return;
         }
-        var now = System.currentTimeMillis();
         var internalKeys = keys;
         var headerParts = header.split(";");
         if(headerParts.length != 5) {
