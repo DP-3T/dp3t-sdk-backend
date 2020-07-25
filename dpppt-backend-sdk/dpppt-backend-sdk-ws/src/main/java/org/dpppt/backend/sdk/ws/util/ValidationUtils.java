@@ -9,12 +9,8 @@
  */
 package org.dpppt.backend.sdk.ws.util;
 
+import org.dpppt.backend.sdk.utils.UTCInstant;
 import java.time.Duration;
-import java.time.Instant;
-import java.time.LocalDateTime;
-import java.time.LocalTime;
-import java.time.OffsetDateTime;
-import java.time.ZoneOffset;
 import java.util.Base64;
 
 /**
@@ -62,12 +58,11 @@ public class ValidationUtils {
 	 * @param timestamp to verify
 	 * @return if the date is in the range
 	 */
-	public boolean isDateInRange(OffsetDateTime timestamp) {
-		OffsetDateTime now = Instant.now().atOffset(ZoneOffset.UTC);
-		OffsetDateTime retention = now.minus(retentionPeriod);
+	public boolean isDateInRange(UTCInstant timestamp, UTCInstant now) {
+		var retention = now.minus(retentionPeriod);
 		// This should use timestamp.isAfterOrEqual(retention), but this method does not exist.
 		// Because _now_ has a resolution of 1 millisecond, this precision is acceptable.
-		return timestamp.isAfter(retention) && timestamp.isBefore(now);
+		return timestamp.isAfterExact(retention) && timestamp.isBeforeExact(now);
 	}
 	/**
 	 * Check if the given date is before now - retentionPeriod ... now
@@ -84,11 +79,11 @@ public class ValidationUtils {
 	/**
 	 * Check if the given timestamp is a valid key date: Must be midnight UTC.
 	 * 
-	 * @param keyDate in milliseconds since Unix epoch (1970-01-01)
+	 * @param keyDate as a UTCInstant
 	 * @return if keyDate represents midnight UTC
 	 */
-	public boolean isValidKeyDate(long keyDate) {
-		return LocalDateTime.ofInstant(Instant.ofEpochMilli(keyDate), ZoneOffset.UTC).toLocalTime().equals(LocalTime.MIDNIGHT);
+	public boolean isValidKeyDate(UTCInstant keyDate) {
+		return keyDate.isMidnight();
 	}
 
 	/**
@@ -99,11 +94,11 @@ public class ValidationUtils {
 	 * @return if batchReleaseTime is in range
 	 * @throws BadBatchReleaseTimeException if batchReleaseTime is not on a batch boundary
 	 */
-	public boolean isValidBatchReleaseTime(long batchReleaseTime) throws BadBatchReleaseTimeException {
-		if (batchReleaseTime % releaseBucketDuration != 0) {
+	public boolean isValidBatchReleaseTime(UTCInstant batchReleaseTime, UTCInstant now) throws BadBatchReleaseTimeException {
+		if (batchReleaseTime.getTimestamp() % releaseBucketDuration != 0) {
 			throw new BadBatchReleaseTimeException();
 		}
-		return this.isDateInRange(OffsetDateTime.ofInstant(Instant.ofEpochMilli(batchReleaseTime), ZoneOffset.UTC));
+		return this.isDateInRange(batchReleaseTime, now);
 	}
 
 	public class BadBatchReleaseTimeException extends Exception {

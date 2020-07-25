@@ -10,13 +10,10 @@
 
 package org.dpppt.backend.sdk.ws.security.gaen;
 
-import java.time.Duration;
-import java.time.LocalDate;
-import java.time.ZoneOffset;
-
 import org.dpppt.backend.sdk.model.gaen.GaenKey;
 import org.dpppt.backend.sdk.model.gaen.GaenUnit;
 import org.dpppt.backend.sdk.ws.security.ValidateRequest;
+import org.dpppt.backend.sdk.utils.UTCInstant;
 import org.springframework.security.oauth2.jwt.Jwt;
 
 public class JWTValidateRequest implements ValidateRequest {
@@ -34,19 +31,19 @@ public class JWTValidateRequest implements ValidateRequest {
 	}
 
 	@Override
-	public long validateKeyDate(Object authObject, Object others) throws ClaimIsBeforeOnsetException {
+	public long validateKeyDate(UTCInstant utcNow, Object authObject, Object others) throws ClaimIsBeforeOnsetException {
 		if (authObject instanceof Jwt) {
 			Jwt token = (Jwt) authObject;
-			long jwtKeyDate = LocalDate.parse(token.getClaim("onset")).atStartOfDay().atOffset(ZoneOffset.UTC).toInstant().toEpochMilli();
+			var jwtKeyDate = UTCInstant.parseDate(token.getClaim("onset"));
 			if (others instanceof GaenKey) {
                 GaenKey request = (GaenKey) others;
-                var keyDate = Duration.of(request.getRollingStartNumber(), GaenUnit.TenMinutes);
-				if (keyDate.toMillis() < jwtKeyDate) {
+                var keyDate = UTCInstant.of(request.getRollingStartNumber(), GaenUnit.TenMinutes);
+				if (keyDate.isBeforeExact(jwtKeyDate)) {
 					throw new ClaimIsBeforeOnsetException();
 				} 
-				jwtKeyDate = keyDate.toMillis();
+				jwtKeyDate = keyDate;
 			}
-			return jwtKeyDate;
+			return jwtKeyDate.getTimestamp();
 		}
 		throw new IllegalArgumentException();
 	}

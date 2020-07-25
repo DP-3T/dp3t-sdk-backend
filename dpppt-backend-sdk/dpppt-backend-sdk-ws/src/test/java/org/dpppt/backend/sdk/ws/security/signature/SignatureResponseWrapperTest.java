@@ -20,12 +20,12 @@ import java.io.OutputStream;
 import java.security.KeyPair;
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
-import java.time.OffsetDateTime;
-import java.time.ZoneOffset;
+
 import java.util.ArrayList;
 import java.util.List;
 
 import org.apache.commons.codec.binary.Hex;
+import org.dpppt.backend.sdk.utils.UTCInstant;
 import org.junit.Test;
 import org.springframework.mock.web.MockHttpServletResponse;
 
@@ -121,7 +121,7 @@ public class SignatureResponseWrapperTest {
 	public void testBatchReleaseTime() throws IOException, NoSuchAlgorithmException {
 		response = new MockHttpServletResponse();
 		response.setHeader("X-BATCH-RELEASE-TIME",
-				Long.toString(OffsetDateTime.now().withOffsetSameInstant(ZoneOffset.UTC).toInstant().toEpochMilli()));
+				Long.toString(UTCInstant.now().getTimestamp()));
 		KeyPair keyPair = Keys.keyPairFor(SignatureAlgorithm.ES256);
 		KeyPair wrongKey = Keys.keyPairFor(SignatureAlgorithm.ES256);
 		List<String> protectedHeaders = new ArrayList<String>();
@@ -144,7 +144,7 @@ public class SignatureResponseWrapperTest {
 	public void testBatchReleaseTimeWithOutputStream() throws IOException, NoSuchAlgorithmException {
 		response = new MockHttpServletResponse();
 		response.setHeader("X-BATCH-RELEASE-TIME",
-				Long.toString(OffsetDateTime.now().withOffsetSameInstant(ZoneOffset.UTC).toInstant().toEpochMilli()));
+				Long.toString(UTCInstant.now().getTimestamp()));
 		KeyPair keyPair = Keys.keyPairFor(SignatureAlgorithm.ES256);
 		KeyPair wrongKey = Keys.keyPairFor(SignatureAlgorithm.ES256);
 		List<String> protectedHeaders = new ArrayList<String>();

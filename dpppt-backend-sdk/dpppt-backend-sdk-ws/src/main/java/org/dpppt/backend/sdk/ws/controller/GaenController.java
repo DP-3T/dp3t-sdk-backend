@@ -16,8 +16,6 @@ import java.security.PrivateKey;
 import java.security.SignatureException;
 import java.time.Duration;
 import java.time.Instant;
-import java.time.LocalDate;
-import java.time.ZoneOffset;
 import java.time.format.DateTimeParseException;
 import java.util.ArrayList;
 import java.util.Date;
@@ -44,6 +42,7 @@ import org.dpppt.backend.sdk.ws.security.ValidateRequest.InvalidDateException;
 import org.dpppt.backend.sdk.ws.security.ValidateRequest.WrongScopeException;
 import org.dpppt.backend.sdk.ws.security.signature.ProtoSignature;
 import org.dpppt.backend.sdk.ws.security.signature.ProtoSignature.ProtoSignatureWrapper;
+import org.dpppt.backend.sdk.utils.UTCInstant;
 import org.dpppt.backend.sdk.ws.util.ValidationUtils;
 import org.dpppt.backend.sdk.ws.util.ValidationUtils.BadBatchReleaseTimeException;
 import org.slf4j.Logger;
@@ -133,19 +132,15 @@ public class GaenController {
             @Documentation(description = "JWT token that can be verified by the backend server")
 					Object principal)
 					throws ClaimIsBeforeOnsetException, WrongScopeException {
-		var now = Instant.now().toEpochMilli();
+		var utcNow = UTCInstant.now();
 		this.validateRequest.isValid(principal);
 
 		if(!jwtIsFake(principal)) {
 			insertManager.insertIntoDatabase(gaenRequest.getGaenKeys(), userAgent, principal);
 		}
 
-		var delayedKeyDateDuration = Duration.of(gaenRequest.getDelayedKeyDate(), GaenUnit.TenMinutes);
-		var delayedKeyDate = LocalDate.ofInstant(Instant.ofEpochMilli(delayedKeyDateDuration.toMillis()),
-				ZoneOffset.UTC);
-
-		var nowDay = LocalDate.now(ZoneOffset.UTC);
-		if (delayedKeyDate.isBefore(nowDay.minusDays(1)) || delayedKeyDate.isAfter(nowDay.plusDays(1))) {
+		var delayedKeyDateUTCInstant = UTCInstant.of(gaenRequest.getDelayedKeyDate(), GaenUnit.TenMinutes);
+		if (delayedKeyDateUTCInstant.isBeforeDate(utcNow.getLocalDate().minusDays(1)) || delayedKeyDateUTCInstant.isAfterDate(utcNow.getLocalDate().plusDays(1))) {
 			return () -> ResponseEntity.badRequest().body("delayedKeyDate date must be between yesterday and tomorrow");
 		}
 
@@ -155,7 +150,7 @@ public class GaenController {
 			var jwtBuilder = Jwts.builder().setId(UUID.randomUUID().toString()).setIssuedAt(Date.from(Instant.now()))
 					.setIssuer("dpppt-sdk-backend").setSubject(originalJWT.getSubject())
 					.setExpiration(Date
-							.from(delayedKeyDate.atStartOfDay().toInstant(ZoneOffset.UTC).plus(Duration.ofHours(48))))
+							.from(delayedKeyDateUTCInstant.atStartOfDay().plusDays(2).getInstant()))
 					.claim("scope", "currentDayExposed").claim("delayedKeyDate", gaenRequest.getDelayedKeyDate());
 			if (originalJWT.containsClaim("fake")) {
 				jwtBuilder.claim("fake", originalJWT.getClaim("fake"));
@@ -164,7 +159,7 @@ public class GaenController {
 			responseBuilder.header("Authorization", "Bearer " + jwt);
 		}
 		Callable<ResponseEntity<String>> cb = () -> {
-			normalizeRequestTime(now);
+			normalizeRequestTime(utcNow.getTimestamp());
 			return responseBuilder.body("OK");
 		};
 		return cb;
@@ -190,7 +185,7 @@ public class GaenController {
 			@AuthenticationPrincipal
             @Documentation(description = "JWT token that can be verified by the backend server, must have been created by /v1/gaen/exposed and contain the delayedKeyDate")
                     Object principal) {
-		var now = Instant.now().toEpochMilli();
+		var utcNow = UTCInstant.now();
 
 		if (principal instanceof Jwt && !((Jwt) principal).containsClaim("delayedKeyDate")) {
 			return () -> ResponseEntity.status(HttpStatus.FORBIDDEN).body("claim does not contain delayedKeyDate");
@@ -209,7 +204,7 @@ public class GaenController {
 		}
 
 		return () -> {
-			normalizeRequestTime(now);
+			normalizeRequestTime(utcNow.getTimestamp());
 			return ResponseEntity.ok().body("OK");
 		};
 
@@ -234,14 +229,15 @@ public class GaenController {
 					Long publishedafter)
 			throws BadBatchReleaseTimeException, IOException, InvalidKeyException, SignatureException,
 			NoSuchAlgorithmException {
-		if (!validationUtils.isValidKeyDate(keyDate)) {
+		var utcNow = UTCInstant.now();
+		if (!validationUtils.isValidKeyDate(UTCInstant.ofEpochMillis(keyDate))) {
 			return ResponseEntity.notFound().build();
 		}
-		if (publishedafter != null && !validationUtils.isValidBatchReleaseTime(publishedafter)) {
+		if (publishedafter != null && !validationUtils.isValidBatchReleaseTime(UTCInstant.ofEpochMillis(publishedafter), utcNow)) {
 			return ResponseEntity.notFound().build();
 		}
-
-		long now = System.currentTimeMillis();
+		
+		long now = utcNow.getTimestamp();
 		// calculate exposed until bucket
 		long publishedUntil = now - (now % releaseBucketDuration.toMillis());
 
@@ -269,22 +265,21 @@ public class GaenController {
 			@Documentation(description = "Starting date for exposed key retrieval, as ISO-8601 format",
 				example = "2020-06-27")
 					String dayDateStr) {
-		var atStartOfDay = LocalDate.parse(dayDateStr).atStartOfDay().toInstant(ZoneOffset.UTC)
-				.atOffset(ZoneOffset.UTC);
+		var atStartOfDay = UTCInstant.parseDate(dayDateStr);
 		var end = atStartOfDay.plusDays(1);
-		var now = Instant.now().atOffset(ZoneOffset.UTC);
-		if (!validationUtils.isDateInRange(atStartOfDay)) {
+		var now = UTCInstant.now();
+		if (!validationUtils.isDateInRange(atStartOfDay, now)) {
 			return ResponseEntity.notFound().build();
 		}
 		var relativeUrls = new ArrayList<String>();
 		var dayBuckets = new DayBuckets();
 
 		String controllerMapping = this.getClass().getAnnotation(RequestMapping.class).value()[0];
-		dayBuckets.setDay(dayDateStr).setRelativeUrls(relativeUrls).setDayTimestamp(atStartOfDay.toInstant().toEpochMilli());
+		dayBuckets.setDay(dayDateStr).setRelativeUrls(relativeUrls).setDayTimestamp(atStartOfDay.getTimestamp());
 
-		while (atStartOfDay.toInstant().toEpochMilli() < Math.min(now.toInstant().toEpochMilli(),
-				end.toInstant().toEpochMilli())) {
-			relativeUrls.add(controllerMapping + "/exposed" + "/" + atStartOfDay.toInstant().toEpochMilli());
+		while (atStartOfDay.getTimestamp() < Math.min(now.getTimestamp(),
+				end.getTimestamp())) {
+			relativeUrls.add(controllerMapping + "/exposed" + "/" + atStartOfDay.getTimestamp());
 			atStartOfDay = atStartOfDay.plus(this.releaseBucketDuration);
 		}
 
@@ -292,7 +287,7 @@ public class GaenController {
 	}
 
 	private void normalizeRequestTime(long now) {
-		long after = Instant.now().toEpochMilli();
+		long after = UTCInstant.now().getTimestamp();
 		long duration = after - now;
 		try {
 			Thread.sleep(Math.max(requestTime.minusMillis(duration).toMillis(), 0));

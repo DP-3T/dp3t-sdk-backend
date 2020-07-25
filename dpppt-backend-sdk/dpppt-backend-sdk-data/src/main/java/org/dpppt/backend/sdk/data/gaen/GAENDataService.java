@@ -11,10 +11,10 @@
 package org.dpppt.backend.sdk.data.gaen;
 
 import java.time.Duration;
-import java.time.OffsetDateTime;
 import java.util.List;
 
 import org.dpppt.backend.sdk.model.gaen.GaenKey;
+import org.dpppt.backend.sdk.utils.UTCInstant;
 
 public interface GAENDataService {
 
@@ -31,7 +31,7 @@ public interface GAENDataService {
 	 * @param keys the list of exposed keys to upsert
 	 * @param delayedReceivedAt the timestamp to use for the delayed release (if null use now rounded to next bucket)
 	 */
-	void upsertExposeesDelayed(List<GaenKey> keys, OffsetDateTime delayedReceivedAt);
+	void upsertExposeesDelayed(List<GaenKey> keys, UTCInstant delayedReceivedAt);
 
 	/**
 	 * Returns the maximum id of the stored exposed entries for the given batch.

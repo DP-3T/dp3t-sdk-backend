@@ -9,9 +9,6 @@
  */
 package org.dpppt.backend.sdk.ws.util;
 
-import java.time.Instant;
-import java.time.OffsetDateTime;
-import java.time.ZoneOffset;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
@@ -21,6 +18,7 @@ import javax.sql.DataSource;
 import org.dpppt.backend.sdk.data.gaen.GaenKeyRowMapper;
 import org.dpppt.backend.sdk.model.gaen.GaenKey;
 import org.dpppt.backend.sdk.model.gaen.GaenUnit;
+import org.dpppt.backend.sdk.utils.UTCInstant;
 import org.springframework.jdbc.core.namedparam.MapSqlParameterSource;
 import org.springframework.jdbc.core.namedparam.NamedParameterJdbcTemplate;
 import org.springframework.transaction.annotation.Transactional;
@@ -38,10 +36,8 @@ public class TestJDBCGaen {
 	@Transactional(readOnly = true)
 	public List<GaenKey> getSortedExposedForKeyDate(Long keyDate, Long publishedAfter, Long publishedUntil) {
 		MapSqlParameterSource params = new MapSqlParameterSource();
-		params.addValue("rollingPeriodStartNumberStart",
-				GaenUnit.TenMinutes.between(Instant.ofEpochMilli(0), Instant.ofEpochMilli(keyDate)));
-		params.addValue("rollingPeriodStartNumberEnd", GaenUnit.TenMinutes.between(Instant.ofEpochMilli(0),
-				Instant.ofEpochMilli(keyDate).atOffset(ZoneOffset.UTC).plusDays(1).toInstant()));
+		params.addValue("rollingPeriodStartNumberStart",UTCInstant.ofEpochMillis(keyDate).get10MinutesSince1970());
+		params.addValue("rollingPeriodStartNumberEnd", UTCInstant.ofEpochMillis(keyDate).plusDays(1).get10MinutesSince1970());
 		params.addValue("publishedUntil", new Date(publishedUntil));
 
 		String sql = "select pk_exposed_id, key, rolling_start_number, rolling_period, transmission_risk_level from t_gaen_exposed where"
@@ -60,7 +56,7 @@ public class TestJDBCGaen {
 	}
     
     @Transactional(readOnly = false)
-	public void upsertExposees(List<GaenKey> gaenKeys, OffsetDateTime receivedAt) {
+	public void upsertExposees(List<GaenKey> gaenKeys, UTCInstant receivedAt) {
 		String sql = null;
 		if (dbType.equals(PGSQL)) {
 			sql = "insert into t_gaen_exposed (key, rolling_start_number, rolling_period, transmission_risk_level, received_at) values (:key, :rolling_start_number, :rolling_period, :transmission_risk_level, :received_at)"
@@ -77,13 +73,13 @@ public class TestJDBCGaen {
 			params.addValue("rolling_start_number", gaenKey.getRollingStartNumber());
 			params.addValue("rolling_period", gaenKey.getRollingPeriod());
             params.addValue("transmission_risk_level", gaenKey.getTransmissionRiskLevel());
-            params.addValue("received_at", Date.from((receivedAt.toInstant())));
+            params.addValue("received_at", receivedAt.getDate());
 			parameterList.add(params);
 		}
 		jt.batchUpdate(sql, parameterList.toArray(new MapSqlParameterSource[0]));
 	}
 	@Transactional(readOnly = false)
-	public void upsertExposeesDebug(List<GaenKey> gaenKeys, OffsetDateTime receivedAt) {
+	public void upsertExposeesDebug(List<GaenKey> gaenKeys, UTCInstant receivedAt) {
 		String sql = null;
 		if (dbType.equals(PGSQL)) {
 			sql = "insert into t_debug_gaen_exposed (key, rolling_start_number, rolling_period, transmission_risk_level, received_at, device_name) values (:key, :rolling_start_number, :rolling_period, :transmission_risk_level, :received_at, 'test')"
@@ -100,7 +96,7 @@ public class TestJDBCGaen {
 			params.addValue("rolling_start_number", gaenKey.getRollingStartNumber());
 			params.addValue("rolling_period", gaenKey.getRollingPeriod());
             params.addValue("transmission_risk_level", gaenKey.getTransmissionRiskLevel());
-            params.addValue("received_at", Date.from((receivedAt.toInstant())));
+            params.addValue("received_at", receivedAt.getDate());
 			parameterList.add(params);
 		}
 		jt.batchUpdate(sql, parameterList.toArray(new MapSqlParameterSource[0]));

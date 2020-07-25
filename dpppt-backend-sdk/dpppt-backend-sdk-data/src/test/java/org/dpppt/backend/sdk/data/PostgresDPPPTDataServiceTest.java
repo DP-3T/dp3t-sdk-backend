@@ -14,7 +14,9 @@ import org.assertj.core.api.Assertions;
 import org.dpppt.backend.sdk.data.config.DPPPTDataServiceConfig;
 import org.dpppt.backend.sdk.data.config.FlyWayConfig;
 import org.dpppt.backend.sdk.data.config.PostgresDataConfig;
+import org.dpppt.backend.sdk.data.config.TestConfig;
 import org.dpppt.backend.sdk.model.Exposee;
+import org.dpppt.backend.sdk.utils.UTCInstant;
 import org.jetbrains.annotations.NotNull;
 import org.junit.After;
 import org.junit.Test;
@@ -27,7 +29,9 @@ import org.springframework.test.context.support.AnnotationConfigContextLoader;
 
 import javax.sql.DataSource;
 import java.sql.*;
-import java.time.*;
+import java.time.Duration;
+import java.time.Instant;
+import java.time.LocalDate;
 import java.util.List;
 
 import static org.junit.Assert.assertEquals;
@@ -35,8 +39,8 @@ import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
 @RunWith(SpringJUnit4ClassRunner.class)
-@ContextConfiguration(loader = AnnotationConfigContextLoader.class, classes = {PostgresDataConfig.class, FlyWayConfig.class, DPPPTDataServiceConfig.class})
-@ActiveProfiles("postgres")
+@ContextConfiguration(loader = AnnotationConfigContextLoader.class, classes = {PostgresDataConfig.class, FlyWayConfig.class, DPPPTDataServiceConfig.class, TestConfig.class})
+@ActiveProfiles({"postgres", "test-config"})
 public class PostgresDPPPTDataServiceTest {
 
     private static final String APP_SOURCE = "test-app";
@@ -98,18 +102,18 @@ public class PostgresDPPPTDataServiceTest {
 
     @Test
     public void cleanup() throws SQLException {
-        OffsetDateTime now = OffsetDateTime.now().withOffsetSameInstant(ZoneOffset.UTC);
-        OffsetDateTime receivedAt = now.minusDays(21);
+        var now = UTCInstant.now();
+        var receivedAt = now.minusDays(21);
         Connection connection = dataSource.getConnection();
         String key = "someKey";
-        insertExposeeWithReceivedAt(receivedAt.toInstant(), key);
+        insertExposeeWithReceivedAt(receivedAt.getInstant(), key);
 
 		List<Exposee> sortedExposedForDay = dppptDataService
-				.getSortedExposedForBatchReleaseTime(receivedAt.toInstant().toEpochMilli() + 1, 1 * 60 * 60 * 1000l);
+				.getSortedExposedForBatchReleaseTime(receivedAt.getTimestamp() + 1, 1 * 60 * 60 * 1000l);
 		assertFalse(sortedExposedForDay.isEmpty());
 
 		dppptDataService.cleanDB(Duration.ofDays(21));
-		sortedExposedForDay = dppptDataService.getSortedExposedForBatchReleaseTime(receivedAt.toInstant().toEpochMilli() + 1,
+		sortedExposedForDay = dppptDataService.getSortedExposedForBatchReleaseTime(receivedAt.getTimestamp() + 1,
 				1 * 60 * 60 * 1000l);
 		assertTrue(sortedExposedForDay.isEmpty());
 
@@ -117,18 +121,18 @@ public class PostgresDPPPTDataServiceTest {
 
     @Test
     public void testBatchReleaseTime() throws SQLException {
-        Instant receivedAt = LocalDateTime.parse("2014-01-28T00:00:00").toInstant(ZoneOffset.UTC);
+        var receivedAt = UTCInstant.parseDateTime("2014-01-28T00:00:00");
         String key = "key555";
-        insertExposeeWithReceivedAt(receivedAt, key);
+        insertExposeeWithReceivedAt(receivedAt.getInstant(), key);
 
-        long batchTime = LocalDateTime.parse("2014-01-28T02:00:00").toInstant(ZoneOffset.UTC).toEpochMilli();
+        long batchTime = UTCInstant.parseDateTime("2014-01-28T02:00:00").getInstant().toEpochMilli();
         List<Exposee> sortedExposedForBatchReleaseTime = dppptDataService.getSortedExposedForBatchReleaseTime(batchTime, BATCH_LENGTH);
         assertEquals(1, sortedExposedForBatchReleaseTime.size());
         Exposee actual = sortedExposedForBatchReleaseTime.get(0);
         assertEquals(actual.getKey(), key);
         int maxExposedIdForBatchReleaseTime = dppptDataService.getMaxExposedIdForBatchReleaseTime(batchTime, BATCH_LENGTH);
         assertEquals(1, maxExposedIdForBatchReleaseTime);
-        maxExposedIdForBatchReleaseTime = dppptDataService.getMaxExposedIdForBatchReleaseTime(receivedAt.toEpochMilli(), PostgresDPPPTDataServiceTest.BATCH_LENGTH);
+        maxExposedIdForBatchReleaseTime = dppptDataService.getMaxExposedIdForBatchReleaseTime(receivedAt.getTimestamp(), PostgresDPPPTDataServiceTest.BATCH_LENGTH);
         assertEquals(0, maxExposedIdForBatchReleaseTime);
     }
 
@@ -146,7 +150,7 @@ public class PostgresDPPPTDataServiceTest {
     private Exposee createExposee(String key, String keyDate) {
         Exposee exposee = new Exposee();
         exposee.setKey(key);
-        exposee.setKeyDate(LocalDate.parse("2014-01-28").atStartOfDay().atOffset(ZoneOffset.UTC).toInstant().toEpochMilli());
+        exposee.setKeyDate(UTCInstant.parseDate("2014-01-28").getTimestamp());
         return exposee;
     }
 
