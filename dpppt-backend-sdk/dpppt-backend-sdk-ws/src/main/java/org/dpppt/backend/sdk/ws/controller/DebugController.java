@@ -18,7 +18,9 @@ import org.dpppt.backend.sdk.model.gaen.DayBuckets;
 import org.dpppt.backend.sdk.model.gaen.GaenKey;
 import org.dpppt.backend.sdk.model.gaen.GaenRequest;
 import org.dpppt.backend.sdk.ws.security.ValidateRequest;
+import org.dpppt.backend.sdk.ws.security.ValidateRequest.ClaimIsBeforeOnsetException;
 import org.dpppt.backend.sdk.ws.security.ValidateRequest.InvalidDateException;
+import org.dpppt.backend.sdk.ws.security.ValidateRequest.WrongScopeException;
 import org.dpppt.backend.sdk.ws.security.signature.ProtoSignature;
 import org.dpppt.backend.sdk.ws.util.ValidationUtils;
 import org.dpppt.backend.sdk.ws.util.ValidationUtils.BadBatchReleaseTimeException;
@@ -59,17 +61,16 @@ public class DebugController {
     public @ResponseBody ResponseEntity<String> addExposed(@Valid @RequestBody GaenRequest gaenRequest,
             @RequestHeader(value = "User-Agent", required = true) String userAgent,
             @RequestHeader(value = "X-Device-Name", required = true) String deviceName,
-            @AuthenticationPrincipal Object principal) throws InvalidDateException {
+            @AuthenticationPrincipal Object principal) throws InvalidDateException, ClaimIsBeforeOnsetException, WrongScopeException {
         var now = Instant.now().toEpochMilli();
-        if (!this.validateRequest.isValid(principal)) {
-            return ResponseEntity.status(HttpStatus.FORBIDDEN).build();
-        }
+        this.validateRequest.isValid(principal);
+        
         List<GaenKey> nonFakeKeys = new ArrayList<>();
         for (var key : gaenRequest.getGaenKeys()) {
             if (!validationUtils.isValidBase64Key(key.getKeyData())) {
                 return new ResponseEntity<>("No valid base64 key", HttpStatus.BAD_REQUEST);
             }
-            this.validateRequest.getKeyDate(principal, key);
+            this.validateRequest.validateKeyDate(principal, key);
             if (this.validateRequest.isFakeRequest(principal, key)) {
                 continue;
             } else {

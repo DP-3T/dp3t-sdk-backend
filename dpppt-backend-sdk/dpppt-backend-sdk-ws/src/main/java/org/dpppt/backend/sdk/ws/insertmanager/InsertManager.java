@@ -17,7 +17,10 @@ public class InsertManager {
     public void addFilter(InsertionFilter filter) {
         filterList.add(filter);
     }
-    public void insertIntoDatabase(List<GaenKey> keys, String header){
+    public void insertIntoDatabase(List<GaenKey> keys, String header, Object principal){
+        if(keys.isEmpty()) {
+            return;
+        }
         var now = System.currentTimeMillis();
         var internalKeys = keys;
         var headerParts = header.split(";");
@@ -28,7 +31,10 @@ public class InsertManager {
         var osVersion = extractOsVersion(headerParts[4]);
         var appVersion = extractAppVersion(headerParts[1], headerParts[2]);
         for(InsertionFilter filter : filterList){
-            internalKeys = filter.filter(now, keys, osType, osVersion, appVersion);
+            internalKeys = filter.filter(now, internalKeys, osType, osVersion, appVersion, principal);
+        }
+        if(internalKeys.isEmpty()) {
+            return;
         }
         dataService.upsertExposees(internalKeys);
     }

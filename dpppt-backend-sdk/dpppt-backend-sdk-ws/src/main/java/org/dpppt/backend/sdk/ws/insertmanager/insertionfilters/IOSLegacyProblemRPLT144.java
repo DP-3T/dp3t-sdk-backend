@@ -9,7 +9,7 @@ import org.dpppt.backend.sdk.ws.insertmanager.OSType;
 public class IOSLegacyProblemRPLT144 implements InsertionFilter {
 
     @Override
-    public List<GaenKey> filter(long now,List<GaenKey> content, OSType osType, Version osVersion, Version appVersion) {
+    public List<GaenKey> filter(long now,List<GaenKey> content, OSType osType, Version osVersion, Version appVersion, Object principal) {
         for(GaenKey key : content){
             key.setRollingPeriod(144);
         }

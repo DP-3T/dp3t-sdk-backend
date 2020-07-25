@@ -19,7 +19,7 @@ public class RollingStartNumberBeforeRetentionDay implements InsertionFilter {
         this.validationUtils = validationUtils;
     }
     @Override
-    public List<GaenKey> filter(long now, List<GaenKey> content, OSType osType, Version osVersion, Version appVersion) {
+    public List<GaenKey> filter(long now, List<GaenKey> content, OSType osType, Version osVersion, Version appVersion, Object principal) {
         return content.stream().filter(key -> {
             var rp = key.getRollingStartNumber();
             var timestamp = OffsetDateTime.ofInstant(Instant.ofEpochMilli(rp * GaenUnit.TenMinutes.getDuration().toMillis()), ZoneOffset.UTC);

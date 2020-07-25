@@ -30,10 +30,7 @@ import org.dpppt.backend.sdk.ws.controller.DPPPTController;
 import org.dpppt.backend.sdk.ws.controller.GaenController;
 import org.dpppt.backend.sdk.ws.filter.ResponseWrapperFilter;
 import org.dpppt.backend.sdk.ws.insertmanager.InsertManager;
-import org.dpppt.backend.sdk.ws.insertmanager.insertionfilters.IOSLegacyProblemRPLT144;
-import org.dpppt.backend.sdk.ws.insertmanager.insertionfilters.OldAndroid0RPFilter;
-import org.dpppt.backend.sdk.ws.insertmanager.insertionfilters.RollingStartNumberAfterDayAfterTomorrow;
-import org.dpppt.backend.sdk.ws.insertmanager.insertionfilters.RollingStartNumberBeforeRetentionDay;
+import org.dpppt.backend.sdk.ws.insertmanager.insertionfilters.*;
 import org.dpppt.backend.sdk.ws.interceptor.HeaderInjector;
 import org.dpppt.backend.sdk.ws.security.KeyVault;
 import org.dpppt.backend.sdk.ws.security.NoValidateRequest;
@@ -45,10 +42,8 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
-import org.springframework.boot.autoconfigure.condition.ConditionalOnBean;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
-import org.springframework.context.annotation.Bean;
-import org.springframework.context.annotation.Conditional;
+import org.springframework.context.annotation.Bean; 
 import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.Lazy;
 import org.springframework.http.converter.HttpMessageConverter;
@@ -200,8 +195,12 @@ public abstract class WSBaseConfig implements SchedulingConfigurer, WebMvcConfig
 	@Bean
 	public InsertManager insertManager() {
 		var manager = new InsertManager(gaenDataService());
+		manager.addFilter(new NoBase64Filter(gaenValidationUtils()));
+		manager.addFilter(new KeysNotMatchingJWTFilter(gaenRequestValidator));
 		manager.addFilter(new RollingStartNumberAfterDayAfterTomorrow());
 		manager.addFilter(new RollingStartNumberBeforeRetentionDay(gaenValidationUtils()));
+		manager.addFilter(new FakeKeysFilter());
+		manager.addFilter(new NegativeRollingPeriodFilter());
 		return manager;
 	}
 	@ConditionalOnProperty(

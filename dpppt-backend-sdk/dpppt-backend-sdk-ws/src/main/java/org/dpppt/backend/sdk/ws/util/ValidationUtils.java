@@ -78,7 +78,7 @@ public class ValidationUtils {
 	public boolean isBeforeRetention(OffsetDateTime timestamp){
 		OffsetDateTime now = Instant.now().atOffset(ZoneOffset.UTC);
 		OffsetDateTime retention = now.minus(retentionPeriod);
-		return timestamp.isAfter(retention);
+		return timestamp.isBefore(retention);
 	}
 
 	/**

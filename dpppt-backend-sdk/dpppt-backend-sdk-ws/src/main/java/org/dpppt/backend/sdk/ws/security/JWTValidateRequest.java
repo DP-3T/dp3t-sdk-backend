@@ -30,7 +30,7 @@ public class JWTValidateRequest implements ValidateRequest {
 	}
 
 	@Override
-	public long getKeyDate(Object authObject, Object others) throws InvalidDateException {
+	public long validateKeyDate(Object authObject, Object others) throws InvalidDateException, ClaimIsBeforeOnsetException {
 		if (authObject instanceof Jwt) {
 			Jwt token = (Jwt) authObject;
 			long jwtKeyDate = LocalDate.parse(token.getClaim("onset")).atStartOfDay().atOffset(ZoneOffset.UTC).toInstant().toEpochMilli();
@@ -39,7 +39,7 @@ public class JWTValidateRequest implements ValidateRequest {
 				if (request.getKeyDate() > System.currentTimeMillis()) {
 					throw new InvalidDateException();
 				} else if (request.getKeyDate() < jwtKeyDate) {
-					throw new InvalidDateException();
+					throw new ClaimIsBeforeOnsetException();
 				} 
 				else if(request.getKeyDate() < OffsetDateTime.now().minusDays(21).toInstant().toEpochMilli()) {
 					throw new InvalidDateException();

@@ -39,7 +39,9 @@ import org.dpppt.backend.sdk.model.gaen.GaenUnit;
 import org.dpppt.backend.sdk.ws.insertmanager.InsertManager;
 import org.dpppt.backend.sdk.ws.insertmanager.OSType;
 import org.dpppt.backend.sdk.ws.security.ValidateRequest;
+import org.dpppt.backend.sdk.ws.security.ValidateRequest.ClaimIsBeforeOnsetException;
 import org.dpppt.backend.sdk.ws.security.ValidateRequest.InvalidDateException;
+import org.dpppt.backend.sdk.ws.security.ValidateRequest.WrongScopeException;
 import org.dpppt.backend.sdk.ws.security.signature.ProtoSignature;
 import org.dpppt.backend.sdk.ws.security.signature.ProtoSignature.ProtoSignatureWrapper;
 import org.dpppt.backend.sdk.ws.util.ValidationUtils;
@@ -129,32 +131,13 @@ public class GaenController {
                     String userAgent,
 			@AuthenticationPrincipal
             @Documentation(description = "JWT token that can be verified by the backend server")
-                    Object principal) {
+					Object principal)
+					throws ClaimIsBeforeOnsetException, WrongScopeException {
 		var now = Instant.now().toEpochMilli();
-		if (!this.validateRequest.isValid(principal)) {
-			return () -> ResponseEntity.status(HttpStatus.FORBIDDEN).build();
-		}
+		this.validateRequest.isValid(principal);
 
-		List<GaenKey> nonFakeKeys = new ArrayList<>();
-		for (var key : gaenRequest.getGaenKeys()) {
-			if (!validationUtils.isValidBase64Key(key.getKeyData())) {
-				return () -> new ResponseEntity<>("No valid base64 key", HttpStatus.BAD_REQUEST);
-			}
-			if (this.validateRequest.isFakeRequest(principal, key) 
-				|| hasNegativeRollingPeriod(key)
-				|| hasInvalidKeyDate(principal, key)) {
-				continue;
-			}
-			nonFakeKeys.add(key);
-		}
-
-		if (principal instanceof Jwt && ((Jwt) principal).containsClaim("fake")
-				&& ((Jwt) principal).getClaim("fake").equals("1") && !nonFakeKeys.isEmpty()) {
-			return () -> ResponseEntity.badRequest().body("Claim is fake but list contains non fake keys");
-		}
-		if (!nonFakeKeys.isEmpty()) {
-			//dataService.upsertExposees(nonFakeKeys);
-			insertManager.insertIntoDatabase(nonFakeKeys, userAgent);
+		if(!jwtIsFake(principal)) {
+			insertManager.insertIntoDatabase(gaenRequest.getGaenKeys(), userAgent, principal);
 		}
 
 		var delayedKeyDateDuration = Duration.of(gaenRequest.getDelayedKeyDate(), GaenUnit.TenMinutes);
@@ -209,9 +192,6 @@ public class GaenController {
                     Object principal) {
 		var now = Instant.now().toEpochMilli();
 
-		if (!validationUtils.isValidBase64Key(gaenSecondDay.getDelayedKey().getKeyData())) {
-			return () -> new ResponseEntity<>("No valid base64 key", HttpStatus.BAD_REQUEST);
-		}
 		if (principal instanceof Jwt && !((Jwt) principal).containsClaim("delayedKeyDate")) {
 			return () -> ResponseEntity.status(HttpStatus.FORBIDDEN).body("claim does not contain delayedKeyDate");
 		}
@@ -222,22 +202,10 @@ public class GaenController {
 				return () -> ResponseEntity.badRequest().body("keyDate does not match claim keyDate");
 			}
 		}
-
 		if (!this.validateRequest.isFakeRequest(principal, gaenSecondDay.getDelayedKey())) {
-			if (gaenSecondDay.getDelayedKey().getRollingPeriod().equals(0)) {
-				// currently only android seems to send 0 which can never be valid, since a non used key should not be submitted
-				// default value according to EN is 144, so just set it to that. If we ever get 0 from iOS we should log it, since
-				// this should not happen
-				gaenSecondDay.getDelayedKey().setRollingPeriod(GaenKey.GaenKeyDefaultRollingPeriod);
-				if(userAgent.toLowerCase().contains("ios")) {
-					logger.error("Received a rolling period of 0 for an iOS User-Agent");
-				}
-			} else if(gaenSecondDay.getDelayedKey().getRollingPeriod() < 0) {
-				return () -> ResponseEntity.status(HttpStatus.BAD_REQUEST).body("Rolling Period MUST NOT be negative.");
-			}
 			List<GaenKey> keys = new ArrayList<>();
 			keys.add(gaenSecondDay.getDelayedKey());
-			insertManager.insertIntoDatabase(keys, userAgent);
+			insertManager.insertIntoDatabase(keys, userAgent, principal);
 		}
 
 		return () -> {
@@ -333,31 +301,25 @@ public class GaenController {
 		}
 	}
 
-	private boolean hasNegativeRollingPeriod(GaenKey key) {
-		Integer rollingPeriod = key.getRollingPeriod();
-		if (key.getRollingPeriod() < 0) {
-			logger.error("Detected key with negative rolling period {}", rollingPeriod);
-			return true;
-		} else {
-			return false;
-		}
-	}
-
-	private boolean hasInvalidKeyDate(Object principal, GaenKey key) {
-		try { 
-			this.validateRequest.getKeyDate(principal, key);
-		}
-		catch (InvalidDateException invalidDate) {
-			logger.error(invalidDate.getLocalizedMessage());
-			return true;
-		}
+	private boolean jwtIsFake(Object principal) {
+		if (principal instanceof Jwt && ((Jwt) principal).containsClaim("fake")
+				&& ((Jwt) principal).getClaim("fake").equals("1")) {
+				return true;
+			}
 		return false;
 	}
 
 	@ExceptionHandler({IllegalArgumentException.class, InvalidDateException.class, JsonProcessingException.class,
-			MethodArgumentNotValidException.class, BadBatchReleaseTimeException.class, DateTimeParseException.class})
+			MethodArgumentNotValidException.class, BadBatchReleaseTimeException.class, DateTimeParseException.class, ClaimIsBeforeOnsetException.class})
 	@ResponseStatus(HttpStatus.BAD_REQUEST)
 	public ResponseEntity<Object> invalidArguments() {
 		return ResponseEntity.badRequest().build();
 	}
+
+	@ExceptionHandler({WrongScopeException.class})
+	@ResponseStatus(HttpStatus.FORBIDDEN)
+	public ResponseEntity<Object> forbidden() {
+		return ResponseEntity.status(HttpStatus.FORBIDDEN).build();
+	}
+
 }

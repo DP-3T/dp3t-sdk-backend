@@ -643,7 +643,7 @@ public class GaenControllerTest extends BaseControllerTest {
 		var now = System.currentTimeMillis();
 		GaenRequest exposeeRequest = new GaenRequest();
 		var duration = Duration.ofMillis(
-				LocalDate.now(ZoneOffset.UTC).atStartOfDay().plusDays(1).toInstant(ZoneOffset.UTC).toEpochMilli())
+				LocalDate.now(ZoneOffset.UTC).atStartOfDay().plusDays(2).toInstant(ZoneOffset.UTC).toEpochMilli())
 				.dividedBy(Duration.ofMinutes(10));
 		exposeeRequest.setDelayedKeyDate((int) duration);
 		GaenKey key = new GaenKey();

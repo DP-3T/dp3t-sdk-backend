@@ -26,7 +26,7 @@ public class NoValidateRequest implements ValidateRequest {
 	}
 
 	@Override
-	public long getKeyDate(Object authObject, Object others) throws InvalidDateException {
+	public long validateKeyDate(Object authObject, Object others) throws ClaimIsBeforeOnsetException,InvalidDateException {
 		if (others instanceof ExposeeRequest) {
 			ExposeeRequest request = ((ExposeeRequest) others);
 			if (request.getKeyDate() < OffsetDateTime.now().minusDays(21).toInstant().toEpochMilli()) {

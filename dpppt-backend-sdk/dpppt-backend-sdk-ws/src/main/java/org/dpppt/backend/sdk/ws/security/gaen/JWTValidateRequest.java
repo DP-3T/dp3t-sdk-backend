@@ -12,7 +12,6 @@ package org.dpppt.backend.sdk.ws.security.gaen;
 
 import java.time.Duration;
 import java.time.LocalDate;
-import java.time.OffsetDateTime;
 import java.time.ZoneOffset;
 
 import org.dpppt.backend.sdk.model.gaen.GaenKey;
@@ -23,30 +22,28 @@ import org.springframework.security.oauth2.jwt.Jwt;
 public class JWTValidateRequest implements ValidateRequest {
 
 	@Override
-	public boolean isValid(Object authObject) {
+	public boolean isValid(Object authObject) throws WrongScopeException {
 		if (authObject instanceof Jwt) {
 			Jwt token = (Jwt) authObject;
-			return token.containsClaim("scope") && token.getClaim("scope").equals("exposed");
+			if(token.containsClaim("scope") && token.getClaim("scope").equals("exposed")) {
+				return true;
+			}
+			throw new WrongScopeException();
 		}
 		return false;
 	}
 
 	@Override
-	public long getKeyDate(Object authObject, Object others) throws InvalidDateException {
+	public long validateKeyDate(Object authObject, Object others) throws ClaimIsBeforeOnsetException {
 		if (authObject instanceof Jwt) {
 			Jwt token = (Jwt) authObject;
 			long jwtKeyDate = LocalDate.parse(token.getClaim("onset")).atStartOfDay().atOffset(ZoneOffset.UTC).toInstant().toEpochMilli();
 			if (others instanceof GaenKey) {
                 GaenKey request = (GaenKey) others;
                 var keyDate = Duration.of(request.getRollingStartNumber(), GaenUnit.TenMinutes);
-				if (keyDate.toMillis() > System.currentTimeMillis()) {
-					throw new InvalidDateException();
-				} else if (keyDate.toMillis() < jwtKeyDate) {
-					throw new InvalidDateException();
+				if (keyDate.toMillis() < jwtKeyDate) {
+					throw new ClaimIsBeforeOnsetException();
 				} 
-				else if(keyDate.toMillis() < OffsetDateTime.now().minusDays(21).toInstant().toEpochMilli()) {
-					throw new InvalidDateException();
-				}
 				jwtKeyDate = keyDate.toMillis();
 			}
 			return jwtKeyDate;
