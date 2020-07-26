@@ -115,8 +115,7 @@ public class GaenController {
 			description = "Send exposed keys to server - includes a fix for the fact that GAEN doesn't give access to the current day's exposed key",
 			responses = {
 					"200=>The exposed keys have been stored in the database",
-					"400=> " +
-                            "- Invalid base64 encoding in GaenRequest" + 
+					"400=>Invalid base64 encoding in GaenRequest",
 					"403=>Authentication failed"
 			})
 	public @ResponseBody Callable<ResponseEntity<String>> addExposed(
@@ -134,6 +133,7 @@ public class GaenController {
 
 		this.validateRequest.isValid(principal);
 
+		//Filter out non valid keys and insert them into the database (c.f. InsertManager and configured Filters in the WSBaseConfig)
 		insertIntoDatabaseIfJWTIsNotFake(gaenRequest.getGaenKeys(), userAgent, principal, utcNow);
 
 		this.validationUtils.validateDelayedKeyDate(utcNow, UTCInstant.of(gaenRequest.getDelayedKeyDate(), GaenUnit.TenMinutes));
@@ -165,8 +165,7 @@ public class GaenController {
     		"200=>The exposed key has been stored in the backend",
 			"400=>" +
 					"- Ivnalid base64 encoded Temporary Exposure Key" +
-					"- TEK-date does not match delayedKeyDAte claim in Jwt" +
-					"- TEK has negative rolling period",
+					"- TEK-date does not match delayedKeyDAte claim in Jwt",
 			"403=>No delayedKeyDate claim in authentication"
 	})
 	public @ResponseBody Callable<ResponseEntity<String>> addExposedSecond(
@@ -183,6 +182,7 @@ public class GaenController {
 
 		validationUtils.checkForDelayedKeyDateClaim(principal, gaenSecondDay.getDelayedKey());
 
+		//Filter out non valid keys and insert them into the database (c.f. InsertManager and configured Filters in the WSBaseConfig)
 		insertIntoDatabaseIfJWTIsNotFake(gaenSecondDay.getDelayedKey(), userAgent, principal, utcNow);
 
 		return () -> {
