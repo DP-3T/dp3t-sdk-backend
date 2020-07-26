@@ -81,7 +81,7 @@ public class SemverTests {
         && iosVersionVersion.getMinor() == 6
         && iosVersionVersion.getPatch() == 0);
 
-        var apiLevelWithMetaVersion = new Version("29+test");
+        var apiLevelWithMetaVersion = new Version(apiLevelWithMeta);
         assertTrue(apiLevelWithMetaVersion.getMajor() == 29 
         && apiLevelWithMetaVersion.getMinor() == 0
         && apiLevelWithMetaVersion.getPatch() == 0

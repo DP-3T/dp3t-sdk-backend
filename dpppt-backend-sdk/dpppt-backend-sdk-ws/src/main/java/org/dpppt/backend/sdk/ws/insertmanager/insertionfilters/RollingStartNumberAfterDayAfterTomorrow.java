@@ -1,8 +1,5 @@
 package org.dpppt.backend.sdk.ws.insertmanager.insertionfilters;
 
-import java.time.LocalDateTime;
-import java.time.LocalTime;
-import java.time.ZoneOffset;
 import java.util.List;
 import java.util.stream.Collectors;
 

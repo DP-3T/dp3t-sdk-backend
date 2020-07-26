@@ -1,8 +1,5 @@
 package org.dpppt.backend.sdk.ws.insertmanager.insertionfilters;
 
-import java.time.Instant;
-import java.time.OffsetDateTime;
-import java.time.ZoneOffset;
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -12,7 +9,6 @@ import org.dpppt.backend.sdk.semver.Version;
 import org.dpppt.backend.sdk.utils.UTCInstant;
 import org.dpppt.backend.sdk.ws.insertmanager.OSType;
 import org.dpppt.backend.sdk.ws.util.ValidationUtils;
-import org.springframework.beans.factory.annotation.Autowired;
 
 public class RollingStartNumberBeforeRetentionDay implements InsertionFilter {
     private final ValidationUtils validationUtils;
