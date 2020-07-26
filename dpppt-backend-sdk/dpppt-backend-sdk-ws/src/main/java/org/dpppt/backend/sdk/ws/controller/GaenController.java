@@ -36,6 +36,7 @@ import org.dpppt.backend.sdk.model.gaen.GaenSecondDay;
 import org.dpppt.backend.sdk.model.gaen.GaenUnit;
 import org.dpppt.backend.sdk.ws.insertmanager.InsertManager;
 import org.dpppt.backend.sdk.ws.insertmanager.OSType;
+import org.dpppt.backend.sdk.ws.insertmanager.insertionfilters.NoBase64Filter.KeyIsNotBase64Exception;
 import org.dpppt.backend.sdk.ws.security.ValidateRequest;
 import org.dpppt.backend.sdk.ws.security.ValidateRequest.ClaimIsBeforeOnsetException;
 import org.dpppt.backend.sdk.ws.security.ValidateRequest.InvalidDateException;
@@ -45,6 +46,8 @@ import org.dpppt.backend.sdk.ws.security.signature.ProtoSignature.ProtoSignature
 import org.dpppt.backend.sdk.utils.UTCInstant;
 import org.dpppt.backend.sdk.ws.util.ValidationUtils;
 import org.dpppt.backend.sdk.ws.util.ValidationUtils.BadBatchReleaseTimeException;
+import org.dpppt.backend.sdk.ws.util.ValidationUtils.DelayedKeyDateClaimIsWrong;
+import org.dpppt.backend.sdk.ws.util.ValidationUtils.DelayedKeyDateIsInvalid;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.http.CacheControl;
@@ -92,11 +95,9 @@ public class GaenController {
 	private final PrivateKey secondDayKey;
 	private final ProtoSignature gaenSigner;
 
-	private final boolean delayTodaysKeys;
-
 	public GaenController(InsertManager insertManager, GAENDataService dataService, FakeKeyService fakeKeyService, ValidateRequest validateRequest,
 						  ProtoSignature gaenSigner, ValidationUtils validationUtils, Duration releaseBucketDuration, Duration requestTime,
-						  Duration exposedListCacheControl, PrivateKey secondDayKey, boolean delayTodaysKeys) {
+						  Duration exposedListCacheControl, PrivateKey secondDayKey) {
 		this.insertManager = insertManager;
 		this.dataService = dataService;
 		this.fakeKeyService = fakeKeyService;
@@ -107,7 +108,6 @@ public class GaenController {
 		this.exposedListCacheControl = exposedListCacheControl;
 		this.secondDayKey = secondDayKey;
 		this.gaenSigner = gaenSigner;
-		this.delayTodaysKeys = delayTodaysKeys;
 	}
 
 	@PostMapping(value = "/exposed")
@@ -116,9 +116,7 @@ public class GaenController {
 			responses = {
 					"200=>The exposed keys have been stored in the database",
 					"400=> " +
-                            "- Invalid base64 encoding in GaenRequest" +
-                            "- negative rolling period" +
-                            "- fake claim with non-fake keys",
+                            "- Invalid base64 encoding in GaenRequest" + 
 					"403=>Authentication failed"
 			})
 	public @ResponseBody Callable<ResponseEntity<String>> addExposed(
@@ -131,18 +129,14 @@ public class GaenController {
 			@AuthenticationPrincipal
             @Documentation(description = "JWT token that can be verified by the backend server")
 					Object principal)
-					throws ClaimIsBeforeOnsetException, WrongScopeException {
+					throws ClaimIsBeforeOnsetException, WrongScopeException, KeyIsNotBase64Exception, DelayedKeyDateIsInvalid {
 		var utcNow = UTCInstant.now();
+
 		this.validateRequest.isValid(principal);
 
-		if(!jwtIsFake(principal)) {
-			insertManager.insertIntoDatabase(gaenRequest.getGaenKeys(), userAgent, principal, utcNow);
-		}
+		insertIntoDatabaseIfJWTIsNotFake(gaenRequest.getGaenKeys(), userAgent, principal, utcNow);
 
-		var delayedKeyDateUTCInstant = UTCInstant.of(gaenRequest.getDelayedKeyDate(), GaenUnit.TenMinutes);
-		if (delayedKeyDateUTCInstant.isBeforeDate(utcNow.getLocalDate().minusDays(1)) || delayedKeyDateUTCInstant.isAfterDate(utcNow.getLocalDate().plusDays(1))) {
-			return () -> ResponseEntity.badRequest().body("delayedKeyDate date must be between yesterday and tomorrow");
-		}
+		this.validationUtils.validateDelayedKeyDate(utcNow, UTCInstant.of(gaenRequest.getDelayedKeyDate(), GaenUnit.TenMinutes));
 
 		var responseBuilder = ResponseEntity.ok();
 		if (principal instanceof Jwt) {
@@ -150,7 +144,7 @@ public class GaenController {
 			var jwtBuilder = Jwts.builder().setId(UUID.randomUUID().toString()).setIssuedAt(Date.from(Instant.now()))
 					.setIssuer("dpppt-sdk-backend").setSubject(originalJWT.getSubject())
 					.setExpiration(Date
-							.from(delayedKeyDateUTCInstant.atStartOfDay().plusDays(2).getInstant()))
+							.from(utcNow.atStartOfDay().plusDays(2).getInstant()))
 					.claim("scope", "currentDayExposed").claim("delayedKeyDate", gaenRequest.getDelayedKeyDate());
 			if (originalJWT.containsClaim("fake")) {
 				jwtBuilder.claim("fake", originalJWT.getClaim("fake"));
@@ -184,24 +178,12 @@ public class GaenController {
                     String userAgent,
 			@AuthenticationPrincipal
             @Documentation(description = "JWT token that can be verified by the backend server, must have been created by /v1/gaen/exposed and contain the delayedKeyDate")
-                    Object principal) {
+                    Object principal) throws KeyIsNotBase64Exception, DelayedKeyDateClaimIsWrong {
 		var utcNow = UTCInstant.now();
 
-		if (principal instanceof Jwt && !((Jwt) principal).containsClaim("delayedKeyDate")) {
-			return () -> ResponseEntity.status(HttpStatus.FORBIDDEN).body("claim does not contain delayedKeyDate");
-		}
-		if (principal instanceof Jwt) {
-			var jwt = (Jwt) principal;
-			var claimKeyDate = Integer.parseInt(jwt.getClaimAsString("delayedKeyDate"));
-			if (!gaenSecondDay.getDelayedKey().getRollingStartNumber().equals(claimKeyDate)) {
-				return () -> ResponseEntity.badRequest().body("keyDate does not match claim keyDate");
-			}
-		}
-		if (!this.validateRequest.isFakeRequest(principal, gaenSecondDay.getDelayedKey())) {
-			List<GaenKey> keys = new ArrayList<>();
-			keys.add(gaenSecondDay.getDelayedKey());
-			insertManager.insertIntoDatabase(keys, userAgent, principal, utcNow);
-		}
+		validationUtils.checkForDelayedKeyDateClaim(principal, gaenSecondDay.getDelayedKey());
+
+		insertIntoDatabaseIfJWTIsNotFake(gaenSecondDay.getDelayedKey(), userAgent, principal, utcNow);
 
 		return () -> {
 			normalizeRequestTime(utcNow.getTimestamp());
@@ -295,17 +277,34 @@ public class GaenController {
 			logger.error("Couldn't equalize request time: {}", ex.toString());
 		}
 	}
+	private void insertIntoDatabaseIfJWTIsNotFake(GaenKey key, String userAgent, Object principal, UTCInstant utcNow) throws KeyIsNotBase64Exception {
+		List<GaenKey> keys = new ArrayList<>();
+		keys.add(key);
+		insertIntoDatabaseIfJWTIsNotFake(keys, userAgent, principal, utcNow);
+	}
+	private void insertIntoDatabaseIfJWTIsNotFake(List<GaenKey> keys, String userAgent, Object principal, UTCInstant utcNow) throws KeyIsNotBase64Exception {
+		try {
+			insertManager.insertIntoDatabase(keys, userAgent, principal, utcNow);
+		}
+		catch(Throwable ex) {
+			if(ex instanceof KeyIsNotBase64Exception) throw (KeyIsNotBase64Exception)ex;
+		}
+	}
 
-	private boolean jwtIsFake(Object principal) {
-		if (principal instanceof Jwt && ((Jwt) principal).containsClaim("fake")
-				&& ((Jwt) principal).getClaim("fake").equals("1")) {
-				return true;
-			}
-		return false;
+	@ExceptionHandler({DelayedKeyDateClaimIsWrong.class})
+	@ResponseStatus(HttpStatus.BAD_REQUEST)
+	public ResponseEntity<String> delayedClaimIsWrong() {
+		return ResponseEntity.badRequest().body("DelayedKeyDateClaim is wrong");
+	}
+
+	@ExceptionHandler({DelayedKeyDateIsInvalid.class})
+	@ResponseStatus(HttpStatus.BAD_REQUEST)
+	public ResponseEntity<String> delayedKeyDateIsInvalid() {
+		return ResponseEntity.badRequest().body("DelayedKeyDate must be between yesterday and tomorrow");
 	}
 
 	@ExceptionHandler({IllegalArgumentException.class, InvalidDateException.class, JsonProcessingException.class,
-			MethodArgumentNotValidException.class, BadBatchReleaseTimeException.class, DateTimeParseException.class, ClaimIsBeforeOnsetException.class})
+			MethodArgumentNotValidException.class, BadBatchReleaseTimeException.class, DateTimeParseException.class, ClaimIsBeforeOnsetException.class, KeyIsNotBase64Exception.class})
 	@ResponseStatus(HttpStatus.BAD_REQUEST)
 	public ResponseEntity<Object> invalidArguments() {
 		return ResponseEntity.badRequest().build();

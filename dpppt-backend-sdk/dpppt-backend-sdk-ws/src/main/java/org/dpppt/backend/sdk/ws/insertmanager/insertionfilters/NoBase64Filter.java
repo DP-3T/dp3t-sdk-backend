@@ -15,8 +15,20 @@ public class NoBase64Filter implements InsertionFilter {
         this.validationUtils = validationUtils;
     }
     @Override
-    public List<GaenKey> filter(UTCInstant now, List<GaenKey> content, OSType osType, Version osVersion, Version appVersion, Object principal) {
-        return content.stream().filter(key -> validationUtils.isValidBase64Key(key.getKeyData())).collect(Collectors.toList());
+    public List<GaenKey> filter(UTCInstant now, List<GaenKey> content, OSType osType, Version osVersion, Version appVersion, Object principal) throws KeyIsNotBase64Exception {
+        var numberOfInvalidKeys = content.stream().filter(key -> !validationUtils.isValidBase64Key(key.getKeyData())).collect(Collectors.toList()).size();
+        if(numberOfInvalidKeys > 0) {
+            throw new KeyIsNotBase64Exception();
+        }
+        return content;
     }
     
+    public class KeyIsNotBase64Exception extends Exception {
+
+        /**
+         *
+         */
+        private static final long serialVersionUID = -918099046973553472L;
+        
+    }
 }

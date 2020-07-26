@@ -8,17 +8,21 @@ import org.dpppt.backend.sdk.model.gaen.GaenKey;
 import org.dpppt.backend.sdk.semver.Version;
 import org.dpppt.backend.sdk.utils.UTCInstant;
 import org.dpppt.backend.sdk.ws.insertmanager.insertionfilters.InsertionFilter;
+import org.dpppt.backend.sdk.ws.util.ValidationUtils;
 
 public class InsertManager {
     private ArrayList<InsertionFilter> filterList = new ArrayList<>();
     private final GAENDataService dataService;
-    public InsertManager(GAENDataService dataService){
+    private final ValidationUtils validationUtils;
+
+    public InsertManager(GAENDataService dataService, ValidationUtils validationUtils){
         this.dataService = dataService;
+        this.validationUtils = validationUtils;
     }
     public void addFilter(InsertionFilter filter) {
         filterList.add(filter);
     }
-    public void insertIntoDatabase(List<GaenKey> keys, String header, Object principal, UTCInstant now){
+    public void insertIntoDatabase(List<GaenKey> keys, String header, Object principal, UTCInstant now) throws Throwable{
         if(keys.isEmpty()) {
             return;
         }
@@ -33,7 +37,8 @@ public class InsertManager {
         for(InsertionFilter filter : filterList){
             internalKeys = filter.filter(now, internalKeys, osType, osVersion, appVersion, principal);
         }
-        if(internalKeys.isEmpty()) {
+        if(internalKeys.isEmpty()
+        || validationUtils.jwtIsFake(principal)) {
             return;
         }
         dataService.upsertExposees(internalKeys);

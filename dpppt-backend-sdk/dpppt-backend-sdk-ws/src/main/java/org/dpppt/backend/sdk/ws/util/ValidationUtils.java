@@ -9,7 +9,10 @@
  */
 package org.dpppt.backend.sdk.ws.util;
 
+import org.dpppt.backend.sdk.model.gaen.GaenKey;
 import org.dpppt.backend.sdk.utils.UTCInstant;
+import org.springframework.security.oauth2.jwt.Jwt;
+
 import java.time.Duration;
 import java.util.Base64;
 
@@ -99,9 +102,53 @@ public class ValidationUtils {
 		return this.isDateInRange(batchReleaseTime, now);
 	}
 
+	public void validateDelayedKeyDate(UTCInstant now, UTCInstant delayedKeyDate) throws DelayedKeyDateIsInvalid{
+		if (delayedKeyDate.isBeforeDate(now.getLocalDate().minusDays(1)) 
+		||  delayedKeyDate.isAfterDate(now.getLocalDate().plusDays(1))) {
+			throw new DelayedKeyDateIsInvalid();
+		}
+	}
+	public void checkForDelayedKeyDateClaim(Object principal, GaenKey delayedKey) throws DelayedKeyDateClaimIsWrong {
+		if (principal instanceof Jwt && !((Jwt) principal).containsClaim("delayedKeyDate")) {
+			throw new DelayedKeyDateClaimIsWrong();
+		}
+		if (principal instanceof Jwt) {
+			var jwt = (Jwt) principal;
+			var claimKeyDate = Integer.parseInt(jwt.getClaimAsString("delayedKeyDate"));
+			if (!delayedKey.getRollingStartNumber().equals(claimKeyDate)) {
+				throw new DelayedKeyDateClaimIsWrong();
+			}
+		}
+	}
+
+	public boolean jwtIsFake(Object principal) {
+		if (principal instanceof Jwt && ((Jwt) principal).containsClaim("fake")
+				&& ((Jwt) principal).getClaim("fake").equals("1")) {
+				return true;
+			}
+		return false;
+	}
+
+
 	public class BadBatchReleaseTimeException extends Exception {
 
 		private static final long serialVersionUID = 618376703047108588L;
+
+	}
+	public class DelayedKeyDateIsInvalid extends Exception {
+
+		/**
+		 *
+		 */
+		private static final long serialVersionUID = -2667236967819549686L;
+
+	}
+	public class DelayedKeyDateClaimIsWrong extends Exception {
+
+		/**
+		 *
+		 */
+		private static final long serialVersionUID = 4683923905451080793L;
 
 	}
 

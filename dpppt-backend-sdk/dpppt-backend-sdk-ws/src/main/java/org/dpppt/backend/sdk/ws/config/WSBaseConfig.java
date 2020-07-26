@@ -194,7 +194,7 @@ public abstract class WSBaseConfig implements SchedulingConfigurer, WebMvcConfig
 	}
 	@Bean
 	public InsertManager insertManager() {
-		var manager = new InsertManager(gaenDataService());
+		var manager = new InsertManager(gaenDataService(), gaenValidationUtils());
 		manager.addFilter(new NoBase64Filter(gaenValidationUtils()));
 		manager.addFilter(new KeysNotMatchingJWTFilter(gaenRequestValidator));
 		manager.addFilter(new RollingStartNumberAfterDayAfterTomorrow());
@@ -252,7 +252,7 @@ public abstract class WSBaseConfig implements SchedulingConfigurer, WebMvcConfig
 		}
 		return new GaenController(insertManager(),gaenDataService(), fakeKeyService(), theValidator, gaenSigner(),
 				gaenValidationUtils(), Duration.ofMillis(releaseBucketDuration), Duration.ofMillis(requestTime),
-				Duration.ofMillis(exposedListCacheControl), keyVault.get("nextDayJWT").getPrivate(), delayTodaysKeys);
+				Duration.ofMillis(exposedListCacheControl), keyVault.get("nextDayJWT").getPrivate());
 	}
 
 	@Bean
