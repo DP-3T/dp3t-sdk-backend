@@ -48,7 +48,8 @@ public class FakeKeyService {
 				var key = new GaenKey(Base64.getEncoder().encodeToString(keyData), keyGAENTime, 144, 0);
 				keys.add(key);
 			}
-			this.dataService.upsertExposees(keys);
+			//TODO: Check if currentKeyDate is indeed intended here
+			this.dataService.upsertExposees(keys, currentKeyDate);
 			tmpDate = tmpDate.plusDays(1);
 		} while (tmpDate.isBeforeDate(currentKeyDate.plusDays(1)));
 	}

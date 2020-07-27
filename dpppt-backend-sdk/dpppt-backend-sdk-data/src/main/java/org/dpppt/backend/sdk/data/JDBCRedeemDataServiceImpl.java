@@ -56,7 +56,6 @@ public class JDBCRedeemDataServiceImpl implements RedeemDataService {
 	@Override
 	@Transactional(readOnly = false)
 	public void cleanDB(Duration retentionPeriod) {
-		//TODO: should that be now or midnight?
 		var retentionTime = UTCInstant.now().minus(retentionPeriod);
 		logger.info("Cleanup DB entries before: " + retentionTime);
 		MapSqlParameterSource params = new MapSqlParameterSource("retention_time", retentionTime.getDate());
