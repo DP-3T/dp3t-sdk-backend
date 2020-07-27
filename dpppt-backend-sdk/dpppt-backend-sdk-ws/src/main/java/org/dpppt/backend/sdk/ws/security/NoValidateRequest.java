@@ -16,11 +16,12 @@ import org.dpppt.backend.sdk.model.ExposeeRequest;
 import org.dpppt.backend.sdk.model.gaen.GaenKey;
 import org.dpppt.backend.sdk.model.gaen.GaenUnit;
 import org.dpppt.backend.sdk.utils.UTCInstant;
+import org.dpppt.backend.sdk.ws.util.ValidationUtils;
 
 public class NoValidateRequest implements ValidateRequest {
-	private final Duration retentionPeriod;
-	public NoValidateRequest(Duration retentionPeriod){
-		this.retentionPeriod = retentionPeriod;
+	private final ValidationUtils validationUtils;
+	public NoValidateRequest(ValidationUtils validationUtils){
+		this.validationUtils = validationUtils;
 	}
 	@Override
 	public boolean isValid(Object authObject) {
@@ -45,9 +46,7 @@ public class NoValidateRequest implements ValidateRequest {
 	}
 
 	private void checkDateIsInBounds(UTCInstant requestKeyDate, UTCInstant now) throws InvalidDateException {
-		if (requestKeyDate.isBeforeEpochMillisOf(now.minus(retentionPeriod))) {
-			throw new InvalidDateException();
-		} else if (requestKeyDate.isAfterEpochMillisOf(now)) {
+		if (!validationUtils.isDateInRange(requestKeyDate, now)) {
 			throw new InvalidDateException();
 		}
 	}

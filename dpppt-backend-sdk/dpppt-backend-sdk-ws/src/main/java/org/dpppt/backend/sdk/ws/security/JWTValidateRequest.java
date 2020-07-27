@@ -13,9 +13,14 @@ package org.dpppt.backend.sdk.ws.security;
 import org.dpppt.backend.sdk.model.ExposeeRequest;
 import org.dpppt.backend.sdk.model.ExposeeRequestList;
 import org.dpppt.backend.sdk.utils.UTCInstant;
+import org.dpppt.backend.sdk.ws.util.ValidationUtils;
 import org.springframework.security.oauth2.jwt.Jwt;
 
 public class JWTValidateRequest implements ValidateRequest {
+	private final ValidationUtils validationUtils;
+	public JWTValidateRequest(ValidationUtils validationUtils) {
+		this.validationUtils = validationUtils;
+	}
 
 	@Override
 	public boolean isValid(Object authObject) {
@@ -34,10 +39,8 @@ public class JWTValidateRequest implements ValidateRequest {
 			if (others instanceof ExposeeRequest) {
 				ExposeeRequest request = (ExposeeRequest) others;
 				var requestKeyDate = UTCInstant.ofEpochMillis(request.getKeyDate());
-				if (requestKeyDate.isAfterEpochMillisOf(now)){
-					throw new InvalidDateException();
-				} else if (requestKeyDate.isBeforeEpochMillisOf(jwtKeyDate)
-						|| requestKeyDate.isBeforeEpochMillisOf(now.minusDays(21))) {
+				if (!validationUtils.isDateInRange(requestKeyDate, now)
+				 || requestKeyDate.isBeforeEpochMillisOf(jwtKeyDate)){
 					throw new InvalidDateException();
 				} 
 				jwtKeyDate = UTCInstant.ofEpochMillis(request.getKeyDate());
