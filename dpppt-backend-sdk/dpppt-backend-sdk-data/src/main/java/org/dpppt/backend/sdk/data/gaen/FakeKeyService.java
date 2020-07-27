@@ -51,7 +51,7 @@ public class FakeKeyService {
 			//TODO: Check if currentKeyDate is indeed intended here
 			this.dataService.upsertExposees(keys, currentKeyDate);
 			tmpDate = tmpDate.plusDays(1);
-		} while (tmpDate.isBeforeDate(currentKeyDate.plusDays(1)));
+		} while (tmpDate.isBeforeDateOf(currentKeyDate.plusDays(1)));
 	}
 
 	private void deleteAllKeys() {

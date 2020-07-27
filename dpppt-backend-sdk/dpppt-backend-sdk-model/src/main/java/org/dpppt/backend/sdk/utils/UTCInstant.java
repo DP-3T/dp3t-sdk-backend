@@ -12,6 +12,18 @@ import java.time.temporal.TemporalUnit;
 import java.util.Date;
 
 import org.dpppt.backend.sdk.model.gaen.GaenUnit;
+/**
+ * This class tries to unify time usage. Any `java.time.*` class should have its 
+ * equivalent regarding UTC.
+ * 
+ * All timestamps should be described as 'milliseconds since Unix epoch'.
+ * 
+ * 
+ * IMPORTANT: `Local*` classes do not carry any timezone informations. As such, all comparisons are 
+ *             made regarding 'UTC'
+ * 
+ * 
+ */
 
 public class UTCInstant {
     private final long timestamp;
@@ -98,14 +110,12 @@ public class UTCInstant {
     } 
     public UTCInstant minus(Duration duration){
         return new UTCInstant(this.timestamp - duration.toMillis());
-    } 
-    //TODO: Fix for leap year and stuff
+    }
     public UTCInstant plusYears(long years){
-        return new UTCInstant(this.timestamp + Duration.ofDays(years * 365).toMillis());
+        return new UTCInstant(this.getOffsetDateTime().plusYears(years));
     } 
-    //TODO: Fix for leap year and stuff
     public UTCInstant minusYears(long years){
-        return new UTCInstant(this.timestamp - Duration.ofDays(years * 365).toMillis());
+        return new UTCInstant(this.getOffsetDateTime().minusYears(years));
     } 
     public UTCInstant plusDays(long days){
         return new UTCInstant(this.timestamp + Duration.ofDays(days).toMillis());
@@ -131,7 +141,6 @@ public class UTCInstant {
     public UTCInstant minusSeconds(long seconds){
         return new UTCInstant(this.timestamp - Duration.ofSeconds(seconds).toMillis());
     } 
-
     public boolean isMidnight() {
         return getLocalTime().equals(LocalTime.MIDNIGHT);
     }
@@ -141,44 +150,40 @@ public class UTCInstant {
     public long get10MinutesSince1970() {
         return getDuration(midnight1970()).dividedBy(GaenUnit.TenMinutes.getDuration());
     }
-
-
-
-    public boolean isSameDate(UTCInstant other) {
-        return this.getLocalDate().isEqual(other.getLocalDate());
+    public boolean hasSameDateAs(UTCInstant otherInstant) {
+        return this.getLocalDate().isEqual(otherInstant.getLocalDate());
     }
-    public boolean isSameTime(UTCInstant other) {
-        return this.getLocalTime().equals(other.getLocalTime());
+    public boolean hasSameTimeOfDayAs(UTCInstant otherInstant) {
+        return this.getLocalTime().equals(otherInstant.getLocalTime());
     }
-
-    public boolean isBeforeExact(UTCInstant other) {
-        return this.getTimestamp() < other.getTimestamp();
+    public boolean isBeforeEpochMillisOf(UTCInstant otherInstant) {
+        return this.getTimestamp() < otherInstant.getTimestamp();
     }
-    public boolean isAfterExact(UTCInstant other) {
-        return this.getTimestamp() > other.getTimestamp();
+    public boolean isAfterEpochMillisOf(UTCInstant otherInstant) {
+        return this.getTimestamp() > otherInstant.getTimestamp();
     }
-    public boolean isBeforeDate(UTCInstant other) {
-        return this.getLocalDate().isBefore(other.getLocalDate());
+    public boolean isBeforeDateOf(UTCInstant otherInstant) {
+        return this.getLocalDate().isBefore(otherInstant.getLocalDate());
     }
-    public boolean isAfterDate(UTCInstant other) {
-        return this.getLocalDate().isAfter(other.getLocalDate());
+    public boolean isAfterDateOf(UTCInstant otherInstant) {
+        return this.getLocalDate().isAfter(otherInstant.getLocalDate());
     }
-    public boolean isBeforeDate(LocalDate other) {
-        return this.getLocalDate().isBefore(other);
+    public boolean isBeforeDateOf(LocalDate otherDate) {
+        return this.getLocalDate().isBefore(otherDate);
     }
-    public boolean isAfterDate(LocalDate other) {
-        return this.getLocalDate().isAfter(other);
+    public boolean isAfterDateOf(LocalDate otherDate) {
+        return this.getLocalDate().isAfter(otherDate);
     }
-    public boolean isBeforeTime(UTCInstant other) {
-        return this.getLocalTime().isBefore(other.getLocalTime());
+    public boolean isBeforeTimeOfDayOf(UTCInstant otherInstant) {
+        return this.getLocalTime().isBefore(otherInstant.getLocalTime());
     }
-    public boolean isAfterTime(UTCInstant other) {
-        return this.getLocalTime().isAfter(other.getLocalTime());
+    public boolean isAfterTimeOfDayOf(UTCInstant otherInstant) {
+        return this.getLocalTime().isAfter(otherInstant.getLocalTime());
     }
     public boolean isBeforeToday() {
-        return this.isBeforeDate(UTCInstant.now());
+        return this.isBeforeDateOf(UTCInstant.now());
     }
     public boolean isAfterToday() {
-        return this.isAfterDate(UTCInstant.now());
+        return this.isAfterDateOf(UTCInstant.now());
     }
 }

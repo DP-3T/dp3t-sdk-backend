@@ -23,12 +23,12 @@ public class NoValidateRequest implements ValidateRequest {
 	}
 
 	@Override
-	public long getKeyDate(UTCInstant utcNow, Object authObject, Object others) throws InvalidDateException {
+	public long getKeyDate(UTCInstant now, Object authObject, Object others) throws InvalidDateException {
 		if (others instanceof ExposeeRequest) {
 			ExposeeRequest request = ((ExposeeRequest) others);
-			if (request.getKeyDate() < utcNow.minusDays(21).getTimestamp()) {
+			if (request.getKeyDate() < now.minusDays(21).getTimestamp()) {
 				throw new InvalidDateException();
-			} else if (request.getKeyDate() > utcNow.getTimestamp()) {
+			} else if (request.getKeyDate() > now.getTimestamp()) {
 				throw new InvalidDateException();
 			}
 			return request.getKeyDate();
@@ -36,9 +36,9 @@ public class NoValidateRequest implements ValidateRequest {
 		if (others instanceof GaenKey) {
 			GaenKey key = ((GaenKey) others);
 			var requestDate = UTCInstant.of(key.getRollingStartNumber(), GaenUnit.TenMinutes);
-			if (requestDate.isBeforeExact(utcNow.minusDays(21))) {
+			if (requestDate.isBeforeEpochMillisOf(now.minusDays(21))) {
 				throw new InvalidDateException();
-			} else if (requestDate.isAfterExact(utcNow)) {
+			} else if (requestDate.isAfterEpochMillisOf(now)) {
 				throw new InvalidDateException();
 			}
 			return requestDate.getTimestamp();

@@ -1104,7 +1104,7 @@ public class GaenControllerTest extends BaseControllerTest {
 	private void insertNKeysPerDayInIntervalWithDebugFlag(int n, UTCInstant start, UTCInstant end, UTCInstant receivedAt, boolean debug) throws Exception {
 		var current = start;
 		Map<Integer, Integer> rollingToCount = new HashMap<>();
-		while (current.isBeforeExact(end)) {
+		while (current.isBeforeEpochMillisOf(end)) {
 			List<GaenKey> keys = new ArrayList<>();
 			SecureRandom random = new SecureRandom();
 			int lastRolling = (int)start.get10MinutesSince1970();

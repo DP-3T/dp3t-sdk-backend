@@ -21,6 +21,6 @@ public class ValidationUtilsTest {
         assertEquals(false, validationUtils.isValidKeyDate(midnight.plusMinutes(1)));
         assertEquals(false, validationUtils.isValidKeyDate(midnight.plusHours(1)));
         
-        assertEquals(true, UTCInstant.today().isSameDate(midnight));
+        assertEquals(true, UTCInstant.today().hasSameDateAs(midnight));
     }
 }

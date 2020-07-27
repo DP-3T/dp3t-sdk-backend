@@ -28,20 +28,20 @@ public class JWTValidateRequest implements ValidateRequest {
 	}
 
 	@Override
-	public long getKeyDate(UTCInstant utcNow, Object authObject, Object others) throws InvalidDateException {
+	public long getKeyDate(UTCInstant now, Object authObject, Object others) throws InvalidDateException {
 		if (authObject instanceof Jwt) {
 			Jwt token = (Jwt) authObject;
 			var jwtKeyDate = UTCInstant.parseDate(token.getClaim("onset"));
 			if (others instanceof GaenKey) {
                 GaenKey request = (GaenKey) others;
                 var keyDate = UTCInstant.of(request.getRollingStartNumber(), GaenUnit.TenMinutes);
-				if (keyDate.isAfterExact(utcNow)) {
+				if (keyDate.isAfterEpochMillisOf(now)) {
 					throw new InvalidDateException();
-				} else if (keyDate.isBeforeExact(jwtKeyDate)) {
+				} else if (keyDate.isBeforeEpochMillisOf(jwtKeyDate)) {
 					throw new InvalidDateException();
 				} 
 				//TODO: fix 14 to retentionPeriod Constant
-				else if(keyDate.isBeforeExact(utcNow.minusDays(14))) {
+				else if(keyDate.isBeforeEpochMillisOf(now.minusDays(14))) {
 					throw new InvalidDateException();
 				}
 				jwtKeyDate = keyDate;

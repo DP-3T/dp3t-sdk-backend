@@ -125,7 +125,7 @@ public class GaenController {
 			@AuthenticationPrincipal
             @Documentation(description = "JWT token that can be verified by the backend server")
                     Object principal) {
-		var utcNow = UTCInstant.now();
+		var now = UTCInstant.now();
 		if (!this.validateRequest.isValid(principal)) {
 			return () -> ResponseEntity.status(HttpStatus.FORBIDDEN).build();
 		}
@@ -138,7 +138,7 @@ public class GaenController {
 			}
 			if (this.validateRequest.isFakeRequest(principal, key) 
 				|| hasNegativeRollingPeriod(key)
-				|| hasInvalidKeyDate(utcNow, principal, key)) {
+				|| hasInvalidKeyDate(now, principal, key)) {
 				continue;
 			}
 
@@ -154,7 +154,7 @@ public class GaenController {
 				var rollingUTCInstant = UTCInstant.of(key.getRollingStartNumber(), GaenUnit.TenMinutes);
 				
 				// If this is a same day TEK we are delaying its release
-				if(utcNow.isSameDate(rollingUTCInstant)) {
+				if(now.hasSameDateAs(rollingUTCInstant)) {
 					nonFakeKeysDelayed.add(key);
 				} else {
 					nonFakeKeys.add(key);
@@ -169,18 +169,18 @@ public class GaenController {
 			return () -> ResponseEntity.badRequest().body("Claim is fake but list contains non fake keys");
 		}
 		if (!nonFakeKeys.isEmpty()) {
-			dataService.upsertExposees(nonFakeKeys);
+			dataService.upsertExposees(nonFakeKeys, now);
 		}
 		if (!nonFakeKeysDelayed.isEmpty()) {
 			// Hold back same day TEKs until 02:00 UTC of the next day (as RPIs are accepted by EN up to 2h after rolling period)
-			var tomorrowAt2AM = utcNow.atStartOfDay()
+			var tomorrowAt2AM = now.atStartOfDay()
 										.plusDays(1)
 										.plusHours(2);
-			dataService.upsertExposeesDelayed(nonFakeKeysDelayed, tomorrowAt2AM);
+			dataService.upsertExposeesDelayed(nonFakeKeysDelayed, tomorrowAt2AM, now);
 		}
 
 		var delayedKeyDateUTCInstant = UTCInstant.of(gaenRequest.getDelayedKeyDate(), GaenUnit.TenMinutes);
-		if (delayedKeyDateUTCInstant.isBeforeDate(utcNow.getLocalDate().minusDays(1)) || delayedKeyDateUTCInstant.isAfterDate(utcNow.getLocalDate().plusDays(1))) {
+		if (delayedKeyDateUTCInstant.isBeforeDateOf(now.getLocalDate().minusDays(1)) || delayedKeyDateUTCInstant.isAfterDateOf(now.getLocalDate().plusDays(1))) {
 			return () -> ResponseEntity.badRequest().body("delayedKeyDate date must be between yesterday and tomorrow");
 		}
 
@@ -199,7 +199,7 @@ public class GaenController {
 			responseBuilder.header("Authorization", "Bearer " + jwt);
 		}
 		Callable<ResponseEntity<String>> cb = () -> {
-			normalizeRequestTime(utcNow.getTimestamp());
+			normalizeRequestTime(now.getTimestamp());
 			return responseBuilder.body("OK");
 		};
 		return cb;
@@ -225,7 +225,7 @@ public class GaenController {
 			@AuthenticationPrincipal
             @Documentation(description = "JWT token that can be verified by the backend server, must have been created by /v1/gaen/exposed and contain the delayedKeyDate")
                     Object principal) {
-		var utcNow = UTCInstant.now();
+		var now = UTCInstant.now();
 
 		if (!validationUtils.isValidBase64Key(gaenSecondDay.getDelayedKey().getKeyData())) {
 			return () -> new ResponseEntity<>("No valid base64 key", HttpStatus.BAD_REQUEST);
@@ -255,11 +255,11 @@ public class GaenController {
 			}
 			List<GaenKey> keys = new ArrayList<>();
 			keys.add(gaenSecondDay.getDelayedKey());
-			dataService.upsertExposees(keys);
+			dataService.upsertExposees(keys, now);
 		}
 
 		return () -> {
-			normalizeRequestTime(utcNow.getTimestamp());
+			normalizeRequestTime(now.getTimestamp());
 			return ResponseEntity.ok().body("OK");
 		};
 
