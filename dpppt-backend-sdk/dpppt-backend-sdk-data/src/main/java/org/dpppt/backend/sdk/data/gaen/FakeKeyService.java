@@ -3,6 +3,7 @@ package org.dpppt.backend.sdk.data.gaen;
 import java.security.NoSuchAlgorithmException;
 import java.security.SecureRandom;
 import java.time.Duration;
+import java.time.Instant;
 import java.time.LocalDate;
 import java.time.LocalTime;
 import java.time.ZoneOffset;
@@ -67,8 +68,13 @@ public class FakeKeyService {
 		if (!isEnabled) {
 			return keys;
 		}
+		var today = LocalDate.now(ZoneOffset.UTC);
+		var keyLocalDate = LocalDate.ofInstant(Instant.ofEpochMilli(keyDate), ZoneOffset.UTC);
+		if (today.isEqual(keyLocalDate)) {
+			return keys;
+		}
 		var fakeKeys = this.dataService.getSortedExposedForKeyDate(keyDate, publishedafter,
-				LocalDate.now().plusDays(1).atStartOfDay(ZoneOffset.UTC).toInstant().toEpochMilli());
+						today.plusDays(1).atStartOfDay(ZoneOffset.UTC).toInstant().toEpochMilli());
 
 		keys.addAll(fakeKeys);
 		return keys;
