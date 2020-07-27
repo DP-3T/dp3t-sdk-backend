@@ -50,18 +50,12 @@ public class FakeKeyService {
 				var keyGAENTime = (int) Duration.ofSeconds(tmpDate.toEpochSecond(LocalTime.MIDNIGHT, ZoneOffset.UTC))
 						.dividedBy(GaenUnit.TenMinutes.getDuration());
 
-				int rollingPeriod = 144;
-				// make sure that no keys are added that are valid today
-				if (tmpDate.equals(currentKeyDate)) {
-					continue;
-				}
-
-				var key = new GaenKey(Base64.getEncoder().encodeToString(keyData), keyGAENTime, rollingPeriod, 0);
+				var key = new GaenKey(Base64.getEncoder().encodeToString(keyData), keyGAENTime, GaenKey.GaenKeyDefaultRollingPeriod, 0);
 				keys.add(key);
 			}
 			this.dataService.upsertExposees(keys);
 			tmpDate = tmpDate.plusDays(1);
-		} while (tmpDate.isBefore(currentKeyDate.plusDays(1)));
+		} while (tmpDate.isBefore(currentKeyDate));
 	}
 
 	private void deleteAllKeys() {
