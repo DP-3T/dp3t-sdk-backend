@@ -10,8 +10,6 @@
 
 package org.dpppt.backend.sdk.ws.security;
 
-import java.time.Duration;
-
 import org.dpppt.backend.sdk.model.ExposeeRequest;
 import org.dpppt.backend.sdk.model.gaen.GaenKey;
 import org.dpppt.backend.sdk.model.gaen.GaenUnit;
