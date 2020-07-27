@@ -60,6 +60,9 @@ public class MultipleJWTConfig {
 		@Value("${ws.app.jwt.maxValidityMinutes: 60}")
 		int maxValidityMinutes;
 
+		@Value("${ws.retentiondays: 14}")
+		int retentionDays;
+
 		@Autowired
 		@Lazy
 		DPPPTDataService dataService;
@@ -174,7 +177,7 @@ public class MultipleJWTConfig {
 
 		@Bean
 		public ValidateRequest gaenRequestValidator() {
-			return new org.dpppt.backend.sdk.ws.security.gaen.JWTValidateRequest();
+			return new org.dpppt.backend.sdk.ws.security.gaen.JWTValidateRequest(Duration.ofDays(retentionDays));
 		}
 
 		@Bean
