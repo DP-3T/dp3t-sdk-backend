@@ -10,6 +10,8 @@
 
 package org.dpppt.backend.sdk.ws.security.gaen;
 
+import java.time.Duration;
+
 import org.dpppt.backend.sdk.model.gaen.GaenKey;
 import org.dpppt.backend.sdk.model.gaen.GaenUnit;
 import org.dpppt.backend.sdk.ws.security.ValidateRequest;
@@ -17,7 +19,10 @@ import org.dpppt.backend.sdk.utils.UTCInstant;
 import org.springframework.security.oauth2.jwt.Jwt;
 
 public class JWTValidateRequest implements ValidateRequest {
-
+	private final Duration retentionPeriod;
+	public JWTValidateRequest(Duration retentionPeriod) {
+		this.retentionPeriod = retentionPeriod;
+	}
 	@Override
 	public boolean isValid(Object authObject) {
 		if (authObject instanceof Jwt) {
@@ -37,11 +42,8 @@ public class JWTValidateRequest implements ValidateRequest {
                 var keyDate = UTCInstant.of(request.getRollingStartNumber(), GaenUnit.TenMinutes);
 				if (keyDate.isAfterEpochMillisOf(now)) {
 					throw new InvalidDateException();
-				} else if (keyDate.isBeforeEpochMillisOf(jwtKeyDate)) {
-					throw new InvalidDateException();
-				} 
-				//TODO: fix 14 to retentionPeriod Constant
-				else if(keyDate.isBeforeEpochMillisOf(now.minusDays(14))) {
+				} else if (keyDate.isBeforeEpochMillisOf(jwtKeyDate)
+						|| keyDate.isBeforeEpochMillisOf(now.minus(retentionPeriod))) {
 					throw new InvalidDateException();
 				}
 				jwtKeyDate = keyDate;

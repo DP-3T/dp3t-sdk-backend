@@ -33,14 +33,13 @@ public class JWTValidateRequest implements ValidateRequest {
 			var jwtKeyDate = UTCInstant.parseDate(token.getClaim("onset"));
 			if (others instanceof ExposeeRequest) {
 				ExposeeRequest request = (ExposeeRequest) others;
-				if (request.getKeyDate() > now.getTimestamp()){
+				var requestKeyDate = UTCInstant.ofEpochMillis(request.getKeyDate());
+				if (requestKeyDate.isAfterEpochMillisOf(now)){
 					throw new InvalidDateException();
-				} else if (request.getKeyDate() < jwtKeyDate.getTimestamp()) {
+				} else if (requestKeyDate.isBeforeEpochMillisOf(jwtKeyDate)
+						|| requestKeyDate.isBeforeEpochMillisOf(now.minusDays(21))) {
 					throw new InvalidDateException();
 				} 
-				else if(request.getKeyDate() < UTCInstant.now().minusDays(21).getTimestamp()) {
-					throw new InvalidDateException();
-				}
 				jwtKeyDate = UTCInstant.ofEpochMillis(request.getKeyDate());
 			}
 			return jwtKeyDate.getTimestamp();

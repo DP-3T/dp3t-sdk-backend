@@ -10,13 +10,18 @@
 
 package org.dpppt.backend.sdk.ws.security;
 
+import java.time.Duration;
+
 import org.dpppt.backend.sdk.model.ExposeeRequest;
 import org.dpppt.backend.sdk.model.gaen.GaenKey;
 import org.dpppt.backend.sdk.model.gaen.GaenUnit;
 import org.dpppt.backend.sdk.utils.UTCInstant;
 
 public class NoValidateRequest implements ValidateRequest {
-
+	private final Duration retentionPeriod;
+	public NoValidateRequest(Duration retentionPeriod){
+		this.retentionPeriod = retentionPeriod;
+	}
 	@Override
 	public boolean isValid(Object authObject) {
 		return true;
@@ -26,24 +31,25 @@ public class NoValidateRequest implements ValidateRequest {
 	public long getKeyDate(UTCInstant now, Object authObject, Object others) throws InvalidDateException {
 		if (others instanceof ExposeeRequest) {
 			ExposeeRequest request = ((ExposeeRequest) others);
-			if (request.getKeyDate() < now.minusDays(21).getTimestamp()) {
-				throw new InvalidDateException();
-			} else if (request.getKeyDate() > now.getTimestamp()) {
-				throw new InvalidDateException();
-			}
+			var requestKeyDate = new UTCInstant(request.getKeyDate());
+			checkDateIsInBounds(requestKeyDate, now);
 			return request.getKeyDate();
 		}
 		if (others instanceof GaenKey) {
 			GaenKey key = ((GaenKey) others);
-			var requestDate = UTCInstant.of(key.getRollingStartNumber(), GaenUnit.TenMinutes);
-			if (requestDate.isBeforeEpochMillisOf(now.minusDays(21))) {
-				throw new InvalidDateException();
-			} else if (requestDate.isAfterEpochMillisOf(now)) {
-				throw new InvalidDateException();
-			}
-			return requestDate.getTimestamp();
+			var requestKeyDate = UTCInstant.of(key.getRollingStartNumber(), GaenUnit.TenMinutes);
+			checkDateIsInBounds(requestKeyDate, now);
+			return requestKeyDate.getTimestamp();
 		}
 		throw new IllegalArgumentException();
+	}
+
+	private void checkDateIsInBounds(UTCInstant requestKeyDate, UTCInstant now) throws InvalidDateException {
+		if (requestKeyDate.isBeforeEpochMillisOf(now.minus(retentionPeriod))) {
+			throw new InvalidDateException();
+		} else if (requestKeyDate.isAfterEpochMillisOf(now)) {
+			throw new InvalidDateException();
+		}
 	}
 
 	@Override
