@@ -51,9 +51,9 @@ public class FakeKeyService {
 						.dividedBy(GaenUnit.TenMinutes.getDuration());
 
 				int rollingPeriod = 144;
-				// make sure that no key is added that is valid in the future.
+				// make sure that no keys are added that are valid today
 				if (tmpDate.equals(currentKeyDate)) {
-					rollingPeriod = 0;
+					continue;
 				}
 
 				var key = new GaenKey(Base64.getEncoder().encodeToString(keyData), keyGAENTime, rollingPeriod, 0);

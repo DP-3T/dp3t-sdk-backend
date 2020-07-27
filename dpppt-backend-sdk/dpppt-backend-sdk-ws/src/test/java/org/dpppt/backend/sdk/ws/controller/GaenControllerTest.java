@@ -989,13 +989,12 @@ public class GaenControllerTest extends BaseControllerTest {
 	
 	@Test
 	@Transactional(transactionManager = "testTransactionManager")
-	public void testNonEmptyResponseAndCurrentDayRandomKeyRollingPeriod() throws Exception {
+	public void testTodayWeDontHaveKeys() throws Exception {
 		MockHttpServletResponse response = mockMvc
 				.perform(get("/v1/gaen/exposed/"
 						+ LocalDate.now(ZoneOffset.UTC).atStartOfDay(ZoneOffset.UTC).toInstant().toEpochMilli())
 								.header("User-Agent", "MockMVC"))
-				.andExpect(status().isOk()).andReturn().getResponse();
-		verifyZipResponse(response, 10, 0);
+				.andExpect(status().is(204)).andReturn().getResponse();
 	}
 
 	// @Test
