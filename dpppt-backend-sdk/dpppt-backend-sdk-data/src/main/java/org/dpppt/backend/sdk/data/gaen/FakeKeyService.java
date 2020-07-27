@@ -3,6 +3,7 @@ package org.dpppt.backend.sdk.data.gaen;
 import java.security.NoSuchAlgorithmException;
 import java.security.SecureRandom;
 import java.time.Duration;
+import java.time.Instant;
 import java.time.LocalDate;
 import java.time.LocalTime;
 import java.time.ZoneOffset;
@@ -16,7 +17,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 public class FakeKeyService {
-	
+
 	private final GAENDataService dataService;
 	private final Integer minNumOfKeys;
 	private final SecureRandom random;
@@ -49,12 +50,13 @@ public class FakeKeyService {
 				random.nextBytes(keyData);
 				var keyGAENTime = (int) Duration.ofSeconds(tmpDate.toEpochSecond(LocalTime.MIDNIGHT, ZoneOffset.UTC))
 						.dividedBy(GaenUnit.TenMinutes.getDuration());
-				var key = new GaenKey(Base64.getEncoder().encodeToString(keyData), keyGAENTime, 144, 0);
+
+				var key = new GaenKey(Base64.getEncoder().encodeToString(keyData), keyGAENTime, GaenKey.GaenKeyDefaultRollingPeriod, 0);
 				keys.add(key);
 			}
 			this.dataService.upsertExposees(keys);
 			tmpDate = tmpDate.plusDays(1);
-		} while (tmpDate.isBefore(currentKeyDate.plusDays(1)));
+		} while (tmpDate.isBefore(currentKeyDate));
 	}
 
 	private void deleteAllKeys() {
@@ -66,8 +68,13 @@ public class FakeKeyService {
 		if (!isEnabled) {
 			return keys;
 		}
+		var today = LocalDate.now(ZoneOffset.UTC);
+		var keyLocalDate = LocalDate.ofInstant(Instant.ofEpochMilli(keyDate), ZoneOffset.UTC);
+		if (today.isEqual(keyLocalDate)) {
+			return keys;
+		}
 		var fakeKeys = this.dataService.getSortedExposedForKeyDate(keyDate, publishedafter,
-				LocalDate.now().plusDays(1).atStartOfDay(ZoneOffset.UTC).toInstant().toEpochMilli());
+						today.plusDays(1).atStartOfDay(ZoneOffset.UTC).toInstant().toEpochMilli());
 
 		keys.addAll(fakeKeys);
 		return keys;
