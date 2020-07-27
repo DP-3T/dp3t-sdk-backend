@@ -41,15 +41,15 @@ import org.springframework.web.context.request.WebRequest;
 public class DebugController {
     private final ValidateRequest validateRequest;
     private final ValidationUtils validationUtils;
-    private final Duration releaseBucketDuration;
+    private final Duration bucketLength;
     private final Duration requestTime;
     private final ProtoSignature gaenSigner;
     private final DebugGAENDataService dataService;
 
-    public DebugController(DebugGAENDataService dataService, ProtoSignature gaenSigner, ValidateRequest validateRequest, ValidationUtils validationUtils, Duration releaseBucketDuration, Duration requestTime) {
+    public DebugController(DebugGAENDataService dataService, ProtoSignature gaenSigner, ValidateRequest validateRequest, ValidationUtils validationUtils, Duration bucketLength, Duration requestTime) {
         this.validateRequest = validateRequest;
         this.validationUtils = validationUtils;
-        this.releaseBucketDuration = releaseBucketDuration;
+        this.bucketLength = bucketLength;
         this.requestTime = requestTime;
         this.gaenSigner = gaenSigner;
         this.dataService = dataService;
@@ -96,11 +96,11 @@ public class DebugController {
             NoSuchAlgorithmException, SignatureException {
 
         var batchReleaseTimeDuration = Duration.ofMillis(batchReleaseTime);
-        if (batchReleaseTime % releaseBucketDuration.toMillis() != 0) {
+        if (batchReleaseTime % bucketLength.toMillis() != 0) {
             return ResponseEntity.notFound().build();
         }
 
-        var exposedKeys = dataService.getSortedExposedForBatchReleaseTime(batchReleaseTimeDuration.toMillis(), releaseBucketDuration.toMillis());
+        var exposedKeys = dataService.getSortedExposedForBatchReleaseTime(batchReleaseTimeDuration.toMillis(), bucketLength.toMillis());
         
         byte[] payload = gaenSigner.getPayload(exposedKeys);
         
@@ -121,12 +121,12 @@ public class DebugController {
         var dayBuckets = new DayBuckets();
 
         String controllerMapping = this.getClass().getAnnotation(RequestMapping.class).value()[0];
-        dayBuckets.setDay(dayDateStr).setRelativeUrls(relativeUrls);
+        dayBuckets.day(dayDateStr).relativeUrls(relativeUrls);
 
         while (atStartOfDay.toInstant().toEpochMilli() < Math.min(now.toInstant().toEpochMilli(),
                 end.toInstant().toEpochMilli())) {
             relativeUrls.add(controllerMapping + "/exposed" + "/" + atStartOfDay.toInstant().toEpochMilli());
-            atStartOfDay = atStartOfDay.plus(this.releaseBucketDuration);
+            atStartOfDay = atStartOfDay.plus(this.bucketLength);
         }
 
         return ResponseEntity.ok(dayBuckets);

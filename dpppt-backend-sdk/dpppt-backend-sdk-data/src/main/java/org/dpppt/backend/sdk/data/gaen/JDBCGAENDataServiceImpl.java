@@ -35,23 +35,17 @@ public class JDBCGAENDataServiceImpl implements GAENDataService {
 	private static final String PGSQL = "pgsql";
 	private final String dbType;
 	private final NamedParameterJdbcTemplate jt;
-	private final Duration releaseBucketDuration;
+	private final Duration bucketLength;
 
-	public JDBCGAENDataServiceImpl(String dbType, DataSource dataSource, Duration releaseBucketDuration) {
+	public JDBCGAENDataServiceImpl(String dbType, DataSource dataSource, Duration bucketLength) {
 		this.dbType = dbType;
 		this.jt = new NamedParameterJdbcTemplate(dataSource);
-		this.releaseBucketDuration = releaseBucketDuration;
+		this.bucketLength = bucketLength;
 	}
 
 	@Override
 	@Transactional(readOnly = false)
 	public void upsertExposees(List<GaenKey> gaenKeys) {
-		upsertExposeesDelayed(gaenKeys, null);
-	}
-
-	@Override
-	public void upsertExposeesDelayed(List<GaenKey> gaenKeys, OffsetDateTime delayedReceivedAt) {
-		
 		String sql = null;
 		if (dbType.equals(PGSQL)) {
 			sql = "insert into t_gaen_exposed (key, rolling_start_number, rolling_period, transmission_risk_level, received_at) values (:key, :rolling_start_number, :rolling_period, :transmission_risk_level, :received_at)"
@@ -63,8 +57,7 @@ public class JDBCGAENDataServiceImpl implements GAENDataService {
 		}
 		var parameterList = new ArrayList<MapSqlParameterSource>();
 		var nowMillis = System.currentTimeMillis();
-		//if delayedReceivedAt is supplied use it
-		var receivedAt = delayedReceivedAt == null? (nowMillis/releaseBucketDuration.toMillis() + 1) * releaseBucketDuration.toMillis() - 1 : delayedReceivedAt.toInstant().toEpochMilli(); 
+		var receivedAt = (nowMillis/bucketLength.toMillis() + 1) * bucketLength.toMillis() - 1;
 		for (var gaenKey : gaenKeys) {
 			MapSqlParameterSource params = new MapSqlParameterSource();
 			params.addValue("key", gaenKey.getKeyData());
@@ -77,7 +70,6 @@ public class JDBCGAENDataServiceImpl implements GAENDataService {
 		}
 		jt.batchUpdate(sql, parameterList.toArray(new MapSqlParameterSource[0]));
 	}
-
 
 	@Override
 	@Transactional(readOnly = true)
@@ -143,4 +135,5 @@ public class JDBCGAENDataServiceImpl implements GAENDataService {
 		String sqlExposed = "delete from t_gaen_exposed where received_at < :retention_time";
 		jt.update(sqlExposed, params);
 	}
+
 }

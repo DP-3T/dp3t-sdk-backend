@@ -13,6 +13,7 @@ package org.dpppt.backend.sdk.ws.controller;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotEquals;
 import static org.junit.Assert.assertNotNull;
+import static org.junit.Assert.assertNull;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.asyncDispatch;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
@@ -67,13 +68,11 @@ import io.jsonwebtoken.Jwts;
 
 @ActiveProfiles({"actuator-security"})
 @SpringBootTest(properties = { "ws.app.jwt.publickey=classpath://generated_pub.pem",
-		"logging.level.org.springframework.security=DEBUG", "ws.exposedlist.releaseBucketDuration=7200000", "ws.gaen.randomkeysenabled=true",
-		"ws.app.gaen.delayTodaysKeys=true",
+		"logging.level.org.springframework.security=DEBUG", "ws.exposedlist.batchlength=7200000", "ws.gaen.randomkeysenabled=true",
 	"ws.monitor.prometheus.user=prometheus",
 	"ws.monitor.prometheus.password=prometheus",
 	"management.endpoints.enabled-by-default=true",
 	"management.endpoints.web.exposure.include=*"})
-@Transactional
 public class GaenControllerTest extends BaseControllerTest {
 	@Autowired
 	ProtoSignature signer;
@@ -81,7 +80,7 @@ public class GaenControllerTest extends BaseControllerTest {
 	KeyVault keyVault;
 	@Autowired
 	GAENDataService gaenDataService;
-	Long releaseBucketDuration = 7200000L;
+	Long batchLength = 7200000L;
 
 	private static final Logger logger = LoggerFactory.getLogger(GaenControllerTest.class);
 
@@ -107,7 +106,8 @@ public class GaenControllerTest extends BaseControllerTest {
 		.getResponse();
 	}
 
-	private void testNKeys(int n, boolean shouldSucceed) throws Exception{
+	@Test
+	public void testMultipleKeyUpload() throws Exception {
 		var requestList = new GaenRequest();
 		var gaenKey1 = new GaenKey();
 		var now = System.currentTimeMillis();
@@ -125,99 +125,16 @@ public class GaenControllerTest extends BaseControllerTest {
 		gaenKey2.setRollingPeriod(0);
 		gaenKey2.setFake(0);
 		gaenKey2.setTransmissionRiskLevel(0);
-		//third key should be delayed
-		var gaenKey3 = new GaenKey();
-		gaenKey3.setRollingStartNumber((int) Duration.ofMillis(LocalDate.now(ZoneOffset.UTC).atStartOfDay(ZoneOffset.UTC).toInstant().toEpochMilli())
-				.dividedBy(Duration.ofMinutes(10)));
-		gaenKey3.setKeyData(Base64.getEncoder().encodeToString("testKey32Bytes03".getBytes("UTF-8")));
-		gaenKey3.setRollingPeriod(120);
-		gaenKey3.setFake(0);
-		gaenKey3.setTransmissionRiskLevel(0);
-		List<GaenKey> exposedKeys = new ArrayList<>();
-		exposedKeys.add(gaenKey1);
-		exposedKeys.add(gaenKey2);
-		exposedKeys.add(gaenKey3);
-		for (int i = 0; i < n-3; i++) {
-			var tmpKey = new GaenKey();
-			tmpKey.setRollingStartNumber(
-					(int) Duration.ofMillis(now).dividedBy(Duration.ofMinutes(10)));
-			tmpKey.setKeyData(Base64.getEncoder().encodeToString("testKey32Bytes--".getBytes("UTF-8")));
-			tmpKey.setRollingPeriod(144);
-			tmpKey.setFake(1);
-			tmpKey.setTransmissionRiskLevel(0);
-			exposedKeys.add(tmpKey);
-		}
-		requestList.setGaenKeys(exposedKeys);
-		var duration = Duration.ofMillis(
-				LocalDate.now(ZoneOffset.UTC).atStartOfDay().plusDays(1).toInstant(ZoneOffset.UTC).toEpochMilli())
-				.dividedBy(Duration.ofMinutes(10));
-		requestList.setDelayedKeyDate((int) duration);
-		gaenKey1.setFake(0);
-		String token = createToken(OffsetDateTime.now().withOffsetSameInstant(ZoneOffset.UTC).plusMinutes(5));
-		var requestBuilder = mockMvc.perform(post("/v1/gaen/exposed")
-		.contentType(MediaType.APPLICATION_JSON).header("Authorization", "Bearer " + token)
-		.header("User-Agent", "MockMVC").content(json(requestList)));
-		MvcResult response;
-
-		if(shouldSucceed) {
-			response = requestBuilder.andExpect(request().asyncStarted())
-			.andReturn();
-			mockMvc.perform(asyncDispatch(response)).andExpect(status().is2xxSuccessful());
-		}
-		else {
-			response = requestBuilder.andExpect(status().is(400)).andReturn();
-			return;
-		}
-		response = mockMvc
-				.perform(post("/v1/gaen/exposed").contentType(MediaType.APPLICATION_JSON)
-						.header("Authorization", "Bearer " + jwtToken).header("User-Agent", "MockMVC")
-						.content(json(requestList)))
-				.andExpect(status().is(401)).andExpect(request().asyncNotStarted()).andExpect(content().string("")).andReturn();
-
-		var result = gaenDataService.getSortedExposedForKeyDate(LocalDate.now(ZoneOffset.UTC).minusDays(1).atStartOfDay().toInstant(ZoneOffset.UTC).toEpochMilli(),null, (now / releaseBucketDuration + 1 )*releaseBucketDuration);
-		assertEquals(2, result.size());
-		for(var key : result) {
-			assertEquals(Integer.valueOf(144), key.getRollingPeriod());
-		}
-
-		result = gaenDataService.getSortedExposedForKeyDate(LocalDate.now(ZoneOffset.UTC).minusDays(1).atStartOfDay().toInstant(ZoneOffset.UTC).toEpochMilli(),null, (now / releaseBucketDuration)*releaseBucketDuration);
-		assertEquals(0, result.size());
-
-		//third key should be released tomorrow
-		var tomorrow2AM = LocalDate.now(ZoneOffset.UTC).plusDays(1).atStartOfDay().plusHours(2).plusSeconds(1);
-		result = gaenDataService.getSortedExposedForKeyDate(LocalDate.now(ZoneOffset.UTC).atStartOfDay().toInstant(ZoneOffset.UTC).toEpochMilli(),null, tomorrow2AM.toInstant(ZoneOffset.UTC).toEpochMilli());
-		assertEquals(1, result.size());
-	}
-
-	@Test
-	public void testAllKeysWrongButStill200() throws Exception {
-		var requestList = new GaenRequest();
-		var gaenKey1 = new GaenKey();
-		var now = System.currentTimeMillis();
-		gaenKey1.setRollingStartNumber(
-			(int) Duration.ofMillis(LocalDate.now(ZoneOffset.UTC).minusDays(30).atStartOfDay(ZoneOffset.UTC).toInstant().toEpochMilli())
-			.dividedBy(Duration.ofMinutes(10)));
-		gaenKey1.setKeyData(Base64.getEncoder().encodeToString("testKey32Bytes01".getBytes("UTF-8")));
-		gaenKey1.setRollingPeriod(0);
-		gaenKey1.setFake(0);
-		gaenKey1.setTransmissionRiskLevel(0);
-		var gaenKey2 = new GaenKey();
-		gaenKey2.setRollingStartNumber((int) Duration.ofMillis(LocalDate.now(ZoneOffset.UTC).minusDays(1).atStartOfDay(ZoneOffset.UTC).toInstant().toEpochMilli())
-				.dividedBy(Duration.ofMinutes(10)));
-		gaenKey2.setKeyData(Base64.getEncoder().encodeToString("testKey32Bytes02".getBytes("UTF-8")));
-		gaenKey2.setRollingPeriod(-10);
-		gaenKey2.setFake(0);
-		gaenKey2.setTransmissionRiskLevel(0);
 		List<GaenKey> exposedKeys = new ArrayList<>();
 		exposedKeys.add(gaenKey1);
 		exposedKeys.add(gaenKey2);
 		for (int i = 0; i < 12; i++) {
 			var tmpKey = new GaenKey();
 			tmpKey.setRollingStartNumber(
-					(int) Duration.ofMillis(now).plusDays(10).dividedBy(Duration.ofMinutes(10)));
+					(int) Duration.ofMillis(now).dividedBy(Duration.ofMinutes(10)));
 			tmpKey.setKeyData(Base64.getEncoder().encodeToString("testKey32Bytes--".getBytes("UTF-8")));
 			tmpKey.setRollingPeriod(144);
-			tmpKey.setFake(0);
+			tmpKey.setFake(1);
 			tmpKey.setTransmissionRiskLevel(0);
 			exposedKeys.add(tmpKey);
 		}
@@ -240,28 +157,15 @@ public class GaenControllerTest extends BaseControllerTest {
 						.content(json(requestList)))
 				.andExpect(status().is(401)).andExpect(request().asyncNotStarted()).andExpect(content().string("")).andReturn();
 
-		var result = gaenDataService.getSortedExposedForKeyDate(LocalDate.now(ZoneOffset.UTC).minusDays(1).atStartOfDay().toInstant(ZoneOffset.UTC).toEpochMilli(),null, (now / releaseBucketDuration + 1 )*releaseBucketDuration);
-		//all keys are in compatible
+		var result = gaenDataService.getSortedExposedForKeyDate(LocalDate.now(ZoneOffset.UTC).minusDays(1).atStartOfDay().toInstant(ZoneOffset.UTC).toEpochMilli(),null, (now / batchLength + 1 )*batchLength);
+		assertEquals(2, result.size());
+		for(var key : result) {
+			assertEquals(Integer.valueOf(144), key.getRollingPeriod());
+		}
+
+		result = gaenDataService.getSortedExposedForKeyDate(LocalDate.now(ZoneOffset.UTC).minusDays(1).atStartOfDay().toInstant(ZoneOffset.UTC).toEpochMilli(),null, (now / batchLength)*batchLength);
 		assertEquals(0, result.size());
 	}
-
-	@Transactional
-	public void testMultipleKeyUpload() throws Exception {
-		testNKeys(14, true);
-	}
-	@Test
-	@Transactional
-	public void testCanUploadMoreThan14Keys() throws Exception {
-		testNKeys(30, true);
-	}
-	@Test
-	@Transactional
-	public void testCannotUploadMoreThan30Keys() throws Exception {
-		testNKeys(31,false);
-		testNKeys(100,false);
-		testNKeys(1000,false);
-	}
-
 
 	private Map<String, String> headers= Map.of("X-Content-Type-Options","nosniff", "X-Frame-Options", "DENY", "X-Xss-Protection", "1; mode=block");
 	@Test
@@ -286,17 +190,16 @@ public class GaenControllerTest extends BaseControllerTest {
 
 	@Test
 	public void testUploadWithNegativeRollingPeriodFails() throws Exception {
-		var now = System.currentTimeMillis();
 		var requestList = new GaenRequest();
 		var gaenKey1 = new GaenKey();
 		gaenKey1.setRollingStartNumber(
-				(int) Duration.ofMillis(LocalDate.now(ZoneOffset.UTC).atStartOfDay().toInstant(ZoneOffset.UTC).toEpochMilli()).dividedBy(Duration.ofMinutes(10)));
+				(int) Duration.ofMillis(Instant.now().toEpochMilli()).dividedBy(Duration.ofMinutes(10)));
 		gaenKey1.setKeyData(Base64.getEncoder().encodeToString("testKey32Bytes--".getBytes("UTF-8")));
 		gaenKey1.setRollingPeriod(-1);
 		gaenKey1.setFake(0);
 		gaenKey1.setTransmissionRiskLevel(0);
 		var gaenKey2 = new GaenKey();
-		gaenKey2.setRollingStartNumber((int) Duration.ofMillis(LocalDate.now(ZoneOffset.UTC).minusDays(1).atStartOfDay().toInstant(ZoneOffset.UTC).toEpochMilli())
+		gaenKey2.setRollingStartNumber((int) Duration.ofMillis(Instant.now().minus(Duration.ofDays(1)).toEpochMilli())
 				.dividedBy(Duration.ofMinutes(10)));
 		gaenKey2.setKeyData(Base64.getEncoder().encodeToString("testKey32Bytes--".getBytes("UTF-8")));
 		gaenKey2.setRollingPeriod(-5);
@@ -327,14 +230,7 @@ public class GaenControllerTest extends BaseControllerTest {
 				.header("User-Agent", "MockMVC").content(json(requestList))).andExpect(request().asyncStarted())
 				.andReturn();
 
-		mockMvc.perform(asyncDispatch(response)).andExpect(status().is(200));
-
-		var result = gaenDataService.getSortedExposedForKeyDate(LocalDate.now(ZoneOffset.UTC).minusDays(1).atStartOfDay().toInstant(ZoneOffset.UTC).toEpochMilli(),null, (now / releaseBucketDuration + 1 )*releaseBucketDuration);
-		//all keys are in compatible
-		assertEquals(0, result.size());
-		result = gaenDataService.getSortedExposedForKeyDate(LocalDate.now(ZoneOffset.UTC).atStartOfDay().toInstant(ZoneOffset.UTC).toEpochMilli(),null, (now / releaseBucketDuration + 1 )*releaseBucketDuration);
-		//all keys are in compatible
-		assertEquals(0, result.size());
+		mockMvc.perform(asyncDispatch(response)).andExpect(status().isBadRequest());
 	}
 
 	@Test
@@ -564,8 +460,7 @@ public class GaenControllerTest extends BaseControllerTest {
 	}
 
 	@Test
-	public void testKeyDateBeforeOnsetIsNotInserted() throws Exception {
-		var now = System.currentTimeMillis();
+	public void cannotUseKeyDateBeforeOnset() throws Exception {
 		GaenRequest exposeeRequest = new GaenRequest();
 		var duration = Duration.ofMillis(
 				LocalDate.now(ZoneOffset.UTC).atStartOfDay().plusDays(1).toInstant(ZoneOffset.UTC).toEpochMilli())
@@ -596,9 +491,7 @@ public class GaenControllerTest extends BaseControllerTest {
 				LocalDate.now().format(DateTimeFormatter.ISO_DATE));
 		MvcResult response = mockMvc.perform(post("/v1/gaen/exposed")
 				.contentType(MediaType.APPLICATION_JSON).header("Authorization", "Bearer " + token)
-				.header("User-Agent", "MockMVC").content(json(exposeeRequest))).andExpect(request().asyncStarted()).andExpect(status().is(200)).andReturn();
-		var result = gaenDataService.getSortedExposedForKeyDate(LocalDate.now(ZoneOffset.UTC).minusDays(2).atStartOfDay().toInstant(ZoneOffset.UTC).toEpochMilli(),null, (now / releaseBucketDuration + 1 )*releaseBucketDuration);
-		assertEquals(0, result.size());
+				.header("User-Agent", "MockMVC").content(json(exposeeRequest))).andExpect(request().asyncNotStarted()).andExpect(status().is(400)).andReturn();
 	}
 
 	@Test
@@ -640,7 +533,6 @@ public class GaenControllerTest extends BaseControllerTest {
 
 	@Test
 	public void cannotUseKeyDateInFuture() throws Exception {
-		var now = System.currentTimeMillis();
 		GaenRequest exposeeRequest = new GaenRequest();
 		var duration = Duration.ofMillis(
 				LocalDate.now(ZoneOffset.UTC).atStartOfDay().plusDays(1).toInstant(ZoneOffset.UTC).toEpochMilli())
@@ -649,7 +541,7 @@ public class GaenControllerTest extends BaseControllerTest {
 		GaenKey key = new GaenKey();
 		key.setKeyData(Base64.getEncoder().encodeToString("testKey32Bytes--".getBytes("UTF-8")));
 		key.setRollingPeriod(144);
-		key.setRollingStartNumber((int) Duration.ofMillis(LocalDate.now(ZoneOffset.UTC).plusDays(2).atStartOfDay(ZoneOffset.UTC).toInstant().toEpochMilli())
+		key.setRollingStartNumber((int) Duration.ofMillis(Instant.now().plus(Duration.ofDays(2)).toEpochMilli())
 				.dividedBy(Duration.ofMinutes(10)));
 		key.setTransmissionRiskLevel(1);
 		key.setFake(0);
@@ -673,15 +565,12 @@ public class GaenControllerTest extends BaseControllerTest {
 				.perform(post("/v1/gaen/exposed").contentType(MediaType.APPLICATION_JSON)
 						.header("Authorization", "Bearer " + token).header("User-Agent", "MockMVC")
 						.content(json(exposeeRequest)))
-				.andExpect(request().asyncStarted()).andExpect(status().is(200)).andReturn();
-		var result = gaenDataService.getSortedExposedForKeyDate(LocalDate.now(ZoneOffset.UTC).plusDays(2).atStartOfDay().toInstant(ZoneOffset.UTC).toEpochMilli(),null, (now / releaseBucketDuration + 1 )*releaseBucketDuration);
-		assertEquals(0, result.size());
+				.andExpect(request().asyncNotStarted()).andExpect(status().is4xxClientError()).andReturn();
 	}
 
 	@Test
 	public void keyDateNotOlderThan21Days() throws Exception {
 		GaenRequest exposeeRequest = new GaenRequest();
-		var now = System.currentTimeMillis();
 		var duration = Duration.ofMillis(
 				LocalDate.now(ZoneOffset.UTC).atStartOfDay().plusDays(1).toInstant(ZoneOffset.UTC).toEpochMilli())
 				.dividedBy(Duration.ofMinutes(10));
@@ -689,7 +578,7 @@ public class GaenControllerTest extends BaseControllerTest {
 		GaenKey key = new GaenKey();
 		key.setKeyData(Base64.getEncoder().encodeToString("testKey32Bytes--".getBytes("UTF-8")));
 		key.setRollingPeriod(144);
-		key.setRollingStartNumber((int) Duration.ofMillis(LocalDate.now(ZoneOffset.UTC).minusDays(22).atStartOfDay().toInstant(ZoneOffset.UTC).toEpochMilli())
+		key.setRollingStartNumber((int) Duration.ofMillis(Instant.now().minus(Duration.ofDays(22)).toEpochMilli())
 				.dividedBy(Duration.ofMinutes(10)));
 		key.setTransmissionRiskLevel(1);
 		key.setFake(0);
@@ -714,9 +603,7 @@ public class GaenControllerTest extends BaseControllerTest {
 				.perform(post("/v1/gaen/exposed").contentType(MediaType.APPLICATION_JSON)
 						.header("Authorization", "Bearer " + token).header("User-Agent", "MockMVC")
 						.content(json(exposeeRequest)))
-				.andExpect(request().asyncStarted()).andExpect(status().is(200)).andReturn();
-		var result = gaenDataService.getSortedExposedForKeyDate(LocalDate.now(ZoneOffset.UTC).minusDays(22).atStartOfDay().toInstant(ZoneOffset.UTC).toEpochMilli(),null, (now / releaseBucketDuration + 1 )*releaseBucketDuration);
-		assertEquals(0, result.size());
+				.andExpect(request().asyncNotStarted()).andExpect(status().is4xxClientError()).andReturn();
 	}
 
 	@Test

@@ -101,8 +101,8 @@ public abstract class WSBaseConfig implements SchedulingConfigurer, WebMvcConfig
 	@Value("${ws.retentiondays: 14}")
 	int retentionDays;
 
-	@Value("${ws.exposedlist.releaseBucketDuration: 7200000}")
-	long releaseBucketDuration;
+	@Value("${ws.exposedlist.batchlength: 7200000}")
+	long batchLength;
 
 	@Value("${ws.exposedlist.requestTime: 1500}")
 	long requestTime;
@@ -128,8 +128,6 @@ public abstract class WSBaseConfig implements SchedulingConfigurer, WebMvcConfig
 	String keyIdentifier;
 	@Value("${ws.app.gaen.algorithm:1.2.840.10045.4.3.2}")
 	String gaenAlgorithm;
-	@Value("${ws.app.gaen.delayTodaysKeys: false}")
-	boolean delayTodaysKeys;
 
 	@Autowired(required = false)
 	ValidateRequest requestValidator;
@@ -167,7 +165,7 @@ public abstract class WSBaseConfig implements SchedulingConfigurer, WebMvcConfig
 			Flyway flyWay = Flyway.configure().dataSource(fakeDataSource).locations("classpath:/db/migration/hsqldb")
 					.load();
 			flyWay.migrate();
-			GAENDataService fakeGaenService = new JDBCGAENDataServiceImpl("hsql", fakeDataSource,Duration.ofMillis(releaseBucketDuration));
+			GAENDataService fakeGaenService = new JDBCGAENDataServiceImpl("hsql", fakeDataSource,Duration.ofMillis(batchLength));
 			return new FakeKeyService(fakeGaenService, Integer.valueOf(randomkeyamount),
 					Integer.valueOf(gaenKeySizeBytes), Duration.ofDays(retentionDays), randomkeysenabled);
 		} catch (Exception ex) {
@@ -179,7 +177,7 @@ public abstract class WSBaseConfig implements SchedulingConfigurer, WebMvcConfig
 	public ProtoSignature gaenSigner() {
 		try {
 			return new ProtoSignature(gaenAlgorithm, keyVault.get("gaen"), getBundleId(), getPackageName(),
-					getKeyVersion(), getKeyIdentifier(), gaenRegion, Duration.ofMillis(releaseBucketDuration));
+					getKeyVersion(), getKeyIdentifier(), gaenRegion, Duration.ofMillis(batchLength));
 		} catch (Exception ex) {
 			throw new RuntimeException("Cannot initialize signer for protobuf");
 		}
@@ -192,17 +190,17 @@ public abstract class WSBaseConfig implements SchedulingConfigurer, WebMvcConfig
 			theValidator = new NoValidateRequest();
 		}
 		return new DPPPTController(dppptSDKDataService(), appSource, exposedListCacheControl, theValidator,
-				dpptValidationUtils(), releaseBucketDuration, requestTime);
+				dpptValidationUtils(), batchLength, requestTime);
 	}
 
 	@Bean
 	public ValidationUtils dpptValidationUtils() {
-		return new ValidationUtils(keySizeBytes, Duration.ofDays(retentionDays), releaseBucketDuration);
+		return new ValidationUtils(keySizeBytes, Duration.ofDays(retentionDays), batchLength);
 	}
 
 	@Bean
 	public ValidationUtils gaenValidationUtils() {
-		return new ValidationUtils(gaenKeySizeBytes, Duration.ofDays(retentionDays), releaseBucketDuration);
+		return new ValidationUtils(gaenKeySizeBytes, Duration.ofDays(retentionDays), batchLength);
 	}
 
 	@Bean
@@ -212,8 +210,8 @@ public abstract class WSBaseConfig implements SchedulingConfigurer, WebMvcConfig
 			theValidator = backupValidator();
 		}
 		return new GaenController(gaenDataService(), fakeKeyService(), theValidator, gaenSigner(),
-				gaenValidationUtils(), Duration.ofMillis(releaseBucketDuration), Duration.ofMillis(requestTime),
-				Duration.ofMillis(exposedListCacheControl), keyVault.get("nextDayJWT").getPrivate(), delayTodaysKeys);
+				gaenValidationUtils(), Duration.ofMillis(batchLength), Duration.ofMillis(requestTime),
+				Duration.ofMillis(exposedListCacheControl), keyVault.get("nextDayJWT").getPrivate());
 	}
 
 	@Bean
@@ -228,7 +226,7 @@ public abstract class WSBaseConfig implements SchedulingConfigurer, WebMvcConfig
 
 	@Bean
 	public GAENDataService gaenDataService() {
-		return new JDBCGAENDataServiceImpl(getDbType(), dataSource(), Duration.ofMillis(releaseBucketDuration));
+		return new JDBCGAENDataServiceImpl(getDbType(), dataSource(), Duration.ofMillis(batchLength));
 	}
 
 	@Bean

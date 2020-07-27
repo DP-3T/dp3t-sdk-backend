@@ -82,10 +82,10 @@ public class JDBCDPPPTDataServiceImpl implements DPPPTDataService {
 
 	@Override
 	@Transactional(readOnly = true)
-	public int getMaxExposedIdForBatchReleaseTime(long batchReleaseTime, long releaseBucketDuration) {
+	public int getMaxExposedIdForBatchReleaseTime(long batchReleaseTime, long batchLength) {
 		MapSqlParameterSource params = new MapSqlParameterSource();
 		params.addValue("batchReleaseTime", Date.from(Instant.ofEpochMilli(batchReleaseTime)));
-		params.addValue("startBatch", Date.from(Instant.ofEpochMilli(batchReleaseTime - releaseBucketDuration)));
+		params.addValue("startBatch", Date.from(Instant.ofEpochMilli(batchReleaseTime - batchLength)));
 		String sql = "select max(pk_exposed_id) from t_exposed where received_at >= :startBatch and received_at < :batchReleaseTime";
 		Integer maxId = jt.queryForObject(sql, params, Integer.class);
 		if (maxId == null) {
@@ -97,11 +97,11 @@ public class JDBCDPPPTDataServiceImpl implements DPPPTDataService {
 
 	@Override
 	@Transactional(readOnly = true)
-	public List<Exposee> getSortedExposedForBatchReleaseTime(long batchReleaseTime, long releaseBucketDuration) {
+	public List<Exposee> getSortedExposedForBatchReleaseTime(long batchReleaseTime, long batchLength) {
 		String sql = "select pk_exposed_id, key, key_date from t_exposed where received_at >= :startBatch and received_at < :batchReleaseTime order by pk_exposed_id desc";
 		MapSqlParameterSource params = new MapSqlParameterSource();
 		params.addValue("batchReleaseTime", Date.from(Instant.ofEpochMilli(batchReleaseTime)));
-		params.addValue("startBatch", Date.from(Instant.ofEpochMilli(batchReleaseTime - releaseBucketDuration)));
+		params.addValue("startBatch", Date.from(Instant.ofEpochMilli(batchReleaseTime - batchLength)));
 		return jt.query(sql, params, new ExposeeRowMapper());
 	}
 

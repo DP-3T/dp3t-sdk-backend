@@ -23,19 +23,19 @@ import java.util.Base64;
 public class ValidationUtils {
 	private final int KEY_LENGTH_BYTES;
 	private final Duration retentionPeriod;
-	private final Long releaseBucketDuration;
+	private final Long batchLength;
 
 	/**
 	 * Initialize the validator with the current parameters in use.
 	 *
 	 * @param keyLengthBytes how long the exposed keys are, in bytes
 	 * @param retentionPeriod period during which the exposed keys are stored, before they are deleted
-	 * @param releaseBucketDuration maximum time in milliseconds that exposed keys are hidden before being served, in order to prevent timing attacks
+	 * @param batchLength time in milliseconds that exposed keys are hidden before being served, in order to prevent timing attacks
 	 */
-	public ValidationUtils(int keyLengthBytes, Duration retentionPeriod, Long releaseBucketDuration) {
+	public ValidationUtils(int keyLengthBytes, Duration retentionPeriod, Long batchLength) {
 		this.KEY_LENGTH_BYTES = keyLengthBytes;
 		this.retentionPeriod = retentionPeriod;
-		this.releaseBucketDuration = releaseBucketDuration;
+		this.batchLength = batchLength;
 	}
 
 	/**
@@ -89,7 +89,7 @@ public class ValidationUtils {
 	 * @throws BadBatchReleaseTimeException if batchReleaseTime is not on a batch boundary
 	 */
 	public boolean isValidBatchReleaseTime(long batchReleaseTime) throws BadBatchReleaseTimeException {
-		if (batchReleaseTime % releaseBucketDuration != 0) {
+		if (batchReleaseTime % batchLength != 0) {
 			throw new BadBatchReleaseTimeException();
 		}
 		return this.isDateInRange(OffsetDateTime.ofInstant(Instant.ofEpochMilli(batchReleaseTime), ZoneOffset.UTC));

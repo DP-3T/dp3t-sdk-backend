@@ -65,19 +65,19 @@ public class DPPPTController {
 	private final ValidateRequest validateRequest;
 	private final ValidationUtils validationUtils;
 	// time in milliseconds that exposed keys are hidden before being served, in order to prevent timing attacks
-	private final long releaseBucketDuration;
+	private final long batchLength;
 	private final long requestTime;
 
 
 	public DPPPTController(DPPPTDataService dataService, String appSource,
-			int exposedListCacheControl, ValidateRequest validateRequest, ValidationUtils validationUtils, long releaseBucketDuration,
+			int exposedListCacheControl, ValidateRequest validateRequest, ValidationUtils validationUtils, long batchLength,
 			long requestTime) {
 		this.dataService = dataService;
 		this.appSource = appSource;
 		this.exposedListCacheControl = exposedListCacheControl/1000/60;
 		this.validateRequest = validateRequest;
 		this.validationUtils = validationUtils;
-		this.releaseBucketDuration = releaseBucketDuration;
+		this.batchLength = batchLength;
 		this.requestTime = requestTime;
 	}
 
@@ -194,7 +194,7 @@ public class DPPPTController {
 			return ResponseEntity.notFound().build();
 		}
 
-		List<Exposee> exposeeList = dataService.getSortedExposedForBatchReleaseTime(batchReleaseTime, releaseBucketDuration);
+		List<Exposee> exposeeList = dataService.getSortedExposedForBatchReleaseTime(batchReleaseTime, batchLength);
 		ExposedOverview overview = new ExposedOverview(exposeeList);
 		overview.setBatchReleaseTime(batchReleaseTime);
 		return ResponseEntity.ok().cacheControl(CacheControl.maxAge(Duration.ofMinutes(exposedListCacheControl)))
@@ -217,7 +217,7 @@ public class DPPPTController {
 			return ResponseEntity.notFound().build();
 		}
 
-		List<Exposee> exposeeList = dataService.getSortedExposedForBatchReleaseTime(batchReleaseTime, releaseBucketDuration);
+		List<Exposee> exposeeList = dataService.getSortedExposedForBatchReleaseTime(batchReleaseTime, batchLength);
 		List<Exposed.ProtoExposee> exposees = new ArrayList<>();
 		for (Exposee exposee : exposeeList) {
 			Exposed.ProtoExposee protoExposee = Exposed.ProtoExposee.newBuilder()
@@ -248,7 +248,7 @@ public class DPPPTController {
 		while (currentBucket.toInstant().toEpochMilli() < Math.min(day.plusDays(1).toInstant().toEpochMilli(),
 				now.toInstant().toEpochMilli())) {
 			bucketList.add(currentBucket.toInstant().toEpochMilli());
-			currentBucket = currentBucket.plusSeconds(releaseBucketDuration / 1000);
+			currentBucket = currentBucket.plusSeconds(batchLength / 1000);
 		}
 		BucketList list = new BucketList();
 		list.setBuckets(bucketList);
