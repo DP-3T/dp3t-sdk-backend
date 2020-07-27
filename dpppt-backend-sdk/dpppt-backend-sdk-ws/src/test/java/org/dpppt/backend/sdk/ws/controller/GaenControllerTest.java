@@ -68,7 +68,6 @@ import io.jsonwebtoken.Jwts;
 @ActiveProfiles({"actuator-security"})
 @SpringBootTest(properties = { "ws.app.jwt.publickey=classpath://generated_pub.pem",
 		"logging.level.org.springframework.security=DEBUG", "ws.exposedlist.releaseBucketDuration=7200000", "ws.gaen.randomkeysenabled=true",
-		"ws.app.gaen.delayTodaysKeys=true",
 	"ws.monitor.prometheus.user=prometheus",
 	"ws.monitor.prometheus.password=prometheus",
 	"management.endpoints.enabled-by-default=true",
@@ -125,19 +124,10 @@ public class GaenControllerTest extends BaseControllerTest {
 		gaenKey2.setRollingPeriod(0);
 		gaenKey2.setFake(0);
 		gaenKey2.setTransmissionRiskLevel(0);
-		//third key should be delayed
-		var gaenKey3 = new GaenKey();
-		gaenKey3.setRollingStartNumber((int) Duration.ofMillis(LocalDate.now(ZoneOffset.UTC).atStartOfDay(ZoneOffset.UTC).toInstant().toEpochMilli())
-				.dividedBy(Duration.ofMinutes(10)));
-		gaenKey3.setKeyData(Base64.getEncoder().encodeToString("testKey32Bytes03".getBytes("UTF-8")));
-		gaenKey3.setRollingPeriod(120);
-		gaenKey3.setFake(0);
-		gaenKey3.setTransmissionRiskLevel(0);
 		List<GaenKey> exposedKeys = new ArrayList<>();
 		exposedKeys.add(gaenKey1);
 		exposedKeys.add(gaenKey2);
-		exposedKeys.add(gaenKey3);
-		for (int i = 0; i < n-3; i++) {
+		for (int i = 0; i < n-2; i++) {
 			var tmpKey = new GaenKey();
 			tmpKey.setRollingStartNumber(
 					(int) Duration.ofMillis(now).dividedBy(Duration.ofMinutes(10)));
@@ -182,11 +172,6 @@ public class GaenControllerTest extends BaseControllerTest {
 
 		result = gaenDataService.getSortedExposedForKeyDate(LocalDate.now(ZoneOffset.UTC).minusDays(1).atStartOfDay().toInstant(ZoneOffset.UTC).toEpochMilli(),null, (now / releaseBucketDuration)*releaseBucketDuration);
 		assertEquals(0, result.size());
-
-		//third key should be released tomorrow
-		var tomorrow2AM = LocalDate.now(ZoneOffset.UTC).plusDays(1).atStartOfDay().plusHours(2).plusSeconds(1);
-		result = gaenDataService.getSortedExposedForKeyDate(LocalDate.now(ZoneOffset.UTC).atStartOfDay().toInstant(ZoneOffset.UTC).toEpochMilli(),null, tomorrow2AM.toInstant(ZoneOffset.UTC).toEpochMilli());
-		assertEquals(1, result.size());
 	}
 
 	@Test

@@ -128,8 +128,6 @@ public abstract class WSBaseConfig implements SchedulingConfigurer, WebMvcConfig
 	String keyIdentifier;
 	@Value("${ws.app.gaen.algorithm:1.2.840.10045.4.3.2}")
 	String gaenAlgorithm;
-	@Value("${ws.app.gaen.delayTodaysKeys: false}")
-	boolean delayTodaysKeys;
 
 	@Autowired(required = false)
 	ValidateRequest requestValidator;
@@ -213,7 +211,7 @@ public abstract class WSBaseConfig implements SchedulingConfigurer, WebMvcConfig
 		}
 		return new GaenController(gaenDataService(), fakeKeyService(), theValidator, gaenSigner(),
 				gaenValidationUtils(), Duration.ofMillis(releaseBucketDuration), Duration.ofMillis(requestTime),
-				Duration.ofMillis(exposedListCacheControl), keyVault.get("nextDayJWT").getPrivate(), delayTodaysKeys);
+				Duration.ofMillis(exposedListCacheControl), keyVault.get("nextDayJWT").getPrivate());
 	}
 
 	@Bean
