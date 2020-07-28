@@ -84,7 +84,7 @@ public class UTCInstant {
         return Instant.ofEpochMilli(this.timestamp);
     }
     public Duration getDuration(long since) {
-        return Duration.ofMillis(since);
+        return Duration.ofMillis(this.timestamp-since);
     }
     public Duration getDuration(UTCInstant since) {
         return Duration.ofMillis(this.timestamp-since.timestamp);
