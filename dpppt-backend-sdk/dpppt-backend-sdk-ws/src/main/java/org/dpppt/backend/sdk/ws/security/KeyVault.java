@@ -165,7 +165,7 @@ public class KeyVault {
 			try {
 				readerPem.close();
 			} catch (IOException e) {
-					logger.error("Exception closing PEM reader: {}", e.getMessage(), e);
+				logger.error("Exception closing PEM reader: {}", e.getMessage(), e);
 			}
 		}
 		return result;
