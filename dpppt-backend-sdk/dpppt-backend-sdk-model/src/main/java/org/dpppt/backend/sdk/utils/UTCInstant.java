@@ -13,7 +13,7 @@ import java.util.Date;
 
 import org.dpppt.backend.sdk.model.gaen.GaenUnit;
 /**
- * This class tries to unify time usage. Any `java.time.*` class should have its 
+ * This class collects all usages of time within the project. Any `java.time.*` class should have its 
  * equivalent regarding UTC.
  * 
  * All timestamps should be described as 'milliseconds since Unix epoch'.
