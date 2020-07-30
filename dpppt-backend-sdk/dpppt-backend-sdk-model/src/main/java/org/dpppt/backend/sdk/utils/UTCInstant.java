@@ -30,7 +30,7 @@ public class UTCInstant {
     private static Clock currentClock = Clock.systemUTC();
 
     public static UTCInstant today() {
-        return new UTCInstant(LocalDateTime.now(currentClock).toInstant(ZoneOffset.UTC)).atStartOfDay();
+        return UTCInstant.now().atStartOfDay();
     }
     public static UTCInstant midnight1970(){
         return new UTCInstant(0);
