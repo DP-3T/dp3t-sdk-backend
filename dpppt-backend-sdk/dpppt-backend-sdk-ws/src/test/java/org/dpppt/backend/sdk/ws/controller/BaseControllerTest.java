@@ -151,7 +151,7 @@ public abstract class BaseControllerTest {
 		claims.put("onset", "2020-04-20");
 		claims.put("fake", "0");
 		return Jwts.builder().setClaims(claims).setId(UUID.randomUUID().toString())
-				.setSubject("test-subject" + OffsetDateTime.now().withOffsetSameInstant(ZoneOffset.UTC).toString()).setExpiration(Date.from(expiresAt.toInstant()))
+				.setSubject("test-subject" + OffsetDateTime.now().withOffsetSameInstant(ZoneOffset.UTC).toString()).setExpiration(expiresAt.getDate())
 				.setIssuedAt(Date.from(OffsetDateTime.now().withOffsetSameInstant(ZoneOffset.UTC).toInstant())).compact();
 	}
 
