@@ -36,7 +36,7 @@ public class DPPTJwtDecoder implements JwtDecoder {
 	@Override
 	public Jwt decode(String token) throws JwtException {
 		try {
-			var t = parser.parse(token);
+			var t = parser.parseClaimsJws(token);
 
 			var headers = t.getHeader();
 			var claims = (Claims) t.getBody();
