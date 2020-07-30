@@ -143,7 +143,6 @@ public class GaenController {
 				//default value according to EN is 144, so just set it to that. If we ever get 0 from iOS we should log it, since
 				//this should not happen
 				key.setRollingPeriod(GaenKey.GaenKeyDefaultRollingPeriod);
-				var rollingUTCInstant = UTCInstant.of(key.getRollingStartNumber(), GaenUnit.TenMinutes);
 				
 				// If this is a same day TEK we are delaying its release
 				nonFakeKeys.add(key);
@@ -167,10 +166,9 @@ public class GaenController {
 		var responseBuilder = ResponseEntity.ok();
 		if (principal instanceof Jwt) {
 			var originalJWT = (Jwt) principal;
-			var jwtBuilder = Jwts.builder().setId(UUID.randomUUID().toString()).setIssuedAt(Date.from(Instant.now()))
+			var jwtBuilder = Jwts.builder().setId(UUID.randomUUID().toString()).setIssuedAt(now.getDate())
 					.setIssuer("dpppt-sdk-backend").setSubject(originalJWT.getSubject())
-					.setExpiration(Date
-							.from(delayedKeyDateUTCInstant.atStartOfDay().plusDays(2).getInstant()))
+					.setExpiration(now.plusDays(2).getDate())
 					.claim("scope", "currentDayExposed").claim("delayedKeyDate", gaenRequest.getDelayedKeyDate());
 			if (originalJWT.containsClaim("fake")) {
 				jwtBuilder.claim("fake", originalJWT.getClaim("fake"));
