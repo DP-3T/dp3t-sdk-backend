@@ -1027,6 +1027,19 @@ public class GaenControllerTest extends BaseControllerTest {
 		assertTrue(publishedUntil < System.currentTimeMillis(), "Published until must be in the past");
 		assertNotEquals(expectedEtag, response.getHeader("etag"));
 	}
+	
+	@Test
+	public void testMalciousTokenFails() throws Exception {
+		var requestList = new GaenRequest();
+		List<GaenKey> exposedKeys = new ArrayList<GaenKey>();
+		requestList.setGaenKeys(exposedKeys);
+		String token = createMaliciousToken(OffsetDateTime.now().withOffsetSameInstant(ZoneOffset.UTC).plusMinutes(5));
+		MvcResult response = mockMvc.perform(post("/v1/gaen/exposed")
+				.contentType(MediaType.APPLICATION_JSON).header("Authorization", "Bearer " + token)
+				.header("User-Agent", "MockMVC").content(json(requestList))).andExpect(request().asyncNotStarted()).andExpect(status().is(401)).andReturn();
+		String authenticateError = response.getResponse().getHeader("www-authenticate");
+		assertTrue(authenticateError.contains("Unsigned Claims JWTs are not supported."));
+	}
 
 	private void verifyZipInZipResponse(MockHttpServletResponse response, int expectKeyCount) throws Exception {
 		ByteArrayInputStream baisOuter = new ByteArrayInputStream(response.getContentAsByteArray());
