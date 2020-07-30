@@ -73,7 +73,6 @@ public class JDBCGAENDataServiceImpl implements GAENDataService {
 		jt.batchUpdate(sql, parameterList.toArray(new MapSqlParameterSource[0]));
 	}
 
-
 	@Override
 	@Transactional(readOnly = true)
 	public int getMaxExposedIdForKeyDate(Long keyDate, Long publishedAfter, Long publishedUntil) {
@@ -133,4 +132,5 @@ public class JDBCGAENDataServiceImpl implements GAENDataService {
 		String sqlExposed = "delete from t_gaen_exposed where received_at < :retention_time";
 		jt.update(sqlExposed, params);
 	}
+
 }

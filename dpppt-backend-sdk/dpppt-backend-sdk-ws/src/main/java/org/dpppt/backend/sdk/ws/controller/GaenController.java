@@ -87,11 +87,9 @@ public class GaenController {
 	private final PrivateKey secondDayKey;
 	private final ProtoSignature gaenSigner;
 
-	private final boolean delayTodaysKeys;
-
 	public GaenController(GAENDataService dataService, FakeKeyService fakeKeyService, ValidateRequest validateRequest,
 						  ProtoSignature gaenSigner, ValidationUtils validationUtils, Duration releaseBucketDuration, Duration requestTime,
-						  Duration exposedListCacheControl, PrivateKey secondDayKey, boolean delayTodaysKeys) {
+						  Duration exposedListCacheControl, PrivateKey secondDayKey) {
 		this.dataService = dataService;
 		this.fakeKeyService = fakeKeyService;
 		this.releaseBucketDuration = releaseBucketDuration;
@@ -101,7 +99,6 @@ public class GaenController {
 		this.exposedListCacheControl = exposedListCacheControl;
 		this.secondDayKey = secondDayKey;
 		this.gaenSigner = gaenSigner;
-		this.delayTodaysKeys = delayTodaysKeys;
 	}
 
 	@PostMapping(value = "/exposed")
@@ -131,7 +128,6 @@ public class GaenController {
 		}
 
 		List<GaenKey> nonFakeKeys = new ArrayList<>();
-		List<GaenKey> nonFakeKeysDelayed = new ArrayList<>();
 		for (var key : gaenRequest.getGaenKeys()) {
 			if (!validationUtils.isValidBase64Key(key.getKeyData())) {
 				return () -> new ResponseEntity<>("No valid base64 key", HttpStatus.BAD_REQUEST);
@@ -143,25 +139,16 @@ public class GaenController {
 			}
 
 			if (key.getRollingPeriod().equals(0)) {
-				logger.error("RollingPeriod should NOT be 0, fixing it and using 144");
-				key.setRollingPeriod(GaenKey.GaenKeyDefaultRollingPeriod);
-			}
-			
-			if(delayTodaysKeys) {
-				// Additionally to delaying keys this feature also make sure rolling period is always set to 144 
-				// to make sure iOS 13.5.x does not ignore the TEK.
+				//currently only android seems to send 0 which can never be valid, since a non used key should not be submitted
+				//default value according to EN is 144, so just set it to that. If we ever get 0 from iOS we should log it, since
+				//this should not happen
 				key.setRollingPeriod(GaenKey.GaenKeyDefaultRollingPeriod);
 				var rollingUTCInstant = UTCInstant.of(key.getRollingStartNumber(), GaenUnit.TenMinutes);
 				
 				// If this is a same day TEK we are delaying its release
-				if(now.hasSameDateAs(rollingUTCInstant)) {
-					nonFakeKeysDelayed.add(key);
-				} else {
-					nonFakeKeys.add(key);
-				}
-			} else {
 				nonFakeKeys.add(key);
 			}
+			nonFakeKeys.add(key);
 		}
 
 		if (principal instanceof Jwt && ((Jwt) principal).containsClaim("fake")
@@ -170,13 +157,6 @@ public class GaenController {
 		}
 		if (!nonFakeKeys.isEmpty()) {
 			dataService.upsertExposees(nonFakeKeys, now);
-		}
-		if (!nonFakeKeysDelayed.isEmpty()) {
-			// Hold back same day TEKs until 02:00 UTC of the next day (as RPIs are accepted by EN up to 2h after rolling period)
-			var tomorrowAt2AM = now.atStartOfDay()
-										.plusDays(1)
-										.plusHours(2);
-			dataService.upsertExposeesDelayed(nonFakeKeysDelayed, tomorrowAt2AM, now);
 		}
 
 		var delayedKeyDateUTCInstant = UTCInstant.of(gaenRequest.getDelayedKeyDate(), GaenUnit.TenMinutes);
