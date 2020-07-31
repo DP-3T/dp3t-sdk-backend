@@ -146,7 +146,7 @@ public class KeyVault {
 			return KeyFactory.getInstance(algorithm)
 					.generatePrivate(new PKCS8EncodedKeySpec(Base64.getDecoder().decode(privatePart)));
 		} catch (InvalidKeySpecException | NoSuchAlgorithmException e) {
-			logger.warn("Exception loading private key from java encoding", e);
+			logger.warn("Exception loading private key from java encoding: {}", e);
 			return null;
 		}
 	}
