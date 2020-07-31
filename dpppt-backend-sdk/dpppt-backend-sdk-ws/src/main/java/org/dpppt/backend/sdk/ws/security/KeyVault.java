@@ -198,7 +198,7 @@ public class KeyVault {
 			readerPem.close();
 			return KeyFactory.getInstance(algorithm).generatePublic(new X509EncodedKeySpec(obj.getContent()));
 		} catch (InvalidKeySpecException | NoSuchAlgorithmException | IOException e) {
-			logger.warn("Exception loading public key from PEM", e);
+			logger.warn("Exception loading public key from PEM: {}", e);
 			return null;
 		}
 	}
