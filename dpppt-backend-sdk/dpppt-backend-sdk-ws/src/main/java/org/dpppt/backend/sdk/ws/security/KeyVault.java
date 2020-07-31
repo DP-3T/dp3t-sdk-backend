@@ -185,7 +185,7 @@ public class KeyVault {
 			return KeyFactory.getInstance(algorithm)
 					.generatePublic(new X509EncodedKeySpec(Base64.getDecoder().decode(publicPart)));
 		} catch (InvalidKeySpecException | NoSuchAlgorithmException e) {
-			logger.warn("Exception loading public key from java encoding", e);
+			logger.warn("Exception loading public key from java encoding: {}", e);
 			return null;
 		}
 	}
