@@ -220,7 +220,8 @@ To build the docker image run
 make docker-build
 ```
 
-This will build the jar and copy it into the `ws-sdk/ws/bin` folder, from where it is then added to the container image. The image will be tagged as `dp3t-docker`. 
+This will build the jar and copy it into the `ws-sdk/ws/bin` folder, from where it is then added to the container image.
+The image will be tagged as `dp3t-docker`. 
 
 An example `logback.xml` is found in the `resources` folder for the `dpppt-backend-sdk-ws` Java module.
 
