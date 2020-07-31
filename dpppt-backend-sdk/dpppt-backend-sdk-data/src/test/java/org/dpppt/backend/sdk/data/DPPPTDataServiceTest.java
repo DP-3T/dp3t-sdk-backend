@@ -16,9 +16,6 @@ import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
 import java.time.Duration;
-import java.time.LocalDate;
-import java.time.OffsetDateTime;
-import java.time.ZoneOffset;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -26,7 +23,9 @@ import org.dpppt.backend.sdk.data.config.DPPPTDataServiceConfig;
 import org.dpppt.backend.sdk.data.config.FlyWayConfig;
 import org.dpppt.backend.sdk.data.config.RedeemDataServiceConfig;
 import org.dpppt.backend.sdk.data.config.StandaloneDataConfig;
+import org.dpppt.backend.sdk.data.config.TestConfig;
 import org.dpppt.backend.sdk.model.Exposee;
+import org.dpppt.backend.sdk.utils.UTCInstant;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -34,11 +33,13 @@ import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.junit4.SpringJUnit4ClassRunner;
 import org.springframework.test.context.support.AnnotationConfigContextLoader;
+import org.springframework.transaction.annotation.Transactional;
 
 @RunWith(SpringJUnit4ClassRunner.class)
 @ContextConfiguration(loader = AnnotationConfigContextLoader.class, classes = { StandaloneDataConfig.class,
-		FlyWayConfig.class, DPPPTDataServiceConfig.class, RedeemDataServiceConfig.class })
-@ActiveProfiles("hsqldb")
+		FlyWayConfig.class, DPPPTDataServiceConfig.class, RedeemDataServiceConfig.class, TestConfig.class })
+@ActiveProfiles({ "hsqldb", "test-config"})
+@Transactional
 public class DPPPTDataServiceTest {
 
 	@Autowired
@@ -47,16 +48,17 @@ public class DPPPTDataServiceTest {
 	private RedeemDataService redeemDataService;
 
 	@Test
+	@Transactional
 	public void testUpsertupsertExposee() {
 		Exposee expected = new Exposee();
 		expected.setKey("key");
-		OffsetDateTime now = OffsetDateTime.now().withOffsetSameInstant(ZoneOffset.UTC);
-		expected.setKeyDate(now.toLocalDate().atStartOfDay().atOffset(ZoneOffset.UTC).toInstant().toEpochMilli());
+		var now = UTCInstant.now();
+		expected.setKeyDate(now.atStartOfDay().getTimestamp());
 
 		dppptDataService.upsertExposee(expected, "AppSource");
 
 		List<Exposee> sortedExposedForDay = dppptDataService
-				.getSortedExposedForBatchReleaseTime(OffsetDateTime.now().plusMinutes(10).toInstant().toEpochMilli(), 1 * 60 * 60 * 1000l);
+				.getSortedExposedForBatchReleaseTime(now.plusMinutes(10).getTimestamp(), 1 * 60 * 60 * 1000l);
 		assertFalse(sortedExposedForDay.isEmpty());
 		Exposee actual = sortedExposedForDay.get(0);
 		assertEquals(expected.getKey(), actual.getKey());
@@ -65,27 +67,29 @@ public class DPPPTDataServiceTest {
 	}
 
 	@Test
+	@Transactional
 	// depends on sorting of dbservice (in our case descsending with respect to id
 	// -> last inserted is first in list)
-	public void testUpsertExposees() {
+	public void testUpsertExposees() throws Exception {
 		var expected = new ArrayList<Exposee>();
 		var exposee1 = new Exposee();
 		var exposee2 = new Exposee();
 		exposee1.setKey("key1");
 		exposee2.setKey("key2");
-
-		OffsetDateTime now = LocalDate.now().atStartOfDay().atOffset(ZoneOffset.UTC);
-		OffsetDateTime yesterday = LocalDate.now().atStartOfDay().atOffset(ZoneOffset.UTC).minusDays(1);
-		exposee1.setKeyDate(now.toInstant().toEpochMilli());
-		exposee2.setKeyDate(yesterday.toInstant().toEpochMilli());
+		
+		var now = UTCInstant.now();
+		var nowMidnight = now.atStartOfDay();
+		var yesterday = nowMidnight.minusDays(1);
+		exposee1.setKeyDate(nowMidnight.getTimestamp());
+		exposee2.setKeyDate(yesterday.getTimestamp());
 
 		expected.add(exposee1);
 		expected.add(exposee2);
-
+		
 		dppptDataService.upsertExposees(expected, "AppSource");
 
 		List<Exposee> sortedExposedForDay = dppptDataService
-				.getSortedExposedForBatchReleaseTime(OffsetDateTime.now().plusMinutes(10).toInstant().toEpochMilli(), 1 * 60 * 60 * 1000l);
+				.getSortedExposedForBatchReleaseTime(now.plusMinutes(10).getTimestamp(), 1 * 60 * 60 * 1000l);
 		assertFalse(sortedExposedForDay.isEmpty());
 
 		Exposee actual = sortedExposedForDay.get(1);
@@ -100,6 +104,7 @@ public class DPPPTDataServiceTest {
 	}
 
 	@Test
+	@Transactional
 	public void testRedeemUUID() {
 		boolean actual = redeemDataService.checkAndInsertPublishUUID("bc77d983-2359-48e8-835a-de673fe53ccb");
 		assertTrue(actual);
@@ -110,23 +115,23 @@ public class DPPPTDataServiceTest {
 	}
 
 	@Test
+	@Transactional
 	public void cleanUp() {
 		Exposee expected = new Exposee();
 		expected.setKey("key");
-		OffsetDateTime now = OffsetDateTime.now().withOffsetSameInstant(ZoneOffset.UTC);
-		expected.setKeyDate(now.toLocalDate().atStartOfDay().atOffset(ZoneOffset.UTC).toInstant().toEpochMilli());
+		var now = UTCInstant.now();
+		expected.setKeyDate(now.atStartOfDay().getTimestamp());
 
 		dppptDataService.upsertExposee(expected, "AppSource");
 		dppptDataService.cleanDB(Duration.ofDays(21));
 
 		List<Exposee> sortedExposedForDay = dppptDataService
-				.getSortedExposedForBatchReleaseTime(now.plusMinutes(10).toInstant().toEpochMilli(), 1 * 60 * 60 * 1000l);
+				.getSortedExposedForBatchReleaseTime(now.plusMinutes(10).getTimestamp(), 1 * 60 * 60 * 1000l);
 		assertFalse(sortedExposedForDay.isEmpty());
 
 		dppptDataService.cleanDB(Duration.ofDays(0));
-		sortedExposedForDay = dppptDataService.getSortedExposedForBatchReleaseTime(now.plusMinutes(10).toInstant().toEpochMilli(),
+		sortedExposedForDay = dppptDataService.getSortedExposedForBatchReleaseTime(now.plusMinutes(10).getTimestamp(),
 				1 * 60 * 60 * 1000l);
 		assertTrue(sortedExposedForDay.isEmpty());
-
 	}
 }

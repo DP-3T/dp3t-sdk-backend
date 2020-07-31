@@ -132,7 +132,7 @@ public class KeyVault {
 			try {
 				key = (PrivateKey) provider.invoke(null, privatePart, algorithm);
 			} catch (IllegalAccessException | IllegalArgumentException | InvocationTargetException e) {
-				logger.warn("Could not decode key as " + algorithm);
+				logger.warn("Could not decode key as {}", algorithm);
 			}
 			if (key != null) {
 				return key;
@@ -146,7 +146,7 @@ public class KeyVault {
 			return KeyFactory.getInstance(algorithm)
 					.generatePrivate(new PKCS8EncodedKeySpec(Base64.getDecoder().decode(privatePart)));
 		} catch (InvalidKeySpecException | NoSuchAlgorithmException e) {
-			logger.warn("Exception loading private key from java encoding", e);
+			logger.warn("Exception loading private key from java encoding ", e);
 			return null;
 		}
 	}
@@ -159,7 +159,7 @@ public class KeyVault {
 			readerPem.close();
 			return KeyFactory.getInstance(algorithm).generatePrivate(new PKCS8EncodedKeySpec(obj.getContent()));
 		} catch (InvalidKeySpecException | NoSuchAlgorithmException | IOException e) {
-			logger.warn("Exception loading private key from PEM", e);
+			logger.warn("Exception loading private key from PEM ", e);
 			return null;
 		}
 	}
@@ -171,7 +171,7 @@ public class KeyVault {
 			try {
 				key = (PublicKey) provider.invoke(null, publicPart, algorithm);
 			} catch (IllegalAccessException | IllegalArgumentException | InvocationTargetException e) {
-				logger.warn("Could not decode key as " + algorithm);
+				logger.warn("Could not decode key as {}", algorithm);
 			}
 			if (key != null) {
 				return key;

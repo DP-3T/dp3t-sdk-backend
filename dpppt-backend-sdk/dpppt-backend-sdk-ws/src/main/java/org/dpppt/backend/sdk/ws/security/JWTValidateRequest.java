@@ -10,15 +10,17 @@
 
 package org.dpppt.backend.sdk.ws.security;
 
-import java.time.LocalDate;
-import java.time.OffsetDateTime;
-import java.time.ZoneOffset;
-
 import org.dpppt.backend.sdk.model.ExposeeRequest;
 import org.dpppt.backend.sdk.model.ExposeeRequestList;
+import org.dpppt.backend.sdk.utils.UTCInstant;
+import org.dpppt.backend.sdk.ws.util.ValidationUtils;
 import org.springframework.security.oauth2.jwt.Jwt;
 
 public class JWTValidateRequest implements ValidateRequest {
+	private final ValidationUtils validationUtils;
+	public JWTValidateRequest(ValidationUtils validationUtils) {
+		this.validationUtils = validationUtils;
+	}
 
 	@Override
 	public boolean isValid(Object authObject) {
@@ -30,23 +32,20 @@ public class JWTValidateRequest implements ValidateRequest {
 	}
 
 	@Override
-	public long getKeyDate(Object authObject, Object others) throws InvalidDateException {
+	public long getKeyDate(UTCInstant now, Object authObject, Object others) throws InvalidDateException {
 		if (authObject instanceof Jwt) {
 			Jwt token = (Jwt) authObject;
-			long jwtKeyDate = LocalDate.parse(token.getClaim("onset")).atStartOfDay().atOffset(ZoneOffset.UTC).toInstant().toEpochMilli();
+			var jwtKeyDate = UTCInstant.parseDate(token.getClaim("onset"));
 			if (others instanceof ExposeeRequest) {
 				ExposeeRequest request = (ExposeeRequest) others;
-				if (request.getKeyDate() > System.currentTimeMillis()) {
-					throw new InvalidDateException();
-				} else if (request.getKeyDate() < jwtKeyDate) {
+				var requestKeyDate = UTCInstant.ofEpochMillis(request.getKeyDate());
+				if (!validationUtils.isDateInRange(requestKeyDate, now)
+				 || requestKeyDate.isBeforeEpochMillisOf(jwtKeyDate)){
 					throw new InvalidDateException();
 				} 
-				else if(request.getKeyDate() < OffsetDateTime.now().minusDays(21).toInstant().toEpochMilli()) {
-					throw new InvalidDateException();
-				}
-				jwtKeyDate = request.getKeyDate();
+				jwtKeyDate = UTCInstant.ofEpochMillis(request.getKeyDate());
 			}
-			return jwtKeyDate;
+			return jwtKeyDate.getTimestamp();
 		}
 		throw new IllegalArgumentException();
 	}

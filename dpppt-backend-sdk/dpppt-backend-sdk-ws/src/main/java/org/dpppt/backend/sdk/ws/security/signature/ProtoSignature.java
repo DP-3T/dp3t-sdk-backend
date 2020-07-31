@@ -19,9 +19,6 @@ import java.security.PublicKey;
 import java.security.Signature;
 import java.security.SignatureException;
 import java.time.Duration;
-import java.time.Instant;
-import java.time.LocalDate;
-import java.time.ZoneOffset;
 import java.util.ArrayList;
 import java.util.Base64;
 import java.util.Collection;
@@ -35,6 +32,7 @@ import org.dpppt.backend.sdk.model.gaen.GaenKey;
 import org.dpppt.backend.sdk.model.gaen.GaenUnit;
 import org.dpppt.backend.sdk.model.gaen.proto.TemporaryExposureKeyFormat;
 import org.dpppt.backend.sdk.model.gaen.proto.TemporaryExposureKeyFormat.SignatureInfo;
+import org.dpppt.backend.sdk.utils.UTCInstant;
 
 import com.google.protobuf.ByteString;
 
@@ -199,8 +197,7 @@ public class ProtoSignature {
 		for (var keys : buckets) {
 			if (keys.isEmpty())
 				continue;
-			var keyDate = Duration.of(keys.get(0).getRollingStartNumber(), GaenUnit.TenMinutes);
-			var keyLocalDate = LocalDate.ofInstant(Instant.ofEpochMilli(keyDate.toMillis()), ZoneOffset.UTC).toString();
+			var keyLocalDate = UTCInstant.of(keys.get(0).getRollingStartNumber(), GaenUnit.TenMinutes).getLocalDate().toString();
 			grouped.put(keyLocalDate, keys);
 		}
 		return getPayload(grouped);

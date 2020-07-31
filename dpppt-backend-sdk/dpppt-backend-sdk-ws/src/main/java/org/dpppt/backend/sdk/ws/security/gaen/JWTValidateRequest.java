@@ -10,18 +10,18 @@
 
 package org.dpppt.backend.sdk.ws.security.gaen;
 
-import java.time.Duration;
-import java.time.LocalDate;
-import java.time.OffsetDateTime;
-import java.time.ZoneOffset;
-
 import org.dpppt.backend.sdk.model.gaen.GaenKey;
 import org.dpppt.backend.sdk.model.gaen.GaenUnit;
 import org.dpppt.backend.sdk.ws.security.ValidateRequest;
+import org.dpppt.backend.sdk.ws.util.ValidationUtils;
+import org.dpppt.backend.sdk.utils.UTCInstant;
 import org.springframework.security.oauth2.jwt.Jwt;
 
 public class JWTValidateRequest implements ValidateRequest {
-
+	private final ValidationUtils validationUtils;
+	public JWTValidateRequest(ValidationUtils validationUtils) {
+		this.validationUtils = validationUtils;
+	}
 	@Override
 	public boolean isValid(Object authObject) {
 		if (authObject instanceof Jwt) {
@@ -32,24 +32,20 @@ public class JWTValidateRequest implements ValidateRequest {
 	}
 
 	@Override
-	public long getKeyDate(Object authObject, Object others) throws InvalidDateException {
+	public long getKeyDate(UTCInstant now, Object authObject, Object others) throws InvalidDateException {
 		if (authObject instanceof Jwt) {
 			Jwt token = (Jwt) authObject;
-			long jwtKeyDate = LocalDate.parse(token.getClaim("onset")).atStartOfDay().atOffset(ZoneOffset.UTC).toInstant().toEpochMilli();
+			var jwtKeyDate = UTCInstant.parseDate(token.getClaim("onset"));
 			if (others instanceof GaenKey) {
                 GaenKey request = (GaenKey) others;
-                var keyDate = Duration.of(request.getRollingStartNumber(), GaenUnit.TenMinutes);
-				if (keyDate.toMillis() > System.currentTimeMillis()) {
-					throw new InvalidDateException();
-				} else if (keyDate.toMillis() < jwtKeyDate) {
-					throw new InvalidDateException();
-				} 
-				else if(keyDate.toMillis() < OffsetDateTime.now().minusDays(21).toInstant().toEpochMilli()) {
+                var keyDate = UTCInstant.of(request.getRollingStartNumber(), GaenUnit.TenMinutes);
+				if (!validationUtils.isDateInRange(keyDate,now)
+				 ||	keyDate.isBeforeEpochMillisOf(jwtKeyDate)) {
 					throw new InvalidDateException();
 				}
-				jwtKeyDate = keyDate.toMillis();
+				jwtKeyDate = keyDate;
 			}
-			return jwtKeyDate;
+			return jwtKeyDate.getTimestamp();
 		}
 		throw new IllegalArgumentException();
 	}

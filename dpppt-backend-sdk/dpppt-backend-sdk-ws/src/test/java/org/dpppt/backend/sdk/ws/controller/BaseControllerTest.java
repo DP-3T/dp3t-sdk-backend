@@ -27,6 +27,7 @@ import javax.servlet.Filter;
 import javax.sql.DataSource;
 
 import org.apache.commons.io.IOUtils;
+import org.dpppt.backend.sdk.utils.UTCInstant;
 import org.dpppt.backend.sdk.ws.filter.ResponseWrapperFilter;
 import org.dpppt.backend.sdk.ws.util.TestJDBCGaen;
 import org.junit.Before;
@@ -97,59 +98,60 @@ public abstract class BaseControllerTest {
 	protected PublicKey publicKey;
 	protected PrivateKey privateKey;
 
-	protected String createToken(OffsetDateTime expiresAt) {
+	protected String createToken(UTCInstant expiresAt) {
 		Claims claims = Jwts.claims();
 		claims.put("scope", "exposed");
 		claims.put("onset", "2020-04-20");
 		claims.put("fake", "0");
 		return Jwts.builder().setClaims(claims).setId(UUID.randomUUID().toString())
-				.setSubject("test-subject" + OffsetDateTime.now().withOffsetSameInstant(ZoneOffset.UTC).toString()).setExpiration(Date.from(expiresAt.toInstant()))
-				.setIssuedAt(Date.from(OffsetDateTime.now().withOffsetSameInstant(ZoneOffset.UTC).toInstant())).signWith((Key) privateKey).compact();
+				.setSubject("test-subject" + OffsetDateTime.now().withOffsetSameInstant(ZoneOffset.UTC).toString()).setExpiration(expiresAt.getDate())
+				.setIssuedAt(UTCInstant.now().getDate()).signWith((Key) privateKey).compact();
 	}
-	protected String createToken(OffsetDateTime expiresAt, String onset) {
+	protected String createToken(UTCInstant expiresAt, String onset) {
 		Claims claims = Jwts.claims();
 		claims.put("scope", "exposed");
 		claims.put("fake", "0");
 		claims.put("onset", onset);
 		return Jwts.builder().setClaims(claims).setId(UUID.randomUUID().toString())
-				.setSubject("test-subject" + OffsetDateTime.now().withOffsetSameInstant(ZoneOffset.UTC).toString()).setExpiration(Date.from(expiresAt.toInstant()))
-				.setIssuedAt(Date.from(OffsetDateTime.now().withOffsetSameInstant(ZoneOffset.UTC).toInstant())).signWith((Key) privateKey).compact();
+				.setSubject("test-subject" + OffsetDateTime.now().withOffsetSameInstant(ZoneOffset.UTC).toString()).setExpiration(expiresAt.getDate())
+				.setIssuedAt(UTCInstant.now().getDate()).signWith((Key) privateKey).compact();
 	}
 
-	protected String createToken(String subject, OffsetDateTime expiresAt) {
+	protected String createToken(String subject, UTCInstant expiresAt) {
 		Claims claims = Jwts.claims();
 		claims.put("scope", "exposed");
 		claims.put("fake", "0");
-		return Jwts.builder().setSubject(subject).setExpiration(Date.from(expiresAt.toInstant())).setClaims(claims)
+		return Jwts.builder().setSubject(subject).setExpiration(expiresAt.getDate()).setClaims(claims)
 				.setId(UUID.randomUUID().toString()).signWith((Key) privateKey).compact();
 	}
 
-	protected String createToken(boolean fake, OffsetDateTime expiresAt) {
+	protected String createToken(boolean fake, UTCInstant expiresAt) {
 		Claims claims = Jwts.claims();
 		claims.put("scope", "exposed");
 		claims.put("onset", "2020-04-20");
 		claims.put("fake", fake? "1": "0");
 		return Jwts.builder().setClaims(claims).setId(UUID.randomUUID().toString())
-				.setSubject("test-subject" + OffsetDateTime.now().withOffsetSameInstant(ZoneOffset.UTC).toString()).setExpiration(Date.from(expiresAt.toInstant()))
-				.setIssuedAt(Date.from(OffsetDateTime.now().withOffsetSameInstant(ZoneOffset.UTC).toInstant())).signWith((Key) privateKey).compact();
+				.setSubject("test-subject" + UTCInstant.now().getOffsetDateTime().toString())
+				.setExpiration(expiresAt.getDate())
+				.setIssuedAt(UTCInstant.now().getDate()).signWith((Key) privateKey).compact();
 	}
 
-	protected String createTokenWithScope(OffsetDateTime expiresAt, String scope) {
+	protected String createTokenWithScope(UTCInstant expiresAt, String scope) {
 		Claims claims = Jwts.claims();
 		claims.put("scope", scope);
 		claims.put("fake", "0");
 		claims.put("onset", "2020-04-20");
 		return Jwts.builder().setClaims(claims).setId(UUID.randomUUID().toString())
-				.setSubject("test-subject" + OffsetDateTime.now().withOffsetSameInstant(ZoneOffset.UTC).toString()).setExpiration(Date.from(expiresAt.toInstant()))
-				.setIssuedAt(Date.from(OffsetDateTime.now().withOffsetSameInstant(ZoneOffset.UTC).toInstant())).signWith((Key) privateKey).compact();
+				.setSubject("test-subject" + OffsetDateTime.now().withOffsetSameInstant(ZoneOffset.UTC).toString()).setExpiration(expiresAt.getDate())
+				.setIssuedAt(UTCInstant.now().getDate()).signWith((Key) privateKey).compact();
 	}
-	protected String createMaliciousToken(OffsetDateTime expiresAt) {
+	protected String createMaliciousToken(UTCInstant expiresAt) {
 		Claims claims = Jwts.claims();
 		claims.put("scope", "exposed");
 		claims.put("onset", "2020-04-20");
 		claims.put("fake", "0");
 		return Jwts.builder().setClaims(claims).setId(UUID.randomUUID().toString())
-				.setSubject("test-subject" + OffsetDateTime.now().withOffsetSameInstant(ZoneOffset.UTC).toString()).setExpiration(Date.from(expiresAt.toInstant()))
+				.setSubject("test-subject" + OffsetDateTime.now().withOffsetSameInstant(ZoneOffset.UTC).toString()).setExpiration(expiresAt.getDate())
 				.setIssuedAt(Date.from(OffsetDateTime.now().withOffsetSameInstant(ZoneOffset.UTC).toInstant())).compact();
 	}
 

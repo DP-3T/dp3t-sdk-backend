@@ -11,9 +11,6 @@
 package org.dpppt.backend.sdk.ws.controller;
 
 import java.time.Duration;
-import java.time.LocalDate;
-import java.time.OffsetDateTime;
-import java.time.ZoneOffset;
 import java.time.format.DateTimeParseException;
 import java.util.ArrayList;
 import java.util.Base64;
@@ -31,6 +28,7 @@ import org.dpppt.backend.sdk.model.ExposeeRequestList;
 import org.dpppt.backend.sdk.model.proto.Exposed;
 import org.dpppt.backend.sdk.ws.security.ValidateRequest;
 import org.dpppt.backend.sdk.ws.security.ValidateRequest.InvalidDateException;
+import org.dpppt.backend.sdk.utils.UTCInstant;
 import org.dpppt.backend.sdk.ws.util.ValidationUtils;
 import org.dpppt.backend.sdk.ws.util.ValidationUtils.BadBatchReleaseTimeException;
 import org.springframework.http.CacheControl;
@@ -104,7 +102,7 @@ public class DPPPTController {
             @Documentation(description = "App Identifier (PackageName/BundleIdentifier) + App-Version + OS (Android/iOS) + OS-Version", example = "ch.ubique.android.starsdk;1.0;iOS;13.3")
                     String userAgent,
 			@AuthenticationPrincipal Object principal) throws InvalidDateException {
-		long now = System.currentTimeMillis();
+		var now = UTCInstant.now();
 		if (!this.validateRequest.isValid(principal)) {
 			return ResponseEntity.status(HttpStatus.FORBIDDEN).build();
 		}
@@ -114,7 +112,7 @@ public class DPPPTController {
 		// TODO: should we give that information?
 		Exposee exposee = new Exposee();
 		exposee.setKey(exposeeRequest.getKey());
-		long keyDate = this.validateRequest.getKeyDate(principal, exposeeRequest);
+		long keyDate = this.validateRequest.getKeyDate(now, principal, exposeeRequest);
 
 		exposee.setKeyDate(keyDate);
 		if (!this.validateRequest.isFakeRequest(principal, exposeeRequest)) {
@@ -122,7 +120,7 @@ public class DPPPTController {
 		}
 
 		long after = System.currentTimeMillis();
-		long duration = after - now;
+		long duration = after - now.getTimestamp();
 		try {
 			Thread.sleep(Math.max(this.requestTime - duration, 0));
 		} catch (Exception ex) {
@@ -145,7 +143,7 @@ public class DPPPTController {
             @Documentation(description = "App Identifier (PackageName/BundleIdentifier) + App-Version + OS (Android/iOS) + OS-Version", example = "ch.ubique.android.starsdk;1.0;iOS;13.3")
                     String userAgent,
 			@AuthenticationPrincipal Object principal) throws InvalidDateException {
-		long now = System.currentTimeMillis();
+		var now = UTCInstant.now();
 		if (!this.validateRequest.isValid(principal)) {
 			return ResponseEntity.status(HttpStatus.FORBIDDEN).build();
 		}
@@ -158,7 +156,7 @@ public class DPPPTController {
 
 			Exposee exposee = new Exposee();
 			exposee.setKey(exposedKey.getKey());
-			long keyDate = this.validateRequest.getKeyDate(principal, exposedKey);
+			long keyDate = this.validateRequest.getKeyDate(now, principal, exposedKey);
 
 			exposee.setKeyDate(keyDate);
 			exposees.add(exposee);
@@ -169,7 +167,7 @@ public class DPPPTController {
 		}
 
 		long after = System.currentTimeMillis();
-		long duration = after - now;
+		long duration = after - now.getTimestamp();
 		try {
 			Thread.sleep(Math.max(this.requestTime - duration, 0));
 		} catch (Exception ex) {
@@ -190,7 +188,8 @@ public class DPPPTController {
                                                                                          example = "1593043200000")
                                                                                          long batchReleaseTime,
 			WebRequest request) throws BadBatchReleaseTimeException{
-		if(!validationUtils.isValidBatchReleaseTime(batchReleaseTime)) {
+		var now = UTCInstant.now();
+		if(!validationUtils.isValidBatchReleaseTime(UTCInstant.ofEpochMillis(batchReleaseTime), now)) {
 			return ResponseEntity.notFound().build();
 		}
 
@@ -213,7 +212,8 @@ public class DPPPTController {
                                                                                                 example = "1593043200000")
                                                                                                 long batchReleaseTime,
 			WebRequest request) throws BadBatchReleaseTimeException {
-		if(!validationUtils.isValidBatchReleaseTime(batchReleaseTime)) {
+		var now = UTCInstant.now();
+		if(!validationUtils.isValidBatchReleaseTime(UTCInstant.ofEpochMillis(batchReleaseTime), now)) {
 			return ResponseEntity.notFound().build();
 		}
 
@@ -241,13 +241,13 @@ public class DPPPTController {
 	public @ResponseBody ResponseEntity<BucketList> getListOfBuckets(@PathVariable
                                                                          @Documentation(description = "The date starting when to return the available buckets, in ISO8601 date format", example = "2019-01-31")
                                                                                  String dayDateStr) {
-		OffsetDateTime day = LocalDate.parse(dayDateStr).atStartOfDay().atOffset(ZoneOffset.UTC);
-		OffsetDateTime currentBucket = day;
-		OffsetDateTime now = OffsetDateTime.now().withOffsetSameInstant(ZoneOffset.UTC);
+		var day = UTCInstant.parseDate(dayDateStr);
+		var currentBucket = day;
+		var now = UTCInstant.now();
 		List<Long> bucketList = new ArrayList<>();
-		while (currentBucket.toInstant().toEpochMilli() < Math.min(day.plusDays(1).toInstant().toEpochMilli(),
-				now.toInstant().toEpochMilli())) {
-			bucketList.add(currentBucket.toInstant().toEpochMilli());
+		while (currentBucket.getTimestamp() < Math.min(day.plusDays(1).getTimestamp(),
+				now.getTimestamp())) {
+			bucketList.add(currentBucket.getTimestamp());
 			currentBucket = currentBucket.plusSeconds(releaseBucketDuration / 1000);
 		}
 		BucketList list = new BucketList();

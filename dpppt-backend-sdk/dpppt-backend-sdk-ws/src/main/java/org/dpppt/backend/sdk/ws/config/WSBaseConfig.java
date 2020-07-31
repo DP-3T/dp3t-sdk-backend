@@ -187,7 +187,7 @@ public abstract class WSBaseConfig implements SchedulingConfigurer, WebMvcConfig
 	public DPPPTController dppptSDKController() {
 		ValidateRequest theValidator = requestValidator;
 		if (theValidator == null) {
-			theValidator = new NoValidateRequest();
+			theValidator = new NoValidateRequest(dpptValidationUtils());
 		}
 		return new DPPPTController(dppptSDKDataService(), appSource, exposedListCacheControl, theValidator,
 				dpptValidationUtils(), releaseBucketDuration, requestTime);
@@ -216,7 +216,7 @@ public abstract class WSBaseConfig implements SchedulingConfigurer, WebMvcConfig
 
 	@Bean
 	ValidateRequest backupValidator() {
-		return new NoValidateRequest();
+		return new NoValidateRequest(gaenValidationUtils());
 	}
 
 	@Bean
