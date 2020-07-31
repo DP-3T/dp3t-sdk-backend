@@ -132,7 +132,7 @@ public class KeyVault {
 			try {
 				key = (PrivateKey) provider.invoke(null, privatePart, algorithm);
 			} catch (IllegalAccessException | IllegalArgumentException | InvocationTargetException e) {
-				logger.warn("Could not decode key as " + algorithm);
+				logger.warn("Could not decode key as ", algorithm);
 			}
 			if (key != null) {
 				return key;
@@ -171,7 +171,7 @@ public class KeyVault {
 			try {
 				key = (PublicKey) provider.invoke(null, publicPart, algorithm);
 			} catch (IllegalAccessException | IllegalArgumentException | InvocationTargetException e) {
-				logger.warn("Could not decode key as " + algorithm);
+				logger.warn("Could not decode key as ", algorithm);
 			}
 			if (key != null) {
 				return key;
