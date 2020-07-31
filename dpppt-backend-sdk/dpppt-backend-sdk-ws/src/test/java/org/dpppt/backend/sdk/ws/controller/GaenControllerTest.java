@@ -27,6 +27,7 @@ import java.security.InvalidKeyException;
 import java.security.NoSuchAlgorithmException;
 import java.security.SecureRandom;
 import java.security.SignatureException;
+import java.time.Clock;
 import java.time.Duration;
 import java.time.Instant;
 import java.time.format.DateTimeFormatter;
@@ -922,6 +923,9 @@ public class GaenControllerTest extends BaseControllerTest {
 	@Transactional
 	public void zipContainsFiles() throws Exception {
 		var now = UTCInstant.now();
+		var clock = Clock.offset(Clock.systemUTC(), now.getDuration(now.atStartOfDay().plusHours(12)));
+		UTCInstant.setClock(clock);
+		now = UTCInstant.now();
 		var midnight = now.atStartOfDay();
 
 		// insert two times 5 keys per day for the last 14 days. the second batch has a
@@ -957,7 +961,8 @@ public class GaenControllerTest extends BaseControllerTest {
 				.andExpect(status().is2xxSuccessful()).andReturn().getResponse();
 
 		//we always have 10
-		verifyZipResponse(responseWithPublishedAfter, 15, 144);
+		verifyZipResponse(responseWithPublishedAfter, 10, 144);
+		UTCInstant.resetClock();
 	}
 
 	@Test
