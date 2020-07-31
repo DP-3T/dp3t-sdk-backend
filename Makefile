@@ -43,7 +43,7 @@ docker:
 	cp dpppt-backend-sdk/dpppt-backend-sdk-ws/target/dpppt-backend-sdk-ws.jar ws-sdk/ws/bin/dpppt-backend-sdk-ws-1.0.0.jar
 	docker build -t dp3t-docker ws-sdk/
 	@printf '\033[33m DO NOT USE THIS IN PRODUCTION \033[0m \n'
-	@printf '\033[32m docker run -p 8080:8080 -v `pwd`/dpppt-backend-sdk/dpppt-backend-sdk-ws/src/main/resources/logback.xml:/home/ws/conf/dpppt-backend-sdk-ws-logback.xml -v `pwd`/dpppt-backend-sdk/dpppt-backend-sdk-ws/src/main/resources/application.properties:/home/ws/conf/dpppt-backend-sdk-ws.properties dp3t-docker \033[0m'
+	@printf "\033[32m docker run -p 8080:8080 -v $(PWD)/dpppt-backend-sdk/dpppt-backend-sdk-ws/src/main/resources/logback.xml:/home/ws/conf/dpppt-backend-sdk-ws-logback.xml -v $(PWD)/dpppt-backend-sdk/dpppt-backend-sdk-ws/src/main/resources/application.properties:/home/ws/conf/dpppt-backend-sdk-ws.properties dp3t-docker \033[0m\n"
 	
 
 
