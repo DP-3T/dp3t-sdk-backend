@@ -14,6 +14,7 @@ import java.time.Duration;
 import java.util.List;
 
 import org.dpppt.backend.sdk.model.gaen.GaenKey;
+import org.dpppt.backend.sdk.utils.UTCInstant;
 
 public interface GAENDataService {
 
@@ -22,7 +23,15 @@ public interface GAENDataService {
 	 * 
 	 * @param keys the list of exposed keys to upsert
 	 */
-	void upsertExposees(List<GaenKey> keys);
+	void upsertExposees(List<GaenKey> keys, UTCInstant now);
+
+	/**
+	 * Upserts (Update or Inserts) the given list of exposed keys, with delayed release of same day TEKs
+	 * 
+	 * @param keys the list of exposed keys to upsert
+	 * @param delayedReceivedAt the timestamp to use for the delayed release (if null use now rounded to next bucket)
+	 */
+	void upsertExposeesDelayed(List<GaenKey> keys, UTCInstant delayedReceivedAt, UTCInstant now);
 
 	/**
 	 * Returns the maximum id of the stored exposed entries for the given batch.

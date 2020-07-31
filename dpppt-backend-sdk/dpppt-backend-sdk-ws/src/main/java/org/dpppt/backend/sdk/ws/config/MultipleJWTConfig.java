@@ -28,6 +28,7 @@ import org.dpppt.backend.sdk.ws.security.KeyVault;
 import org.dpppt.backend.sdk.ws.security.KeyVault.PublicKeyNoSuitableEncodingFoundException;
 import org.dpppt.backend.sdk.ws.security.ValidateRequest;
 import org.dpppt.backend.sdk.ws.util.KeyHelper;
+import org.dpppt.backend.sdk.ws.util.ValidationUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
@@ -59,6 +60,9 @@ public class MultipleJWTConfig {
 
 		@Value("${ws.app.jwt.maxValidityMinutes: 60}")
 		int maxValidityMinutes;
+
+		@Value("${ws.retentiondays: 14}")
+		int retentionDays;
 
 		@Autowired
 		@Lazy
@@ -168,13 +172,13 @@ public class MultipleJWTConfig {
 		}
 
 		@Bean
-		public ValidateRequest requestValidator() {
-			return new JWTValidateRequest();
+		public ValidateRequest requestValidator(ValidationUtils dpptValidationUtils) {
+			return new JWTValidateRequest(dpptValidationUtils);
 		}
 
 		@Bean
-		public ValidateRequest gaenRequestValidator() {
-			return new org.dpppt.backend.sdk.ws.security.gaen.JWTValidateRequest();
+		public ValidateRequest gaenRequestValidator(ValidationUtils gaenValidationUtils) {
+			return new org.dpppt.backend.sdk.ws.security.gaen.JWTValidateRequest(gaenValidationUtils);
 		}
 
 		@Bean

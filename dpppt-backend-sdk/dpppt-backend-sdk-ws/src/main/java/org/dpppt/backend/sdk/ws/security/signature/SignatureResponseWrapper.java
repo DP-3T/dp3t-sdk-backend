@@ -18,11 +18,7 @@ import java.io.PrintWriter;
 import java.io.StringWriter;
 import java.security.KeyPair;
 import java.security.MessageDigest;
-import java.time.Instant;
-import java.time.OffsetDateTime;
-import java.time.ZoneOffset;
 import java.util.Base64;
-import java.util.Date;
 import java.util.List;
 
 import javax.servlet.ServletOutputStream;
@@ -33,6 +29,7 @@ import javax.servlet.http.HttpServletResponseWrapper;
 import org.apache.commons.codec.binary.Hex;
 import org.bouncycastle.util.io.pem.PemObject;
 import org.bouncycastle.util.io.pem.PemWriter;
+import org.dpppt.backend.sdk.utils.UTCInstant;
 import org.springframework.http.HttpStatus;
 import org.springframework.util.Base64Utils;
 
@@ -129,15 +126,15 @@ public class SignatureResponseWrapper extends HttpServletResponseWrapper {
 		}
 		
 		byte[] theHash = this.getHash();
+		var now = UTCInstant.now();
 
 		Claims claims = Jwts.claims();
 		claims.put(CLAIM_CONTENT_HASH, Base64.getEncoder().encodeToString(theHash));
 		claims.put(CLAIM_HASH_ALG, "sha-256");
 
 		claims.setIssuer(ISSUER_DP3T);
-		claims.setIssuedAt(Date.from(OffsetDateTime.now().withOffsetSameInstant(ZoneOffset.UTC).toInstant()));
-		claims.setExpiration(Date.from(
-				OffsetDateTime.now().withOffsetSameInstant(ZoneOffset.UTC).plusDays(retentionPeriod).toInstant()));
+		claims.setIssuedAt(now.getDate());
+		claims.setExpiration(now.plusDays(retentionPeriod).getDate());
 		for (String header : protectedHeaders) {
 			if (!this.containsHeader(header)) {
 				continue;
@@ -147,10 +144,9 @@ public class SignatureResponseWrapper extends HttpServletResponseWrapper {
 			String headerValue = this.getHeader(header);
 			claims.put(normalizedHeader, headerValue);
 			if (normalizedHeader.equals("batch-release-time")) {
-				OffsetDateTime issueDate = OffsetDateTime.ofInstant(Instant.ofEpochMilli(Long.parseLong(headerValue)),
-						ZoneOffset.UTC);
-				claims.setIssuedAt(Date.from(issueDate.toInstant()));
-				claims.setExpiration(Date.from(issueDate.plusDays(retentionPeriod).toInstant()));
+				var issueDate = UTCInstant.ofEpochMillis(Long.parseLong(headerValue));
+				claims.setIssuedAt(issueDate.getDate());
+				claims.setExpiration(issueDate.plusDays(retentionPeriod).getDate());
 			}
 		}
 		String signature = Jwts.builder().setClaims(claims).signWith(pair.getPrivate()).compact();
