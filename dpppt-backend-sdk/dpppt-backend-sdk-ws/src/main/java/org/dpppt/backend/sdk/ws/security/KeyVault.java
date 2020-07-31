@@ -159,7 +159,7 @@ public class KeyVault {
 			readerPem.close();
 			return KeyFactory.getInstance(algorithm).generatePrivate(new PKCS8EncodedKeySpec(obj.getContent()));
 		} catch (InvalidKeySpecException | NoSuchAlgorithmException | IOException e) {
-			logger.warn("Exception loading private key from PEM", e);
+			logger.warn("Exception loading private key from PEM: {}", e);
 			return null;
 		}
 	}
