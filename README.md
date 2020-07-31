@@ -224,4 +224,6 @@ This will build the jar and copy it into the `ws-sdk/ws/bin` folder, from where 
 
 An example `logback.xml` is found in the `resources` folder for the `dpppt-backend-sdk-ws` Java module.
 
-An example `application.properties` file is found at the same location. Just make sure the configuration matches with your deployment (c.f. `WSBaseConfig` for possible properties and `WSCloudBaseConfig` for some `CloudFoundry` specific properties) 
+An example `application.properties` file is found at the same location. 
+Just make sure the configuration matches with your deployment (c.f. `WSBaseConfig` for possible properties
+and `WSCloudBaseConfig` for some `CloudFoundry` specific properties) 
