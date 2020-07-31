@@ -208,7 +208,7 @@ public class KeyVault {
 			return CertificateFactory.getInstance("X.509")
 					.generateCertificate(new ByteArrayInputStream(publicPart.getBytes())).getPublicKey();
 		} catch (CertificateException e) {
-			logger.warn("Exception loading public key from X509 certificate", e);
+			logger.warn("Exception loading public key from X509 certificate: {}", e);
 			return null;
 		}
 	}
