@@ -39,8 +39,8 @@ public class UTCInstant {
     public UTCInstant(long timestamp) {
         this.timestamp = timestamp;
     }
-    public UTCInstant(Duration duration) {
-        this.timestamp = duration.toMillis();
+    public UTCInstant(Duration duration, UTCInstant since) {
+        this.timestamp = since.timestamp + duration.toMillis();
     }
     public UTCInstant(Instant instant) {
         this.timestamp = instant.toEpochMilli();
@@ -51,6 +51,7 @@ public class UTCInstant {
     public UTCInstant(OffsetDateTime offsetDateTime) {
         this.timestamp = offsetDateTime.toInstant().toEpochMilli();
     }
+    //TODO: make protected and subclass for use in tests
     public static void setClock(Clock clock) {
         currentClock = clock;
     }
