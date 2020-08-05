@@ -920,51 +920,6 @@ public class GaenControllerTest extends BaseControllerTest {
 		verifyZipInZipResponse(response, 0);
 	}
 
-	@Test
-	@Transactional
-	public void zipContainsFiles() throws Exception {
-		var now = UTCInstant.now();
-		var clock = Clock.offset(Clock.systemUTC(), now.getDuration(now.atStartOfDay().plusHours(12)));
-		UTCInstant.setClock(clock);
-		now = UTCInstant.now();
-		var midnight = now.atStartOfDay();
-
-		// insert two times 5 keys per day for the last 14 days. the second batch has a
-		// different received at timestamp. (+6 hours)
-		insertNKeysPerDayInInterval(14,
-				midnight.minusDays(4),
-				now, now.minusDays(1));
-
-		insertNKeysPerDayInInterval(14,
-				midnight.minusDays(4),
-				now, now.minusDays(12));
-
-		// request the keys with date date 1 day ago. no publish until.
-		MockHttpServletResponse response = mockMvc
-				.perform(get("/v1/gaen/exposed/"
-						+ midnight.minusDays(8).getTimestamp())
-								.header("User-Agent", "MockMVC"))
-				.andExpect(status().is2xxSuccessful()).andReturn().getResponse();
-
-		Long publishedUntil = Long.parseLong(response.getHeader("X-PUBLISHED-UNTIL"));
-		assertTrue(publishedUntil < now.getTimestamp(), "Published until must be in the past");
-
-		verifyZipResponse(response, 20, 144);
-
-		// request again the keys with date date 1 day ago. with publish until, so that
-		// we only get the second batch.
-		var bucketAfterSecondRelease = Duration.ofMillis(midnight.getTimestamp()).minusDays(1).plusHours(12).dividedBy(Duration.ofHours(2)) * 2*60*60*1000;
-		MockHttpServletResponse responseWithPublishedAfter = mockMvc
-				.perform(get("/v1/gaen/exposed/"
-						+ midnight.minusDays(8).getTimestamp())
-								.header("User-Agent", "MockMVC").param("publishedafter",
-										Long.toString(bucketAfterSecondRelease)))
-				.andExpect(status().is2xxSuccessful()).andReturn().getResponse();
-
-		//we always have 10
-		verifyZipResponse(responseWithPublishedAfter, 10, 144);
-		UTCInstant.resetClock();
-	}
 
 	@Test
 	@Transactional(transactionManager = "testTransactionManager")

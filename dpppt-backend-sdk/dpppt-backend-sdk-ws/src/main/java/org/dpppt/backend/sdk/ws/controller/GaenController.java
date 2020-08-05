@@ -208,17 +208,17 @@ public class GaenController {
 					Long publishedafter)
 			throws BadBatchReleaseTimeException, IOException, InvalidKeyException, SignatureException,
 			NoSuchAlgorithmException {
-		var utcNow = UTCInstant.now();
+		var now = UTCInstant.now();
 		if (!validationUtils.isValidKeyDate(UTCInstant.ofEpochMillis(keyDate))) {
 			return ResponseEntity.notFound().build();
 		}
-		if (publishedafter != null && !validationUtils.isValidBatchReleaseTime(UTCInstant.ofEpochMillis(publishedafter), utcNow)) {
+		if (publishedafter != null && !validationUtils.isValidBatchReleaseTime(UTCInstant.ofEpochMillis(publishedafter), now)) {
 			return ResponseEntity.notFound().build();
 		}
 		
-		long now = utcNow.getTimestamp();
+		
 		// calculate exposed until bucket
-		long publishedUntil = now - (now % releaseBucketDuration.toMillis());
+		long publishedUntil = now.getTimestamp() - (now.getTimestamp() % releaseBucketDuration.toMillis());
 
 		var exposedKeys = dataService.getSortedExposedForKeyDate(keyDate, publishedafter, publishedUntil);
 		exposedKeys = fakeKeyService.fillUpKeys(exposedKeys, publishedafter, keyDate);
@@ -274,14 +274,14 @@ public class GaenController {
 			logger.error("Couldn't equalize request time: {}", ex.toString());
 		}
 	}
-	private void insertIntoDatabaseIfJWTIsNotFake(GaenKey key, String userAgent, Object principal, UTCInstant utcNow) throws KeyIsNotBase64Exception {
+	private void insertIntoDatabaseIfJWTIsNotFake(GaenKey key, String userAgent, Object principal, UTCInstant now) throws KeyIsNotBase64Exception {
 		List<GaenKey> keys = new ArrayList<>();
 		keys.add(key);
-		insertIntoDatabaseIfJWTIsNotFake(keys, userAgent, principal, utcNow);
+		insertIntoDatabaseIfJWTIsNotFake(keys, userAgent, principal, now);
 	}
-	private void insertIntoDatabaseIfJWTIsNotFake(List<GaenKey> keys, String userAgent, Object principal, UTCInstant utcNow) throws KeyIsNotBase64Exception {
+	private void insertIntoDatabaseIfJWTIsNotFake(List<GaenKey> keys, String userAgent, Object principal, UTCInstant now) throws KeyIsNotBase64Exception {
 		try {
-			insertManager.insertIntoDatabase(keys, userAgent, principal, utcNow);
+			insertManager.insertIntoDatabase(keys, userAgent, principal, now);
 		}
 		catch(Throwable ex) {
 			if(ex instanceof KeyIsNotBase64Exception) throw (KeyIsNotBase64Exception)ex;
