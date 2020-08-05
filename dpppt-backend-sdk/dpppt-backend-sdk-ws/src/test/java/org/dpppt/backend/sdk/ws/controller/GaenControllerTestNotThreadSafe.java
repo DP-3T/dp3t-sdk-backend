@@ -3,9 +3,10 @@ package org.dpppt.backend.sdk.ws.controller;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotEquals;
 import static org.junit.Assert.assertTrue;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
 import java.io.ByteArrayInputStream;
-import java.io.IOException;
 import java.security.SecureRandom;
 import java.time.Clock;
 import java.time.Duration;
@@ -32,9 +33,6 @@ import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.mock.web.MockHttpServletResponse;
 import org.springframework.test.context.ActiveProfiles;
 import org.springframework.transaction.annotation.Transactional;
-
-import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
-import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
 @ActiveProfiles({ "actuator-security" })
 @SpringBootTest(properties = { "ws.app.jwt.publickey=classpath://generated_pub.pem",
@@ -145,7 +143,7 @@ public class GaenControllerTestNotThreadSafe extends BaseControllerTest {
 	private void insertNKeysPerDayInIntervalWithDebugFlag(int n, UTCInstant start, UTCInstant end, UTCInstant receivedAt, boolean debug) throws Exception {
 		var current = start;
 		Map<Integer, Integer> rollingToCount = new HashMap<>();
-		while (current.isBeforeExact(end)) {
+		while (current.isBeforeEpochMillisOf(end)) {
 			List<GaenKey> keys = new ArrayList<>();
 			SecureRandom random = new SecureRandom();
 			int lastRolling = (int)start.get10MinutesSince1970();

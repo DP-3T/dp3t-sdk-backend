@@ -41,7 +41,7 @@ public class InsertManager {
         || validationUtils.jwtIsFake(principal)) {
             return;
         }
-        dataService.upsertExposees(internalKeys);
+        dataService.upsertExposees(internalKeys, now);
     }
     //ch.admin.bag.dp36;1.0.7,200724.1105.215;iOS;13.6
     //ch.admin.bag.dp3t.dev;1.0.7;1595591959493;Android;29

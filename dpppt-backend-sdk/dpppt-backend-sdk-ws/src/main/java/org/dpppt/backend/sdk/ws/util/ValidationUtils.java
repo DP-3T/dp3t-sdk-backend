@@ -9,12 +9,12 @@
  */
 package org.dpppt.backend.sdk.ws.util;
 
+import java.time.Duration;
+import java.util.Base64;
+
 import org.dpppt.backend.sdk.model.gaen.GaenKey;
 import org.dpppt.backend.sdk.utils.UTCInstant;
 import org.springframework.security.oauth2.jwt.Jwt;
-
-import java.time.Duration;
-import java.util.Base64;
 
 /**
  * Offers a set of methods to validate the incoming requests from the mobile devices.
@@ -74,7 +74,7 @@ public class ValidationUtils {
 	 * @return if the date is in the range
 	 */
 	public boolean isBeforeRetention(UTCInstant timestamp, UTCInstant now){
-		return timestamp.isBeforeDate(now.minus(retentionPeriod));
+		return timestamp.isBeforeDateOf(now.minus(retentionPeriod));
 	}
 
 	/**
@@ -103,8 +103,8 @@ public class ValidationUtils {
 	}
 
 	public void validateDelayedKeyDate(UTCInstant now, UTCInstant delayedKeyDate) throws DelayedKeyDateIsInvalid{
-		if (delayedKeyDate.isBeforeDate(now.getLocalDate().minusDays(1)) 
-		||  delayedKeyDate.isAfterDate(now.getLocalDate().plusDays(1))) {
+		if (delayedKeyDate.isBeforeDateOf(now.getLocalDate().minusDays(1)) 
+		||  delayedKeyDate.isAfterDateOf(now.getLocalDate().plusDays(1))) {
 			throw new DelayedKeyDateIsInvalid();
 		}
 	}

@@ -25,6 +25,10 @@ import java.util.UUID;
 import javax.servlet.Filter;
 import javax.sql.DataSource;
 
+import com.fasterxml.jackson.core.JsonFactory;
+import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
+
 import org.apache.commons.io.IOUtils;
 import org.dpppt.backend.sdk.utils.UTCInstant;
 import org.dpppt.backend.sdk.ws.filter.ResponseWrapperFilter;
@@ -40,10 +44,6 @@ import org.springframework.test.context.junit4.SpringRunner;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.setup.MockMvcBuilders;
 import org.springframework.web.context.WebApplicationContext;
-
-import com.fasterxml.jackson.core.JsonFactory;
-import com.fasterxml.jackson.databind.ObjectMapper;
-import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
 
 import io.jsonwebtoken.Claims;
 import io.jsonwebtoken.Jwts;
@@ -151,7 +151,7 @@ public abstract class BaseControllerTest {
 		claims.put("fake", "0");
 		return Jwts.builder().setClaims(claims).setId(UUID.randomUUID().toString())
 				.setSubject("test-subject" + OffsetDateTime.now().withOffsetSameInstant(ZoneOffset.UTC).toString()).setExpiration(expiresAt.getDate())
-				.setIssuedAt(Date.from(OffsetDateTime.now().withOffsetSameInstant(ZoneOffset.UTC).toInstant())).compact();
+				.setIssuedAt(UTCInstant.now().getDate()).compact();
 	}
 
 }
