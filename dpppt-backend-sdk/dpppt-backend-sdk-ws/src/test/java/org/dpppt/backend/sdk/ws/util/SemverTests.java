@@ -2,6 +2,7 @@ package org.dpppt.backend.sdk.ws.util;
 
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertTrue;
+import static org.junit.Assert.assertEquals;
 
 import java.util.List;
 
@@ -9,6 +10,20 @@ import org.dpppt.backend.sdk.semver.Version;
 import org.junit.Test;
 
 public class SemverTests {
+    @Test
+    public void testToString() throws Exception {
+        var v = new Version("ios-1.1.3-test+meta");
+        assertEquals("1.1.3-test+meta", v.toString());
+        v = new Version("1.1.3+meta");
+        assertEquals("1.1.3+meta", v.toString());
+        v = new Version("ios-1.1.3-meta");
+        assertEquals("1.1.3-meta", v.toString());
+        v = new Version("ios-1.1.3");
+        assertEquals("1.1.3", v.toString());
+        v = new Version("1.1.3");
+        assertEquals("1.1.3", v.toString());
+
+    }
     @Test
     public void testVersionFromString() throws Exception {
         var cases = List.of(new Version("ios-0.1.0"),new Version("android-0.1.1"),new Version("0.2.0"),new Version("1.0.0-prerelease"),new Version("1.0.0"),new Version("1.0.1+ios"));

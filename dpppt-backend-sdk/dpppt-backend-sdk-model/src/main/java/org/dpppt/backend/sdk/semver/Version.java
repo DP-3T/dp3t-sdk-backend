@@ -192,13 +192,7 @@ public class Version implements Comparable<Version> {
 
     @Override
     public String toString() {
-        return "{" +
-            " major='" + getMajor() + "'" +
-            ", minor='" + getMinor() + "'" +
-            ", patch='" + getPatch() + "'" +
-            ", preReleaseString='" + getPreReleaseString() + "'" +
-            ", metaInfo='" + getMetaInfo() + "'" +
-            "}";
+        return getMajor() + "." + getMinor() +  "." + getPatch() + (getPreReleaseString().isEmpty()? "" : "-" + getPreReleaseString()) + (getMetaInfo().isEmpty()? "" : "+" + getMetaInfo());
     }
 
     @Override
