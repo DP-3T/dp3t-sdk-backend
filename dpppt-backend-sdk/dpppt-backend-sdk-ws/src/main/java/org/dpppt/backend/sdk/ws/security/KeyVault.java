@@ -132,7 +132,7 @@ public class KeyVault {
 			try {
 				key = (PrivateKey) provider.invoke(null, privatePart, algorithm);
 			} catch (IllegalAccessException | IllegalArgumentException | InvocationTargetException e) {
-				logger.warn("externalPrivateProvider failed with reflection error");
+				logger.warn("Could not decode key as {}", algorithm);
 			}
 			if (key != null) {
 				return key;
@@ -146,7 +146,7 @@ public class KeyVault {
 			return KeyFactory.getInstance(algorithm)
 					.generatePrivate(new PKCS8EncodedKeySpec(Base64.getDecoder().decode(privatePart)));
 		} catch (InvalidKeySpecException | NoSuchAlgorithmException e) {
-			logger.error("Exception loading private key from java encoding", e);
+			logger.warn("Exception loading private key from java encoding ", e);
 			return null;
 		}
 	}
@@ -159,7 +159,7 @@ public class KeyVault {
 			readerPem.close();
 			return KeyFactory.getInstance(algorithm).generatePrivate(new PKCS8EncodedKeySpec(obj.getContent()));
 		} catch (InvalidKeySpecException | NoSuchAlgorithmException | IOException e) {
-			logger.error("Exception loading private key from PEM", e);
+			logger.warn("Exception loading private key from PEM ", e);
 			return null;
 		}
 	}
@@ -171,7 +171,7 @@ public class KeyVault {
 			try {
 				key = (PublicKey) provider.invoke(null, publicPart, algorithm);
 			} catch (IllegalAccessException | IllegalArgumentException | InvocationTargetException e) {
-				logger.warn("externalPublicProvider failed with reflection error");
+				logger.warn("Could not decode key as {}", algorithm);
 			}
 			if (key != null) {
 				return key;
@@ -185,7 +185,7 @@ public class KeyVault {
 			return KeyFactory.getInstance(algorithm)
 					.generatePublic(new X509EncodedKeySpec(Base64.getDecoder().decode(publicPart)));
 		} catch (InvalidKeySpecException | NoSuchAlgorithmException e) {
-			logger.error("Exception loading public key from java encoding", e);
+			logger.warn("Exception loading public key from java encoding", e);
 			return null;
 		}
 	}
@@ -198,7 +198,7 @@ public class KeyVault {
 			readerPem.close();
 			return KeyFactory.getInstance(algorithm).generatePublic(new X509EncodedKeySpec(obj.getContent()));
 		} catch (InvalidKeySpecException | NoSuchAlgorithmException | IOException e) {
-			logger.error("Exception loading public key from PEM", e);
+			logger.warn("Exception loading public key from PEM", e);
 			return null;
 		}
 	}
@@ -208,7 +208,7 @@ public class KeyVault {
 			return CertificateFactory.getInstance("X.509")
 					.generateCertificate(new ByteArrayInputStream(publicPart.getBytes())).getPublicKey();
 		} catch (CertificateException e) {
-			logger.error("Exception loading public key from X509 certificate", e);
+			logger.warn("Exception loading public key from X509 certificate", e);
 			return null;
 		}
 	}

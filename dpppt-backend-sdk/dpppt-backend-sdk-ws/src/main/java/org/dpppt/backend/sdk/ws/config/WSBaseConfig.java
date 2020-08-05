@@ -19,6 +19,12 @@ import java.util.TimeZone;
 
 import javax.sql.DataSource;
 
+import com.fasterxml.jackson.annotation.JsonInclude;
+import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.databind.SerializationFeature;
+import com.fasterxml.jackson.datatype.jdk8.Jdk8Module;
+import com.hubspot.jackson.datatype.protobuf.ProtobufModule;
+
 import org.dpppt.backend.sdk.data.DPPPTDataService;
 import org.dpppt.backend.sdk.data.JDBCDPPPTDataServiceImpl;
 import org.dpppt.backend.sdk.data.JDBCRedeemDataServiceImpl;
@@ -30,7 +36,14 @@ import org.dpppt.backend.sdk.ws.controller.DPPPTController;
 import org.dpppt.backend.sdk.ws.controller.GaenController;
 import org.dpppt.backend.sdk.ws.filter.ResponseWrapperFilter;
 import org.dpppt.backend.sdk.ws.insertmanager.InsertManager;
-import org.dpppt.backend.sdk.ws.insertmanager.insertionfilters.*;
+import org.dpppt.backend.sdk.ws.insertmanager.insertionfilters.FakeKeysFilter;
+import org.dpppt.backend.sdk.ws.insertmanager.insertionfilters.IOSLegacyProblemRPLT144;
+import org.dpppt.backend.sdk.ws.insertmanager.insertionfilters.KeysNotMatchingJWTFilter;
+import org.dpppt.backend.sdk.ws.insertmanager.insertionfilters.NegativeRollingPeriodFilter;
+import org.dpppt.backend.sdk.ws.insertmanager.insertionfilters.NoBase64Filter;
+import org.dpppt.backend.sdk.ws.insertmanager.insertionfilters.OldAndroid0RPFilter;
+import org.dpppt.backend.sdk.ws.insertmanager.insertionfilters.RollingStartNumberAfterDayAfterTomorrow;
+import org.dpppt.backend.sdk.ws.insertmanager.insertionfilters.RollingStartNumberBeforeRetentionDay;
 import org.dpppt.backend.sdk.ws.interceptor.HeaderInjector;
 import org.dpppt.backend.sdk.ws.security.KeyVault;
 import org.dpppt.backend.sdk.ws.security.NoValidateRequest;
@@ -43,7 +56,7 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
-import org.springframework.context.annotation.Bean; 
+import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.Lazy;
 import org.springframework.http.converter.HttpMessageConverter;
@@ -61,12 +74,6 @@ import org.springframework.scheduling.support.CronTrigger;
 import org.springframework.web.servlet.config.annotation.AsyncSupportConfigurer;
 import org.springframework.web.servlet.config.annotation.InterceptorRegistry;
 import org.springframework.web.servlet.config.annotation.WebMvcConfigurer;
-
-import com.fasterxml.jackson.annotation.JsonInclude;
-import com.fasterxml.jackson.databind.ObjectMapper;
-import com.fasterxml.jackson.databind.SerializationFeature;
-import com.fasterxml.jackson.datatype.jdk8.Jdk8Module;
-import com.hubspot.jackson.datatype.protobuf.ProtobufModule;
 
 import io.jsonwebtoken.SignatureAlgorithm;
 import io.jsonwebtoken.security.Keys;
@@ -131,8 +138,6 @@ public abstract class WSBaseConfig implements SchedulingConfigurer, WebMvcConfig
 	String keyIdentifier;
 	@Value("${ws.app.gaen.algorithm:1.2.840.10045.4.3.2}")
 	String gaenAlgorithm;
-	@Value("${ws.app.gaen.delayTodaysKeys: false}")
-	boolean delayTodaysKeys;
 	@Value("${ws.app.gaen.ioslegacy: true}")
 	boolean iosLegacy;
 	@Value("${ws.app.gaen.androidBug: true}")
@@ -228,7 +233,7 @@ public abstract class WSBaseConfig implements SchedulingConfigurer, WebMvcConfig
 	public DPPPTController dppptSDKController() {
 		ValidateRequest theValidator = requestValidator;
 		if (theValidator == null) {
-			theValidator = new NoValidateRequest();
+			theValidator = new NoValidateRequest(dpptValidationUtils());
 		}
 		return new DPPPTController(dppptSDKDataService(), appSource, exposedListCacheControl, theValidator,
 				dpptValidationUtils(), releaseBucketDuration, requestTime);
@@ -257,7 +262,7 @@ public abstract class WSBaseConfig implements SchedulingConfigurer, WebMvcConfig
 
 	@Bean
 	ValidateRequest backupValidator() {
-		return new NoValidateRequest();
+		return new NoValidateRequest(gaenValidationUtils());
 	}
 
 	@Bean

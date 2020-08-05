@@ -95,7 +95,7 @@ public class PostgresGaenDataServiceTest {
 			list = fakeKeyService.fillUpKeys(keys, UTCInstant.now().plusHours(3).getTimestamp(), keysUntilToday.getTimestamp());
 			assertEquals(10, list.size());
 			keysUntilToday = keysUntilToday.plusDays(1);
-		} while (keysUntilToday.isBeforeDate(today));
+		} while (keysUntilToday.isBeforeDateOf(today));
 
 		keys.clear();
 		emptyList = fakeKeyService.fillUpKeys(keys, null,
@@ -173,7 +173,7 @@ public class PostgresGaenDataServiceTest {
 		tmpKey.setTransmissionRiskLevel(0);
 		List<GaenKey> keys = List.of(tmpKey);
 
-		gaenDataService.upsertExposees(keys);
+		gaenDataService.upsertExposees(keys, UTCInstant.now());
 
 		long now = System.currentTimeMillis();
 		// calculate exposed until bucket, but get bucket in the future, as keys have

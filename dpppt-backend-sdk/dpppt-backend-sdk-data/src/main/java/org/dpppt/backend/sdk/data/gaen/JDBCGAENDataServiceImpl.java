@@ -41,12 +41,12 @@ public class JDBCGAENDataServiceImpl implements GAENDataService {
 
 	@Override
 	@Transactional(readOnly = false)
-	public void upsertExposees(List<GaenKey> gaenKeys) {
-		upsertExposeesDelayed(gaenKeys, null);
+	public void upsertExposees(List<GaenKey> gaenKeys, UTCInstant now) {
+		upsertExposeesDelayed(gaenKeys, null, now);
 	}
 
 	@Override
-	public void upsertExposeesDelayed(List<GaenKey> gaenKeys, UTCInstant delayedReceivedAt) {
+	public void upsertExposeesDelayed(List<GaenKey> gaenKeys, UTCInstant delayedReceivedAt, UTCInstant now) {
 		
 		String sql = null;
 		if (dbType.equals(PGSQL)) {
@@ -58,7 +58,6 @@ public class JDBCGAENDataServiceImpl implements GAENDataService {
 					+ " when not matched then insert (key, rolling_start_number, rolling_period, transmission_risk_level, received_at) values (vals.key, vals.rolling_start_number, vals.rolling_period, transmission_risk_level, vals.received_at)";
 		}
 		var parameterList = new ArrayList<MapSqlParameterSource>();
-		var now = UTCInstant.now();
 		//if delayedReceivedAt is supplied use it
 		var receivedAt = delayedReceivedAt == null? (now.getTimestamp()/releaseBucketDuration.toMillis() + 1) * releaseBucketDuration.toMillis() - 1 : delayedReceivedAt.getTimestamp(); 
 		for (var gaenKey : gaenKeys) {
@@ -73,7 +72,6 @@ public class JDBCGAENDataServiceImpl implements GAENDataService {
 		}
 		jt.batchUpdate(sql, parameterList.toArray(new MapSqlParameterSource[0]));
 	}
-
 
 	@Override
 	@Transactional(readOnly = true)
@@ -134,4 +132,5 @@ public class JDBCGAENDataServiceImpl implements GAENDataService {
 		String sqlExposed = "delete from t_gaen_exposed where received_at < :retention_time";
 		jt.update(sqlExposed, params);
 	}
+
 }

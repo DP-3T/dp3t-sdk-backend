@@ -65,7 +65,7 @@ public class ValidationUtils {
 		var retention = now.minus(retentionPeriod);
 		// This should use timestamp.isAfterOrEqual(retention), but this method does not exist.
 		// Because _now_ has a resolution of 1 millisecond, this precision is acceptable.
-		return timestamp.isAfterExact(retention) && timestamp.isBeforeExact(now);
+		return timestamp.isAfterEpochMillisOf(retention) && timestamp.isBeforeEpochMillisOf(now);
 	}
 	/**
 	 * Check if the given date is before now - retentionPeriod ... now

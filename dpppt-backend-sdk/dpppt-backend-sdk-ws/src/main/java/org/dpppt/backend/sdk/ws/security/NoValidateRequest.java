@@ -14,36 +14,39 @@ import org.dpppt.backend.sdk.model.ExposeeRequest;
 import org.dpppt.backend.sdk.model.gaen.GaenKey;
 import org.dpppt.backend.sdk.model.gaen.GaenUnit;
 import org.dpppt.backend.sdk.utils.UTCInstant;
+import org.dpppt.backend.sdk.ws.util.ValidationUtils;
 
 public class NoValidateRequest implements ValidateRequest {
-
+	private final ValidationUtils validationUtils;
+	public NoValidateRequest(ValidationUtils validationUtils){
+		this.validationUtils = validationUtils;
+	}
 	@Override
 	public boolean isValid(Object authObject) {
 		return true;
 	}
 
 	@Override
-	public long validateKeyDate(UTCInstant utcNow, Object authObject, Object others) throws ClaimIsBeforeOnsetException,InvalidDateException {
+	public long validateKeyDate(UTCInstant now, Object authObject, Object others) throws ClaimIsBeforeOnsetException,InvalidDateException {
 		if (others instanceof ExposeeRequest) {
 			ExposeeRequest request = ((ExposeeRequest) others);
-			if (request.getKeyDate() < utcNow.minusDays(21).getTimestamp()) {
-				throw new InvalidDateException();
-			} else if (request.getKeyDate() > utcNow.getTimestamp()) {
-				throw new InvalidDateException();
-			}
+			var requestKeyDate = new UTCInstant(request.getKeyDate());
+			checkDateIsInBounds(requestKeyDate, now);
 			return request.getKeyDate();
 		}
 		if (others instanceof GaenKey) {
 			GaenKey key = ((GaenKey) others);
-			var requestDate = UTCInstant.of(key.getRollingStartNumber(), GaenUnit.TenMinutes);
-			if (requestDate.isBeforeExact(utcNow.minusDays(21))) {
-				throw new InvalidDateException();
-			} else if (requestDate.isAfterExact(utcNow)) {
-				throw new InvalidDateException();
-			}
-			return requestDate.getTimestamp();
+			var requestKeyDate = UTCInstant.of(key.getRollingStartNumber(), GaenUnit.TenMinutes);
+			checkDateIsInBounds(requestKeyDate, now);
+			return requestKeyDate.getTimestamp();
 		}
 		throw new IllegalArgumentException();
+	}
+
+	private void checkDateIsInBounds(UTCInstant requestKeyDate, UTCInstant now) throws InvalidDateException {
+		if (!validationUtils.isDateInRange(requestKeyDate, now)) {
+			throw new InvalidDateException();
+		}
 	}
 
 	@Override

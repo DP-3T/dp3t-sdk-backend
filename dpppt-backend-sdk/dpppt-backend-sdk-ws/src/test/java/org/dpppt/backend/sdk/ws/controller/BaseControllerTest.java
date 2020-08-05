@@ -144,5 +144,14 @@ public abstract class BaseControllerTest {
 				.setSubject("test-subject" + OffsetDateTime.now().withOffsetSameInstant(ZoneOffset.UTC).toString()).setExpiration(expiresAt.getDate())
 				.setIssuedAt(UTCInstant.now().getDate()).signWith((Key) privateKey).compact();
 	}
+	protected String createMaliciousToken(UTCInstant expiresAt) {
+		Claims claims = Jwts.claims();
+		claims.put("scope", "exposed");
+		claims.put("onset", "2020-04-20");
+		claims.put("fake", "0");
+		return Jwts.builder().setClaims(claims).setId(UUID.randomUUID().toString())
+				.setSubject("test-subject" + OffsetDateTime.now().withOffsetSameInstant(ZoneOffset.UTC).toString()).setExpiration(expiresAt.getDate())
+				.setIssuedAt(Date.from(OffsetDateTime.now().withOffsetSameInstant(ZoneOffset.UTC).toInstant())).compact();
+	}
 
 }

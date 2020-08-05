@@ -12,12 +12,16 @@ package org.dpppt.backend.sdk.ws.security.gaen;
 
 import org.dpppt.backend.sdk.model.gaen.GaenKey;
 import org.dpppt.backend.sdk.model.gaen.GaenUnit;
-import org.dpppt.backend.sdk.ws.security.ValidateRequest;
 import org.dpppt.backend.sdk.utils.UTCInstant;
+import org.dpppt.backend.sdk.ws.security.ValidateRequest;
+import org.dpppt.backend.sdk.ws.util.ValidationUtils;
 import org.springframework.security.oauth2.jwt.Jwt;
 
 public class JWTValidateRequest implements ValidateRequest {
-
+	private final ValidationUtils validationUtils;
+	public JWTValidateRequest(ValidationUtils validationUtils) {
+		this.validationUtils = validationUtils;
+	}
 	@Override
 	public boolean isValid(Object authObject) throws WrongScopeException {
 		if (authObject instanceof Jwt) {
@@ -31,14 +35,14 @@ public class JWTValidateRequest implements ValidateRequest {
 	}
 
 	@Override
-	public long validateKeyDate(UTCInstant utcNow, Object authObject, Object others) throws ClaimIsBeforeOnsetException {
+	public long validateKeyDate(UTCInstant now, Object authObject, Object others) throws ClaimIsBeforeOnsetException {
 		if (authObject instanceof Jwt) {
 			Jwt token = (Jwt) authObject;
 			var jwtKeyDate = UTCInstant.parseDate(token.getClaim("onset"));
 			if (others instanceof GaenKey) {
                 GaenKey request = (GaenKey) others;
                 var keyDate = UTCInstant.of(request.getRollingStartNumber(), GaenUnit.TenMinutes);
-				if (keyDate.isBeforeExact(jwtKeyDate)) {
+				if (keyDate.isBeforeEpochMillisOf(jwtKeyDate)) {
 					throw new ClaimIsBeforeOnsetException();
 				} 
 				jwtKeyDate = keyDate;

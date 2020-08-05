@@ -13,7 +13,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 public class FakeKeyService {
-	
+
 	private final GAENDataService dataService;
 	private final Integer minNumOfKeys;
 	private final SecureRandom random;
@@ -48,9 +48,10 @@ public class FakeKeyService {
 				var key = new GaenKey(Base64.getEncoder().encodeToString(keyData), keyGAENTime, 144, 0);
 				keys.add(key);
 			}
-			this.dataService.upsertExposees(keys);
+			//TODO: Check if currentKeyDate is indeed intended here
+			this.dataService.upsertExposees(keys, currentKeyDate);
 			tmpDate = tmpDate.plusDays(1);
-		} while (tmpDate.isBeforeDate(currentKeyDate.plusDays(1)));
+		} while (tmpDate.isBeforeDateOf(currentKeyDate));
 	}
 
 	private void deleteAllKeys() {
@@ -60,6 +61,11 @@ public class FakeKeyService {
 
 	public List<GaenKey> fillUpKeys(List<GaenKey> keys, Long publishedafter, Long keyDate) {
 		if (!isEnabled) {
+			return keys;
+		}
+		var today = UTCInstant.today();
+		var keyLocalDate = UTCInstant.ofEpochMillis(keyDate).atStartOfDay();
+		if (today.hasSameDateAs(keyLocalDate)) {
 			return keys;
 		}
 		var fakeKeys = this.dataService.getSortedExposedForKeyDate(keyDate, publishedafter,

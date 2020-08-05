@@ -13,9 +13,14 @@ package org.dpppt.backend.sdk.ws.security;
 import org.dpppt.backend.sdk.model.ExposeeRequest;
 import org.dpppt.backend.sdk.model.ExposeeRequestList;
 import org.dpppt.backend.sdk.utils.UTCInstant;
+import org.dpppt.backend.sdk.ws.util.ValidationUtils;
 import org.springframework.security.oauth2.jwt.Jwt;
 
 public class JWTValidateRequest implements ValidateRequest {
+	private final ValidationUtils validationUtils;
+	public JWTValidateRequest(ValidationUtils validationUtils) {
+		this.validationUtils = validationUtils;
+	}
 
 	@Override
 	public boolean isValid(Object authObject) {
@@ -27,19 +32,18 @@ public class JWTValidateRequest implements ValidateRequest {
 	}
 
 	@Override
-	public long validateKeyDate(UTCInstant utcNow, Object authObject, Object others) throws InvalidDateException, ClaimIsBeforeOnsetException {
+	public long validateKeyDate(UTCInstant now, Object authObject, Object others) throws InvalidDateException, ClaimIsBeforeOnsetException {
 		if (authObject instanceof Jwt) {
 			Jwt token = (Jwt) authObject;
 			var jwtKeyDate = UTCInstant.parseDate(token.getClaim("onset"));
 			if (others instanceof ExposeeRequest) {
 				ExposeeRequest request = (ExposeeRequest) others;
-				if (request.getKeyDate() > utcNow.getTimestamp()){
+				var requestKeyDate = UTCInstant.ofEpochMillis(request.getKeyDate());
+				if (!validationUtils.isDateInRange(requestKeyDate, now))
+				  {
 					throw new InvalidDateException();
-				} else if (request.getKeyDate() < jwtKeyDate.getTimestamp()) {
+				} else if (requestKeyDate.isBeforeEpochMillisOf(jwtKeyDate)) {
 					throw new ClaimIsBeforeOnsetException();
-				} 
-				else if(request.getKeyDate() < UTCInstant.now().minusDays(21).getTimestamp()) {
-					throw new InvalidDateException();
 				}
 				jwtKeyDate = UTCInstant.ofEpochMillis(request.getKeyDate());
 			}

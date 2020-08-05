@@ -27,6 +27,7 @@ import java.security.InvalidKeyException;
 import java.security.NoSuchAlgorithmException;
 import java.security.SecureRandom;
 import java.security.SignatureException;
+import java.time.Clock;
 import java.time.Duration;
 import java.time.Instant;
 import java.time.format.DateTimeFormatter;
@@ -45,6 +46,8 @@ import org.dpppt.backend.sdk.model.gaen.GaenKey;
 import org.dpppt.backend.sdk.model.gaen.GaenRequest;
 import org.dpppt.backend.sdk.model.gaen.GaenSecondDay;
 import org.dpppt.backend.sdk.model.gaen.proto.TemporaryExposureKeyFormat;
+import org.dpppt.backend.sdk.model.gaen.proto.TemporaryExposureKeyFormat.TEKSignatureList;
+import org.dpppt.backend.sdk.model.gaen.proto.TemporaryExposureKeyFormat.TemporaryExposureKeyExport;
 import org.dpppt.backend.sdk.utils.UTCInstant;
 import org.dpppt.backend.sdk.ws.security.KeyVault;
 import org.dpppt.backend.sdk.ws.security.signature.ProtoSignature;
@@ -65,7 +68,6 @@ import io.jsonwebtoken.Jwts;
 @ActiveProfiles({"actuator-security"})
 @SpringBootTest(properties = { "ws.app.jwt.publickey=classpath://generated_pub.pem",
 		"logging.level.org.springframework.security=DEBUG", "ws.exposedlist.releaseBucketDuration=7200000", "ws.gaen.randomkeysenabled=true",
-		"ws.app.gaen.delayTodaysKeys=true",
 	"ws.monitor.prometheus.user=prometheus",
 	"ws.monitor.prometheus.password=prometheus",
 	"management.endpoints.enabled-by-default=true",
@@ -118,18 +120,10 @@ public class GaenControllerTest extends BaseControllerTest {
 		gaenKey2.setRollingPeriod(0);
 		gaenKey2.setFake(0);
 		gaenKey2.setTransmissionRiskLevel(0);
-		//third key should be delayed
-		var gaenKey3 = new GaenKey();
-		gaenKey3.setRollingStartNumber((int)now.atStartOfDay().get10MinutesSince1970());
-		gaenKey3.setKeyData(Base64.getEncoder().encodeToString("testKey32Bytes03".getBytes("UTF-8")));
-		gaenKey3.setRollingPeriod(120);
-		gaenKey3.setFake(0);
-		gaenKey3.setTransmissionRiskLevel(0);
 		List<GaenKey> exposedKeys = new ArrayList<>();
 		exposedKeys.add(gaenKey1);
 		exposedKeys.add(gaenKey2);
-		exposedKeys.add(gaenKey3);
-		for (int i = 0; i < n-3; i++) {
+		for (int i = 0; i < n-2; i++) {
 			var tmpKey = new GaenKey();
 			tmpKey.setRollingStartNumber((int)now.atStartOfDay().get10MinutesSince1970());
 			tmpKey.setKeyData(Base64.getEncoder().encodeToString("testKey32Bytes--".getBytes("UTF-8")));
@@ -171,11 +165,6 @@ public class GaenControllerTest extends BaseControllerTest {
 
 		result = gaenDataService.getSortedExposedForKeyDate(now.atStartOfDay().minusDays(1).getTimestamp(),null, (now.getTimestamp() / releaseBucketDuration)*releaseBucketDuration);
 		assertEquals(0, result.size());
-
-		//third key should be released tomorrow
-		var tomorrow2AM = now.atStartOfDay().plusDays(1).plusHours(2).plusSeconds(1);
-		result = gaenDataService.getSortedExposedForKeyDate(now.atStartOfDay().getTimestamp(),null, tomorrow2AM.getTimestamp());
-		assertEquals(1, result.size());
 	}
 
 	@Test
@@ -932,6 +921,52 @@ public class GaenControllerTest extends BaseControllerTest {
 	}
 
 	@Test
+	@Transactional
+	public void zipContainsFiles() throws Exception {
+		var now = UTCInstant.now();
+		var clock = Clock.offset(Clock.systemUTC(), now.getDuration(now.atStartOfDay().plusHours(12)));
+		UTCInstant.setClock(clock);
+		now = UTCInstant.now();
+		var midnight = now.atStartOfDay();
+
+		// insert two times 5 keys per day for the last 14 days. the second batch has a
+		// different received at timestamp. (+6 hours)
+		insertNKeysPerDayInInterval(14,
+				midnight.minusDays(4),
+				now, now.minusDays(1));
+
+		insertNKeysPerDayInInterval(14,
+				midnight.minusDays(4),
+				now, now.minusDays(12));
+
+		// request the keys with date date 1 day ago. no publish until.
+		MockHttpServletResponse response = mockMvc
+				.perform(get("/v1/gaen/exposed/"
+						+ midnight.minusDays(8).getTimestamp())
+								.header("User-Agent", "MockMVC"))
+				.andExpect(status().is2xxSuccessful()).andReturn().getResponse();
+
+		Long publishedUntil = Long.parseLong(response.getHeader("X-PUBLISHED-UNTIL"));
+		assertTrue(publishedUntil < now.getTimestamp(), "Published until must be in the past");
+
+		verifyZipResponse(response, 20, 144);
+
+		// request again the keys with date date 1 day ago. with publish until, so that
+		// we only get the second batch.
+		var bucketAfterSecondRelease = Duration.ofMillis(midnight.getTimestamp()).minusDays(1).plusHours(12).dividedBy(Duration.ofHours(2)) * 2*60*60*1000;
+		MockHttpServletResponse responseWithPublishedAfter = mockMvc
+				.perform(get("/v1/gaen/exposed/"
+						+ midnight.minusDays(8).getTimestamp())
+								.header("User-Agent", "MockMVC").param("publishedafter",
+										Long.toString(bucketAfterSecondRelease)))
+				.andExpect(status().is2xxSuccessful()).andReturn().getResponse();
+
+		//we always have 10
+		verifyZipResponse(responseWithPublishedAfter, 10, 144);
+		UTCInstant.resetClock();
+	}
+
+	@Test
 	@Transactional(transactionManager = "testTransactionManager")
 	public void testNonEmptyResponseAnd304() throws Exception {
 		var now = UTCInstant.now();
@@ -942,20 +977,18 @@ public class GaenControllerTest extends BaseControllerTest {
 						+ midnight.minusDays(8).getTimestamp())
 								.header("User-Agent", "ch.admin.bag.dp3t.dev;1.0.7;1595591959493;Android;29"))
 				.andExpect(status().isOk()).andReturn().getResponse();
-		verifyZipInZipResponse(response, 10);
-		// var etag = response.getHeader("ETag");
-		// var firstPublishUntil = response.getHeader("X-PUBLISHED-UNTIL");
-		// var signature = response.getHeader("Signature");
-		// assertNotNull(signature);
-
-		// response = mockMvc
-		// 		.perform(get("/v1/gaen/exposed/"
-		// 				+ LocalDate.now(ZoneOffset.UTC).minusDays(8).atStartOfDay(ZoneOffset.UTC).toInstant().toEpochMilli())
-		// 						.header("User-Agent", "ch.admin.bag.dp3t.dev;1.0.7;1595591959493;Android;29")
-		// 						.header("If-None-Match", etag))
-		// 		.andExpect(status().is(304)).andReturn().getResponse();
-		// signature = response.getHeader("Signature");
-		// assertNull(signature);
+		verifyZipResponse(response, 10, 144);
+	}
+	
+	@Test
+	@Transactional(transactionManager = "testTransactionManager")
+	public void testTodayWeDontHaveKeys() throws Exception {
+		var midnight = UTCInstant.today();
+		MockHttpServletResponse response = mockMvc
+				.perform(get("/v1/gaen/exposed/"
+						+ midnight.getTimestamp())
+								.header("User-Agent", "MockMVC"))
+				.andExpect(status().is(204)).andReturn().getResponse();
 	}
 
 	// @Test
@@ -1005,6 +1038,19 @@ public class GaenControllerTest extends BaseControllerTest {
 		assertTrue(publishedUntil < System.currentTimeMillis(), "Published until must be in the past");
 		assertNotEquals(expectedEtag, response.getHeader("etag"));
 	}
+	
+	@Test
+	public void testMalciousTokenFails() throws Exception {
+		var requestList = new GaenRequest();
+		List<GaenKey> exposedKeys = new ArrayList<GaenKey>();
+		requestList.setGaenKeys(exposedKeys);
+		String token = createMaliciousToken(UTCInstant.now().plusMinutes(5));
+		MvcResult response = mockMvc.perform(post("/v1/gaen/exposed")
+				.contentType(MediaType.APPLICATION_JSON).header("Authorization", "Bearer " + token)
+				.header("User-Agent", "MockMVC").content(json(requestList))).andExpect(request().asyncNotStarted()).andExpect(status().is(401)).andReturn();
+		String authenticateError = response.getResponse().getHeader("www-authenticate");
+		assertTrue(authenticateError.contains("Unsigned Claims JWTs are not supported."));
+	}
 
 	private void verifyZipInZipResponse(MockHttpServletResponse response, int expectKeyCount) throws Exception {
 		ByteArrayInputStream baisOuter = new ByteArrayInputStream(response.getContentAsByteArray());
@@ -1015,7 +1061,7 @@ public class GaenControllerTest extends BaseControllerTest {
 		}
 	}
 
-	private void verifyZipResponse(MockHttpServletResponse response, int expectKeyCount)
+	private void verifyZipResponse(MockHttpServletResponse response, int expectKeyCount, int expectedRollingPeriod)
 			throws IOException, NoSuchAlgorithmException, InvalidKeyException, SignatureException {
 		ByteArrayInputStream baisOuter = new ByteArrayInputStream(response.getContentAsByteArray());
 		ZipInputStream zipOuter = new ZipInputStream(baisOuter);
@@ -1044,10 +1090,10 @@ public class GaenControllerTest extends BaseControllerTest {
 		assertTrue(foundData, "export.bin not found in zip");
 		assertTrue(foundSignature, "export.sig not found in zip");
 
-		var list = TemporaryExposureKeyFormat.TEKSignatureList.parseFrom(signatureProto);
-		var export = TemporaryExposureKeyFormat.TemporaryExposureKeyExport.parseFrom(keyProto);
+		TEKSignatureList list = TemporaryExposureKeyFormat.TEKSignatureList.parseFrom(signatureProto);
+		TemporaryExposureKeyExport export = TemporaryExposureKeyFormat.TemporaryExposureKeyExport.parseFrom(keyProto);
 		for(var key : export.getKeysList()) {
-			assertNotEquals(0, key.getRollingPeriod());
+			assertEquals(expectedRollingPeriod, key.getRollingPeriod());
 		}
 		var sig = list.getSignatures(0);
 		java.security.Signature signatureVerifier = java.security.Signature
@@ -1063,7 +1109,7 @@ public class GaenControllerTest extends BaseControllerTest {
 	private void insertNKeysPerDayInIntervalWithDebugFlag(int n, UTCInstant start, UTCInstant end, UTCInstant receivedAt, boolean debug) throws Exception {
 		var current = start;
 		Map<Integer, Integer> rollingToCount = new HashMap<>();
-		while (current.isBeforeExact(end)) {
+		while (current.isBeforeEpochMillisOf(end)) {
 			List<GaenKey> keys = new ArrayList<>();
 			SecureRandom random = new SecureRandom();
 			int lastRolling = (int)start.get10MinutesSince1970();
