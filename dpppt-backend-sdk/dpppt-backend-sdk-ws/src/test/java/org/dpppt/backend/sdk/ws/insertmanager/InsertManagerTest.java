@@ -68,8 +68,7 @@ public class InsertManagerTest {
         appender.stop();
         for(var event : appender.getLog()) {
             assertEquals(Level.ERROR,event.getLevel());
-            assertEquals("We received a invalid header: {}", event.getMessage());
-            assertEquals("test", (String)event.getArgumentArray()[0]);
+            assertEquals("We received an invalid header, setting default.", event.getMessage());
         }
     }
 

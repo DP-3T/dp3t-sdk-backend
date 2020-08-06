@@ -34,7 +34,7 @@ public class InsertManager {
         var headerParts = header.split(";");
         if(headerParts.length != 5) {
             headerParts = List.of("org.example.dp3t", "1.0.0", "0", "Android", "29").toArray(new String[0]);
-            logger.error("We received a invalid header: {}", header.replaceAll("[\n|\r|\t]", "_"));
+            logger.error("We received an invalid header, setting default.");
         } 
         var osType = exctractOS(headerParts[3]);
         var osVersion = extractOsVersion(headerParts[4]);
