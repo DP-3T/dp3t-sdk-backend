@@ -25,7 +25,7 @@ public class JWTValidateRequest implements ValidateRequest {
 	public boolean isValid(Object authObject) throws WrongScopeException {
 		if (authObject instanceof Jwt) {
 			Jwt token = (Jwt) authObject;
-			if(token.containsClaim("scope") && token.getClaim("scope").equals("exposed")) {
+			if(Boolean.TRUE.equals(token.containsClaim("scope")) && token.getClaim("scope").equals("exposed")) {
 				return true;
 			}
 			throw new WrongScopeException();

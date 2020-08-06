@@ -18,8 +18,7 @@ public class OldAndroid0RPFilter implements InsertionFilter {
     
     @Override
     public List<GaenKey> filter(UTCInstant now, List<GaenKey> content, OSType osType, Version osVersion, Version appVersion, Object principal) {
-        for(GaenKey key : content){
-            var gaenKey = (GaenKey)key;
+        for(GaenKey gaenKey : content){
             if(gaenKey.getRollingPeriod().equals(0)) {
                 if(osType.equals(OSType.IOS)) {
                     logger.error("We got a rollingPeriod of 0 ({},{},{})", osType, osVersion, appVersion);
