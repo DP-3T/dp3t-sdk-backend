@@ -19,10 +19,7 @@ public class RollingStartNumberBeforeRetentionDay implements InsertionFilter {
     public List<GaenKey> filter(UTCInstant now, List<GaenKey> content, OSType osType, Version osVersion, Version appVersion, Object principal) {
         return content.stream().filter(key -> {
             var timestamp = UTCInstant.of(key.getRollingStartNumber(), GaenUnit.TenMinutes);
-            if(validationUtils.isBeforeRetention(timestamp, now)){
-                return false;
-            }
-            return true;
+            return !validationUtils.isBeforeRetention(timestamp, now);
         }).collect(Collectors.toList());
     }
 }

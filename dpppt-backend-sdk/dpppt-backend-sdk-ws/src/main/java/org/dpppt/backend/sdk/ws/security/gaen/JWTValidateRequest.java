@@ -18,10 +18,9 @@ import org.dpppt.backend.sdk.ws.util.ValidationUtils;
 import org.springframework.security.oauth2.jwt.Jwt;
 
 public class JWTValidateRequest implements ValidateRequest {
-	private final ValidationUtils validationUtils;
-	public JWTValidateRequest(ValidationUtils validationUtils) {
-		this.validationUtils = validationUtils;
-	}
+	
+	public JWTValidateRequest(ValidationUtils validationUtils) {}
+
 	@Override
 	public boolean isValid(Object authObject) throws WrongScopeException {
 		if (authObject instanceof Jwt) {
@@ -58,7 +57,7 @@ public class JWTValidateRequest implements ValidateRequest {
 			Jwt token = (Jwt) authObject;
 			GaenKey request = (GaenKey) others;
 			boolean fake = false;
-			if (token.containsClaim("fake") && token.getClaimAsString("fake").equals("1")) {
+			if (Boolean.TRUE.equals(token.containsClaim("fake")) && token.getClaimAsString("fake").equals("1")) {
 				fake = true;
 			}
 			if (request.getFake() == 1) {

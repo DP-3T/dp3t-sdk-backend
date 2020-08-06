@@ -22,7 +22,7 @@ public class InsertManager {
     public void addFilter(InsertionFilter filter) {
         filterList.add(filter);
     }
-    public void insertIntoDatabase(List<GaenKey> keys, String header, Object principal, UTCInstant now) throws Throwable{
+    public void insertIntoDatabase(List<GaenKey> keys, String header, Object principal, UTCInstant now) throws InsertException{
         if(keys.isEmpty()) {
             return;
         }

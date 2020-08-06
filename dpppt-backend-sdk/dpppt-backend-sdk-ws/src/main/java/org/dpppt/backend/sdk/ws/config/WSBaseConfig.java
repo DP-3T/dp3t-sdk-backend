@@ -201,7 +201,7 @@ public abstract class WSBaseConfig implements SchedulingConfigurer, WebMvcConfig
 	public InsertManager insertManager() {
 		var manager = new InsertManager(gaenDataService(), gaenValidationUtils());
 		manager.addFilter(new NoBase64Filter(gaenValidationUtils()));
-		manager.addFilter(new KeysNotMatchingJWTFilter(gaenRequestValidator));
+		manager.addFilter(new KeysNotMatchingJWTFilter(gaenRequestValidator, gaenValidationUtils()));
 		manager.addFilter(new RollingStartNumberAfterDayAfterTomorrow());
 		manager.addFilter(new RollingStartNumberBeforeRetentionDay(gaenValidationUtils()));
 		manager.addFilter(new FakeKeysFilter());

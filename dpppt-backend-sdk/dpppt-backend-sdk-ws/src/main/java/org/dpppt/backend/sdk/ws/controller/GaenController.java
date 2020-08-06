@@ -33,6 +33,7 @@ import org.dpppt.backend.sdk.model.gaen.GaenRequest;
 import org.dpppt.backend.sdk.model.gaen.GaenSecondDay;
 import org.dpppt.backend.sdk.model.gaen.GaenUnit;
 import org.dpppt.backend.sdk.utils.UTCInstant;
+import org.dpppt.backend.sdk.ws.insertmanager.InsertException;
 import org.dpppt.backend.sdk.ws.insertmanager.InsertManager;
 import org.dpppt.backend.sdk.ws.insertmanager.insertionfilters.NoBase64Filter.KeyIsNotBase64Exception;
 import org.dpppt.backend.sdk.ws.security.ValidateRequest;
@@ -126,7 +127,7 @@ public class GaenController {
 			@AuthenticationPrincipal
             @Documentation(description = "JWT token that can be verified by the backend server")
 					Object principal)
-					throws ClaimIsBeforeOnsetException, WrongScopeException, KeyIsNotBase64Exception, DelayedKeyDateIsInvalid {
+					throws WrongScopeException, KeyIsNotBase64Exception, DelayedKeyDateIsInvalid {
 		var now = UTCInstant.now();
 
 		this.validateRequest.isValid(principal);
@@ -283,8 +284,11 @@ public class GaenController {
 		try {
 			insertManager.insertIntoDatabase(keys, userAgent, principal, now);
 		}
-		catch(Throwable ex) {
-			if(ex instanceof KeyIsNotBase64Exception) throw (KeyIsNotBase64Exception)ex;
+		catch(KeyIsNotBase64Exception ex) {
+			throw ex;
+		}
+		catch(InsertException ex){
+			logger.info("Unknown exception thrown: ", ex);
 		}
 	}
 

@@ -1,6 +1,7 @@
 package org.dpppt.backend.sdk.ws.util;
 
 import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertNotEquals;
 import static org.junit.Assert.assertTrue;
 import static org.junit.Assert.assertEquals;
 
@@ -38,9 +39,9 @@ public class SemverTests {
         var releaseVersion = new Version("1.0.0");
         var metaInfoVersion = new Version("1.0.0+ios");
         assertTrue(releaseVersion.isSameVersionAs(metaInfoVersion));
-        assertFalse(releaseVersion.equals(metaInfoVersion));
+        assertNotEquals(metaInfoVersion, releaseVersion);
         var sameIosVersion = new Version("1.0.0+ios");
-        assertTrue( metaInfoVersion.equals(sameIosVersion));
+        assertEquals(sameIosVersion, metaInfoVersion);
     }
     @Test
     public void testPlatform() throws Exception {
@@ -76,9 +77,9 @@ public class SemverTests {
         var releaseVersion = new Version(1,0,0);
         var metaInfoVersion = new Version(1,0,0,"", "ios");
         assertTrue(releaseVersion.isSameVersionAs(metaInfoVersion));
-        assertFalse(releaseVersion.equals(metaInfoVersion));
+        assertNotEquals(metaInfoVersion, releaseVersion);
         var sameIosVersion = new Version(1,0,0,"", "ios");
-        assertTrue( metaInfoVersion.equals(sameIosVersion));
+        assertEquals(sameIosVersion, metaInfoVersion);
     }
     @Test
     public void testMissingMinorOrPatch() throws Exception {
