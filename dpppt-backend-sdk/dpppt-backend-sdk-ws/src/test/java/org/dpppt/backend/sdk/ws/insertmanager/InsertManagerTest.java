@@ -1,6 +1,7 @@
 package org.dpppt.backend.sdk.ws.insertmanager;
 
 import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertNull;
 
 import java.time.Duration;
 import java.util.ArrayList;
@@ -27,14 +28,26 @@ public class InsertManagerTest {
     }
 
     @Test
-    public void emptyListShouldNotFail() throws Exception{
-        InsertManager manager = new InsertManager(new MockDataSource(), new ValidationUtils(16, Duration.ofDays(14), Duration.ofHours(2).toMillis()));
-        manager.insertIntoDatabase(new ArrayList<>(), null, null, null);
+    public void emptyListShouldNotFail(){
+        Object theException = null;
+        try {
+            InsertManager manager = new InsertManager(new MockDataSource(), new ValidationUtils(16, Duration.ofDays(14), Duration.ofHours(2).toMillis()));
+            manager.insertIntoDatabase(new ArrayList<>(), null, null, null);
+        } catch(Exception ex) {
+            theException = ex;
+        }  
+        assertNull(theException);
     }
     @Test
     public void nullListShouldNotFail() throws Exception {
-        InsertManager manager = new InsertManager(new MockDataSource(), new ValidationUtils(16, Duration.ofDays(14), Duration.ofHours(2).toMillis()));
-        manager.insertIntoDatabase(null, null, null, null);
+        Object theException = null;
+        try {
+            InsertManager manager = new InsertManager(new MockDataSource(), new ValidationUtils(16, Duration.ofDays(14), Duration.ofHours(2).toMillis()));
+            manager.insertIntoDatabase(null, null, null, null);
+        } catch(Exception ex) {
+            theException = ex;
+        }  
+        assertNull(theException);
     }
     @Test
     public void wrongHeaderShouldNotFail() throws Exception {
@@ -59,7 +72,7 @@ public class InsertManagerTest {
             assertEquals("test", (String)event.getArgumentArray()[0]);
         }
     }
-    
+
     @Test
     public void iosRP0ShouldLog() throws Exception {
         Logger logger = (Logger)LoggerFactory.getLogger(OldAndroid0RPFilter.class);
