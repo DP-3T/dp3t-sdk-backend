@@ -1,11 +1,11 @@
 # Insert-Manager
 
 ## Idea
-The Insert-Manager was introduced to reduce logic in controllers. The idea is to provide a second abstraction layer next to the `DataServices` to provide for possible generic valiation an normalization. The Insert-Manager holds a list of `InsertionFilter`, which provide some code, to either filter for invalid data or alter incoming data. Each filter can decide to either skip respective keys, or throw a `InsertException`. Throwing an exception aborts the current insert request, and throws to the controller. Inside the controller the exception can be mapped to a respective error message and http status code.
+The Insert-Manager was introduced to reduce logic in controllers. The idea is to provide a second abstraction layer next to the `DataServices` to provide for possible generic validation and normalization. The Insert-Manager holds a list of `InsertionFilter`, which provide some code, to either filter for invalid data or alter incoming data. Each filter can decide to either skip respective keys, or throw a `InsertException`. Throwing an exception aborts the current insert request, and throws to the controller. Inside the controller the exception can be mapped to a respective error message and http status code.
 
 The current default only handles `KeyIsNotBase64Exception` and ignores all other exceptions (since there are none).
 
-During construction, instances of `GAENDataService` and `ValidationUtils` are needed. Further, any filter can be added to the list with `addFilter(InsertionFilter filter)`. Ideally this happens inside the [`WSBaseConfig`](../config/WSBaseConfig), where defaut filters are added right after constructing the `InsertManager`. To allow for conditional `InserstionFilters` refer to the following snippet:
+During construction, instances of `GAENDataService` and `ValidationUtils` are needed. Further, any filter can be added to the list with `addFilter(InsertionFilter filter)`. Ideally, this happens inside the [`WSBaseConfig`](../config/WSBaseConfig), where default filters are added right after constructing the `InsertManager`. To allow for conditional `InsertionFilters` refer to the following snippet:
 
 ```java
 @ConditionalOnProperty(
@@ -19,7 +19,7 @@ matchIfMissing = true)
 }
 ```
 
-This looks for a property, either supplied via a `application.properties` file, or via `java` arguments (e.g. `java -D w.app.gaen.ioslegacy`) and constructs and inserts the respective filter bean into the filter chain.
+This looks for a property, either supplied via a `application.properties` file, or via `java` arguments (e.g. `java -D w.app.gaen.ioslegacy`) and constructs and inserts the respective filter bean into the filter chain. For further `SpringBoot` `Conditional` annotations have a look at ["Spring Boot Conditionals"](https://reflectoring.io/spring-boot-conditionals/)
 
 Encapsulating the logic into smaller pieces of code, should allow for easier and better reviews of the respective filters. Further, for each filter an extensive documentation can be provided, without cluttering the code with too many comments. 
 
@@ -34,7 +34,7 @@ It gets a `now` object representing _the time the request started_ from the cont
 
 ## InsertException
 
-An `InsertException` can be thrown inside an implementation of the `InssertionFilter` interface to mark an insert as "unrecoverable" and abort it. Such "unrecoverable" states might be patterns in the uploaded model, which allows for packet sniffing and/or information gathering.
+An `InsertException` can be thrown inside an implementation of the `InsertionFilter` interface to mark an insert as "unrecoverable" and abort it. Such "unrecoverable" states might be patterns in the uploaded model, which allows for packet sniffing and/or information gathering.
 
 ## Default Filters
 
