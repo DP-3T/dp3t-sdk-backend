@@ -5,7 +5,7 @@ The Insert-Manager was introduced to reduce logic in controllers. The idea is to
 
 The current default only handles `KeyIsNotBase64Exception` and ignores all other exceptions (since there are none).
 
-During construction, instances of `GAENDataService` and `ValidationUtils` are needed. Further, any filter can be added to the list with `addFilter(InsertionFilter filter)`. Ideally, this happens inside the [`WSBaseConfig`](../config/WSBaseConfig), where default filters are added right after constructing the `InsertManager`. To allow for conditional `InsertionFilters` refer to the following snippet:
+During construction, instances of `GAENDataService` and `ValidationUtils` are needed. Further, any filter can be added to the list with `addFilter(InsertionFilter filter)`. Ideally, this happens inside the [`WSBaseConfig`](../config/WSBaseConfig.java), where default filters are added right after constructing the `InsertManager`. To allow for conditional `InsertionFilters` refer to the following snippet:
 
 ```java
 @ConditionalOnProperty(
