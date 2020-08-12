@@ -57,7 +57,7 @@ public InsertManager insertManager() {
 - `NoBase64Filter`
     > This filter validates that the key actually is a correctly encoded base64 string. Since we are using 16 bytes of key data, those can be represented with exactly 24 characters. The validation of the length is already done during model validation and is assumed to be correct when reaching the filter. This filter _throws_ a `KeyIsNotBase64Exception` if any of the keys is wrongly encoded. Every key submitted _MUST_ have correct base64 encoding
 - `KeysNotMatchingJWTFilter`: 
-    > 
+    > This filter compares the supplied keys with information found in the JWT token. During the `exposed` request, the onset date, which will be set by the health authority and inserted as a claim into the JWT is the lower bound for allowed key dates. For the `exposednextday` the JWT contains the previously submitted and checked `delayedKeyDate`, which is compared to the actual supplied key.
 - `RollingStartNumberAfterDayAfterTomorrow`: 
     > Representing the maximum allowed time skew. Any key which is further in the future as the day after tomorrow is considered to be _maliciously_ uploaded and is hence filtered out.
 - `RollingStartNumberBeforeRetentionDay`: 
