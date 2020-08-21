@@ -32,19 +32,23 @@ public abstract class WSCloudBaseConfig extends WSBaseConfig {
 
 	@Value("${ws.cloud.base.config.publicKey.fromCertificate:true}")
 	private boolean publicKeyFromCertificate;
-	
+
 	@Value("${datasource.maximumPoolSize}")
 	int dataSourceMaximumPoolSize;
-	
+
 	@Value("${datasource.connectionTimeout}")
 	int dataSourceConnectionTimeout;
 
-	
+	@Value("${datasource.leakDetectionThreshold:0}")
+	int dataSourceLeakDetectionThreshold;
+
 	@Bean
 	@Override
 	public DataSource dataSource() {
 		PoolConfig poolConfig = new PoolConfig(dataSourceMaximumPoolSize, dataSourceConnectionTimeout);
 		DataSourceConfig dbConfig = new DataSourceConfig(poolConfig, null);
+		dbConfig.getConnectionProperties().getConnectionProperties().put("leakDetectionThreshold",
+				dataSourceLeakDetectionThreshold);
 		CloudFactory factory = new CloudFactory();
 		return factory.getCloud().getSingletonServiceConnector(DataSource.class, dbConfig);
 	}
@@ -68,8 +72,8 @@ public abstract class WSCloudBaseConfig extends WSBaseConfig {
 	protected KeyVault keyVault() {
 		var privateKey = getPrivateKey();
 		var publicKey = getPublicKey();
-		
-		if(privateKey.isEmpty() || publicKey.isEmpty()) {
+
+		if (privateKey.isEmpty() || publicKey.isEmpty()) {
 			var kp = super.getKeyPair(algorithm);
 			var gaenKp = new KeyVault.KeyVaultKeyPair("gaen", kp);
 			var nextDayJWTKp = new KeyVault.KeyVaultKeyPair("nextDayJWT", kp);
@@ -79,7 +83,7 @@ public abstract class WSCloudBaseConfig extends WSBaseConfig {
 
 		var gaen = new KeyVault.KeyVaultEntry("gaen", getPrivateKey(), getPublicKey(), "EC");
 		var nextDayJWT = new KeyVault.KeyVaultEntry("nextDayJWT", getPrivateKey(), getPublicKey(), "EC");
-		var hashFilter = new KeyVault.KeyVaultEntry("hashFilter", getPrivateKey(), getPublicKey(), "EC"); 
+		var hashFilter = new KeyVault.KeyVaultEntry("hashFilter", getPrivateKey(), getPublicKey(), "EC");
 
 		try {
 			return new KeyVault(gaen, nextDayJWT, hashFilter);
