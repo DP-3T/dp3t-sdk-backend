@@ -10,6 +10,8 @@
 
 package org.dpppt.backend.sdk.ws.config;
 
+import java.util.Map;
+
 import javax.sql.DataSource;
 
 import org.dpppt.backend.sdk.ws.security.KeyVault;
@@ -46,9 +48,8 @@ public abstract class WSCloudBaseConfig extends WSBaseConfig {
 	@Override
 	public DataSource dataSource() {
 		PoolConfig poolConfig = new PoolConfig(dataSourceMaximumPoolSize, dataSourceConnectionTimeout);
-		DataSourceConfig dbConfig = new DataSourceConfig(poolConfig, null);
-		dbConfig.getConnectionProperties().getConnectionProperties().put("leakDetectionThreshold",
-				dataSourceLeakDetectionThreshold);
+		DataSourceConfig dbConfig = new DataSourceConfig(poolConfig, null, null,
+				Map.of("leakDetectionThreshold", dataSourceLeakDetectionThreshold));
 		CloudFactory factory = new CloudFactory();
 		return factory.getCloud().getSingletonServiceConnector(DataSource.class, dbConfig);
 	}
