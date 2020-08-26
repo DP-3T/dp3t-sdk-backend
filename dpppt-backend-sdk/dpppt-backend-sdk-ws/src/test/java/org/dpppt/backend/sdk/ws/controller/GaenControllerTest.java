@@ -843,7 +843,14 @@ public class GaenControllerTest extends BaseControllerTest {
 			tmpKey.setTransmissionRiskLevel(0);
 			keys.add(tmpKey);
 		}
-		Map<Integer, Boolean> tests = Map.of(-2, false, -1, true, 0, true, 1, true, 2, false);
+		
+		Map<Integer, Boolean> tests = Map.of(
+				-2, false, 
+				-1, true,
+				0, true,
+				1, true,
+				2, false);
+		
 		for (Map.Entry<Integer, Boolean> t : tests.entrySet()) {
 			Integer offset = t.getKey();
 			Boolean pass = t.getValue();
@@ -896,12 +903,16 @@ public class GaenControllerTest extends BaseControllerTest {
 		var now = UTCInstant.now();
 		var midnight = now.atStartOfDay();
 
-		// insert two times 10 keys per day for the last 14 days, with different received at. In total: 280 keys
+		// insert two times 10 keys per day for the last 14 days, with different
+		// received at. In total: 280 keys
 		insertNKeysPerDay(midnight, 14, 10, midnight.minusDays(1), true);
 		insertNKeysPerDay(midnight, 14, 10, midnight.minusHours(12), true);
 
-		
-		// request keys which have been received in the last day, must be 280 in total.
+		// Request keys which have been received in the last day, must be 280 in total.
+		// This is the debug controller, which returns keys based on the received at, on
+		// not based on the key date. So this request should return all keys with
+		// received at of the last day.
+
 		MockHttpServletResponse response = mockMvc
 				.perform(get("/v1/debug/exposed/" + midnight.getTimestamp()).header("User-Agent", "MockMVC"))
 				.andExpect(status().is2xxSuccessful()).andReturn().getResponse();
@@ -937,11 +948,11 @@ public class GaenControllerTest extends BaseControllerTest {
 
 		// request again the keys with date date 8 days ago. with publish until, so that
 		// we only get the second batch.
-		var bucketAfterSecondRelease = Duration.ofMillis(midnight.getTimestamp()).minusDays(1).plusHours(12)
-				.dividedBy(Duration.ofHours(2)) * 2 * 60 * 60 * 1000;
+		var bucketAfterSecondRelease = midnight.minusHours(12);
+
 		MockHttpServletResponse responseWithPublishedAfter = mockMvc
 				.perform(get("/v1/gaen/exposed/" + midnight.minusDays(8).getTimestamp()).header("User-Agent", "MockMVC")
-						.param("publishedafter", Long.toString(bucketAfterSecondRelease)))
+						.param("publishedafter", Long.toString(bucketAfterSecondRelease.getTimestamp())))
 				.andExpect(status().is2xxSuccessful()).andReturn().getResponse();
 
 		// must contain 15 keys: 5 from the second insert and 10 random keys
@@ -1026,12 +1037,9 @@ public class GaenControllerTest extends BaseControllerTest {
 
 	/**
 	 * Verifies a zip in zip response, that each inner zip is again valid.
-	 * @param response
-	 * @param expectKeyCount
-	 * @param expectedRollingPeriod
-	 * @throws Exception
 	 */
-	private void verifyZipInZipResponse(MockHttpServletResponse response, int expectKeyCount, int expectedRollingPeriod) throws Exception {
+	private void verifyZipInZipResponse(MockHttpServletResponse response, int expectKeyCount, int expectedRollingPeriod)
+			throws Exception {
 		ByteArrayInputStream baisOuter = new ByteArrayInputStream(response.getContentAsByteArray());
 		ZipInputStream zipOuter = new ZipInputStream(baisOuter);
 		ZipEntry entry = zipOuter.getNextEntry();
@@ -1044,14 +1052,6 @@ public class GaenControllerTest extends BaseControllerTest {
 
 	/**
 	 * Verifies a zip response, checks if keys and signature is correct.
-	 * 
-	 * @param response
-	 * @param expectKeyCount
-	 * @param expectedRollingPeriod
-	 * @throws IOException
-	 * @throws NoSuchAlgorithmException
-	 * @throws InvalidKeyException
-	 * @throws SignatureException
 	 */
 	private void verifyZipResponse(MockHttpServletResponse response, int expectKeyCount, int expectedRollingPeriod)
 			throws IOException, NoSuchAlgorithmException, InvalidKeyException, SignatureException {
@@ -1104,7 +1104,8 @@ public class GaenControllerTest extends BaseControllerTest {
 	}
 
 	/**
-	 * Creates keysPerDay for every day: lastDay, lastDay-1, ..., lastDay - daysBack + 1
+	 * Creates keysPerDay for every day: lastDay, lastDay-1, ..., lastDay - daysBack
+	 * + 1
 	 *
 	 * @param lastDay    of the created keys
 	 * @param daysBack   of the key creation, counted including the lastDay
