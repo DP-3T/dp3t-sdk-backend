@@ -12,7 +12,6 @@ package org.dpppt.backend.sdk.data;
 
 import java.time.Duration;
 import javax.sql.DataSource;
-
 import org.dpppt.backend.sdk.utils.UTCInstant;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -23,43 +22,46 @@ import org.springframework.transaction.annotation.Transactional;
 
 public class JDBCRedeemDataServiceImpl implements RedeemDataService {
 
-	private static final Logger logger = LoggerFactory.getLogger(JDBCRedeemDataServiceImpl.class);
+  private static final Logger logger = LoggerFactory.getLogger(JDBCRedeemDataServiceImpl.class);
 
-	private final NamedParameterJdbcTemplate jt;
-	private final SimpleJdbcInsert reedemUUIDInsert;
+  private final NamedParameterJdbcTemplate jt;
+  private final SimpleJdbcInsert reedemUUIDInsert;
 
-	public JDBCRedeemDataServiceImpl(DataSource dataSource) {
-		this.jt = new NamedParameterJdbcTemplate(dataSource);
-		this.reedemUUIDInsert = new SimpleJdbcInsert(dataSource).withTableName("t_redeem_uuid")
-				.usingGeneratedKeyColumns("pk_redeem_uuid_id");
-	}
+  public JDBCRedeemDataServiceImpl(DataSource dataSource) {
+    this.jt = new NamedParameterJdbcTemplate(dataSource);
+    this.reedemUUIDInsert =
+        new SimpleJdbcInsert(dataSource)
+            .withTableName("t_redeem_uuid")
+            .usingGeneratedKeyColumns("pk_redeem_uuid_id");
+  }
 
-	@Override
-	@Transactional(readOnly = false)
-	public boolean checkAndInsertPublishUUID(String uuid) {
-		String sql = "select count(1) from t_redeem_uuid where uuid = :uuid";
-		MapSqlParameterSource params = new MapSqlParameterSource("uuid", uuid);
-		Integer count = jt.queryForObject(sql, params, Integer.class);
-		if (count > 0) {
-			return false;
-		} else {
-			// set the received_at to the next day, with no time information
-			// it will stay longer in the DB but we mitigate the risk that the JWT
-			// can be used twice (c.f. testTokensArentDeletedBeforeExpire). 
-			var startOfTomorrow = UTCInstant.today().plusDays(1);
-			params.addValue("received_at", startOfTomorrow.getDate());
-			reedemUUIDInsert.execute(params);
-			return true;
-		}
-	}
+  @Override
+  @Transactional(readOnly = false)
+  public boolean checkAndInsertPublishUUID(String uuid) {
+    String sql = "select count(1) from t_redeem_uuid where uuid = :uuid";
+    MapSqlParameterSource params = new MapSqlParameterSource("uuid", uuid);
+    Integer count = jt.queryForObject(sql, params, Integer.class);
+    if (count > 0) {
+      return false;
+    } else {
+      // set the received_at to the next day, with no time information
+      // it will stay longer in the DB but we mitigate the risk that the JWT
+      // can be used twice (c.f. testTokensArentDeletedBeforeExpire).
+      var startOfTomorrow = UTCInstant.today().plusDays(1);
+      params.addValue("received_at", startOfTomorrow.getDate());
+      reedemUUIDInsert.execute(params);
+      return true;
+    }
+  }
 
-	@Override
-	@Transactional(readOnly = false)
-	public void cleanDB(Duration retentionPeriod) {
-		var retentionTime = UTCInstant.now().minus(retentionPeriod);
-		logger.info("Cleanup DB entries before: " + retentionTime);
-		MapSqlParameterSource params = new MapSqlParameterSource("retention_time", retentionTime.getDate());
-		String sqlRedeem = "delete from t_redeem_uuid where received_at < :retention_time";
-		jt.update(sqlRedeem, params);
-	}
+  @Override
+  @Transactional(readOnly = false)
+  public void cleanDB(Duration retentionPeriod) {
+    var retentionTime = UTCInstant.now().minus(retentionPeriod);
+    logger.info("Cleanup DB entries before: " + retentionTime);
+    MapSqlParameterSource params =
+        new MapSqlParameterSource("retention_time", retentionTime.getDate());
+    String sqlRedeem = "delete from t_redeem_uuid where received_at < :retention_time";
+    jt.update(sqlRedeem, params);
+  }
 }

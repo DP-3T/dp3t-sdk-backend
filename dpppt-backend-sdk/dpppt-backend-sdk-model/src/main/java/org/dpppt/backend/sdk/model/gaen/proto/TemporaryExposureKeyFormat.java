@@ -4,20 +4,21 @@ package org.dpppt.backend.sdk.model.gaen.proto;
 
 public final class TemporaryExposureKeyFormat {
   private TemporaryExposureKeyFormat() {}
-  public static void registerAllExtensions(
-      com.google.protobuf.ExtensionRegistryLite registry) {
+
+  public static void registerAllExtensions(com.google.protobuf.ExtensionRegistryLite registry) {}
+
+  public static void registerAllExtensions(com.google.protobuf.ExtensionRegistry registry) {
+    registerAllExtensions((com.google.protobuf.ExtensionRegistryLite) registry);
   }
 
-  public static void registerAllExtensions(
-      com.google.protobuf.ExtensionRegistry registry) {
-    registerAllExtensions(
-        (com.google.protobuf.ExtensionRegistryLite) registry);
-  }
-  public interface TemporaryExposureKeyExportOrBuilder extends
+  public interface TemporaryExposureKeyExportOrBuilder
+      extends
       // @@protoc_insertion_point(interface_extends:TemporaryExposureKeyExport)
       com.google.protobuf.MessageOrBuilder {
 
     /**
+     *
+     *
      * <pre>
      * Time window of keys in this batch based on arrival to server, in UTC seconds
      * </pre>
@@ -26,6 +27,8 @@ public final class TemporaryExposureKeyFormat {
      */
     boolean hasStartTimestamp();
     /**
+     *
+     *
      * <pre>
      * Time window of keys in this batch based on arrival to server, in UTC seconds
      * </pre>
@@ -34,16 +37,14 @@ public final class TemporaryExposureKeyFormat {
      */
     long getStartTimestamp();
 
-    /**
-     * <code>optional fixed64 end_timestamp = 2;</code>
-     */
+    /** <code>optional fixed64 end_timestamp = 2;</code> */
     boolean hasEndTimestamp();
-    /**
-     * <code>optional fixed64 end_timestamp = 2;</code>
-     */
+    /** <code>optional fixed64 end_timestamp = 2;</code> */
     long getEndTimestamp();
 
     /**
+     *
+     *
      * <pre>
      * Region for which these keys came from (e.g., country)
      * </pre>
@@ -52,6 +53,8 @@ public final class TemporaryExposureKeyFormat {
      */
     boolean hasRegion();
     /**
+     *
+     *
      * <pre>
      * Region for which these keys came from (e.g., country)
      * </pre>
@@ -60,16 +63,19 @@ public final class TemporaryExposureKeyFormat {
      */
     java.lang.String getRegion();
     /**
+     *
+     *
      * <pre>
      * Region for which these keys came from (e.g., country)
      * </pre>
      *
      * <code>optional string region = 3;</code>
      */
-    com.google.protobuf.ByteString
-        getRegionBytes();
+    com.google.protobuf.ByteString getRegionBytes();
 
     /**
+     *
+     *
      * <pre>
      * E.g., File 2 in batch size of 10. Ordinal, 1-based numbering.
      * </pre>
@@ -78,6 +84,8 @@ public final class TemporaryExposureKeyFormat {
      */
     boolean hasBatchNum();
     /**
+     *
+     *
      * <pre>
      * E.g., File 2 in batch size of 10. Ordinal, 1-based numbering.
      * </pre>
@@ -86,25 +94,24 @@ public final class TemporaryExposureKeyFormat {
      */
     int getBatchNum();
 
-    /**
-     * <code>optional int32 batch_size = 5;</code>
-     */
+    /** <code>optional int32 batch_size = 5;</code> */
     boolean hasBatchSize();
-    /**
-     * <code>optional int32 batch_size = 5;</code>
-     */
+    /** <code>optional int32 batch_size = 5;</code> */
     int getBatchSize();
 
     /**
+     *
+     *
      * <pre>
      * Information about associated signatures
      * </pre>
      *
      * <code>repeated .SignatureInfo signature_infos = 6;</code>
      */
-    java.util.List<TemporaryExposureKeyFormat.SignatureInfo> 
-        getSignatureInfosList();
+    java.util.List<TemporaryExposureKeyFormat.SignatureInfo> getSignatureInfosList();
     /**
+     *
+     *
      * <pre>
      * Information about associated signatures
      * </pre>
@@ -113,6 +120,8 @@ public final class TemporaryExposureKeyFormat {
      */
     TemporaryExposureKeyFormat.SignatureInfo getSignatureInfos(int index);
     /**
+     *
+     *
      * <pre>
      * Information about associated signatures
      * </pre>
@@ -121,34 +130,40 @@ public final class TemporaryExposureKeyFormat {
      */
     int getSignatureInfosCount();
     /**
+     *
+     *
      * <pre>
      * Information about associated signatures
      * </pre>
      *
      * <code>repeated .SignatureInfo signature_infos = 6;</code>
      */
-    java.util.List<? extends TemporaryExposureKeyFormat.SignatureInfoOrBuilder> 
+    java.util.List<? extends TemporaryExposureKeyFormat.SignatureInfoOrBuilder>
         getSignatureInfosOrBuilderList();
     /**
+     *
+     *
      * <pre>
      * Information about associated signatures
      * </pre>
      *
      * <code>repeated .SignatureInfo signature_infos = 6;</code>
      */
-    TemporaryExposureKeyFormat.SignatureInfoOrBuilder getSignatureInfosOrBuilder(
-        int index);
+    TemporaryExposureKeyFormat.SignatureInfoOrBuilder getSignatureInfosOrBuilder(int index);
 
     /**
+     *
+     *
      * <pre>
      * The TemporaryExposureKeys themselves
      * </pre>
      *
      * <code>repeated .TemporaryExposureKey keys = 7;</code>
      */
-    java.util.List<TemporaryExposureKeyFormat.TemporaryExposureKey> 
-        getKeysList();
+    java.util.List<TemporaryExposureKeyFormat.TemporaryExposureKey> getKeysList();
     /**
+     *
+     *
      * <pre>
      * The TemporaryExposureKeys themselves
      * </pre>
@@ -157,6 +172,8 @@ public final class TemporaryExposureKeyFormat {
      */
     TemporaryExposureKeyFormat.TemporaryExposureKey getKeys(int index);
     /**
+     *
+     *
      * <pre>
      * The TemporaryExposureKeys themselves
      * </pre>
@@ -165,36 +182,39 @@ public final class TemporaryExposureKeyFormat {
      */
     int getKeysCount();
     /**
+     *
+     *
      * <pre>
      * The TemporaryExposureKeys themselves
      * </pre>
      *
      * <code>repeated .TemporaryExposureKey keys = 7;</code>
      */
-    java.util.List<? extends TemporaryExposureKeyFormat.TemporaryExposureKeyOrBuilder> 
+    java.util.List<? extends TemporaryExposureKeyFormat.TemporaryExposureKeyOrBuilder>
         getKeysOrBuilderList();
     /**
+     *
+     *
      * <pre>
      * The TemporaryExposureKeys themselves
      * </pre>
      *
      * <code>repeated .TemporaryExposureKey keys = 7;</code>
      */
-    TemporaryExposureKeyFormat.TemporaryExposureKeyOrBuilder getKeysOrBuilder(
-        int index);
+    TemporaryExposureKeyFormat.TemporaryExposureKeyOrBuilder getKeysOrBuilder(int index);
   }
-  /**
-   * Protobuf type {@code TemporaryExposureKeyExport}
-   */
-  public  static final class TemporaryExposureKeyExport extends
-      com.google.protobuf.GeneratedMessageV3 implements
+  /** Protobuf type {@code TemporaryExposureKeyExport} */
+  public static final class TemporaryExposureKeyExport
+      extends com.google.protobuf.GeneratedMessageV3
+      implements
       // @@protoc_insertion_point(message_implements:TemporaryExposureKeyExport)
       TemporaryExposureKeyExportOrBuilder {
-  private static final long serialVersionUID = 0L;
+    private static final long serialVersionUID = 0L;
     // Use TemporaryExposureKeyExport.newBuilder() to construct.
     private TemporaryExposureKeyExport(com.google.protobuf.GeneratedMessageV3.Builder<?> builder) {
       super(builder);
     }
+
     private TemporaryExposureKeyExport() {
       region_ = "";
       signatureInfos_ = java.util.Collections.emptyList();
@@ -202,10 +222,10 @@ public final class TemporaryExposureKeyFormat {
     }
 
     @java.lang.Override
-    public final com.google.protobuf.UnknownFieldSet
-    getUnknownFields() {
+    public final com.google.protobuf.UnknownFieldSet getUnknownFields() {
       return this.unknownFields;
     }
+
     private TemporaryExposureKeyExport(
         com.google.protobuf.CodedInputStream input,
         com.google.protobuf.ExtensionRegistryLite extensionRegistry)
@@ -225,64 +245,74 @@ public final class TemporaryExposureKeyFormat {
             case 0:
               done = true;
               break;
-            case 9: {
-              bitField0_ |= 0x00000001;
-              startTimestamp_ = input.readFixed64();
-              break;
-            }
-            case 17: {
-              bitField0_ |= 0x00000002;
-              endTimestamp_ = input.readFixed64();
-              break;
-            }
-            case 26: {
-              com.google.protobuf.ByteString bs = input.readBytes();
-              bitField0_ |= 0x00000004;
-              region_ = bs;
-              break;
-            }
-            case 32: {
-              bitField0_ |= 0x00000008;
-              batchNum_ = input.readInt32();
-              break;
-            }
-            case 40: {
-              bitField0_ |= 0x00000010;
-              batchSize_ = input.readInt32();
-              break;
-            }
-            case 50: {
-              if (!((mutable_bitField0_ & 0x00000020) != 0)) {
-                signatureInfos_ = new java.util.ArrayList<TemporaryExposureKeyFormat.SignatureInfo>();
-                mutable_bitField0_ |= 0x00000020;
+            case 9:
+              {
+                bitField0_ |= 0x00000001;
+                startTimestamp_ = input.readFixed64();
+                break;
               }
-              signatureInfos_.add(
-                  input.readMessage(TemporaryExposureKeyFormat.SignatureInfo.PARSER, extensionRegistry));
-              break;
-            }
-            case 58: {
-              if (!((mutable_bitField0_ & 0x00000040) != 0)) {
-                keys_ = new java.util.ArrayList<TemporaryExposureKeyFormat.TemporaryExposureKey>();
-                mutable_bitField0_ |= 0x00000040;
+            case 17:
+              {
+                bitField0_ |= 0x00000002;
+                endTimestamp_ = input.readFixed64();
+                break;
               }
-              keys_.add(
-                  input.readMessage(TemporaryExposureKeyFormat.TemporaryExposureKey.PARSER, extensionRegistry));
-              break;
-            }
-            default: {
-              if (!parseUnknownField(
-                  input, unknownFields, extensionRegistry, tag)) {
-                done = true;
+            case 26:
+              {
+                com.google.protobuf.ByteString bs = input.readBytes();
+                bitField0_ |= 0x00000004;
+                region_ = bs;
+                break;
               }
-              break;
-            }
+            case 32:
+              {
+                bitField0_ |= 0x00000008;
+                batchNum_ = input.readInt32();
+                break;
+              }
+            case 40:
+              {
+                bitField0_ |= 0x00000010;
+                batchSize_ = input.readInt32();
+                break;
+              }
+            case 50:
+              {
+                if (!((mutable_bitField0_ & 0x00000020) != 0)) {
+                  signatureInfos_ =
+                      new java.util.ArrayList<TemporaryExposureKeyFormat.SignatureInfo>();
+                  mutable_bitField0_ |= 0x00000020;
+                }
+                signatureInfos_.add(
+                    input.readMessage(
+                        TemporaryExposureKeyFormat.SignatureInfo.PARSER, extensionRegistry));
+                break;
+              }
+            case 58:
+              {
+                if (!((mutable_bitField0_ & 0x00000040) != 0)) {
+                  keys_ =
+                      new java.util.ArrayList<TemporaryExposureKeyFormat.TemporaryExposureKey>();
+                  mutable_bitField0_ |= 0x00000040;
+                }
+                keys_.add(
+                    input.readMessage(
+                        TemporaryExposureKeyFormat.TemporaryExposureKey.PARSER, extensionRegistry));
+                break;
+              }
+            default:
+              {
+                if (!parseUnknownField(input, unknownFields, extensionRegistry, tag)) {
+                  done = true;
+                }
+                break;
+              }
           }
         }
       } catch (com.google.protobuf.InvalidProtocolBufferException e) {
         throw e.setUnfinishedMessage(this);
       } catch (java.io.IOException e) {
-        throw new com.google.protobuf.InvalidProtocolBufferException(
-            e).setUnfinishedMessage(this);
+        throw new com.google.protobuf.InvalidProtocolBufferException(e).setUnfinishedMessage(this);
       } finally {
         if (((mutable_bitField0_ & 0x00000020) != 0)) {
           signatureInfos_ = java.util.Collections.unmodifiableList(signatureInfos_);
@@ -294,23 +324,27 @@ public final class TemporaryExposureKeyFormat {
         makeExtensionsImmutable();
       }
     }
-    public static final com.google.protobuf.Descriptors.Descriptor
-        getDescriptor() {
+
+    public static final com.google.protobuf.Descriptors.Descriptor getDescriptor() {
       return TemporaryExposureKeyFormat.internal_static_TemporaryExposureKeyExport_descriptor;
     }
 
     @java.lang.Override
     protected com.google.protobuf.GeneratedMessageV3.FieldAccessorTable
         internalGetFieldAccessorTable() {
-      return TemporaryExposureKeyFormat.internal_static_TemporaryExposureKeyExport_fieldAccessorTable
+      return TemporaryExposureKeyFormat
+          .internal_static_TemporaryExposureKeyExport_fieldAccessorTable
           .ensureFieldAccessorsInitialized(
-              TemporaryExposureKeyFormat.TemporaryExposureKeyExport.class, TemporaryExposureKeyFormat.TemporaryExposureKeyExport.Builder.class);
+              TemporaryExposureKeyFormat.TemporaryExposureKeyExport.class,
+              TemporaryExposureKeyFormat.TemporaryExposureKeyExport.Builder.class);
     }
 
     private int bitField0_;
     public static final int START_TIMESTAMP_FIELD_NUMBER = 1;
     private long startTimestamp_;
     /**
+     *
+     *
      * <pre>
      * Time window of keys in this batch based on arrival to server, in UTC seconds
      * </pre>
@@ -321,6 +355,8 @@ public final class TemporaryExposureKeyFormat {
       return ((bitField0_ & 0x00000001) != 0);
     }
     /**
+     *
+     *
      * <pre>
      * Time window of keys in this batch based on arrival to server, in UTC seconds
      * </pre>
@@ -333,15 +369,11 @@ public final class TemporaryExposureKeyFormat {
 
     public static final int END_TIMESTAMP_FIELD_NUMBER = 2;
     private long endTimestamp_;
-    /**
-     * <code>optional fixed64 end_timestamp = 2;</code>
-     */
+    /** <code>optional fixed64 end_timestamp = 2;</code> */
     public boolean hasEndTimestamp() {
       return ((bitField0_ & 0x00000002) != 0);
     }
-    /**
-     * <code>optional fixed64 end_timestamp = 2;</code>
-     */
+    /** <code>optional fixed64 end_timestamp = 2;</code> */
     public long getEndTimestamp() {
       return endTimestamp_;
     }
@@ -349,6 +381,8 @@ public final class TemporaryExposureKeyFormat {
     public static final int REGION_FIELD_NUMBER = 3;
     private volatile java.lang.Object region_;
     /**
+     *
+     *
      * <pre>
      * Region for which these keys came from (e.g., country)
      * </pre>
@@ -359,6 +393,8 @@ public final class TemporaryExposureKeyFormat {
       return ((bitField0_ & 0x00000004) != 0);
     }
     /**
+     *
+     *
      * <pre>
      * Region for which these keys came from (e.g., country)
      * </pre>
@@ -370,8 +406,7 @@ public final class TemporaryExposureKeyFormat {
       if (ref instanceof java.lang.String) {
         return (java.lang.String) ref;
       } else {
-        com.google.protobuf.ByteString bs = 
-            (com.google.protobuf.ByteString) ref;
+        com.google.protobuf.ByteString bs = (com.google.protobuf.ByteString) ref;
         java.lang.String s = bs.toStringUtf8();
         if (bs.isValidUtf8()) {
           region_ = s;
@@ -380,19 +415,19 @@ public final class TemporaryExposureKeyFormat {
       }
     }
     /**
+     *
+     *
      * <pre>
      * Region for which these keys came from (e.g., country)
      * </pre>
      *
      * <code>optional string region = 3;</code>
      */
-    public com.google.protobuf.ByteString
-        getRegionBytes() {
+    public com.google.protobuf.ByteString getRegionBytes() {
       java.lang.Object ref = region_;
       if (ref instanceof java.lang.String) {
-        com.google.protobuf.ByteString b = 
-            com.google.protobuf.ByteString.copyFromUtf8(
-                (java.lang.String) ref);
+        com.google.protobuf.ByteString b =
+            com.google.protobuf.ByteString.copyFromUtf8((java.lang.String) ref);
         region_ = b;
         return b;
       } else {
@@ -403,6 +438,8 @@ public final class TemporaryExposureKeyFormat {
     public static final int BATCH_NUM_FIELD_NUMBER = 4;
     private int batchNum_;
     /**
+     *
+     *
      * <pre>
      * E.g., File 2 in batch size of 10. Ordinal, 1-based numbering.
      * </pre>
@@ -413,6 +450,8 @@ public final class TemporaryExposureKeyFormat {
       return ((bitField0_ & 0x00000008) != 0);
     }
     /**
+     *
+     *
      * <pre>
      * E.g., File 2 in batch size of 10. Ordinal, 1-based numbering.
      * </pre>
@@ -425,15 +464,11 @@ public final class TemporaryExposureKeyFormat {
 
     public static final int BATCH_SIZE_FIELD_NUMBER = 5;
     private int batchSize_;
-    /**
-     * <code>optional int32 batch_size = 5;</code>
-     */
+    /** <code>optional int32 batch_size = 5;</code> */
     public boolean hasBatchSize() {
       return ((bitField0_ & 0x00000010) != 0);
     }
-    /**
-     * <code>optional int32 batch_size = 5;</code>
-     */
+    /** <code>optional int32 batch_size = 5;</code> */
     public int getBatchSize() {
       return batchSize_;
     }
@@ -441,6 +476,8 @@ public final class TemporaryExposureKeyFormat {
     public static final int SIGNATURE_INFOS_FIELD_NUMBER = 6;
     private java.util.List<TemporaryExposureKeyFormat.SignatureInfo> signatureInfos_;
     /**
+     *
+     *
      * <pre>
      * Information about associated signatures
      * </pre>
@@ -451,17 +488,21 @@ public final class TemporaryExposureKeyFormat {
       return signatureInfos_;
     }
     /**
+     *
+     *
      * <pre>
      * Information about associated signatures
      * </pre>
      *
      * <code>repeated .SignatureInfo signature_infos = 6;</code>
      */
-    public java.util.List<? extends TemporaryExposureKeyFormat.SignatureInfoOrBuilder> 
+    public java.util.List<? extends TemporaryExposureKeyFormat.SignatureInfoOrBuilder>
         getSignatureInfosOrBuilderList() {
       return signatureInfos_;
     }
     /**
+     *
+     *
      * <pre>
      * Information about associated signatures
      * </pre>
@@ -472,6 +513,8 @@ public final class TemporaryExposureKeyFormat {
       return signatureInfos_.size();
     }
     /**
+     *
+     *
      * <pre>
      * Information about associated signatures
      * </pre>
@@ -482,20 +525,23 @@ public final class TemporaryExposureKeyFormat {
       return signatureInfos_.get(index);
     }
     /**
+     *
+     *
      * <pre>
      * Information about associated signatures
      * </pre>
      *
      * <code>repeated .SignatureInfo signature_infos = 6;</code>
      */
-    public TemporaryExposureKeyFormat.SignatureInfoOrBuilder getSignatureInfosOrBuilder(
-        int index) {
+    public TemporaryExposureKeyFormat.SignatureInfoOrBuilder getSignatureInfosOrBuilder(int index) {
       return signatureInfos_.get(index);
     }
 
     public static final int KEYS_FIELD_NUMBER = 7;
     private java.util.List<TemporaryExposureKeyFormat.TemporaryExposureKey> keys_;
     /**
+     *
+     *
      * <pre>
      * The TemporaryExposureKeys themselves
      * </pre>
@@ -506,17 +552,21 @@ public final class TemporaryExposureKeyFormat {
       return keys_;
     }
     /**
+     *
+     *
      * <pre>
      * The TemporaryExposureKeys themselves
      * </pre>
      *
      * <code>repeated .TemporaryExposureKey keys = 7;</code>
      */
-    public java.util.List<? extends TemporaryExposureKeyFormat.TemporaryExposureKeyOrBuilder> 
+    public java.util.List<? extends TemporaryExposureKeyFormat.TemporaryExposureKeyOrBuilder>
         getKeysOrBuilderList() {
       return keys_;
     }
     /**
+     *
+     *
      * <pre>
      * The TemporaryExposureKeys themselves
      * </pre>
@@ -527,6 +577,8 @@ public final class TemporaryExposureKeyFormat {
       return keys_.size();
     }
     /**
+     *
+     *
      * <pre>
      * The TemporaryExposureKeys themselves
      * </pre>
@@ -537,18 +589,20 @@ public final class TemporaryExposureKeyFormat {
       return keys_.get(index);
     }
     /**
+     *
+     *
      * <pre>
      * The TemporaryExposureKeys themselves
      * </pre>
      *
      * <code>repeated .TemporaryExposureKey keys = 7;</code>
      */
-    public TemporaryExposureKeyFormat.TemporaryExposureKeyOrBuilder getKeysOrBuilder(
-        int index) {
+    public TemporaryExposureKeyFormat.TemporaryExposureKeyOrBuilder getKeysOrBuilder(int index) {
       return keys_.get(index);
     }
 
     private byte memoizedIsInitialized = -1;
+
     @java.lang.Override
     public final boolean isInitialized() {
       byte isInitialized = memoizedIsInitialized;
@@ -560,8 +614,7 @@ public final class TemporaryExposureKeyFormat {
     }
 
     @java.lang.Override
-    public void writeTo(com.google.protobuf.CodedOutputStream output)
-                        throws java.io.IOException {
+    public void writeTo(com.google.protobuf.CodedOutputStream output) throws java.io.IOException {
       if (((bitField0_ & 0x00000001) != 0)) {
         output.writeFixed64(1, startTimestamp_);
       }
@@ -593,31 +646,25 @@ public final class TemporaryExposureKeyFormat {
 
       size = 0;
       if (((bitField0_ & 0x00000001) != 0)) {
-        size += com.google.protobuf.CodedOutputStream
-          .computeFixed64Size(1, startTimestamp_);
+        size += com.google.protobuf.CodedOutputStream.computeFixed64Size(1, startTimestamp_);
       }
       if (((bitField0_ & 0x00000002) != 0)) {
-        size += com.google.protobuf.CodedOutputStream
-          .computeFixed64Size(2, endTimestamp_);
+        size += com.google.protobuf.CodedOutputStream.computeFixed64Size(2, endTimestamp_);
       }
       if (((bitField0_ & 0x00000004) != 0)) {
         size += com.google.protobuf.GeneratedMessageV3.computeStringSize(3, region_);
       }
       if (((bitField0_ & 0x00000008) != 0)) {
-        size += com.google.protobuf.CodedOutputStream
-          .computeInt32Size(4, batchNum_);
+        size += com.google.protobuf.CodedOutputStream.computeInt32Size(4, batchNum_);
       }
       if (((bitField0_ & 0x00000010) != 0)) {
-        size += com.google.protobuf.CodedOutputStream
-          .computeInt32Size(5, batchSize_);
+        size += com.google.protobuf.CodedOutputStream.computeInt32Size(5, batchSize_);
       }
       for (int i = 0; i < signatureInfos_.size(); i++) {
-        size += com.google.protobuf.CodedOutputStream
-          .computeMessageSize(6, signatureInfos_.get(i));
+        size += com.google.protobuf.CodedOutputStream.computeMessageSize(6, signatureInfos_.get(i));
       }
       for (int i = 0; i < keys_.size(); i++) {
-        size += com.google.protobuf.CodedOutputStream
-          .computeMessageSize(7, keys_.get(i));
+        size += com.google.protobuf.CodedOutputStream.computeMessageSize(7, keys_.get(i));
       }
       size += unknownFields.getSerializedSize();
       memoizedSize = size;
@@ -627,42 +674,36 @@ public final class TemporaryExposureKeyFormat {
     @java.lang.Override
     public boolean equals(final java.lang.Object obj) {
       if (obj == this) {
-       return true;
+        return true;
       }
       if (!(obj instanceof TemporaryExposureKeyFormat.TemporaryExposureKeyExport)) {
         return super.equals(obj);
       }
-      TemporaryExposureKeyFormat.TemporaryExposureKeyExport other = (TemporaryExposureKeyFormat.TemporaryExposureKeyExport) obj;
+      TemporaryExposureKeyFormat.TemporaryExposureKeyExport other =
+          (TemporaryExposureKeyFormat.TemporaryExposureKeyExport) obj;
 
       if (hasStartTimestamp() != other.hasStartTimestamp()) return false;
       if (hasStartTimestamp()) {
-        if (getStartTimestamp()
-            != other.getStartTimestamp()) return false;
+        if (getStartTimestamp() != other.getStartTimestamp()) return false;
       }
       if (hasEndTimestamp() != other.hasEndTimestamp()) return false;
       if (hasEndTimestamp()) {
-        if (getEndTimestamp()
-            != other.getEndTimestamp()) return false;
+        if (getEndTimestamp() != other.getEndTimestamp()) return false;
       }
       if (hasRegion() != other.hasRegion()) return false;
       if (hasRegion()) {
-        if (!getRegion()
-            .equals(other.getRegion())) return false;
+        if (!getRegion().equals(other.getRegion())) return false;
       }
       if (hasBatchNum() != other.hasBatchNum()) return false;
       if (hasBatchNum()) {
-        if (getBatchNum()
-            != other.getBatchNum()) return false;
+        if (getBatchNum() != other.getBatchNum()) return false;
       }
       if (hasBatchSize() != other.hasBatchSize()) return false;
       if (hasBatchSize()) {
-        if (getBatchSize()
-            != other.getBatchSize()) return false;
+        if (getBatchSize() != other.getBatchSize()) return false;
       }
-      if (!getSignatureInfosList()
-          .equals(other.getSignatureInfosList())) return false;
-      if (!getKeysList()
-          .equals(other.getKeysList())) return false;
+      if (!getSignatureInfosList().equals(other.getSignatureInfosList())) return false;
+      if (!getKeysList().equals(other.getKeysList())) return false;
       if (!unknownFields.equals(other.unknownFields)) return false;
       return true;
     }
@@ -676,13 +717,11 @@ public final class TemporaryExposureKeyFormat {
       hash = (19 * hash) + getDescriptor().hashCode();
       if (hasStartTimestamp()) {
         hash = (37 * hash) + START_TIMESTAMP_FIELD_NUMBER;
-        hash = (53 * hash) + com.google.protobuf.Internal.hashLong(
-            getStartTimestamp());
+        hash = (53 * hash) + com.google.protobuf.Internal.hashLong(getStartTimestamp());
       }
       if (hasEndTimestamp()) {
         hash = (37 * hash) + END_TIMESTAMP_FIELD_NUMBER;
-        hash = (53 * hash) + com.google.protobuf.Internal.hashLong(
-            getEndTimestamp());
+        hash = (53 * hash) + com.google.protobuf.Internal.hashLong(getEndTimestamp());
       }
       if (hasRegion()) {
         hash = (37 * hash) + REGION_FIELD_NUMBER;
@@ -710,87 +749,94 @@ public final class TemporaryExposureKeyFormat {
     }
 
     public static TemporaryExposureKeyFormat.TemporaryExposureKeyExport parseFrom(
-        java.nio.ByteBuffer data)
-        throws com.google.protobuf.InvalidProtocolBufferException {
+        java.nio.ByteBuffer data) throws com.google.protobuf.InvalidProtocolBufferException {
       return PARSER.parseFrom(data);
     }
+
     public static TemporaryExposureKeyFormat.TemporaryExposureKeyExport parseFrom(
-        java.nio.ByteBuffer data,
-        com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+        java.nio.ByteBuffer data, com.google.protobuf.ExtensionRegistryLite extensionRegistry)
         throws com.google.protobuf.InvalidProtocolBufferException {
       return PARSER.parseFrom(data, extensionRegistry);
     }
+
     public static TemporaryExposureKeyFormat.TemporaryExposureKeyExport parseFrom(
         com.google.protobuf.ByteString data)
         throws com.google.protobuf.InvalidProtocolBufferException {
       return PARSER.parseFrom(data);
     }
+
     public static TemporaryExposureKeyFormat.TemporaryExposureKeyExport parseFrom(
         com.google.protobuf.ByteString data,
         com.google.protobuf.ExtensionRegistryLite extensionRegistry)
         throws com.google.protobuf.InvalidProtocolBufferException {
       return PARSER.parseFrom(data, extensionRegistry);
     }
+
     public static TemporaryExposureKeyFormat.TemporaryExposureKeyExport parseFrom(byte[] data)
         throws com.google.protobuf.InvalidProtocolBufferException {
       return PARSER.parseFrom(data);
     }
+
     public static TemporaryExposureKeyFormat.TemporaryExposureKeyExport parseFrom(
-        byte[] data,
-        com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+        byte[] data, com.google.protobuf.ExtensionRegistryLite extensionRegistry)
         throws com.google.protobuf.InvalidProtocolBufferException {
       return PARSER.parseFrom(data, extensionRegistry);
     }
-    public static TemporaryExposureKeyFormat.TemporaryExposureKeyExport parseFrom(java.io.InputStream input)
-        throws java.io.IOException {
-      return com.google.protobuf.GeneratedMessageV3
-          .parseWithIOException(PARSER, input);
-    }
+
     public static TemporaryExposureKeyFormat.TemporaryExposureKeyExport parseFrom(
-        java.io.InputStream input,
-        com.google.protobuf.ExtensionRegistryLite extensionRegistry)
-        throws java.io.IOException {
-      return com.google.protobuf.GeneratedMessageV3
-          .parseWithIOException(PARSER, input, extensionRegistry);
+        java.io.InputStream input) throws java.io.IOException {
+      return com.google.protobuf.GeneratedMessageV3.parseWithIOException(PARSER, input);
     }
-    public static TemporaryExposureKeyFormat.TemporaryExposureKeyExport parseDelimitedFrom(java.io.InputStream input)
+
+    public static TemporaryExposureKeyFormat.TemporaryExposureKeyExport parseFrom(
+        java.io.InputStream input, com.google.protobuf.ExtensionRegistryLite extensionRegistry)
         throws java.io.IOException {
-      return com.google.protobuf.GeneratedMessageV3
-          .parseDelimitedWithIOException(PARSER, input);
+      return com.google.protobuf.GeneratedMessageV3.parseWithIOException(
+          PARSER, input, extensionRegistry);
     }
+
     public static TemporaryExposureKeyFormat.TemporaryExposureKeyExport parseDelimitedFrom(
-        java.io.InputStream input,
-        com.google.protobuf.ExtensionRegistryLite extensionRegistry)
-        throws java.io.IOException {
-      return com.google.protobuf.GeneratedMessageV3
-          .parseDelimitedWithIOException(PARSER, input, extensionRegistry);
+        java.io.InputStream input) throws java.io.IOException {
+      return com.google.protobuf.GeneratedMessageV3.parseDelimitedWithIOException(PARSER, input);
     }
+
+    public static TemporaryExposureKeyFormat.TemporaryExposureKeyExport parseDelimitedFrom(
+        java.io.InputStream input, com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+        throws java.io.IOException {
+      return com.google.protobuf.GeneratedMessageV3.parseDelimitedWithIOException(
+          PARSER, input, extensionRegistry);
+    }
+
     public static TemporaryExposureKeyFormat.TemporaryExposureKeyExport parseFrom(
-        com.google.protobuf.CodedInputStream input)
-        throws java.io.IOException {
-      return com.google.protobuf.GeneratedMessageV3
-          .parseWithIOException(PARSER, input);
+        com.google.protobuf.CodedInputStream input) throws java.io.IOException {
+      return com.google.protobuf.GeneratedMessageV3.parseWithIOException(PARSER, input);
     }
+
     public static TemporaryExposureKeyFormat.TemporaryExposureKeyExport parseFrom(
         com.google.protobuf.CodedInputStream input,
         com.google.protobuf.ExtensionRegistryLite extensionRegistry)
         throws java.io.IOException {
-      return com.google.protobuf.GeneratedMessageV3
-          .parseWithIOException(PARSER, input, extensionRegistry);
+      return com.google.protobuf.GeneratedMessageV3.parseWithIOException(
+          PARSER, input, extensionRegistry);
     }
 
     @java.lang.Override
-    public Builder newBuilderForType() { return newBuilder(); }
+    public Builder newBuilderForType() {
+      return newBuilder();
+    }
+
     public static Builder newBuilder() {
       return DEFAULT_INSTANCE.toBuilder();
     }
-    public static Builder newBuilder(TemporaryExposureKeyFormat.TemporaryExposureKeyExport prototype) {
+
+    public static Builder newBuilder(
+        TemporaryExposureKeyFormat.TemporaryExposureKeyExport prototype) {
       return DEFAULT_INSTANCE.toBuilder().mergeFrom(prototype);
     }
+
     @java.lang.Override
     public Builder toBuilder() {
-      return this == DEFAULT_INSTANCE
-          ? new Builder() : new Builder().mergeFrom(this);
+      return this == DEFAULT_INSTANCE ? new Builder() : new Builder().mergeFrom(this);
     }
 
     @java.lang.Override
@@ -799,24 +845,24 @@ public final class TemporaryExposureKeyFormat {
       Builder builder = new Builder(parent);
       return builder;
     }
-    /**
-     * Protobuf type {@code TemporaryExposureKeyExport}
-     */
-    public static final class Builder extends
-        com.google.protobuf.GeneratedMessageV3.Builder<Builder> implements
+    /** Protobuf type {@code TemporaryExposureKeyExport} */
+    public static final class Builder
+        extends com.google.protobuf.GeneratedMessageV3.Builder<Builder>
+        implements
         // @@protoc_insertion_point(builder_implements:TemporaryExposureKeyExport)
         TemporaryExposureKeyFormat.TemporaryExposureKeyExportOrBuilder {
-      public static final com.google.protobuf.Descriptors.Descriptor
-          getDescriptor() {
+      public static final com.google.protobuf.Descriptors.Descriptor getDescriptor() {
         return TemporaryExposureKeyFormat.internal_static_TemporaryExposureKeyExport_descriptor;
       }
 
       @java.lang.Override
       protected com.google.protobuf.GeneratedMessageV3.FieldAccessorTable
           internalGetFieldAccessorTable() {
-        return TemporaryExposureKeyFormat.internal_static_TemporaryExposureKeyExport_fieldAccessorTable
+        return TemporaryExposureKeyFormat
+            .internal_static_TemporaryExposureKeyExport_fieldAccessorTable
             .ensureFieldAccessorsInitialized(
-                TemporaryExposureKeyFormat.TemporaryExposureKeyExport.class, TemporaryExposureKeyFormat.TemporaryExposureKeyExport.Builder.class);
+                TemporaryExposureKeyFormat.TemporaryExposureKeyExport.class,
+                TemporaryExposureKeyFormat.TemporaryExposureKeyExport.Builder.class);
       }
 
       // Construct using TemporaryExposureKeyFormat.TemporaryExposureKeyExport.newBuilder()
@@ -824,18 +870,18 @@ public final class TemporaryExposureKeyFormat {
         maybeForceBuilderInitialization();
       }
 
-      private Builder(
-          com.google.protobuf.GeneratedMessageV3.BuilderParent parent) {
+      private Builder(com.google.protobuf.GeneratedMessageV3.BuilderParent parent) {
         super(parent);
         maybeForceBuilderInitialization();
       }
+
       private void maybeForceBuilderInitialization() {
-        if (com.google.protobuf.GeneratedMessageV3
-                .alwaysUseFieldBuilders) {
+        if (com.google.protobuf.GeneratedMessageV3.alwaysUseFieldBuilders) {
           getSignatureInfosFieldBuilder();
           getKeysFieldBuilder();
         }
       }
+
       @java.lang.Override
       public Builder clear() {
         super.clear();
@@ -865,8 +911,7 @@ public final class TemporaryExposureKeyFormat {
       }
 
       @java.lang.Override
-      public com.google.protobuf.Descriptors.Descriptor
-          getDescriptorForType() {
+      public com.google.protobuf.Descriptors.Descriptor getDescriptorForType() {
         return TemporaryExposureKeyFormat.internal_static_TemporaryExposureKeyExport_descriptor;
       }
 
@@ -886,7 +931,8 @@ public final class TemporaryExposureKeyFormat {
 
       @java.lang.Override
       public TemporaryExposureKeyFormat.TemporaryExposureKeyExport buildPartial() {
-        TemporaryExposureKeyFormat.TemporaryExposureKeyExport result = new TemporaryExposureKeyFormat.TemporaryExposureKeyExport(this);
+        TemporaryExposureKeyFormat.TemporaryExposureKeyExport result =
+            new TemporaryExposureKeyFormat.TemporaryExposureKeyExport(this);
         int from_bitField0_ = bitField0_;
         int to_bitField0_ = 0;
         if (((from_bitField0_ & 0x00000001) != 0)) {
@@ -936,38 +982,41 @@ public final class TemporaryExposureKeyFormat {
       public Builder clone() {
         return super.clone();
       }
+
       @java.lang.Override
       public Builder setField(
-          com.google.protobuf.Descriptors.FieldDescriptor field,
-          java.lang.Object value) {
+          com.google.protobuf.Descriptors.FieldDescriptor field, java.lang.Object value) {
         return super.setField(field, value);
       }
+
       @java.lang.Override
-      public Builder clearField(
-          com.google.protobuf.Descriptors.FieldDescriptor field) {
+      public Builder clearField(com.google.protobuf.Descriptors.FieldDescriptor field) {
         return super.clearField(field);
       }
+
       @java.lang.Override
-      public Builder clearOneof(
-          com.google.protobuf.Descriptors.OneofDescriptor oneof) {
+      public Builder clearOneof(com.google.protobuf.Descriptors.OneofDescriptor oneof) {
         return super.clearOneof(oneof);
       }
+
       @java.lang.Override
       public Builder setRepeatedField(
           com.google.protobuf.Descriptors.FieldDescriptor field,
-          int index, java.lang.Object value) {
+          int index,
+          java.lang.Object value) {
         return super.setRepeatedField(field, index, value);
       }
+
       @java.lang.Override
       public Builder addRepeatedField(
-          com.google.protobuf.Descriptors.FieldDescriptor field,
-          java.lang.Object value) {
+          com.google.protobuf.Descriptors.FieldDescriptor field, java.lang.Object value) {
         return super.addRepeatedField(field, value);
       }
+
       @java.lang.Override
       public Builder mergeFrom(com.google.protobuf.Message other) {
         if (other instanceof TemporaryExposureKeyFormat.TemporaryExposureKeyExport) {
-          return mergeFrom((TemporaryExposureKeyFormat.TemporaryExposureKeyExport)other);
+          return mergeFrom((TemporaryExposureKeyFormat.TemporaryExposureKeyExport) other);
         } else {
           super.mergeFrom(other);
           return this;
@@ -975,7 +1024,8 @@ public final class TemporaryExposureKeyFormat {
       }
 
       public Builder mergeFrom(TemporaryExposureKeyFormat.TemporaryExposureKeyExport other) {
-        if (other == TemporaryExposureKeyFormat.TemporaryExposureKeyExport.getDefaultInstance()) return this;
+        if (other == TemporaryExposureKeyFormat.TemporaryExposureKeyExport.getDefaultInstance())
+          return this;
         if (other.hasStartTimestamp()) {
           setStartTimestamp(other.getStartTimestamp());
         }
@@ -1011,9 +1061,10 @@ public final class TemporaryExposureKeyFormat {
               signatureInfosBuilder_ = null;
               signatureInfos_ = other.signatureInfos_;
               bitField0_ = (bitField0_ & ~0x00000020);
-              signatureInfosBuilder_ = 
-                com.google.protobuf.GeneratedMessageV3.alwaysUseFieldBuilders ?
-                   getSignatureInfosFieldBuilder() : null;
+              signatureInfosBuilder_ =
+                  com.google.protobuf.GeneratedMessageV3.alwaysUseFieldBuilders
+                      ? getSignatureInfosFieldBuilder()
+                      : null;
             } else {
               signatureInfosBuilder_.addAllMessages(other.signatureInfos_);
             }
@@ -1037,9 +1088,10 @@ public final class TemporaryExposureKeyFormat {
               keysBuilder_ = null;
               keys_ = other.keys_;
               bitField0_ = (bitField0_ & ~0x00000040);
-              keysBuilder_ = 
-                com.google.protobuf.GeneratedMessageV3.alwaysUseFieldBuilders ?
-                   getKeysFieldBuilder() : null;
+              keysBuilder_ =
+                  com.google.protobuf.GeneratedMessageV3.alwaysUseFieldBuilders
+                      ? getKeysFieldBuilder()
+                      : null;
             } else {
               keysBuilder_.addAllMessages(other.keys_);
             }
@@ -1064,7 +1116,8 @@ public final class TemporaryExposureKeyFormat {
         try {
           parsedMessage = PARSER.parsePartialFrom(input, extensionRegistry);
         } catch (com.google.protobuf.InvalidProtocolBufferException e) {
-          parsedMessage = (TemporaryExposureKeyFormat.TemporaryExposureKeyExport) e.getUnfinishedMessage();
+          parsedMessage =
+              (TemporaryExposureKeyFormat.TemporaryExposureKeyExport) e.getUnfinishedMessage();
           throw e.unwrapIOException();
         } finally {
           if (parsedMessage != null) {
@@ -1073,10 +1126,13 @@ public final class TemporaryExposureKeyFormat {
         }
         return this;
       }
+
       private int bitField0_;
 
-      private long startTimestamp_ ;
+      private long startTimestamp_;
       /**
+       *
+       *
        * <pre>
        * Time window of keys in this batch based on arrival to server, in UTC seconds
        * </pre>
@@ -1087,6 +1143,8 @@ public final class TemporaryExposureKeyFormat {
         return ((bitField0_ & 0x00000001) != 0);
       }
       /**
+       *
+       *
        * <pre>
        * Time window of keys in this batch based on arrival to server, in UTC seconds
        * </pre>
@@ -1097,6 +1155,8 @@ public final class TemporaryExposureKeyFormat {
         return startTimestamp_;
       }
       /**
+       *
+       *
        * <pre>
        * Time window of keys in this batch based on arrival to server, in UTC seconds
        * </pre>
@@ -1110,6 +1170,8 @@ public final class TemporaryExposureKeyFormat {
         return this;
       }
       /**
+       *
+       *
        * <pre>
        * Time window of keys in this batch based on arrival to server, in UTC seconds
        * </pre>
@@ -1123,31 +1185,23 @@ public final class TemporaryExposureKeyFormat {
         return this;
       }
 
-      private long endTimestamp_ ;
-      /**
-       * <code>optional fixed64 end_timestamp = 2;</code>
-       */
+      private long endTimestamp_;
+      /** <code>optional fixed64 end_timestamp = 2;</code> */
       public boolean hasEndTimestamp() {
         return ((bitField0_ & 0x00000002) != 0);
       }
-      /**
-       * <code>optional fixed64 end_timestamp = 2;</code>
-       */
+      /** <code>optional fixed64 end_timestamp = 2;</code> */
       public long getEndTimestamp() {
         return endTimestamp_;
       }
-      /**
-       * <code>optional fixed64 end_timestamp = 2;</code>
-       */
+      /** <code>optional fixed64 end_timestamp = 2;</code> */
       public Builder setEndTimestamp(long value) {
         bitField0_ |= 0x00000002;
         endTimestamp_ = value;
         onChanged();
         return this;
       }
-      /**
-       * <code>optional fixed64 end_timestamp = 2;</code>
-       */
+      /** <code>optional fixed64 end_timestamp = 2;</code> */
       public Builder clearEndTimestamp() {
         bitField0_ = (bitField0_ & ~0x00000002);
         endTimestamp_ = 0L;
@@ -1157,6 +1211,8 @@ public final class TemporaryExposureKeyFormat {
 
       private java.lang.Object region_ = "";
       /**
+       *
+       *
        * <pre>
        * Region for which these keys came from (e.g., country)
        * </pre>
@@ -1167,6 +1223,8 @@ public final class TemporaryExposureKeyFormat {
         return ((bitField0_ & 0x00000004) != 0);
       }
       /**
+       *
+       *
        * <pre>
        * Region for which these keys came from (e.g., country)
        * </pre>
@@ -1176,8 +1234,7 @@ public final class TemporaryExposureKeyFormat {
       public java.lang.String getRegion() {
         java.lang.Object ref = region_;
         if (!(ref instanceof java.lang.String)) {
-          com.google.protobuf.ByteString bs =
-              (com.google.protobuf.ByteString) ref;
+          com.google.protobuf.ByteString bs = (com.google.protobuf.ByteString) ref;
           java.lang.String s = bs.toStringUtf8();
           if (bs.isValidUtf8()) {
             region_ = s;
@@ -1188,19 +1245,19 @@ public final class TemporaryExposureKeyFormat {
         }
       }
       /**
+       *
+       *
        * <pre>
        * Region for which these keys came from (e.g., country)
        * </pre>
        *
        * <code>optional string region = 3;</code>
        */
-      public com.google.protobuf.ByteString
-          getRegionBytes() {
+      public com.google.protobuf.ByteString getRegionBytes() {
         java.lang.Object ref = region_;
         if (ref instanceof String) {
-          com.google.protobuf.ByteString b = 
-              com.google.protobuf.ByteString.copyFromUtf8(
-                  (java.lang.String) ref);
+          com.google.protobuf.ByteString b =
+              com.google.protobuf.ByteString.copyFromUtf8((java.lang.String) ref);
           region_ = b;
           return b;
         } else {
@@ -1208,23 +1265,26 @@ public final class TemporaryExposureKeyFormat {
         }
       }
       /**
+       *
+       *
        * <pre>
        * Region for which these keys came from (e.g., country)
        * </pre>
        *
        * <code>optional string region = 3;</code>
        */
-      public Builder setRegion(
-          java.lang.String value) {
+      public Builder setRegion(java.lang.String value) {
         if (value == null) {
-    throw new NullPointerException();
-  }
-  bitField0_ |= 0x00000004;
+          throw new NullPointerException();
+        }
+        bitField0_ |= 0x00000004;
         region_ = value;
         onChanged();
         return this;
       }
       /**
+       *
+       *
        * <pre>
        * Region for which these keys came from (e.g., country)
        * </pre>
@@ -1238,25 +1298,28 @@ public final class TemporaryExposureKeyFormat {
         return this;
       }
       /**
+       *
+       *
        * <pre>
        * Region for which these keys came from (e.g., country)
        * </pre>
        *
        * <code>optional string region = 3;</code>
        */
-      public Builder setRegionBytes(
-          com.google.protobuf.ByteString value) {
+      public Builder setRegionBytes(com.google.protobuf.ByteString value) {
         if (value == null) {
-    throw new NullPointerException();
-  }
-  bitField0_ |= 0x00000004;
+          throw new NullPointerException();
+        }
+        bitField0_ |= 0x00000004;
         region_ = value;
         onChanged();
         return this;
       }
 
-      private int batchNum_ ;
+      private int batchNum_;
       /**
+       *
+       *
        * <pre>
        * E.g., File 2 in batch size of 10. Ordinal, 1-based numbering.
        * </pre>
@@ -1267,6 +1330,8 @@ public final class TemporaryExposureKeyFormat {
         return ((bitField0_ & 0x00000008) != 0);
       }
       /**
+       *
+       *
        * <pre>
        * E.g., File 2 in batch size of 10. Ordinal, 1-based numbering.
        * </pre>
@@ -1277,6 +1342,8 @@ public final class TemporaryExposureKeyFormat {
         return batchNum_;
       }
       /**
+       *
+       *
        * <pre>
        * E.g., File 2 in batch size of 10. Ordinal, 1-based numbering.
        * </pre>
@@ -1290,6 +1357,8 @@ public final class TemporaryExposureKeyFormat {
         return this;
       }
       /**
+       *
+       *
        * <pre>
        * E.g., File 2 in batch size of 10. Ordinal, 1-based numbering.
        * </pre>
@@ -1303,31 +1372,23 @@ public final class TemporaryExposureKeyFormat {
         return this;
       }
 
-      private int batchSize_ ;
-      /**
-       * <code>optional int32 batch_size = 5;</code>
-       */
+      private int batchSize_;
+      /** <code>optional int32 batch_size = 5;</code> */
       public boolean hasBatchSize() {
         return ((bitField0_ & 0x00000010) != 0);
       }
-      /**
-       * <code>optional int32 batch_size = 5;</code>
-       */
+      /** <code>optional int32 batch_size = 5;</code> */
       public int getBatchSize() {
         return batchSize_;
       }
-      /**
-       * <code>optional int32 batch_size = 5;</code>
-       */
+      /** <code>optional int32 batch_size = 5;</code> */
       public Builder setBatchSize(int value) {
         bitField0_ |= 0x00000010;
         batchSize_ = value;
         onChanged();
         return this;
       }
-      /**
-       * <code>optional int32 batch_size = 5;</code>
-       */
+      /** <code>optional int32 batch_size = 5;</code> */
       public Builder clearBatchSize() {
         bitField0_ = (bitField0_ & ~0x00000010);
         batchSize_ = 0;
@@ -1336,18 +1397,25 @@ public final class TemporaryExposureKeyFormat {
       }
 
       private java.util.List<TemporaryExposureKeyFormat.SignatureInfo> signatureInfos_ =
-        java.util.Collections.emptyList();
+          java.util.Collections.emptyList();
+
       private void ensureSignatureInfosIsMutable() {
         if (!((bitField0_ & 0x00000020) != 0)) {
-          signatureInfos_ = new java.util.ArrayList<TemporaryExposureKeyFormat.SignatureInfo>(signatureInfos_);
+          signatureInfos_ =
+              new java.util.ArrayList<TemporaryExposureKeyFormat.SignatureInfo>(signatureInfos_);
           bitField0_ |= 0x00000020;
-         }
+        }
       }
 
       private com.google.protobuf.RepeatedFieldBuilderV3<
-          TemporaryExposureKeyFormat.SignatureInfo, TemporaryExposureKeyFormat.SignatureInfo.Builder, TemporaryExposureKeyFormat.SignatureInfoOrBuilder> signatureInfosBuilder_;
+              TemporaryExposureKeyFormat.SignatureInfo,
+              TemporaryExposureKeyFormat.SignatureInfo.Builder,
+              TemporaryExposureKeyFormat.SignatureInfoOrBuilder>
+          signatureInfosBuilder_;
 
       /**
+       *
+       *
        * <pre>
        * Information about associated signatures
        * </pre>
@@ -1362,6 +1430,8 @@ public final class TemporaryExposureKeyFormat {
         }
       }
       /**
+       *
+       *
        * <pre>
        * Information about associated signatures
        * </pre>
@@ -1376,6 +1446,8 @@ public final class TemporaryExposureKeyFormat {
         }
       }
       /**
+       *
+       *
        * <pre>
        * Information about associated signatures
        * </pre>
@@ -1390,14 +1462,15 @@ public final class TemporaryExposureKeyFormat {
         }
       }
       /**
+       *
+       *
        * <pre>
        * Information about associated signatures
        * </pre>
        *
        * <code>repeated .SignatureInfo signature_infos = 6;</code>
        */
-      public Builder setSignatureInfos(
-          int index, TemporaryExposureKeyFormat.SignatureInfo value) {
+      public Builder setSignatureInfos(int index, TemporaryExposureKeyFormat.SignatureInfo value) {
         if (signatureInfosBuilder_ == null) {
           if (value == null) {
             throw new NullPointerException();
@@ -1411,6 +1484,8 @@ public final class TemporaryExposureKeyFormat {
         return this;
       }
       /**
+       *
+       *
        * <pre>
        * Information about associated signatures
        * </pre>
@@ -1429,6 +1504,8 @@ public final class TemporaryExposureKeyFormat {
         return this;
       }
       /**
+       *
+       *
        * <pre>
        * Information about associated signatures
        * </pre>
@@ -1449,14 +1526,15 @@ public final class TemporaryExposureKeyFormat {
         return this;
       }
       /**
+       *
+       *
        * <pre>
        * Information about associated signatures
        * </pre>
        *
        * <code>repeated .SignatureInfo signature_infos = 6;</code>
        */
-      public Builder addSignatureInfos(
-          int index, TemporaryExposureKeyFormat.SignatureInfo value) {
+      public Builder addSignatureInfos(int index, TemporaryExposureKeyFormat.SignatureInfo value) {
         if (signatureInfosBuilder_ == null) {
           if (value == null) {
             throw new NullPointerException();
@@ -1470,6 +1548,8 @@ public final class TemporaryExposureKeyFormat {
         return this;
       }
       /**
+       *
+       *
        * <pre>
        * Information about associated signatures
        * </pre>
@@ -1488,6 +1568,8 @@ public final class TemporaryExposureKeyFormat {
         return this;
       }
       /**
+       *
+       *
        * <pre>
        * Information about associated signatures
        * </pre>
@@ -1506,6 +1588,8 @@ public final class TemporaryExposureKeyFormat {
         return this;
       }
       /**
+       *
+       *
        * <pre>
        * Information about associated signatures
        * </pre>
@@ -1516,8 +1600,7 @@ public final class TemporaryExposureKeyFormat {
           java.lang.Iterable<? extends TemporaryExposureKeyFormat.SignatureInfo> values) {
         if (signatureInfosBuilder_ == null) {
           ensureSignatureInfosIsMutable();
-          com.google.protobuf.AbstractMessageLite.Builder.addAll(
-              values, signatureInfos_);
+          com.google.protobuf.AbstractMessageLite.Builder.addAll(values, signatureInfos_);
           onChanged();
         } else {
           signatureInfosBuilder_.addAllMessages(values);
@@ -1525,6 +1608,8 @@ public final class TemporaryExposureKeyFormat {
         return this;
       }
       /**
+       *
+       *
        * <pre>
        * Information about associated signatures
        * </pre>
@@ -1542,6 +1627,8 @@ public final class TemporaryExposureKeyFormat {
         return this;
       }
       /**
+       *
+       *
        * <pre>
        * Information about associated signatures
        * </pre>
@@ -1559,17 +1646,20 @@ public final class TemporaryExposureKeyFormat {
         return this;
       }
       /**
+       *
+       *
        * <pre>
        * Information about associated signatures
        * </pre>
        *
        * <code>repeated .SignatureInfo signature_infos = 6;</code>
        */
-      public TemporaryExposureKeyFormat.SignatureInfo.Builder getSignatureInfosBuilder(
-          int index) {
+      public TemporaryExposureKeyFormat.SignatureInfo.Builder getSignatureInfosBuilder(int index) {
         return getSignatureInfosFieldBuilder().getBuilder(index);
       }
       /**
+       *
+       *
        * <pre>
        * Information about associated signatures
        * </pre>
@@ -1579,19 +1669,22 @@ public final class TemporaryExposureKeyFormat {
       public TemporaryExposureKeyFormat.SignatureInfoOrBuilder getSignatureInfosOrBuilder(
           int index) {
         if (signatureInfosBuilder_ == null) {
-          return signatureInfos_.get(index);  } else {
+          return signatureInfos_.get(index);
+        } else {
           return signatureInfosBuilder_.getMessageOrBuilder(index);
         }
       }
       /**
+       *
+       *
        * <pre>
        * Information about associated signatures
        * </pre>
        *
        * <code>repeated .SignatureInfo signature_infos = 6;</code>
        */
-      public java.util.List<? extends TemporaryExposureKeyFormat.SignatureInfoOrBuilder> 
-           getSignatureInfosOrBuilderList() {
+      public java.util.List<? extends TemporaryExposureKeyFormat.SignatureInfoOrBuilder>
+          getSignatureInfosOrBuilderList() {
         if (signatureInfosBuilder_ != null) {
           return signatureInfosBuilder_.getMessageOrBuilderList();
         } else {
@@ -1599,6 +1692,8 @@ public final class TemporaryExposureKeyFormat {
         }
       }
       /**
+       *
+       *
        * <pre>
        * Information about associated signatures
        * </pre>
@@ -1606,38 +1701,47 @@ public final class TemporaryExposureKeyFormat {
        * <code>repeated .SignatureInfo signature_infos = 6;</code>
        */
       public TemporaryExposureKeyFormat.SignatureInfo.Builder addSignatureInfosBuilder() {
-        return getSignatureInfosFieldBuilder().addBuilder(
-            TemporaryExposureKeyFormat.SignatureInfo.getDefaultInstance());
+        return getSignatureInfosFieldBuilder()
+            .addBuilder(TemporaryExposureKeyFormat.SignatureInfo.getDefaultInstance());
       }
       /**
+       *
+       *
        * <pre>
        * Information about associated signatures
        * </pre>
        *
        * <code>repeated .SignatureInfo signature_infos = 6;</code>
        */
-      public TemporaryExposureKeyFormat.SignatureInfo.Builder addSignatureInfosBuilder(
-          int index) {
-        return getSignatureInfosFieldBuilder().addBuilder(
-            index, TemporaryExposureKeyFormat.SignatureInfo.getDefaultInstance());
+      public TemporaryExposureKeyFormat.SignatureInfo.Builder addSignatureInfosBuilder(int index) {
+        return getSignatureInfosFieldBuilder()
+            .addBuilder(index, TemporaryExposureKeyFormat.SignatureInfo.getDefaultInstance());
       }
       /**
+       *
+       *
        * <pre>
        * Information about associated signatures
        * </pre>
        *
        * <code>repeated .SignatureInfo signature_infos = 6;</code>
        */
-      public java.util.List<TemporaryExposureKeyFormat.SignatureInfo.Builder> 
-           getSignatureInfosBuilderList() {
+      public java.util.List<TemporaryExposureKeyFormat.SignatureInfo.Builder>
+          getSignatureInfosBuilderList() {
         return getSignatureInfosFieldBuilder().getBuilderList();
       }
+
       private com.google.protobuf.RepeatedFieldBuilderV3<
-          TemporaryExposureKeyFormat.SignatureInfo, TemporaryExposureKeyFormat.SignatureInfo.Builder, TemporaryExposureKeyFormat.SignatureInfoOrBuilder> 
+              TemporaryExposureKeyFormat.SignatureInfo,
+              TemporaryExposureKeyFormat.SignatureInfo.Builder,
+              TemporaryExposureKeyFormat.SignatureInfoOrBuilder>
           getSignatureInfosFieldBuilder() {
         if (signatureInfosBuilder_ == null) {
-          signatureInfosBuilder_ = new com.google.protobuf.RepeatedFieldBuilderV3<
-              TemporaryExposureKeyFormat.SignatureInfo, TemporaryExposureKeyFormat.SignatureInfo.Builder, TemporaryExposureKeyFormat.SignatureInfoOrBuilder>(
+          signatureInfosBuilder_ =
+              new com.google.protobuf.RepeatedFieldBuilderV3<
+                  TemporaryExposureKeyFormat.SignatureInfo,
+                  TemporaryExposureKeyFormat.SignatureInfo.Builder,
+                  TemporaryExposureKeyFormat.SignatureInfoOrBuilder>(
                   signatureInfos_,
                   ((bitField0_ & 0x00000020) != 0),
                   getParentForChildren(),
@@ -1648,18 +1752,24 @@ public final class TemporaryExposureKeyFormat {
       }
 
       private java.util.List<TemporaryExposureKeyFormat.TemporaryExposureKey> keys_ =
-        java.util.Collections.emptyList();
+          java.util.Collections.emptyList();
+
       private void ensureKeysIsMutable() {
         if (!((bitField0_ & 0x00000040) != 0)) {
           keys_ = new java.util.ArrayList<TemporaryExposureKeyFormat.TemporaryExposureKey>(keys_);
           bitField0_ |= 0x00000040;
-         }
+        }
       }
 
       private com.google.protobuf.RepeatedFieldBuilderV3<
-          TemporaryExposureKeyFormat.TemporaryExposureKey, TemporaryExposureKeyFormat.TemporaryExposureKey.Builder, TemporaryExposureKeyFormat.TemporaryExposureKeyOrBuilder> keysBuilder_;
+              TemporaryExposureKeyFormat.TemporaryExposureKey,
+              TemporaryExposureKeyFormat.TemporaryExposureKey.Builder,
+              TemporaryExposureKeyFormat.TemporaryExposureKeyOrBuilder>
+          keysBuilder_;
 
       /**
+       *
+       *
        * <pre>
        * The TemporaryExposureKeys themselves
        * </pre>
@@ -1674,6 +1784,8 @@ public final class TemporaryExposureKeyFormat {
         }
       }
       /**
+       *
+       *
        * <pre>
        * The TemporaryExposureKeys themselves
        * </pre>
@@ -1688,6 +1800,8 @@ public final class TemporaryExposureKeyFormat {
         }
       }
       /**
+       *
+       *
        * <pre>
        * The TemporaryExposureKeys themselves
        * </pre>
@@ -1702,14 +1816,15 @@ public final class TemporaryExposureKeyFormat {
         }
       }
       /**
+       *
+       *
        * <pre>
        * The TemporaryExposureKeys themselves
        * </pre>
        *
        * <code>repeated .TemporaryExposureKey keys = 7;</code>
        */
-      public Builder setKeys(
-          int index, TemporaryExposureKeyFormat.TemporaryExposureKey value) {
+      public Builder setKeys(int index, TemporaryExposureKeyFormat.TemporaryExposureKey value) {
         if (keysBuilder_ == null) {
           if (value == null) {
             throw new NullPointerException();
@@ -1723,6 +1838,8 @@ public final class TemporaryExposureKeyFormat {
         return this;
       }
       /**
+       *
+       *
        * <pre>
        * The TemporaryExposureKeys themselves
        * </pre>
@@ -1741,6 +1858,8 @@ public final class TemporaryExposureKeyFormat {
         return this;
       }
       /**
+       *
+       *
        * <pre>
        * The TemporaryExposureKeys themselves
        * </pre>
@@ -1761,14 +1880,15 @@ public final class TemporaryExposureKeyFormat {
         return this;
       }
       /**
+       *
+       *
        * <pre>
        * The TemporaryExposureKeys themselves
        * </pre>
        *
        * <code>repeated .TemporaryExposureKey keys = 7;</code>
        */
-      public Builder addKeys(
-          int index, TemporaryExposureKeyFormat.TemporaryExposureKey value) {
+      public Builder addKeys(int index, TemporaryExposureKeyFormat.TemporaryExposureKey value) {
         if (keysBuilder_ == null) {
           if (value == null) {
             throw new NullPointerException();
@@ -1782,6 +1902,8 @@ public final class TemporaryExposureKeyFormat {
         return this;
       }
       /**
+       *
+       *
        * <pre>
        * The TemporaryExposureKeys themselves
        * </pre>
@@ -1800,6 +1922,8 @@ public final class TemporaryExposureKeyFormat {
         return this;
       }
       /**
+       *
+       *
        * <pre>
        * The TemporaryExposureKeys themselves
        * </pre>
@@ -1818,6 +1942,8 @@ public final class TemporaryExposureKeyFormat {
         return this;
       }
       /**
+       *
+       *
        * <pre>
        * The TemporaryExposureKeys themselves
        * </pre>
@@ -1828,8 +1954,7 @@ public final class TemporaryExposureKeyFormat {
           java.lang.Iterable<? extends TemporaryExposureKeyFormat.TemporaryExposureKey> values) {
         if (keysBuilder_ == null) {
           ensureKeysIsMutable();
-          com.google.protobuf.AbstractMessageLite.Builder.addAll(
-              values, keys_);
+          com.google.protobuf.AbstractMessageLite.Builder.addAll(values, keys_);
           onChanged();
         } else {
           keysBuilder_.addAllMessages(values);
@@ -1837,6 +1962,8 @@ public final class TemporaryExposureKeyFormat {
         return this;
       }
       /**
+       *
+       *
        * <pre>
        * The TemporaryExposureKeys themselves
        * </pre>
@@ -1854,6 +1981,8 @@ public final class TemporaryExposureKeyFormat {
         return this;
       }
       /**
+       *
+       *
        * <pre>
        * The TemporaryExposureKeys themselves
        * </pre>
@@ -1871,39 +2000,44 @@ public final class TemporaryExposureKeyFormat {
         return this;
       }
       /**
+       *
+       *
        * <pre>
        * The TemporaryExposureKeys themselves
        * </pre>
        *
        * <code>repeated .TemporaryExposureKey keys = 7;</code>
        */
-      public TemporaryExposureKeyFormat.TemporaryExposureKey.Builder getKeysBuilder(
-          int index) {
+      public TemporaryExposureKeyFormat.TemporaryExposureKey.Builder getKeysBuilder(int index) {
         return getKeysFieldBuilder().getBuilder(index);
       }
       /**
+       *
+       *
        * <pre>
        * The TemporaryExposureKeys themselves
        * </pre>
        *
        * <code>repeated .TemporaryExposureKey keys = 7;</code>
        */
-      public TemporaryExposureKeyFormat.TemporaryExposureKeyOrBuilder getKeysOrBuilder(
-          int index) {
+      public TemporaryExposureKeyFormat.TemporaryExposureKeyOrBuilder getKeysOrBuilder(int index) {
         if (keysBuilder_ == null) {
-          return keys_.get(index);  } else {
+          return keys_.get(index);
+        } else {
           return keysBuilder_.getMessageOrBuilder(index);
         }
       }
       /**
+       *
+       *
        * <pre>
        * The TemporaryExposureKeys themselves
        * </pre>
        *
        * <code>repeated .TemporaryExposureKey keys = 7;</code>
        */
-      public java.util.List<? extends TemporaryExposureKeyFormat.TemporaryExposureKeyOrBuilder> 
-           getKeysOrBuilderList() {
+      public java.util.List<? extends TemporaryExposureKeyFormat.TemporaryExposureKeyOrBuilder>
+          getKeysOrBuilderList() {
         if (keysBuilder_ != null) {
           return keysBuilder_.getMessageOrBuilderList();
         } else {
@@ -1911,6 +2045,8 @@ public final class TemporaryExposureKeyFormat {
         }
       }
       /**
+       *
+       *
        * <pre>
        * The TemporaryExposureKeys themselves
        * </pre>
@@ -1918,46 +2054,54 @@ public final class TemporaryExposureKeyFormat {
        * <code>repeated .TemporaryExposureKey keys = 7;</code>
        */
       public TemporaryExposureKeyFormat.TemporaryExposureKey.Builder addKeysBuilder() {
-        return getKeysFieldBuilder().addBuilder(
-            TemporaryExposureKeyFormat.TemporaryExposureKey.getDefaultInstance());
+        return getKeysFieldBuilder()
+            .addBuilder(TemporaryExposureKeyFormat.TemporaryExposureKey.getDefaultInstance());
       }
       /**
+       *
+       *
        * <pre>
        * The TemporaryExposureKeys themselves
        * </pre>
        *
        * <code>repeated .TemporaryExposureKey keys = 7;</code>
        */
-      public TemporaryExposureKeyFormat.TemporaryExposureKey.Builder addKeysBuilder(
-          int index) {
-        return getKeysFieldBuilder().addBuilder(
-            index, TemporaryExposureKeyFormat.TemporaryExposureKey.getDefaultInstance());
+      public TemporaryExposureKeyFormat.TemporaryExposureKey.Builder addKeysBuilder(int index) {
+        return getKeysFieldBuilder()
+            .addBuilder(
+                index, TemporaryExposureKeyFormat.TemporaryExposureKey.getDefaultInstance());
       }
       /**
+       *
+       *
        * <pre>
        * The TemporaryExposureKeys themselves
        * </pre>
        *
        * <code>repeated .TemporaryExposureKey keys = 7;</code>
        */
-      public java.util.List<TemporaryExposureKeyFormat.TemporaryExposureKey.Builder> 
-           getKeysBuilderList() {
+      public java.util.List<TemporaryExposureKeyFormat.TemporaryExposureKey.Builder>
+          getKeysBuilderList() {
         return getKeysFieldBuilder().getBuilderList();
       }
+
       private com.google.protobuf.RepeatedFieldBuilderV3<
-          TemporaryExposureKeyFormat.TemporaryExposureKey, TemporaryExposureKeyFormat.TemporaryExposureKey.Builder, TemporaryExposureKeyFormat.TemporaryExposureKeyOrBuilder> 
+              TemporaryExposureKeyFormat.TemporaryExposureKey,
+              TemporaryExposureKeyFormat.TemporaryExposureKey.Builder,
+              TemporaryExposureKeyFormat.TemporaryExposureKeyOrBuilder>
           getKeysFieldBuilder() {
         if (keysBuilder_ == null) {
-          keysBuilder_ = new com.google.protobuf.RepeatedFieldBuilderV3<
-              TemporaryExposureKeyFormat.TemporaryExposureKey, TemporaryExposureKeyFormat.TemporaryExposureKey.Builder, TemporaryExposureKeyFormat.TemporaryExposureKeyOrBuilder>(
-                  keys_,
-                  ((bitField0_ & 0x00000040) != 0),
-                  getParentForChildren(),
-                  isClean());
+          keysBuilder_ =
+              new com.google.protobuf.RepeatedFieldBuilderV3<
+                  TemporaryExposureKeyFormat.TemporaryExposureKey,
+                  TemporaryExposureKeyFormat.TemporaryExposureKey.Builder,
+                  TemporaryExposureKeyFormat.TemporaryExposureKeyOrBuilder>(
+                  keys_, ((bitField0_ & 0x00000040) != 0), getParentForChildren(), isClean());
           keys_ = null;
         }
         return keysBuilder_;
       }
+
       @java.lang.Override
       public final Builder setUnknownFields(
           final com.google.protobuf.UnknownFieldSet unknownFields) {
@@ -1970,12 +2114,12 @@ public final class TemporaryExposureKeyFormat {
         return super.mergeUnknownFields(unknownFields);
       }
 
-
       // @@protoc_insertion_point(builder_scope:TemporaryExposureKeyExport)
     }
 
     // @@protoc_insertion_point(class_scope:TemporaryExposureKeyExport)
     private static final TemporaryExposureKeyFormat.TemporaryExposureKeyExport DEFAULT_INSTANCE;
+
     static {
       DEFAULT_INSTANCE = new TemporaryExposureKeyFormat.TemporaryExposureKeyExport();
     }
@@ -1984,16 +2128,17 @@ public final class TemporaryExposureKeyFormat {
       return DEFAULT_INSTANCE;
     }
 
-    @java.lang.Deprecated public static final com.google.protobuf.Parser<TemporaryExposureKeyExport>
-        PARSER = new com.google.protobuf.AbstractParser<TemporaryExposureKeyExport>() {
-      @java.lang.Override
-      public TemporaryExposureKeyExport parsePartialFrom(
-          com.google.protobuf.CodedInputStream input,
-          com.google.protobuf.ExtensionRegistryLite extensionRegistry)
-          throws com.google.protobuf.InvalidProtocolBufferException {
-        return new TemporaryExposureKeyExport(input, extensionRegistry);
-      }
-    };
+    @java.lang.Deprecated
+    public static final com.google.protobuf.Parser<TemporaryExposureKeyExport> PARSER =
+        new com.google.protobuf.AbstractParser<TemporaryExposureKeyExport>() {
+          @java.lang.Override
+          public TemporaryExposureKeyExport parsePartialFrom(
+              com.google.protobuf.CodedInputStream input,
+              com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+              throws com.google.protobuf.InvalidProtocolBufferException {
+            return new TemporaryExposureKeyExport(input, extensionRegistry);
+          }
+        };
 
     public static com.google.protobuf.Parser<TemporaryExposureKeyExport> parser() {
       return PARSER;
@@ -2008,14 +2153,16 @@ public final class TemporaryExposureKeyFormat {
     public TemporaryExposureKeyFormat.TemporaryExposureKeyExport getDefaultInstanceForType() {
       return DEFAULT_INSTANCE;
     }
-
   }
 
-  public interface SignatureInfoOrBuilder extends
+  public interface SignatureInfoOrBuilder
+      extends
       // @@protoc_insertion_point(interface_extends:SignatureInfo)
       com.google.protobuf.MessageOrBuilder {
 
     /**
+     *
+     *
      * <pre>
      * Apple App Store Application Bundle ID
      * </pre>
@@ -2024,6 +2171,8 @@ public final class TemporaryExposureKeyFormat {
      */
     boolean hasAppBundleId();
     /**
+     *
+     *
      * <pre>
      * Apple App Store Application Bundle ID
      * </pre>
@@ -2032,16 +2181,19 @@ public final class TemporaryExposureKeyFormat {
      */
     java.lang.String getAppBundleId();
     /**
+     *
+     *
      * <pre>
      * Apple App Store Application Bundle ID
      * </pre>
      *
      * <code>optional string app_bundle_id = 1;</code>
      */
-    com.google.protobuf.ByteString
-        getAppBundleIdBytes();
+    com.google.protobuf.ByteString getAppBundleIdBytes();
 
     /**
+     *
+     *
      * <pre>
      * Android App package name
      * </pre>
@@ -2050,6 +2202,8 @@ public final class TemporaryExposureKeyFormat {
      */
     boolean hasAndroidPackage();
     /**
+     *
+     *
      * <pre>
      * Android App package name
      * </pre>
@@ -2058,16 +2212,19 @@ public final class TemporaryExposureKeyFormat {
      */
     java.lang.String getAndroidPackage();
     /**
+     *
+     *
      * <pre>
      * Android App package name
      * </pre>
      *
      * <code>optional string android_package = 2;</code>
      */
-    com.google.protobuf.ByteString
-        getAndroidPackageBytes();
+    com.google.protobuf.ByteString getAndroidPackageBytes();
 
     /**
+     *
+     *
      * <pre>
      * Key version for rollovers
      * </pre>
@@ -2076,6 +2233,8 @@ public final class TemporaryExposureKeyFormat {
      */
     boolean hasVerificationKeyVersion();
     /**
+     *
+     *
      * <pre>
      * Key version for rollovers
      * </pre>
@@ -2084,30 +2243,26 @@ public final class TemporaryExposureKeyFormat {
      */
     java.lang.String getVerificationKeyVersion();
     /**
+     *
+     *
      * <pre>
      * Key version for rollovers
      * </pre>
      *
      * <code>optional string verification_key_version = 3;</code>
      */
-    com.google.protobuf.ByteString
-        getVerificationKeyVersionBytes();
+    com.google.protobuf.ByteString getVerificationKeyVersionBytes();
 
-    /**
-     * <code>optional string verification_key_id = 4;</code>
-     */
+    /** <code>optional string verification_key_id = 4;</code> */
     boolean hasVerificationKeyId();
-    /**
-     * <code>optional string verification_key_id = 4;</code>
-     */
+    /** <code>optional string verification_key_id = 4;</code> */
     java.lang.String getVerificationKeyId();
-    /**
-     * <code>optional string verification_key_id = 4;</code>
-     */
-    com.google.protobuf.ByteString
-        getVerificationKeyIdBytes();
+    /** <code>optional string verification_key_id = 4;</code> */
+    com.google.protobuf.ByteString getVerificationKeyIdBytes();
 
     /**
+     *
+     *
      * <pre>
      * E.g. ECDSA using a p-256 curve and SHA-256 as a hash function
      * </pre>
@@ -2116,6 +2271,8 @@ public final class TemporaryExposureKeyFormat {
      */
     boolean hasSignatureAlgorithm();
     /**
+     *
+     *
      * <pre>
      * E.g. ECDSA using a p-256 curve and SHA-256 as a hash function
      * </pre>
@@ -2124,27 +2281,27 @@ public final class TemporaryExposureKeyFormat {
      */
     java.lang.String getSignatureAlgorithm();
     /**
+     *
+     *
      * <pre>
      * E.g. ECDSA using a p-256 curve and SHA-256 as a hash function
      * </pre>
      *
      * <code>optional string signature_algorithm = 5;</code>
      */
-    com.google.protobuf.ByteString
-        getSignatureAlgorithmBytes();
+    com.google.protobuf.ByteString getSignatureAlgorithmBytes();
   }
-  /**
-   * Protobuf type {@code SignatureInfo}
-   */
-  public  static final class SignatureInfo extends
-      com.google.protobuf.GeneratedMessageV3 implements
+  /** Protobuf type {@code SignatureInfo} */
+  public static final class SignatureInfo extends com.google.protobuf.GeneratedMessageV3
+      implements
       // @@protoc_insertion_point(message_implements:SignatureInfo)
       SignatureInfoOrBuilder {
-  private static final long serialVersionUID = 0L;
+    private static final long serialVersionUID = 0L;
     // Use SignatureInfo.newBuilder() to construct.
     private SignatureInfo(com.google.protobuf.GeneratedMessageV3.Builder<?> builder) {
       super(builder);
     }
+
     private SignatureInfo() {
       appBundleId_ = "";
       androidPackage_ = "";
@@ -2154,10 +2311,10 @@ public final class TemporaryExposureKeyFormat {
     }
 
     @java.lang.Override
-    public final com.google.protobuf.UnknownFieldSet
-    getUnknownFields() {
+    public final com.google.protobuf.UnknownFieldSet getUnknownFields() {
       return this.unknownFields;
     }
+
     private SignatureInfo(
         com.google.protobuf.CodedInputStream input,
         com.google.protobuf.ExtensionRegistryLite extensionRegistry)
@@ -2177,57 +2334,61 @@ public final class TemporaryExposureKeyFormat {
             case 0:
               done = true;
               break;
-            case 10: {
-              com.google.protobuf.ByteString bs = input.readBytes();
-              bitField0_ |= 0x00000001;
-              appBundleId_ = bs;
-              break;
-            }
-            case 18: {
-              com.google.protobuf.ByteString bs = input.readBytes();
-              bitField0_ |= 0x00000002;
-              androidPackage_ = bs;
-              break;
-            }
-            case 26: {
-              com.google.protobuf.ByteString bs = input.readBytes();
-              bitField0_ |= 0x00000004;
-              verificationKeyVersion_ = bs;
-              break;
-            }
-            case 34: {
-              com.google.protobuf.ByteString bs = input.readBytes();
-              bitField0_ |= 0x00000008;
-              verificationKeyId_ = bs;
-              break;
-            }
-            case 42: {
-              com.google.protobuf.ByteString bs = input.readBytes();
-              bitField0_ |= 0x00000010;
-              signatureAlgorithm_ = bs;
-              break;
-            }
-            default: {
-              if (!parseUnknownField(
-                  input, unknownFields, extensionRegistry, tag)) {
-                done = true;
+            case 10:
+              {
+                com.google.protobuf.ByteString bs = input.readBytes();
+                bitField0_ |= 0x00000001;
+                appBundleId_ = bs;
+                break;
               }
-              break;
-            }
+            case 18:
+              {
+                com.google.protobuf.ByteString bs = input.readBytes();
+                bitField0_ |= 0x00000002;
+                androidPackage_ = bs;
+                break;
+              }
+            case 26:
+              {
+                com.google.protobuf.ByteString bs = input.readBytes();
+                bitField0_ |= 0x00000004;
+                verificationKeyVersion_ = bs;
+                break;
+              }
+            case 34:
+              {
+                com.google.protobuf.ByteString bs = input.readBytes();
+                bitField0_ |= 0x00000008;
+                verificationKeyId_ = bs;
+                break;
+              }
+            case 42:
+              {
+                com.google.protobuf.ByteString bs = input.readBytes();
+                bitField0_ |= 0x00000010;
+                signatureAlgorithm_ = bs;
+                break;
+              }
+            default:
+              {
+                if (!parseUnknownField(input, unknownFields, extensionRegistry, tag)) {
+                  done = true;
+                }
+                break;
+              }
           }
         }
       } catch (com.google.protobuf.InvalidProtocolBufferException e) {
         throw e.setUnfinishedMessage(this);
       } catch (java.io.IOException e) {
-        throw new com.google.protobuf.InvalidProtocolBufferException(
-            e).setUnfinishedMessage(this);
+        throw new com.google.protobuf.InvalidProtocolBufferException(e).setUnfinishedMessage(this);
       } finally {
         this.unknownFields = unknownFields.build();
         makeExtensionsImmutable();
       }
     }
-    public static final com.google.protobuf.Descriptors.Descriptor
-        getDescriptor() {
+
+    public static final com.google.protobuf.Descriptors.Descriptor getDescriptor() {
       return TemporaryExposureKeyFormat.internal_static_SignatureInfo_descriptor;
     }
 
@@ -2236,13 +2397,16 @@ public final class TemporaryExposureKeyFormat {
         internalGetFieldAccessorTable() {
       return TemporaryExposureKeyFormat.internal_static_SignatureInfo_fieldAccessorTable
           .ensureFieldAccessorsInitialized(
-              TemporaryExposureKeyFormat.SignatureInfo.class, TemporaryExposureKeyFormat.SignatureInfo.Builder.class);
+              TemporaryExposureKeyFormat.SignatureInfo.class,
+              TemporaryExposureKeyFormat.SignatureInfo.Builder.class);
     }
 
     private int bitField0_;
     public static final int APP_BUNDLE_ID_FIELD_NUMBER = 1;
     private volatile java.lang.Object appBundleId_;
     /**
+     *
+     *
      * <pre>
      * Apple App Store Application Bundle ID
      * </pre>
@@ -2253,6 +2417,8 @@ public final class TemporaryExposureKeyFormat {
       return ((bitField0_ & 0x00000001) != 0);
     }
     /**
+     *
+     *
      * <pre>
      * Apple App Store Application Bundle ID
      * </pre>
@@ -2264,8 +2430,7 @@ public final class TemporaryExposureKeyFormat {
       if (ref instanceof java.lang.String) {
         return (java.lang.String) ref;
       } else {
-        com.google.protobuf.ByteString bs = 
-            (com.google.protobuf.ByteString) ref;
+        com.google.protobuf.ByteString bs = (com.google.protobuf.ByteString) ref;
         java.lang.String s = bs.toStringUtf8();
         if (bs.isValidUtf8()) {
           appBundleId_ = s;
@@ -2274,19 +2439,19 @@ public final class TemporaryExposureKeyFormat {
       }
     }
     /**
+     *
+     *
      * <pre>
      * Apple App Store Application Bundle ID
      * </pre>
      *
      * <code>optional string app_bundle_id = 1;</code>
      */
-    public com.google.protobuf.ByteString
-        getAppBundleIdBytes() {
+    public com.google.protobuf.ByteString getAppBundleIdBytes() {
       java.lang.Object ref = appBundleId_;
       if (ref instanceof java.lang.String) {
-        com.google.protobuf.ByteString b = 
-            com.google.protobuf.ByteString.copyFromUtf8(
-                (java.lang.String) ref);
+        com.google.protobuf.ByteString b =
+            com.google.protobuf.ByteString.copyFromUtf8((java.lang.String) ref);
         appBundleId_ = b;
         return b;
       } else {
@@ -2297,6 +2462,8 @@ public final class TemporaryExposureKeyFormat {
     public static final int ANDROID_PACKAGE_FIELD_NUMBER = 2;
     private volatile java.lang.Object androidPackage_;
     /**
+     *
+     *
      * <pre>
      * Android App package name
      * </pre>
@@ -2307,6 +2474,8 @@ public final class TemporaryExposureKeyFormat {
       return ((bitField0_ & 0x00000002) != 0);
     }
     /**
+     *
+     *
      * <pre>
      * Android App package name
      * </pre>
@@ -2318,8 +2487,7 @@ public final class TemporaryExposureKeyFormat {
       if (ref instanceof java.lang.String) {
         return (java.lang.String) ref;
       } else {
-        com.google.protobuf.ByteString bs = 
-            (com.google.protobuf.ByteString) ref;
+        com.google.protobuf.ByteString bs = (com.google.protobuf.ByteString) ref;
         java.lang.String s = bs.toStringUtf8();
         if (bs.isValidUtf8()) {
           androidPackage_ = s;
@@ -2328,19 +2496,19 @@ public final class TemporaryExposureKeyFormat {
       }
     }
     /**
+     *
+     *
      * <pre>
      * Android App package name
      * </pre>
      *
      * <code>optional string android_package = 2;</code>
      */
-    public com.google.protobuf.ByteString
-        getAndroidPackageBytes() {
+    public com.google.protobuf.ByteString getAndroidPackageBytes() {
       java.lang.Object ref = androidPackage_;
       if (ref instanceof java.lang.String) {
-        com.google.protobuf.ByteString b = 
-            com.google.protobuf.ByteString.copyFromUtf8(
-                (java.lang.String) ref);
+        com.google.protobuf.ByteString b =
+            com.google.protobuf.ByteString.copyFromUtf8((java.lang.String) ref);
         androidPackage_ = b;
         return b;
       } else {
@@ -2351,6 +2519,8 @@ public final class TemporaryExposureKeyFormat {
     public static final int VERIFICATION_KEY_VERSION_FIELD_NUMBER = 3;
     private volatile java.lang.Object verificationKeyVersion_;
     /**
+     *
+     *
      * <pre>
      * Key version for rollovers
      * </pre>
@@ -2361,6 +2531,8 @@ public final class TemporaryExposureKeyFormat {
       return ((bitField0_ & 0x00000004) != 0);
     }
     /**
+     *
+     *
      * <pre>
      * Key version for rollovers
      * </pre>
@@ -2372,8 +2544,7 @@ public final class TemporaryExposureKeyFormat {
       if (ref instanceof java.lang.String) {
         return (java.lang.String) ref;
       } else {
-        com.google.protobuf.ByteString bs = 
-            (com.google.protobuf.ByteString) ref;
+        com.google.protobuf.ByteString bs = (com.google.protobuf.ByteString) ref;
         java.lang.String s = bs.toStringUtf8();
         if (bs.isValidUtf8()) {
           verificationKeyVersion_ = s;
@@ -2382,19 +2553,19 @@ public final class TemporaryExposureKeyFormat {
       }
     }
     /**
+     *
+     *
      * <pre>
      * Key version for rollovers
      * </pre>
      *
      * <code>optional string verification_key_version = 3;</code>
      */
-    public com.google.protobuf.ByteString
-        getVerificationKeyVersionBytes() {
+    public com.google.protobuf.ByteString getVerificationKeyVersionBytes() {
       java.lang.Object ref = verificationKeyVersion_;
       if (ref instanceof java.lang.String) {
-        com.google.protobuf.ByteString b = 
-            com.google.protobuf.ByteString.copyFromUtf8(
-                (java.lang.String) ref);
+        com.google.protobuf.ByteString b =
+            com.google.protobuf.ByteString.copyFromUtf8((java.lang.String) ref);
         verificationKeyVersion_ = b;
         return b;
       } else {
@@ -2404,22 +2575,17 @@ public final class TemporaryExposureKeyFormat {
 
     public static final int VERIFICATION_KEY_ID_FIELD_NUMBER = 4;
     private volatile java.lang.Object verificationKeyId_;
-    /**
-     * <code>optional string verification_key_id = 4;</code>
-     */
+    /** <code>optional string verification_key_id = 4;</code> */
     public boolean hasVerificationKeyId() {
       return ((bitField0_ & 0x00000008) != 0);
     }
-    /**
-     * <code>optional string verification_key_id = 4;</code>
-     */
+    /** <code>optional string verification_key_id = 4;</code> */
     public java.lang.String getVerificationKeyId() {
       java.lang.Object ref = verificationKeyId_;
       if (ref instanceof java.lang.String) {
         return (java.lang.String) ref;
       } else {
-        com.google.protobuf.ByteString bs = 
-            (com.google.protobuf.ByteString) ref;
+        com.google.protobuf.ByteString bs = (com.google.protobuf.ByteString) ref;
         java.lang.String s = bs.toStringUtf8();
         if (bs.isValidUtf8()) {
           verificationKeyId_ = s;
@@ -2427,16 +2593,12 @@ public final class TemporaryExposureKeyFormat {
         return s;
       }
     }
-    /**
-     * <code>optional string verification_key_id = 4;</code>
-     */
-    public com.google.protobuf.ByteString
-        getVerificationKeyIdBytes() {
+    /** <code>optional string verification_key_id = 4;</code> */
+    public com.google.protobuf.ByteString getVerificationKeyIdBytes() {
       java.lang.Object ref = verificationKeyId_;
       if (ref instanceof java.lang.String) {
-        com.google.protobuf.ByteString b = 
-            com.google.protobuf.ByteString.copyFromUtf8(
-                (java.lang.String) ref);
+        com.google.protobuf.ByteString b =
+            com.google.protobuf.ByteString.copyFromUtf8((java.lang.String) ref);
         verificationKeyId_ = b;
         return b;
       } else {
@@ -2447,6 +2609,8 @@ public final class TemporaryExposureKeyFormat {
     public static final int SIGNATURE_ALGORITHM_FIELD_NUMBER = 5;
     private volatile java.lang.Object signatureAlgorithm_;
     /**
+     *
+     *
      * <pre>
      * E.g. ECDSA using a p-256 curve and SHA-256 as a hash function
      * </pre>
@@ -2457,6 +2621,8 @@ public final class TemporaryExposureKeyFormat {
       return ((bitField0_ & 0x00000010) != 0);
     }
     /**
+     *
+     *
      * <pre>
      * E.g. ECDSA using a p-256 curve and SHA-256 as a hash function
      * </pre>
@@ -2468,8 +2634,7 @@ public final class TemporaryExposureKeyFormat {
       if (ref instanceof java.lang.String) {
         return (java.lang.String) ref;
       } else {
-        com.google.protobuf.ByteString bs = 
-            (com.google.protobuf.ByteString) ref;
+        com.google.protobuf.ByteString bs = (com.google.protobuf.ByteString) ref;
         java.lang.String s = bs.toStringUtf8();
         if (bs.isValidUtf8()) {
           signatureAlgorithm_ = s;
@@ -2478,19 +2643,19 @@ public final class TemporaryExposureKeyFormat {
       }
     }
     /**
+     *
+     *
      * <pre>
      * E.g. ECDSA using a p-256 curve and SHA-256 as a hash function
      * </pre>
      *
      * <code>optional string signature_algorithm = 5;</code>
      */
-    public com.google.protobuf.ByteString
-        getSignatureAlgorithmBytes() {
+    public com.google.protobuf.ByteString getSignatureAlgorithmBytes() {
       java.lang.Object ref = signatureAlgorithm_;
       if (ref instanceof java.lang.String) {
-        com.google.protobuf.ByteString b = 
-            com.google.protobuf.ByteString.copyFromUtf8(
-                (java.lang.String) ref);
+        com.google.protobuf.ByteString b =
+            com.google.protobuf.ByteString.copyFromUtf8((java.lang.String) ref);
         signatureAlgorithm_ = b;
         return b;
       } else {
@@ -2499,6 +2664,7 @@ public final class TemporaryExposureKeyFormat {
     }
 
     private byte memoizedIsInitialized = -1;
+
     @java.lang.Override
     public final boolean isInitialized() {
       byte isInitialized = memoizedIsInitialized;
@@ -2510,8 +2676,7 @@ public final class TemporaryExposureKeyFormat {
     }
 
     @java.lang.Override
-    public void writeTo(com.google.protobuf.CodedOutputStream output)
-                        throws java.io.IOException {
+    public void writeTo(com.google.protobuf.CodedOutputStream output) throws java.io.IOException {
       if (((bitField0_ & 0x00000001) != 0)) {
         com.google.protobuf.GeneratedMessageV3.writeString(output, 1, appBundleId_);
       }
@@ -2543,7 +2708,8 @@ public final class TemporaryExposureKeyFormat {
         size += com.google.protobuf.GeneratedMessageV3.computeStringSize(2, androidPackage_);
       }
       if (((bitField0_ & 0x00000004) != 0)) {
-        size += com.google.protobuf.GeneratedMessageV3.computeStringSize(3, verificationKeyVersion_);
+        size +=
+            com.google.protobuf.GeneratedMessageV3.computeStringSize(3, verificationKeyVersion_);
       }
       if (((bitField0_ & 0x00000008) != 0)) {
         size += com.google.protobuf.GeneratedMessageV3.computeStringSize(4, verificationKeyId_);
@@ -2559,37 +2725,33 @@ public final class TemporaryExposureKeyFormat {
     @java.lang.Override
     public boolean equals(final java.lang.Object obj) {
       if (obj == this) {
-       return true;
+        return true;
       }
       if (!(obj instanceof TemporaryExposureKeyFormat.SignatureInfo)) {
         return super.equals(obj);
       }
-      TemporaryExposureKeyFormat.SignatureInfo other = (TemporaryExposureKeyFormat.SignatureInfo) obj;
+      TemporaryExposureKeyFormat.SignatureInfo other =
+          (TemporaryExposureKeyFormat.SignatureInfo) obj;
 
       if (hasAppBundleId() != other.hasAppBundleId()) return false;
       if (hasAppBundleId()) {
-        if (!getAppBundleId()
-            .equals(other.getAppBundleId())) return false;
+        if (!getAppBundleId().equals(other.getAppBundleId())) return false;
       }
       if (hasAndroidPackage() != other.hasAndroidPackage()) return false;
       if (hasAndroidPackage()) {
-        if (!getAndroidPackage()
-            .equals(other.getAndroidPackage())) return false;
+        if (!getAndroidPackage().equals(other.getAndroidPackage())) return false;
       }
       if (hasVerificationKeyVersion() != other.hasVerificationKeyVersion()) return false;
       if (hasVerificationKeyVersion()) {
-        if (!getVerificationKeyVersion()
-            .equals(other.getVerificationKeyVersion())) return false;
+        if (!getVerificationKeyVersion().equals(other.getVerificationKeyVersion())) return false;
       }
       if (hasVerificationKeyId() != other.hasVerificationKeyId()) return false;
       if (hasVerificationKeyId()) {
-        if (!getVerificationKeyId()
-            .equals(other.getVerificationKeyId())) return false;
+        if (!getVerificationKeyId().equals(other.getVerificationKeyId())) return false;
       }
       if (hasSignatureAlgorithm() != other.hasSignatureAlgorithm()) return false;
       if (hasSignatureAlgorithm()) {
-        if (!getSignatureAlgorithm()
-            .equals(other.getSignatureAlgorithm())) return false;
+        if (!getSignatureAlgorithm().equals(other.getSignatureAlgorithm())) return false;
       }
       if (!unknownFields.equals(other.unknownFields)) return false;
       return true;
@@ -2627,88 +2789,94 @@ public final class TemporaryExposureKeyFormat {
       return hash;
     }
 
-    public static TemporaryExposureKeyFormat.SignatureInfo parseFrom(
-        java.nio.ByteBuffer data)
+    public static TemporaryExposureKeyFormat.SignatureInfo parseFrom(java.nio.ByteBuffer data)
         throws com.google.protobuf.InvalidProtocolBufferException {
       return PARSER.parseFrom(data);
     }
+
     public static TemporaryExposureKeyFormat.SignatureInfo parseFrom(
-        java.nio.ByteBuffer data,
-        com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+        java.nio.ByteBuffer data, com.google.protobuf.ExtensionRegistryLite extensionRegistry)
         throws com.google.protobuf.InvalidProtocolBufferException {
       return PARSER.parseFrom(data, extensionRegistry);
     }
+
     public static TemporaryExposureKeyFormat.SignatureInfo parseFrom(
         com.google.protobuf.ByteString data)
         throws com.google.protobuf.InvalidProtocolBufferException {
       return PARSER.parseFrom(data);
     }
+
     public static TemporaryExposureKeyFormat.SignatureInfo parseFrom(
         com.google.protobuf.ByteString data,
         com.google.protobuf.ExtensionRegistryLite extensionRegistry)
         throws com.google.protobuf.InvalidProtocolBufferException {
       return PARSER.parseFrom(data, extensionRegistry);
     }
+
     public static TemporaryExposureKeyFormat.SignatureInfo parseFrom(byte[] data)
         throws com.google.protobuf.InvalidProtocolBufferException {
       return PARSER.parseFrom(data);
     }
+
     public static TemporaryExposureKeyFormat.SignatureInfo parseFrom(
-        byte[] data,
-        com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+        byte[] data, com.google.protobuf.ExtensionRegistryLite extensionRegistry)
         throws com.google.protobuf.InvalidProtocolBufferException {
       return PARSER.parseFrom(data, extensionRegistry);
     }
+
     public static TemporaryExposureKeyFormat.SignatureInfo parseFrom(java.io.InputStream input)
         throws java.io.IOException {
-      return com.google.protobuf.GeneratedMessageV3
-          .parseWithIOException(PARSER, input);
+      return com.google.protobuf.GeneratedMessageV3.parseWithIOException(PARSER, input);
     }
+
     public static TemporaryExposureKeyFormat.SignatureInfo parseFrom(
-        java.io.InputStream input,
-        com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+        java.io.InputStream input, com.google.protobuf.ExtensionRegistryLite extensionRegistry)
         throws java.io.IOException {
-      return com.google.protobuf.GeneratedMessageV3
-          .parseWithIOException(PARSER, input, extensionRegistry);
+      return com.google.protobuf.GeneratedMessageV3.parseWithIOException(
+          PARSER, input, extensionRegistry);
     }
-    public static TemporaryExposureKeyFormat.SignatureInfo parseDelimitedFrom(java.io.InputStream input)
-        throws java.io.IOException {
-      return com.google.protobuf.GeneratedMessageV3
-          .parseDelimitedWithIOException(PARSER, input);
-    }
+
     public static TemporaryExposureKeyFormat.SignatureInfo parseDelimitedFrom(
-        java.io.InputStream input,
-        com.google.protobuf.ExtensionRegistryLite extensionRegistry)
-        throws java.io.IOException {
-      return com.google.protobuf.GeneratedMessageV3
-          .parseDelimitedWithIOException(PARSER, input, extensionRegistry);
+        java.io.InputStream input) throws java.io.IOException {
+      return com.google.protobuf.GeneratedMessageV3.parseDelimitedWithIOException(PARSER, input);
     }
+
+    public static TemporaryExposureKeyFormat.SignatureInfo parseDelimitedFrom(
+        java.io.InputStream input, com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+        throws java.io.IOException {
+      return com.google.protobuf.GeneratedMessageV3.parseDelimitedWithIOException(
+          PARSER, input, extensionRegistry);
+    }
+
     public static TemporaryExposureKeyFormat.SignatureInfo parseFrom(
-        com.google.protobuf.CodedInputStream input)
-        throws java.io.IOException {
-      return com.google.protobuf.GeneratedMessageV3
-          .parseWithIOException(PARSER, input);
+        com.google.protobuf.CodedInputStream input) throws java.io.IOException {
+      return com.google.protobuf.GeneratedMessageV3.parseWithIOException(PARSER, input);
     }
+
     public static TemporaryExposureKeyFormat.SignatureInfo parseFrom(
         com.google.protobuf.CodedInputStream input,
         com.google.protobuf.ExtensionRegistryLite extensionRegistry)
         throws java.io.IOException {
-      return com.google.protobuf.GeneratedMessageV3
-          .parseWithIOException(PARSER, input, extensionRegistry);
+      return com.google.protobuf.GeneratedMessageV3.parseWithIOException(
+          PARSER, input, extensionRegistry);
     }
 
     @java.lang.Override
-    public Builder newBuilderForType() { return newBuilder(); }
+    public Builder newBuilderForType() {
+      return newBuilder();
+    }
+
     public static Builder newBuilder() {
       return DEFAULT_INSTANCE.toBuilder();
     }
+
     public static Builder newBuilder(TemporaryExposureKeyFormat.SignatureInfo prototype) {
       return DEFAULT_INSTANCE.toBuilder().mergeFrom(prototype);
     }
+
     @java.lang.Override
     public Builder toBuilder() {
-      return this == DEFAULT_INSTANCE
-          ? new Builder() : new Builder().mergeFrom(this);
+      return this == DEFAULT_INSTANCE ? new Builder() : new Builder().mergeFrom(this);
     }
 
     @java.lang.Override
@@ -2717,15 +2885,13 @@ public final class TemporaryExposureKeyFormat {
       Builder builder = new Builder(parent);
       return builder;
     }
-    /**
-     * Protobuf type {@code SignatureInfo}
-     */
-    public static final class Builder extends
-        com.google.protobuf.GeneratedMessageV3.Builder<Builder> implements
+    /** Protobuf type {@code SignatureInfo} */
+    public static final class Builder
+        extends com.google.protobuf.GeneratedMessageV3.Builder<Builder>
+        implements
         // @@protoc_insertion_point(builder_implements:SignatureInfo)
         TemporaryExposureKeyFormat.SignatureInfoOrBuilder {
-      public static final com.google.protobuf.Descriptors.Descriptor
-          getDescriptor() {
+      public static final com.google.protobuf.Descriptors.Descriptor getDescriptor() {
         return TemporaryExposureKeyFormat.internal_static_SignatureInfo_descriptor;
       }
 
@@ -2734,7 +2900,8 @@ public final class TemporaryExposureKeyFormat {
           internalGetFieldAccessorTable() {
         return TemporaryExposureKeyFormat.internal_static_SignatureInfo_fieldAccessorTable
             .ensureFieldAccessorsInitialized(
-                TemporaryExposureKeyFormat.SignatureInfo.class, TemporaryExposureKeyFormat.SignatureInfo.Builder.class);
+                TemporaryExposureKeyFormat.SignatureInfo.class,
+                TemporaryExposureKeyFormat.SignatureInfo.Builder.class);
       }
 
       // Construct using TemporaryExposureKeyFormat.SignatureInfo.newBuilder()
@@ -2742,16 +2909,15 @@ public final class TemporaryExposureKeyFormat {
         maybeForceBuilderInitialization();
       }
 
-      private Builder(
-          com.google.protobuf.GeneratedMessageV3.BuilderParent parent) {
+      private Builder(com.google.protobuf.GeneratedMessageV3.BuilderParent parent) {
         super(parent);
         maybeForceBuilderInitialization();
       }
+
       private void maybeForceBuilderInitialization() {
-        if (com.google.protobuf.GeneratedMessageV3
-                .alwaysUseFieldBuilders) {
-        }
+        if (com.google.protobuf.GeneratedMessageV3.alwaysUseFieldBuilders) {}
       }
+
       @java.lang.Override
       public Builder clear() {
         super.clear();
@@ -2769,8 +2935,7 @@ public final class TemporaryExposureKeyFormat {
       }
 
       @java.lang.Override
-      public com.google.protobuf.Descriptors.Descriptor
-          getDescriptorForType() {
+      public com.google.protobuf.Descriptors.Descriptor getDescriptorForType() {
         return TemporaryExposureKeyFormat.internal_static_SignatureInfo_descriptor;
       }
 
@@ -2790,7 +2955,8 @@ public final class TemporaryExposureKeyFormat {
 
       @java.lang.Override
       public TemporaryExposureKeyFormat.SignatureInfo buildPartial() {
-        TemporaryExposureKeyFormat.SignatureInfo result = new TemporaryExposureKeyFormat.SignatureInfo(this);
+        TemporaryExposureKeyFormat.SignatureInfo result =
+            new TemporaryExposureKeyFormat.SignatureInfo(this);
         int from_bitField0_ = bitField0_;
         int to_bitField0_ = 0;
         if (((from_bitField0_ & 0x00000001) != 0)) {
@@ -2822,38 +2988,41 @@ public final class TemporaryExposureKeyFormat {
       public Builder clone() {
         return super.clone();
       }
+
       @java.lang.Override
       public Builder setField(
-          com.google.protobuf.Descriptors.FieldDescriptor field,
-          java.lang.Object value) {
+          com.google.protobuf.Descriptors.FieldDescriptor field, java.lang.Object value) {
         return super.setField(field, value);
       }
+
       @java.lang.Override
-      public Builder clearField(
-          com.google.protobuf.Descriptors.FieldDescriptor field) {
+      public Builder clearField(com.google.protobuf.Descriptors.FieldDescriptor field) {
         return super.clearField(field);
       }
+
       @java.lang.Override
-      public Builder clearOneof(
-          com.google.protobuf.Descriptors.OneofDescriptor oneof) {
+      public Builder clearOneof(com.google.protobuf.Descriptors.OneofDescriptor oneof) {
         return super.clearOneof(oneof);
       }
+
       @java.lang.Override
       public Builder setRepeatedField(
           com.google.protobuf.Descriptors.FieldDescriptor field,
-          int index, java.lang.Object value) {
+          int index,
+          java.lang.Object value) {
         return super.setRepeatedField(field, index, value);
       }
+
       @java.lang.Override
       public Builder addRepeatedField(
-          com.google.protobuf.Descriptors.FieldDescriptor field,
-          java.lang.Object value) {
+          com.google.protobuf.Descriptors.FieldDescriptor field, java.lang.Object value) {
         return super.addRepeatedField(field, value);
       }
+
       @java.lang.Override
       public Builder mergeFrom(com.google.protobuf.Message other) {
         if (other instanceof TemporaryExposureKeyFormat.SignatureInfo) {
-          return mergeFrom((TemporaryExposureKeyFormat.SignatureInfo)other);
+          return mergeFrom((TemporaryExposureKeyFormat.SignatureInfo) other);
         } else {
           super.mergeFrom(other);
           return this;
@@ -2915,10 +3084,13 @@ public final class TemporaryExposureKeyFormat {
         }
         return this;
       }
+
       private int bitField0_;
 
       private java.lang.Object appBundleId_ = "";
       /**
+       *
+       *
        * <pre>
        * Apple App Store Application Bundle ID
        * </pre>
@@ -2929,6 +3101,8 @@ public final class TemporaryExposureKeyFormat {
         return ((bitField0_ & 0x00000001) != 0);
       }
       /**
+       *
+       *
        * <pre>
        * Apple App Store Application Bundle ID
        * </pre>
@@ -2938,8 +3112,7 @@ public final class TemporaryExposureKeyFormat {
       public java.lang.String getAppBundleId() {
         java.lang.Object ref = appBundleId_;
         if (!(ref instanceof java.lang.String)) {
-          com.google.protobuf.ByteString bs =
-              (com.google.protobuf.ByteString) ref;
+          com.google.protobuf.ByteString bs = (com.google.protobuf.ByteString) ref;
           java.lang.String s = bs.toStringUtf8();
           if (bs.isValidUtf8()) {
             appBundleId_ = s;
@@ -2950,19 +3123,19 @@ public final class TemporaryExposureKeyFormat {
         }
       }
       /**
+       *
+       *
        * <pre>
        * Apple App Store Application Bundle ID
        * </pre>
        *
        * <code>optional string app_bundle_id = 1;</code>
        */
-      public com.google.protobuf.ByteString
-          getAppBundleIdBytes() {
+      public com.google.protobuf.ByteString getAppBundleIdBytes() {
         java.lang.Object ref = appBundleId_;
         if (ref instanceof String) {
-          com.google.protobuf.ByteString b = 
-              com.google.protobuf.ByteString.copyFromUtf8(
-                  (java.lang.String) ref);
+          com.google.protobuf.ByteString b =
+              com.google.protobuf.ByteString.copyFromUtf8((java.lang.String) ref);
           appBundleId_ = b;
           return b;
         } else {
@@ -2970,23 +3143,26 @@ public final class TemporaryExposureKeyFormat {
         }
       }
       /**
+       *
+       *
        * <pre>
        * Apple App Store Application Bundle ID
        * </pre>
        *
        * <code>optional string app_bundle_id = 1;</code>
        */
-      public Builder setAppBundleId(
-          java.lang.String value) {
+      public Builder setAppBundleId(java.lang.String value) {
         if (value == null) {
-    throw new NullPointerException();
-  }
-  bitField0_ |= 0x00000001;
+          throw new NullPointerException();
+        }
+        bitField0_ |= 0x00000001;
         appBundleId_ = value;
         onChanged();
         return this;
       }
       /**
+       *
+       *
        * <pre>
        * Apple App Store Application Bundle ID
        * </pre>
@@ -3000,18 +3176,19 @@ public final class TemporaryExposureKeyFormat {
         return this;
       }
       /**
+       *
+       *
        * <pre>
        * Apple App Store Application Bundle ID
        * </pre>
        *
        * <code>optional string app_bundle_id = 1;</code>
        */
-      public Builder setAppBundleIdBytes(
-          com.google.protobuf.ByteString value) {
+      public Builder setAppBundleIdBytes(com.google.protobuf.ByteString value) {
         if (value == null) {
-    throw new NullPointerException();
-  }
-  bitField0_ |= 0x00000001;
+          throw new NullPointerException();
+        }
+        bitField0_ |= 0x00000001;
         appBundleId_ = value;
         onChanged();
         return this;
@@ -3019,6 +3196,8 @@ public final class TemporaryExposureKeyFormat {
 
       private java.lang.Object androidPackage_ = "";
       /**
+       *
+       *
        * <pre>
        * Android App package name
        * </pre>
@@ -3029,6 +3208,8 @@ public final class TemporaryExposureKeyFormat {
         return ((bitField0_ & 0x00000002) != 0);
       }
       /**
+       *
+       *
        * <pre>
        * Android App package name
        * </pre>
@@ -3038,8 +3219,7 @@ public final class TemporaryExposureKeyFormat {
       public java.lang.String getAndroidPackage() {
         java.lang.Object ref = androidPackage_;
         if (!(ref instanceof java.lang.String)) {
-          com.google.protobuf.ByteString bs =
-              (com.google.protobuf.ByteString) ref;
+          com.google.protobuf.ByteString bs = (com.google.protobuf.ByteString) ref;
           java.lang.String s = bs.toStringUtf8();
           if (bs.isValidUtf8()) {
             androidPackage_ = s;
@@ -3050,19 +3230,19 @@ public final class TemporaryExposureKeyFormat {
         }
       }
       /**
+       *
+       *
        * <pre>
        * Android App package name
        * </pre>
        *
        * <code>optional string android_package = 2;</code>
        */
-      public com.google.protobuf.ByteString
-          getAndroidPackageBytes() {
+      public com.google.protobuf.ByteString getAndroidPackageBytes() {
         java.lang.Object ref = androidPackage_;
         if (ref instanceof String) {
-          com.google.protobuf.ByteString b = 
-              com.google.protobuf.ByteString.copyFromUtf8(
-                  (java.lang.String) ref);
+          com.google.protobuf.ByteString b =
+              com.google.protobuf.ByteString.copyFromUtf8((java.lang.String) ref);
           androidPackage_ = b;
           return b;
         } else {
@@ -3070,23 +3250,26 @@ public final class TemporaryExposureKeyFormat {
         }
       }
       /**
+       *
+       *
        * <pre>
        * Android App package name
        * </pre>
        *
        * <code>optional string android_package = 2;</code>
        */
-      public Builder setAndroidPackage(
-          java.lang.String value) {
+      public Builder setAndroidPackage(java.lang.String value) {
         if (value == null) {
-    throw new NullPointerException();
-  }
-  bitField0_ |= 0x00000002;
+          throw new NullPointerException();
+        }
+        bitField0_ |= 0x00000002;
         androidPackage_ = value;
         onChanged();
         return this;
       }
       /**
+       *
+       *
        * <pre>
        * Android App package name
        * </pre>
@@ -3100,18 +3283,19 @@ public final class TemporaryExposureKeyFormat {
         return this;
       }
       /**
+       *
+       *
        * <pre>
        * Android App package name
        * </pre>
        *
        * <code>optional string android_package = 2;</code>
        */
-      public Builder setAndroidPackageBytes(
-          com.google.protobuf.ByteString value) {
+      public Builder setAndroidPackageBytes(com.google.protobuf.ByteString value) {
         if (value == null) {
-    throw new NullPointerException();
-  }
-  bitField0_ |= 0x00000002;
+          throw new NullPointerException();
+        }
+        bitField0_ |= 0x00000002;
         androidPackage_ = value;
         onChanged();
         return this;
@@ -3119,6 +3303,8 @@ public final class TemporaryExposureKeyFormat {
 
       private java.lang.Object verificationKeyVersion_ = "";
       /**
+       *
+       *
        * <pre>
        * Key version for rollovers
        * </pre>
@@ -3129,6 +3315,8 @@ public final class TemporaryExposureKeyFormat {
         return ((bitField0_ & 0x00000004) != 0);
       }
       /**
+       *
+       *
        * <pre>
        * Key version for rollovers
        * </pre>
@@ -3138,8 +3326,7 @@ public final class TemporaryExposureKeyFormat {
       public java.lang.String getVerificationKeyVersion() {
         java.lang.Object ref = verificationKeyVersion_;
         if (!(ref instanceof java.lang.String)) {
-          com.google.protobuf.ByteString bs =
-              (com.google.protobuf.ByteString) ref;
+          com.google.protobuf.ByteString bs = (com.google.protobuf.ByteString) ref;
           java.lang.String s = bs.toStringUtf8();
           if (bs.isValidUtf8()) {
             verificationKeyVersion_ = s;
@@ -3150,19 +3337,19 @@ public final class TemporaryExposureKeyFormat {
         }
       }
       /**
+       *
+       *
        * <pre>
        * Key version for rollovers
        * </pre>
        *
        * <code>optional string verification_key_version = 3;</code>
        */
-      public com.google.protobuf.ByteString
-          getVerificationKeyVersionBytes() {
+      public com.google.protobuf.ByteString getVerificationKeyVersionBytes() {
         java.lang.Object ref = verificationKeyVersion_;
         if (ref instanceof String) {
-          com.google.protobuf.ByteString b = 
-              com.google.protobuf.ByteString.copyFromUtf8(
-                  (java.lang.String) ref);
+          com.google.protobuf.ByteString b =
+              com.google.protobuf.ByteString.copyFromUtf8((java.lang.String) ref);
           verificationKeyVersion_ = b;
           return b;
         } else {
@@ -3170,23 +3357,26 @@ public final class TemporaryExposureKeyFormat {
         }
       }
       /**
+       *
+       *
        * <pre>
        * Key version for rollovers
        * </pre>
        *
        * <code>optional string verification_key_version = 3;</code>
        */
-      public Builder setVerificationKeyVersion(
-          java.lang.String value) {
+      public Builder setVerificationKeyVersion(java.lang.String value) {
         if (value == null) {
-    throw new NullPointerException();
-  }
-  bitField0_ |= 0x00000004;
+          throw new NullPointerException();
+        }
+        bitField0_ |= 0x00000004;
         verificationKeyVersion_ = value;
         onChanged();
         return this;
       }
       /**
+       *
+       *
        * <pre>
        * Key version for rollovers
        * </pre>
@@ -3200,38 +3390,34 @@ public final class TemporaryExposureKeyFormat {
         return this;
       }
       /**
+       *
+       *
        * <pre>
        * Key version for rollovers
        * </pre>
        *
        * <code>optional string verification_key_version = 3;</code>
        */
-      public Builder setVerificationKeyVersionBytes(
-          com.google.protobuf.ByteString value) {
+      public Builder setVerificationKeyVersionBytes(com.google.protobuf.ByteString value) {
         if (value == null) {
-    throw new NullPointerException();
-  }
-  bitField0_ |= 0x00000004;
+          throw new NullPointerException();
+        }
+        bitField0_ |= 0x00000004;
         verificationKeyVersion_ = value;
         onChanged();
         return this;
       }
 
       private java.lang.Object verificationKeyId_ = "";
-      /**
-       * <code>optional string verification_key_id = 4;</code>
-       */
+      /** <code>optional string verification_key_id = 4;</code> */
       public boolean hasVerificationKeyId() {
         return ((bitField0_ & 0x00000008) != 0);
       }
-      /**
-       * <code>optional string verification_key_id = 4;</code>
-       */
+      /** <code>optional string verification_key_id = 4;</code> */
       public java.lang.String getVerificationKeyId() {
         java.lang.Object ref = verificationKeyId_;
         if (!(ref instanceof java.lang.String)) {
-          com.google.protobuf.ByteString bs =
-              (com.google.protobuf.ByteString) ref;
+          com.google.protobuf.ByteString bs = (com.google.protobuf.ByteString) ref;
           java.lang.String s = bs.toStringUtf8();
           if (bs.isValidUtf8()) {
             verificationKeyId_ = s;
@@ -3241,53 +3427,41 @@ public final class TemporaryExposureKeyFormat {
           return (java.lang.String) ref;
         }
       }
-      /**
-       * <code>optional string verification_key_id = 4;</code>
-       */
-      public com.google.protobuf.ByteString
-          getVerificationKeyIdBytes() {
+      /** <code>optional string verification_key_id = 4;</code> */
+      public com.google.protobuf.ByteString getVerificationKeyIdBytes() {
         java.lang.Object ref = verificationKeyId_;
         if (ref instanceof String) {
-          com.google.protobuf.ByteString b = 
-              com.google.protobuf.ByteString.copyFromUtf8(
-                  (java.lang.String) ref);
+          com.google.protobuf.ByteString b =
+              com.google.protobuf.ByteString.copyFromUtf8((java.lang.String) ref);
           verificationKeyId_ = b;
           return b;
         } else {
           return (com.google.protobuf.ByteString) ref;
         }
       }
-      /**
-       * <code>optional string verification_key_id = 4;</code>
-       */
-      public Builder setVerificationKeyId(
-          java.lang.String value) {
+      /** <code>optional string verification_key_id = 4;</code> */
+      public Builder setVerificationKeyId(java.lang.String value) {
         if (value == null) {
-    throw new NullPointerException();
-  }
-  bitField0_ |= 0x00000008;
+          throw new NullPointerException();
+        }
+        bitField0_ |= 0x00000008;
         verificationKeyId_ = value;
         onChanged();
         return this;
       }
-      /**
-       * <code>optional string verification_key_id = 4;</code>
-       */
+      /** <code>optional string verification_key_id = 4;</code> */
       public Builder clearVerificationKeyId() {
         bitField0_ = (bitField0_ & ~0x00000008);
         verificationKeyId_ = getDefaultInstance().getVerificationKeyId();
         onChanged();
         return this;
       }
-      /**
-       * <code>optional string verification_key_id = 4;</code>
-       */
-      public Builder setVerificationKeyIdBytes(
-          com.google.protobuf.ByteString value) {
+      /** <code>optional string verification_key_id = 4;</code> */
+      public Builder setVerificationKeyIdBytes(com.google.protobuf.ByteString value) {
         if (value == null) {
-    throw new NullPointerException();
-  }
-  bitField0_ |= 0x00000008;
+          throw new NullPointerException();
+        }
+        bitField0_ |= 0x00000008;
         verificationKeyId_ = value;
         onChanged();
         return this;
@@ -3295,6 +3469,8 @@ public final class TemporaryExposureKeyFormat {
 
       private java.lang.Object signatureAlgorithm_ = "";
       /**
+       *
+       *
        * <pre>
        * E.g. ECDSA using a p-256 curve and SHA-256 as a hash function
        * </pre>
@@ -3305,6 +3481,8 @@ public final class TemporaryExposureKeyFormat {
         return ((bitField0_ & 0x00000010) != 0);
       }
       /**
+       *
+       *
        * <pre>
        * E.g. ECDSA using a p-256 curve and SHA-256 as a hash function
        * </pre>
@@ -3314,8 +3492,7 @@ public final class TemporaryExposureKeyFormat {
       public java.lang.String getSignatureAlgorithm() {
         java.lang.Object ref = signatureAlgorithm_;
         if (!(ref instanceof java.lang.String)) {
-          com.google.protobuf.ByteString bs =
-              (com.google.protobuf.ByteString) ref;
+          com.google.protobuf.ByteString bs = (com.google.protobuf.ByteString) ref;
           java.lang.String s = bs.toStringUtf8();
           if (bs.isValidUtf8()) {
             signatureAlgorithm_ = s;
@@ -3326,19 +3503,19 @@ public final class TemporaryExposureKeyFormat {
         }
       }
       /**
+       *
+       *
        * <pre>
        * E.g. ECDSA using a p-256 curve and SHA-256 as a hash function
        * </pre>
        *
        * <code>optional string signature_algorithm = 5;</code>
        */
-      public com.google.protobuf.ByteString
-          getSignatureAlgorithmBytes() {
+      public com.google.protobuf.ByteString getSignatureAlgorithmBytes() {
         java.lang.Object ref = signatureAlgorithm_;
         if (ref instanceof String) {
-          com.google.protobuf.ByteString b = 
-              com.google.protobuf.ByteString.copyFromUtf8(
-                  (java.lang.String) ref);
+          com.google.protobuf.ByteString b =
+              com.google.protobuf.ByteString.copyFromUtf8((java.lang.String) ref);
           signatureAlgorithm_ = b;
           return b;
         } else {
@@ -3346,23 +3523,26 @@ public final class TemporaryExposureKeyFormat {
         }
       }
       /**
+       *
+       *
        * <pre>
        * E.g. ECDSA using a p-256 curve and SHA-256 as a hash function
        * </pre>
        *
        * <code>optional string signature_algorithm = 5;</code>
        */
-      public Builder setSignatureAlgorithm(
-          java.lang.String value) {
+      public Builder setSignatureAlgorithm(java.lang.String value) {
         if (value == null) {
-    throw new NullPointerException();
-  }
-  bitField0_ |= 0x00000010;
+          throw new NullPointerException();
+        }
+        bitField0_ |= 0x00000010;
         signatureAlgorithm_ = value;
         onChanged();
         return this;
       }
       /**
+       *
+       *
        * <pre>
        * E.g. ECDSA using a p-256 curve and SHA-256 as a hash function
        * </pre>
@@ -3376,22 +3556,24 @@ public final class TemporaryExposureKeyFormat {
         return this;
       }
       /**
+       *
+       *
        * <pre>
        * E.g. ECDSA using a p-256 curve and SHA-256 as a hash function
        * </pre>
        *
        * <code>optional string signature_algorithm = 5;</code>
        */
-      public Builder setSignatureAlgorithmBytes(
-          com.google.protobuf.ByteString value) {
+      public Builder setSignatureAlgorithmBytes(com.google.protobuf.ByteString value) {
         if (value == null) {
-    throw new NullPointerException();
-  }
-  bitField0_ |= 0x00000010;
+          throw new NullPointerException();
+        }
+        bitField0_ |= 0x00000010;
         signatureAlgorithm_ = value;
         onChanged();
         return this;
       }
+
       @java.lang.Override
       public final Builder setUnknownFields(
           final com.google.protobuf.UnknownFieldSet unknownFields) {
@@ -3404,12 +3586,12 @@ public final class TemporaryExposureKeyFormat {
         return super.mergeUnknownFields(unknownFields);
       }
 
-
       // @@protoc_insertion_point(builder_scope:SignatureInfo)
     }
 
     // @@protoc_insertion_point(class_scope:SignatureInfo)
     private static final TemporaryExposureKeyFormat.SignatureInfo DEFAULT_INSTANCE;
+
     static {
       DEFAULT_INSTANCE = new TemporaryExposureKeyFormat.SignatureInfo();
     }
@@ -3418,16 +3600,17 @@ public final class TemporaryExposureKeyFormat {
       return DEFAULT_INSTANCE;
     }
 
-    @java.lang.Deprecated public static final com.google.protobuf.Parser<SignatureInfo>
-        PARSER = new com.google.protobuf.AbstractParser<SignatureInfo>() {
-      @java.lang.Override
-      public SignatureInfo parsePartialFrom(
-          com.google.protobuf.CodedInputStream input,
-          com.google.protobuf.ExtensionRegistryLite extensionRegistry)
-          throws com.google.protobuf.InvalidProtocolBufferException {
-        return new SignatureInfo(input, extensionRegistry);
-      }
-    };
+    @java.lang.Deprecated
+    public static final com.google.protobuf.Parser<SignatureInfo> PARSER =
+        new com.google.protobuf.AbstractParser<SignatureInfo>() {
+          @java.lang.Override
+          public SignatureInfo parsePartialFrom(
+              com.google.protobuf.CodedInputStream input,
+              com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+              throws com.google.protobuf.InvalidProtocolBufferException {
+            return new SignatureInfo(input, extensionRegistry);
+          }
+        };
 
     public static com.google.protobuf.Parser<SignatureInfo> parser() {
       return PARSER;
@@ -3442,14 +3625,16 @@ public final class TemporaryExposureKeyFormat {
     public TemporaryExposureKeyFormat.SignatureInfo getDefaultInstanceForType() {
       return DEFAULT_INSTANCE;
     }
-
   }
 
-  public interface TemporaryExposureKeyOrBuilder extends
+  public interface TemporaryExposureKeyOrBuilder
+      extends
       // @@protoc_insertion_point(interface_extends:TemporaryExposureKey)
       com.google.protobuf.MessageOrBuilder {
 
     /**
+     *
+     *
      * <pre>
      * Key of infected user
      * </pre>
@@ -3458,6 +3643,8 @@ public final class TemporaryExposureKeyFormat {
      */
     boolean hasKeyData();
     /**
+     *
+     *
      * <pre>
      * Key of infected user
      * </pre>
@@ -3467,6 +3654,8 @@ public final class TemporaryExposureKeyFormat {
     com.google.protobuf.ByteString getKeyData();
 
     /**
+     *
+     *
      * <pre>
      * Varying risk associated with a key depending on diagnosis method
      * </pre>
@@ -3475,6 +3664,8 @@ public final class TemporaryExposureKeyFormat {
      */
     boolean hasTransmissionRiskLevel();
     /**
+     *
+     *
      * <pre>
      * Varying risk associated with a key depending on diagnosis method
      * </pre>
@@ -3484,6 +3675,8 @@ public final class TemporaryExposureKeyFormat {
     int getTransmissionRiskLevel();
 
     /**
+     *
+     *
      * <pre>
      * The interval number since epoch for which a key starts
      * </pre>
@@ -3492,6 +3685,8 @@ public final class TemporaryExposureKeyFormat {
      */
     boolean hasRollingStartIntervalNumber();
     /**
+     *
+     *
      * <pre>
      * The interval number since epoch for which a key starts
      * </pre>
@@ -3501,6 +3696,8 @@ public final class TemporaryExposureKeyFormat {
     int getRollingStartIntervalNumber();
 
     /**
+     *
+     *
      * <pre>
      * Increments of 10 minutes describing how long a key is valid
      * </pre>
@@ -3509,6 +3706,8 @@ public final class TemporaryExposureKeyFormat {
      */
     boolean hasRollingPeriod();
     /**
+     *
+     *
      * <pre>
      * Increments of 10 minutes describing how long a key is valid
      * </pre>
@@ -3517,28 +3716,27 @@ public final class TemporaryExposureKeyFormat {
      */
     int getRollingPeriod();
   }
-  /**
-   * Protobuf type {@code TemporaryExposureKey}
-   */
-  public  static final class TemporaryExposureKey extends
-      com.google.protobuf.GeneratedMessageV3 implements
+  /** Protobuf type {@code TemporaryExposureKey} */
+  public static final class TemporaryExposureKey extends com.google.protobuf.GeneratedMessageV3
+      implements
       // @@protoc_insertion_point(message_implements:TemporaryExposureKey)
       TemporaryExposureKeyOrBuilder {
-  private static final long serialVersionUID = 0L;
+    private static final long serialVersionUID = 0L;
     // Use TemporaryExposureKey.newBuilder() to construct.
     private TemporaryExposureKey(com.google.protobuf.GeneratedMessageV3.Builder<?> builder) {
       super(builder);
     }
+
     private TemporaryExposureKey() {
       keyData_ = com.google.protobuf.ByteString.EMPTY;
       rollingPeriod_ = 144;
     }
 
     @java.lang.Override
-    public final com.google.protobuf.UnknownFieldSet
-    getUnknownFields() {
+    public final com.google.protobuf.UnknownFieldSet getUnknownFields() {
       return this.unknownFields;
     }
+
     private TemporaryExposureKey(
         com.google.protobuf.CodedInputStream input,
         com.google.protobuf.ExtensionRegistryLite extensionRegistry)
@@ -3558,47 +3756,50 @@ public final class TemporaryExposureKeyFormat {
             case 0:
               done = true;
               break;
-            case 10: {
-              bitField0_ |= 0x00000001;
-              keyData_ = input.readBytes();
-              break;
-            }
-            case 16: {
-              bitField0_ |= 0x00000002;
-              transmissionRiskLevel_ = input.readInt32();
-              break;
-            }
-            case 24: {
-              bitField0_ |= 0x00000004;
-              rollingStartIntervalNumber_ = input.readInt32();
-              break;
-            }
-            case 32: {
-              bitField0_ |= 0x00000008;
-              rollingPeriod_ = input.readInt32();
-              break;
-            }
-            default: {
-              if (!parseUnknownField(
-                  input, unknownFields, extensionRegistry, tag)) {
-                done = true;
+            case 10:
+              {
+                bitField0_ |= 0x00000001;
+                keyData_ = input.readBytes();
+                break;
               }
-              break;
-            }
+            case 16:
+              {
+                bitField0_ |= 0x00000002;
+                transmissionRiskLevel_ = input.readInt32();
+                break;
+              }
+            case 24:
+              {
+                bitField0_ |= 0x00000004;
+                rollingStartIntervalNumber_ = input.readInt32();
+                break;
+              }
+            case 32:
+              {
+                bitField0_ |= 0x00000008;
+                rollingPeriod_ = input.readInt32();
+                break;
+              }
+            default:
+              {
+                if (!parseUnknownField(input, unknownFields, extensionRegistry, tag)) {
+                  done = true;
+                }
+                break;
+              }
           }
         }
       } catch (com.google.protobuf.InvalidProtocolBufferException e) {
         throw e.setUnfinishedMessage(this);
       } catch (java.io.IOException e) {
-        throw new com.google.protobuf.InvalidProtocolBufferException(
-            e).setUnfinishedMessage(this);
+        throw new com.google.protobuf.InvalidProtocolBufferException(e).setUnfinishedMessage(this);
       } finally {
         this.unknownFields = unknownFields.build();
         makeExtensionsImmutable();
       }
     }
-    public static final com.google.protobuf.Descriptors.Descriptor
-        getDescriptor() {
+
+    public static final com.google.protobuf.Descriptors.Descriptor getDescriptor() {
       return TemporaryExposureKeyFormat.internal_static_TemporaryExposureKey_descriptor;
     }
 
@@ -3607,13 +3808,16 @@ public final class TemporaryExposureKeyFormat {
         internalGetFieldAccessorTable() {
       return TemporaryExposureKeyFormat.internal_static_TemporaryExposureKey_fieldAccessorTable
           .ensureFieldAccessorsInitialized(
-              TemporaryExposureKeyFormat.TemporaryExposureKey.class, TemporaryExposureKeyFormat.TemporaryExposureKey.Builder.class);
+              TemporaryExposureKeyFormat.TemporaryExposureKey.class,
+              TemporaryExposureKeyFormat.TemporaryExposureKey.Builder.class);
     }
 
     private int bitField0_;
     public static final int KEY_DATA_FIELD_NUMBER = 1;
     private com.google.protobuf.ByteString keyData_;
     /**
+     *
+     *
      * <pre>
      * Key of infected user
      * </pre>
@@ -3624,6 +3828,8 @@ public final class TemporaryExposureKeyFormat {
       return ((bitField0_ & 0x00000001) != 0);
     }
     /**
+     *
+     *
      * <pre>
      * Key of infected user
      * </pre>
@@ -3637,6 +3843,8 @@ public final class TemporaryExposureKeyFormat {
     public static final int TRANSMISSION_RISK_LEVEL_FIELD_NUMBER = 2;
     private int transmissionRiskLevel_;
     /**
+     *
+     *
      * <pre>
      * Varying risk associated with a key depending on diagnosis method
      * </pre>
@@ -3647,6 +3855,8 @@ public final class TemporaryExposureKeyFormat {
       return ((bitField0_ & 0x00000002) != 0);
     }
     /**
+     *
+     *
      * <pre>
      * Varying risk associated with a key depending on diagnosis method
      * </pre>
@@ -3660,6 +3870,8 @@ public final class TemporaryExposureKeyFormat {
     public static final int ROLLING_START_INTERVAL_NUMBER_FIELD_NUMBER = 3;
     private int rollingStartIntervalNumber_;
     /**
+     *
+     *
      * <pre>
      * The interval number since epoch for which a key starts
      * </pre>
@@ -3670,6 +3882,8 @@ public final class TemporaryExposureKeyFormat {
       return ((bitField0_ & 0x00000004) != 0);
     }
     /**
+     *
+     *
      * <pre>
      * The interval number since epoch for which a key starts
      * </pre>
@@ -3683,6 +3897,8 @@ public final class TemporaryExposureKeyFormat {
     public static final int ROLLING_PERIOD_FIELD_NUMBER = 4;
     private int rollingPeriod_;
     /**
+     *
+     *
      * <pre>
      * Increments of 10 minutes describing how long a key is valid
      * </pre>
@@ -3693,6 +3909,8 @@ public final class TemporaryExposureKeyFormat {
       return ((bitField0_ & 0x00000008) != 0);
     }
     /**
+     *
+     *
      * <pre>
      * Increments of 10 minutes describing how long a key is valid
      * </pre>
@@ -3704,6 +3922,7 @@ public final class TemporaryExposureKeyFormat {
     }
 
     private byte memoizedIsInitialized = -1;
+
     @java.lang.Override
     public final boolean isInitialized() {
       byte isInitialized = memoizedIsInitialized;
@@ -3715,8 +3934,7 @@ public final class TemporaryExposureKeyFormat {
     }
 
     @java.lang.Override
-    public void writeTo(com.google.protobuf.CodedOutputStream output)
-                        throws java.io.IOException {
+    public void writeTo(com.google.protobuf.CodedOutputStream output) throws java.io.IOException {
       if (((bitField0_ & 0x00000001) != 0)) {
         output.writeBytes(1, keyData_);
       }
@@ -3739,20 +3957,17 @@ public final class TemporaryExposureKeyFormat {
 
       size = 0;
       if (((bitField0_ & 0x00000001) != 0)) {
-        size += com.google.protobuf.CodedOutputStream
-          .computeBytesSize(1, keyData_);
+        size += com.google.protobuf.CodedOutputStream.computeBytesSize(1, keyData_);
       }
       if (((bitField0_ & 0x00000002) != 0)) {
-        size += com.google.protobuf.CodedOutputStream
-          .computeInt32Size(2, transmissionRiskLevel_);
+        size += com.google.protobuf.CodedOutputStream.computeInt32Size(2, transmissionRiskLevel_);
       }
       if (((bitField0_ & 0x00000004) != 0)) {
-        size += com.google.protobuf.CodedOutputStream
-          .computeInt32Size(3, rollingStartIntervalNumber_);
+        size +=
+            com.google.protobuf.CodedOutputStream.computeInt32Size(3, rollingStartIntervalNumber_);
       }
       if (((bitField0_ & 0x00000008) != 0)) {
-        size += com.google.protobuf.CodedOutputStream
-          .computeInt32Size(4, rollingPeriod_);
+        size += com.google.protobuf.CodedOutputStream.computeInt32Size(4, rollingPeriod_);
       }
       size += unknownFields.getSerializedSize();
       memoizedSize = size;
@@ -3762,32 +3977,29 @@ public final class TemporaryExposureKeyFormat {
     @java.lang.Override
     public boolean equals(final java.lang.Object obj) {
       if (obj == this) {
-       return true;
+        return true;
       }
       if (!(obj instanceof TemporaryExposureKeyFormat.TemporaryExposureKey)) {
         return super.equals(obj);
       }
-      TemporaryExposureKeyFormat.TemporaryExposureKey other = (TemporaryExposureKeyFormat.TemporaryExposureKey) obj;
+      TemporaryExposureKeyFormat.TemporaryExposureKey other =
+          (TemporaryExposureKeyFormat.TemporaryExposureKey) obj;
 
       if (hasKeyData() != other.hasKeyData()) return false;
       if (hasKeyData()) {
-        if (!getKeyData()
-            .equals(other.getKeyData())) return false;
+        if (!getKeyData().equals(other.getKeyData())) return false;
       }
       if (hasTransmissionRiskLevel() != other.hasTransmissionRiskLevel()) return false;
       if (hasTransmissionRiskLevel()) {
-        if (getTransmissionRiskLevel()
-            != other.getTransmissionRiskLevel()) return false;
+        if (getTransmissionRiskLevel() != other.getTransmissionRiskLevel()) return false;
       }
       if (hasRollingStartIntervalNumber() != other.hasRollingStartIntervalNumber()) return false;
       if (hasRollingStartIntervalNumber()) {
-        if (getRollingStartIntervalNumber()
-            != other.getRollingStartIntervalNumber()) return false;
+        if (getRollingStartIntervalNumber() != other.getRollingStartIntervalNumber()) return false;
       }
       if (hasRollingPeriod() != other.hasRollingPeriod()) return false;
       if (hasRollingPeriod()) {
-        if (getRollingPeriod()
-            != other.getRollingPeriod()) return false;
+        if (getRollingPeriod() != other.getRollingPeriod()) return false;
       }
       if (!unknownFields.equals(other.unknownFields)) return false;
       return true;
@@ -3822,87 +4034,93 @@ public final class TemporaryExposureKeyFormat {
     }
 
     public static TemporaryExposureKeyFormat.TemporaryExposureKey parseFrom(
-        java.nio.ByteBuffer data)
-        throws com.google.protobuf.InvalidProtocolBufferException {
+        java.nio.ByteBuffer data) throws com.google.protobuf.InvalidProtocolBufferException {
       return PARSER.parseFrom(data);
     }
+
     public static TemporaryExposureKeyFormat.TemporaryExposureKey parseFrom(
-        java.nio.ByteBuffer data,
-        com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+        java.nio.ByteBuffer data, com.google.protobuf.ExtensionRegistryLite extensionRegistry)
         throws com.google.protobuf.InvalidProtocolBufferException {
       return PARSER.parseFrom(data, extensionRegistry);
     }
+
     public static TemporaryExposureKeyFormat.TemporaryExposureKey parseFrom(
         com.google.protobuf.ByteString data)
         throws com.google.protobuf.InvalidProtocolBufferException {
       return PARSER.parseFrom(data);
     }
+
     public static TemporaryExposureKeyFormat.TemporaryExposureKey parseFrom(
         com.google.protobuf.ByteString data,
         com.google.protobuf.ExtensionRegistryLite extensionRegistry)
         throws com.google.protobuf.InvalidProtocolBufferException {
       return PARSER.parseFrom(data, extensionRegistry);
     }
+
     public static TemporaryExposureKeyFormat.TemporaryExposureKey parseFrom(byte[] data)
         throws com.google.protobuf.InvalidProtocolBufferException {
       return PARSER.parseFrom(data);
     }
+
     public static TemporaryExposureKeyFormat.TemporaryExposureKey parseFrom(
-        byte[] data,
-        com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+        byte[] data, com.google.protobuf.ExtensionRegistryLite extensionRegistry)
         throws com.google.protobuf.InvalidProtocolBufferException {
       return PARSER.parseFrom(data, extensionRegistry);
     }
-    public static TemporaryExposureKeyFormat.TemporaryExposureKey parseFrom(java.io.InputStream input)
-        throws java.io.IOException {
-      return com.google.protobuf.GeneratedMessageV3
-          .parseWithIOException(PARSER, input);
-    }
+
     public static TemporaryExposureKeyFormat.TemporaryExposureKey parseFrom(
-        java.io.InputStream input,
-        com.google.protobuf.ExtensionRegistryLite extensionRegistry)
-        throws java.io.IOException {
-      return com.google.protobuf.GeneratedMessageV3
-          .parseWithIOException(PARSER, input, extensionRegistry);
+        java.io.InputStream input) throws java.io.IOException {
+      return com.google.protobuf.GeneratedMessageV3.parseWithIOException(PARSER, input);
     }
-    public static TemporaryExposureKeyFormat.TemporaryExposureKey parseDelimitedFrom(java.io.InputStream input)
+
+    public static TemporaryExposureKeyFormat.TemporaryExposureKey parseFrom(
+        java.io.InputStream input, com.google.protobuf.ExtensionRegistryLite extensionRegistry)
         throws java.io.IOException {
-      return com.google.protobuf.GeneratedMessageV3
-          .parseDelimitedWithIOException(PARSER, input);
+      return com.google.protobuf.GeneratedMessageV3.parseWithIOException(
+          PARSER, input, extensionRegistry);
     }
+
     public static TemporaryExposureKeyFormat.TemporaryExposureKey parseDelimitedFrom(
-        java.io.InputStream input,
-        com.google.protobuf.ExtensionRegistryLite extensionRegistry)
-        throws java.io.IOException {
-      return com.google.protobuf.GeneratedMessageV3
-          .parseDelimitedWithIOException(PARSER, input, extensionRegistry);
+        java.io.InputStream input) throws java.io.IOException {
+      return com.google.protobuf.GeneratedMessageV3.parseDelimitedWithIOException(PARSER, input);
     }
+
+    public static TemporaryExposureKeyFormat.TemporaryExposureKey parseDelimitedFrom(
+        java.io.InputStream input, com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+        throws java.io.IOException {
+      return com.google.protobuf.GeneratedMessageV3.parseDelimitedWithIOException(
+          PARSER, input, extensionRegistry);
+    }
+
     public static TemporaryExposureKeyFormat.TemporaryExposureKey parseFrom(
-        com.google.protobuf.CodedInputStream input)
-        throws java.io.IOException {
-      return com.google.protobuf.GeneratedMessageV3
-          .parseWithIOException(PARSER, input);
+        com.google.protobuf.CodedInputStream input) throws java.io.IOException {
+      return com.google.protobuf.GeneratedMessageV3.parseWithIOException(PARSER, input);
     }
+
     public static TemporaryExposureKeyFormat.TemporaryExposureKey parseFrom(
         com.google.protobuf.CodedInputStream input,
         com.google.protobuf.ExtensionRegistryLite extensionRegistry)
         throws java.io.IOException {
-      return com.google.protobuf.GeneratedMessageV3
-          .parseWithIOException(PARSER, input, extensionRegistry);
+      return com.google.protobuf.GeneratedMessageV3.parseWithIOException(
+          PARSER, input, extensionRegistry);
     }
 
     @java.lang.Override
-    public Builder newBuilderForType() { return newBuilder(); }
+    public Builder newBuilderForType() {
+      return newBuilder();
+    }
+
     public static Builder newBuilder() {
       return DEFAULT_INSTANCE.toBuilder();
     }
+
     public static Builder newBuilder(TemporaryExposureKeyFormat.TemporaryExposureKey prototype) {
       return DEFAULT_INSTANCE.toBuilder().mergeFrom(prototype);
     }
+
     @java.lang.Override
     public Builder toBuilder() {
-      return this == DEFAULT_INSTANCE
-          ? new Builder() : new Builder().mergeFrom(this);
+      return this == DEFAULT_INSTANCE ? new Builder() : new Builder().mergeFrom(this);
     }
 
     @java.lang.Override
@@ -3911,15 +4129,13 @@ public final class TemporaryExposureKeyFormat {
       Builder builder = new Builder(parent);
       return builder;
     }
-    /**
-     * Protobuf type {@code TemporaryExposureKey}
-     */
-    public static final class Builder extends
-        com.google.protobuf.GeneratedMessageV3.Builder<Builder> implements
+    /** Protobuf type {@code TemporaryExposureKey} */
+    public static final class Builder
+        extends com.google.protobuf.GeneratedMessageV3.Builder<Builder>
+        implements
         // @@protoc_insertion_point(builder_implements:TemporaryExposureKey)
         TemporaryExposureKeyFormat.TemporaryExposureKeyOrBuilder {
-      public static final com.google.protobuf.Descriptors.Descriptor
-          getDescriptor() {
+      public static final com.google.protobuf.Descriptors.Descriptor getDescriptor() {
         return TemporaryExposureKeyFormat.internal_static_TemporaryExposureKey_descriptor;
       }
 
@@ -3928,7 +4144,8 @@ public final class TemporaryExposureKeyFormat {
           internalGetFieldAccessorTable() {
         return TemporaryExposureKeyFormat.internal_static_TemporaryExposureKey_fieldAccessorTable
             .ensureFieldAccessorsInitialized(
-                TemporaryExposureKeyFormat.TemporaryExposureKey.class, TemporaryExposureKeyFormat.TemporaryExposureKey.Builder.class);
+                TemporaryExposureKeyFormat.TemporaryExposureKey.class,
+                TemporaryExposureKeyFormat.TemporaryExposureKey.Builder.class);
       }
 
       // Construct using TemporaryExposureKeyFormat.TemporaryExposureKey.newBuilder()
@@ -3936,16 +4153,15 @@ public final class TemporaryExposureKeyFormat {
         maybeForceBuilderInitialization();
       }
 
-      private Builder(
-          com.google.protobuf.GeneratedMessageV3.BuilderParent parent) {
+      private Builder(com.google.protobuf.GeneratedMessageV3.BuilderParent parent) {
         super(parent);
         maybeForceBuilderInitialization();
       }
+
       private void maybeForceBuilderInitialization() {
-        if (com.google.protobuf.GeneratedMessageV3
-                .alwaysUseFieldBuilders) {
-        }
+        if (com.google.protobuf.GeneratedMessageV3.alwaysUseFieldBuilders) {}
       }
+
       @java.lang.Override
       public Builder clear() {
         super.clear();
@@ -3961,8 +4177,7 @@ public final class TemporaryExposureKeyFormat {
       }
 
       @java.lang.Override
-      public com.google.protobuf.Descriptors.Descriptor
-          getDescriptorForType() {
+      public com.google.protobuf.Descriptors.Descriptor getDescriptorForType() {
         return TemporaryExposureKeyFormat.internal_static_TemporaryExposureKey_descriptor;
       }
 
@@ -3982,7 +4197,8 @@ public final class TemporaryExposureKeyFormat {
 
       @java.lang.Override
       public TemporaryExposureKeyFormat.TemporaryExposureKey buildPartial() {
-        TemporaryExposureKeyFormat.TemporaryExposureKey result = new TemporaryExposureKeyFormat.TemporaryExposureKey(this);
+        TemporaryExposureKeyFormat.TemporaryExposureKey result =
+            new TemporaryExposureKeyFormat.TemporaryExposureKey(this);
         int from_bitField0_ = bitField0_;
         int to_bitField0_ = 0;
         if (((from_bitField0_ & 0x00000001) != 0)) {
@@ -4010,38 +4226,41 @@ public final class TemporaryExposureKeyFormat {
       public Builder clone() {
         return super.clone();
       }
+
       @java.lang.Override
       public Builder setField(
-          com.google.protobuf.Descriptors.FieldDescriptor field,
-          java.lang.Object value) {
+          com.google.protobuf.Descriptors.FieldDescriptor field, java.lang.Object value) {
         return super.setField(field, value);
       }
+
       @java.lang.Override
-      public Builder clearField(
-          com.google.protobuf.Descriptors.FieldDescriptor field) {
+      public Builder clearField(com.google.protobuf.Descriptors.FieldDescriptor field) {
         return super.clearField(field);
       }
+
       @java.lang.Override
-      public Builder clearOneof(
-          com.google.protobuf.Descriptors.OneofDescriptor oneof) {
+      public Builder clearOneof(com.google.protobuf.Descriptors.OneofDescriptor oneof) {
         return super.clearOneof(oneof);
       }
+
       @java.lang.Override
       public Builder setRepeatedField(
           com.google.protobuf.Descriptors.FieldDescriptor field,
-          int index, java.lang.Object value) {
+          int index,
+          java.lang.Object value) {
         return super.setRepeatedField(field, index, value);
       }
+
       @java.lang.Override
       public Builder addRepeatedField(
-          com.google.protobuf.Descriptors.FieldDescriptor field,
-          java.lang.Object value) {
+          com.google.protobuf.Descriptors.FieldDescriptor field, java.lang.Object value) {
         return super.addRepeatedField(field, value);
       }
+
       @java.lang.Override
       public Builder mergeFrom(com.google.protobuf.Message other) {
         if (other instanceof TemporaryExposureKeyFormat.TemporaryExposureKey) {
-          return mergeFrom((TemporaryExposureKeyFormat.TemporaryExposureKey)other);
+          return mergeFrom((TemporaryExposureKeyFormat.TemporaryExposureKey) other);
         } else {
           super.mergeFrom(other);
           return this;
@@ -4049,7 +4268,8 @@ public final class TemporaryExposureKeyFormat {
       }
 
       public Builder mergeFrom(TemporaryExposureKeyFormat.TemporaryExposureKey other) {
-        if (other == TemporaryExposureKeyFormat.TemporaryExposureKey.getDefaultInstance()) return this;
+        if (other == TemporaryExposureKeyFormat.TemporaryExposureKey.getDefaultInstance())
+          return this;
         if (other.hasKeyData()) {
           setKeyData(other.getKeyData());
         }
@@ -4081,7 +4301,8 @@ public final class TemporaryExposureKeyFormat {
         try {
           parsedMessage = PARSER.parsePartialFrom(input, extensionRegistry);
         } catch (com.google.protobuf.InvalidProtocolBufferException e) {
-          parsedMessage = (TemporaryExposureKeyFormat.TemporaryExposureKey) e.getUnfinishedMessage();
+          parsedMessage =
+              (TemporaryExposureKeyFormat.TemporaryExposureKey) e.getUnfinishedMessage();
           throw e.unwrapIOException();
         } finally {
           if (parsedMessage != null) {
@@ -4090,10 +4311,13 @@ public final class TemporaryExposureKeyFormat {
         }
         return this;
       }
+
       private int bitField0_;
 
       private com.google.protobuf.ByteString keyData_ = com.google.protobuf.ByteString.EMPTY;
       /**
+       *
+       *
        * <pre>
        * Key of infected user
        * </pre>
@@ -4104,6 +4328,8 @@ public final class TemporaryExposureKeyFormat {
         return ((bitField0_ & 0x00000001) != 0);
       }
       /**
+       *
+       *
        * <pre>
        * Key of infected user
        * </pre>
@@ -4114,6 +4340,8 @@ public final class TemporaryExposureKeyFormat {
         return keyData_;
       }
       /**
+       *
+       *
        * <pre>
        * Key of infected user
        * </pre>
@@ -4122,14 +4350,16 @@ public final class TemporaryExposureKeyFormat {
        */
       public Builder setKeyData(com.google.protobuf.ByteString value) {
         if (value == null) {
-    throw new NullPointerException();
-  }
-  bitField0_ |= 0x00000001;
+          throw new NullPointerException();
+        }
+        bitField0_ |= 0x00000001;
         keyData_ = value;
         onChanged();
         return this;
       }
       /**
+       *
+       *
        * <pre>
        * Key of infected user
        * </pre>
@@ -4143,8 +4373,10 @@ public final class TemporaryExposureKeyFormat {
         return this;
       }
 
-      private int transmissionRiskLevel_ ;
+      private int transmissionRiskLevel_;
       /**
+       *
+       *
        * <pre>
        * Varying risk associated with a key depending on diagnosis method
        * </pre>
@@ -4155,6 +4387,8 @@ public final class TemporaryExposureKeyFormat {
         return ((bitField0_ & 0x00000002) != 0);
       }
       /**
+       *
+       *
        * <pre>
        * Varying risk associated with a key depending on diagnosis method
        * </pre>
@@ -4165,6 +4399,8 @@ public final class TemporaryExposureKeyFormat {
         return transmissionRiskLevel_;
       }
       /**
+       *
+       *
        * <pre>
        * Varying risk associated with a key depending on diagnosis method
        * </pre>
@@ -4178,6 +4414,8 @@ public final class TemporaryExposureKeyFormat {
         return this;
       }
       /**
+       *
+       *
        * <pre>
        * Varying risk associated with a key depending on diagnosis method
        * </pre>
@@ -4191,8 +4429,10 @@ public final class TemporaryExposureKeyFormat {
         return this;
       }
 
-      private int rollingStartIntervalNumber_ ;
+      private int rollingStartIntervalNumber_;
       /**
+       *
+       *
        * <pre>
        * The interval number since epoch for which a key starts
        * </pre>
@@ -4203,6 +4443,8 @@ public final class TemporaryExposureKeyFormat {
         return ((bitField0_ & 0x00000004) != 0);
       }
       /**
+       *
+       *
        * <pre>
        * The interval number since epoch for which a key starts
        * </pre>
@@ -4213,6 +4455,8 @@ public final class TemporaryExposureKeyFormat {
         return rollingStartIntervalNumber_;
       }
       /**
+       *
+       *
        * <pre>
        * The interval number since epoch for which a key starts
        * </pre>
@@ -4226,6 +4470,8 @@ public final class TemporaryExposureKeyFormat {
         return this;
       }
       /**
+       *
+       *
        * <pre>
        * The interval number since epoch for which a key starts
        * </pre>
@@ -4241,6 +4487,8 @@ public final class TemporaryExposureKeyFormat {
 
       private int rollingPeriod_ = 144;
       /**
+       *
+       *
        * <pre>
        * Increments of 10 minutes describing how long a key is valid
        * </pre>
@@ -4251,6 +4499,8 @@ public final class TemporaryExposureKeyFormat {
         return ((bitField0_ & 0x00000008) != 0);
       }
       /**
+       *
+       *
        * <pre>
        * Increments of 10 minutes describing how long a key is valid
        * </pre>
@@ -4261,6 +4511,8 @@ public final class TemporaryExposureKeyFormat {
         return rollingPeriod_;
       }
       /**
+       *
+       *
        * <pre>
        * Increments of 10 minutes describing how long a key is valid
        * </pre>
@@ -4274,6 +4526,8 @@ public final class TemporaryExposureKeyFormat {
         return this;
       }
       /**
+       *
+       *
        * <pre>
        * Increments of 10 minutes describing how long a key is valid
        * </pre>
@@ -4286,6 +4540,7 @@ public final class TemporaryExposureKeyFormat {
         onChanged();
         return this;
       }
+
       @java.lang.Override
       public final Builder setUnknownFields(
           final com.google.protobuf.UnknownFieldSet unknownFields) {
@@ -4298,12 +4553,12 @@ public final class TemporaryExposureKeyFormat {
         return super.mergeUnknownFields(unknownFields);
       }
 
-
       // @@protoc_insertion_point(builder_scope:TemporaryExposureKey)
     }
 
     // @@protoc_insertion_point(class_scope:TemporaryExposureKey)
     private static final TemporaryExposureKeyFormat.TemporaryExposureKey DEFAULT_INSTANCE;
+
     static {
       DEFAULT_INSTANCE = new TemporaryExposureKeyFormat.TemporaryExposureKey();
     }
@@ -4312,16 +4567,17 @@ public final class TemporaryExposureKeyFormat {
       return DEFAULT_INSTANCE;
     }
 
-    @java.lang.Deprecated public static final com.google.protobuf.Parser<TemporaryExposureKey>
-        PARSER = new com.google.protobuf.AbstractParser<TemporaryExposureKey>() {
-      @java.lang.Override
-      public TemporaryExposureKey parsePartialFrom(
-          com.google.protobuf.CodedInputStream input,
-          com.google.protobuf.ExtensionRegistryLite extensionRegistry)
-          throws com.google.protobuf.InvalidProtocolBufferException {
-        return new TemporaryExposureKey(input, extensionRegistry);
-      }
-    };
+    @java.lang.Deprecated
+    public static final com.google.protobuf.Parser<TemporaryExposureKey> PARSER =
+        new com.google.protobuf.AbstractParser<TemporaryExposureKey>() {
+          @java.lang.Override
+          public TemporaryExposureKey parsePartialFrom(
+              com.google.protobuf.CodedInputStream input,
+              com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+              throws com.google.protobuf.InvalidProtocolBufferException {
+            return new TemporaryExposureKey(input, extensionRegistry);
+          }
+        };
 
     public static com.google.protobuf.Parser<TemporaryExposureKey> parser() {
       return PARSER;
@@ -4336,58 +4592,45 @@ public final class TemporaryExposureKeyFormat {
     public TemporaryExposureKeyFormat.TemporaryExposureKey getDefaultInstanceForType() {
       return DEFAULT_INSTANCE;
     }
-
   }
 
-  public interface TEKSignatureListOrBuilder extends
+  public interface TEKSignatureListOrBuilder
+      extends
       // @@protoc_insertion_point(interface_extends:TEKSignatureList)
       com.google.protobuf.MessageOrBuilder {
 
-    /**
-     * <code>repeated .TEKSignature signatures = 1;</code>
-     */
-    java.util.List<TemporaryExposureKeyFormat.TEKSignature> 
-        getSignaturesList();
-    /**
-     * <code>repeated .TEKSignature signatures = 1;</code>
-     */
+    /** <code>repeated .TEKSignature signatures = 1;</code> */
+    java.util.List<TemporaryExposureKeyFormat.TEKSignature> getSignaturesList();
+    /** <code>repeated .TEKSignature signatures = 1;</code> */
     TemporaryExposureKeyFormat.TEKSignature getSignatures(int index);
-    /**
-     * <code>repeated .TEKSignature signatures = 1;</code>
-     */
+    /** <code>repeated .TEKSignature signatures = 1;</code> */
     int getSignaturesCount();
-    /**
-     * <code>repeated .TEKSignature signatures = 1;</code>
-     */
-    java.util.List<? extends TemporaryExposureKeyFormat.TEKSignatureOrBuilder> 
+    /** <code>repeated .TEKSignature signatures = 1;</code> */
+    java.util.List<? extends TemporaryExposureKeyFormat.TEKSignatureOrBuilder>
         getSignaturesOrBuilderList();
-    /**
-     * <code>repeated .TEKSignature signatures = 1;</code>
-     */
-    TemporaryExposureKeyFormat.TEKSignatureOrBuilder getSignaturesOrBuilder(
-        int index);
+    /** <code>repeated .TEKSignature signatures = 1;</code> */
+    TemporaryExposureKeyFormat.TEKSignatureOrBuilder getSignaturesOrBuilder(int index);
   }
-  /**
-   * Protobuf type {@code TEKSignatureList}
-   */
-  public  static final class TEKSignatureList extends
-      com.google.protobuf.GeneratedMessageV3 implements
+  /** Protobuf type {@code TEKSignatureList} */
+  public static final class TEKSignatureList extends com.google.protobuf.GeneratedMessageV3
+      implements
       // @@protoc_insertion_point(message_implements:TEKSignatureList)
       TEKSignatureListOrBuilder {
-  private static final long serialVersionUID = 0L;
+    private static final long serialVersionUID = 0L;
     // Use TEKSignatureList.newBuilder() to construct.
     private TEKSignatureList(com.google.protobuf.GeneratedMessageV3.Builder<?> builder) {
       super(builder);
     }
+
     private TEKSignatureList() {
       signatures_ = java.util.Collections.emptyList();
     }
 
     @java.lang.Override
-    public final com.google.protobuf.UnknownFieldSet
-    getUnknownFields() {
+    public final com.google.protobuf.UnknownFieldSet getUnknownFields() {
       return this.unknownFields;
     }
+
     private TEKSignatureList(
         com.google.protobuf.CodedInputStream input,
         com.google.protobuf.ExtensionRegistryLite extensionRegistry)
@@ -4407,29 +4650,30 @@ public final class TemporaryExposureKeyFormat {
             case 0:
               done = true;
               break;
-            case 10: {
-              if (!((mutable_bitField0_ & 0x00000001) != 0)) {
-                signatures_ = new java.util.ArrayList<TemporaryExposureKeyFormat.TEKSignature>();
-                mutable_bitField0_ |= 0x00000001;
+            case 10:
+              {
+                if (!((mutable_bitField0_ & 0x00000001) != 0)) {
+                  signatures_ = new java.util.ArrayList<TemporaryExposureKeyFormat.TEKSignature>();
+                  mutable_bitField0_ |= 0x00000001;
+                }
+                signatures_.add(
+                    input.readMessage(
+                        TemporaryExposureKeyFormat.TEKSignature.PARSER, extensionRegistry));
+                break;
               }
-              signatures_.add(
-                  input.readMessage(TemporaryExposureKeyFormat.TEKSignature.PARSER, extensionRegistry));
-              break;
-            }
-            default: {
-              if (!parseUnknownField(
-                  input, unknownFields, extensionRegistry, tag)) {
-                done = true;
+            default:
+              {
+                if (!parseUnknownField(input, unknownFields, extensionRegistry, tag)) {
+                  done = true;
+                }
+                break;
               }
-              break;
-            }
           }
         }
       } catch (com.google.protobuf.InvalidProtocolBufferException e) {
         throw e.setUnfinishedMessage(this);
       } catch (java.io.IOException e) {
-        throw new com.google.protobuf.InvalidProtocolBufferException(
-            e).setUnfinishedMessage(this);
+        throw new com.google.protobuf.InvalidProtocolBufferException(e).setUnfinishedMessage(this);
       } finally {
         if (((mutable_bitField0_ & 0x00000001) != 0)) {
           signatures_ = java.util.Collections.unmodifiableList(signatures_);
@@ -4438,8 +4682,8 @@ public final class TemporaryExposureKeyFormat {
         makeExtensionsImmutable();
       }
     }
-    public static final com.google.protobuf.Descriptors.Descriptor
-        getDescriptor() {
+
+    public static final com.google.protobuf.Descriptors.Descriptor getDescriptor() {
       return TemporaryExposureKeyFormat.internal_static_TEKSignatureList_descriptor;
     }
 
@@ -4448,45 +4692,36 @@ public final class TemporaryExposureKeyFormat {
         internalGetFieldAccessorTable() {
       return TemporaryExposureKeyFormat.internal_static_TEKSignatureList_fieldAccessorTable
           .ensureFieldAccessorsInitialized(
-              TemporaryExposureKeyFormat.TEKSignatureList.class, TemporaryExposureKeyFormat.TEKSignatureList.Builder.class);
+              TemporaryExposureKeyFormat.TEKSignatureList.class,
+              TemporaryExposureKeyFormat.TEKSignatureList.Builder.class);
     }
 
     public static final int SIGNATURES_FIELD_NUMBER = 1;
     private java.util.List<TemporaryExposureKeyFormat.TEKSignature> signatures_;
-    /**
-     * <code>repeated .TEKSignature signatures = 1;</code>
-     */
+    /** <code>repeated .TEKSignature signatures = 1;</code> */
     public java.util.List<TemporaryExposureKeyFormat.TEKSignature> getSignaturesList() {
       return signatures_;
     }
-    /**
-     * <code>repeated .TEKSignature signatures = 1;</code>
-     */
-    public java.util.List<? extends TemporaryExposureKeyFormat.TEKSignatureOrBuilder> 
+    /** <code>repeated .TEKSignature signatures = 1;</code> */
+    public java.util.List<? extends TemporaryExposureKeyFormat.TEKSignatureOrBuilder>
         getSignaturesOrBuilderList() {
       return signatures_;
     }
-    /**
-     * <code>repeated .TEKSignature signatures = 1;</code>
-     */
+    /** <code>repeated .TEKSignature signatures = 1;</code> */
     public int getSignaturesCount() {
       return signatures_.size();
     }
-    /**
-     * <code>repeated .TEKSignature signatures = 1;</code>
-     */
+    /** <code>repeated .TEKSignature signatures = 1;</code> */
     public TemporaryExposureKeyFormat.TEKSignature getSignatures(int index) {
       return signatures_.get(index);
     }
-    /**
-     * <code>repeated .TEKSignature signatures = 1;</code>
-     */
-    public TemporaryExposureKeyFormat.TEKSignatureOrBuilder getSignaturesOrBuilder(
-        int index) {
+    /** <code>repeated .TEKSignature signatures = 1;</code> */
+    public TemporaryExposureKeyFormat.TEKSignatureOrBuilder getSignaturesOrBuilder(int index) {
       return signatures_.get(index);
     }
 
     private byte memoizedIsInitialized = -1;
+
     @java.lang.Override
     public final boolean isInitialized() {
       byte isInitialized = memoizedIsInitialized;
@@ -4498,8 +4733,7 @@ public final class TemporaryExposureKeyFormat {
     }
 
     @java.lang.Override
-    public void writeTo(com.google.protobuf.CodedOutputStream output)
-                        throws java.io.IOException {
+    public void writeTo(com.google.protobuf.CodedOutputStream output) throws java.io.IOException {
       for (int i = 0; i < signatures_.size(); i++) {
         output.writeMessage(1, signatures_.get(i));
       }
@@ -4513,8 +4747,7 @@ public final class TemporaryExposureKeyFormat {
 
       size = 0;
       for (int i = 0; i < signatures_.size(); i++) {
-        size += com.google.protobuf.CodedOutputStream
-          .computeMessageSize(1, signatures_.get(i));
+        size += com.google.protobuf.CodedOutputStream.computeMessageSize(1, signatures_.get(i));
       }
       size += unknownFields.getSerializedSize();
       memoizedSize = size;
@@ -4524,15 +4757,15 @@ public final class TemporaryExposureKeyFormat {
     @java.lang.Override
     public boolean equals(final java.lang.Object obj) {
       if (obj == this) {
-       return true;
+        return true;
       }
       if (!(obj instanceof TemporaryExposureKeyFormat.TEKSignatureList)) {
         return super.equals(obj);
       }
-      TemporaryExposureKeyFormat.TEKSignatureList other = (TemporaryExposureKeyFormat.TEKSignatureList) obj;
+      TemporaryExposureKeyFormat.TEKSignatureList other =
+          (TemporaryExposureKeyFormat.TEKSignatureList) obj;
 
-      if (!getSignaturesList()
-          .equals(other.getSignaturesList())) return false;
+      if (!getSignaturesList().equals(other.getSignaturesList())) return false;
       if (!unknownFields.equals(other.unknownFields)) return false;
       return true;
     }
@@ -4553,88 +4786,94 @@ public final class TemporaryExposureKeyFormat {
       return hash;
     }
 
-    public static TemporaryExposureKeyFormat.TEKSignatureList parseFrom(
-        java.nio.ByteBuffer data)
+    public static TemporaryExposureKeyFormat.TEKSignatureList parseFrom(java.nio.ByteBuffer data)
         throws com.google.protobuf.InvalidProtocolBufferException {
       return PARSER.parseFrom(data);
     }
+
     public static TemporaryExposureKeyFormat.TEKSignatureList parseFrom(
-        java.nio.ByteBuffer data,
-        com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+        java.nio.ByteBuffer data, com.google.protobuf.ExtensionRegistryLite extensionRegistry)
         throws com.google.protobuf.InvalidProtocolBufferException {
       return PARSER.parseFrom(data, extensionRegistry);
     }
+
     public static TemporaryExposureKeyFormat.TEKSignatureList parseFrom(
         com.google.protobuf.ByteString data)
         throws com.google.protobuf.InvalidProtocolBufferException {
       return PARSER.parseFrom(data);
     }
+
     public static TemporaryExposureKeyFormat.TEKSignatureList parseFrom(
         com.google.protobuf.ByteString data,
         com.google.protobuf.ExtensionRegistryLite extensionRegistry)
         throws com.google.protobuf.InvalidProtocolBufferException {
       return PARSER.parseFrom(data, extensionRegistry);
     }
+
     public static TemporaryExposureKeyFormat.TEKSignatureList parseFrom(byte[] data)
         throws com.google.protobuf.InvalidProtocolBufferException {
       return PARSER.parseFrom(data);
     }
+
     public static TemporaryExposureKeyFormat.TEKSignatureList parseFrom(
-        byte[] data,
-        com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+        byte[] data, com.google.protobuf.ExtensionRegistryLite extensionRegistry)
         throws com.google.protobuf.InvalidProtocolBufferException {
       return PARSER.parseFrom(data, extensionRegistry);
     }
+
     public static TemporaryExposureKeyFormat.TEKSignatureList parseFrom(java.io.InputStream input)
         throws java.io.IOException {
-      return com.google.protobuf.GeneratedMessageV3
-          .parseWithIOException(PARSER, input);
+      return com.google.protobuf.GeneratedMessageV3.parseWithIOException(PARSER, input);
     }
+
     public static TemporaryExposureKeyFormat.TEKSignatureList parseFrom(
-        java.io.InputStream input,
-        com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+        java.io.InputStream input, com.google.protobuf.ExtensionRegistryLite extensionRegistry)
         throws java.io.IOException {
-      return com.google.protobuf.GeneratedMessageV3
-          .parseWithIOException(PARSER, input, extensionRegistry);
+      return com.google.protobuf.GeneratedMessageV3.parseWithIOException(
+          PARSER, input, extensionRegistry);
     }
-    public static TemporaryExposureKeyFormat.TEKSignatureList parseDelimitedFrom(java.io.InputStream input)
-        throws java.io.IOException {
-      return com.google.protobuf.GeneratedMessageV3
-          .parseDelimitedWithIOException(PARSER, input);
-    }
+
     public static TemporaryExposureKeyFormat.TEKSignatureList parseDelimitedFrom(
-        java.io.InputStream input,
-        com.google.protobuf.ExtensionRegistryLite extensionRegistry)
-        throws java.io.IOException {
-      return com.google.protobuf.GeneratedMessageV3
-          .parseDelimitedWithIOException(PARSER, input, extensionRegistry);
+        java.io.InputStream input) throws java.io.IOException {
+      return com.google.protobuf.GeneratedMessageV3.parseDelimitedWithIOException(PARSER, input);
     }
+
+    public static TemporaryExposureKeyFormat.TEKSignatureList parseDelimitedFrom(
+        java.io.InputStream input, com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+        throws java.io.IOException {
+      return com.google.protobuf.GeneratedMessageV3.parseDelimitedWithIOException(
+          PARSER, input, extensionRegistry);
+    }
+
     public static TemporaryExposureKeyFormat.TEKSignatureList parseFrom(
-        com.google.protobuf.CodedInputStream input)
-        throws java.io.IOException {
-      return com.google.protobuf.GeneratedMessageV3
-          .parseWithIOException(PARSER, input);
+        com.google.protobuf.CodedInputStream input) throws java.io.IOException {
+      return com.google.protobuf.GeneratedMessageV3.parseWithIOException(PARSER, input);
     }
+
     public static TemporaryExposureKeyFormat.TEKSignatureList parseFrom(
         com.google.protobuf.CodedInputStream input,
         com.google.protobuf.ExtensionRegistryLite extensionRegistry)
         throws java.io.IOException {
-      return com.google.protobuf.GeneratedMessageV3
-          .parseWithIOException(PARSER, input, extensionRegistry);
+      return com.google.protobuf.GeneratedMessageV3.parseWithIOException(
+          PARSER, input, extensionRegistry);
     }
 
     @java.lang.Override
-    public Builder newBuilderForType() { return newBuilder(); }
+    public Builder newBuilderForType() {
+      return newBuilder();
+    }
+
     public static Builder newBuilder() {
       return DEFAULT_INSTANCE.toBuilder();
     }
+
     public static Builder newBuilder(TemporaryExposureKeyFormat.TEKSignatureList prototype) {
       return DEFAULT_INSTANCE.toBuilder().mergeFrom(prototype);
     }
+
     @java.lang.Override
     public Builder toBuilder() {
-      return this == DEFAULT_INSTANCE
-          ? new Builder() : new Builder().mergeFrom(this);
+      return this == DEFAULT_INSTANCE ? new Builder() : new Builder().mergeFrom(this);
     }
 
     @java.lang.Override
@@ -4643,15 +4882,13 @@ public final class TemporaryExposureKeyFormat {
       Builder builder = new Builder(parent);
       return builder;
     }
-    /**
-     * Protobuf type {@code TEKSignatureList}
-     */
-    public static final class Builder extends
-        com.google.protobuf.GeneratedMessageV3.Builder<Builder> implements
+    /** Protobuf type {@code TEKSignatureList} */
+    public static final class Builder
+        extends com.google.protobuf.GeneratedMessageV3.Builder<Builder>
+        implements
         // @@protoc_insertion_point(builder_implements:TEKSignatureList)
         TemporaryExposureKeyFormat.TEKSignatureListOrBuilder {
-      public static final com.google.protobuf.Descriptors.Descriptor
-          getDescriptor() {
+      public static final com.google.protobuf.Descriptors.Descriptor getDescriptor() {
         return TemporaryExposureKeyFormat.internal_static_TEKSignatureList_descriptor;
       }
 
@@ -4660,7 +4897,8 @@ public final class TemporaryExposureKeyFormat {
           internalGetFieldAccessorTable() {
         return TemporaryExposureKeyFormat.internal_static_TEKSignatureList_fieldAccessorTable
             .ensureFieldAccessorsInitialized(
-                TemporaryExposureKeyFormat.TEKSignatureList.class, TemporaryExposureKeyFormat.TEKSignatureList.Builder.class);
+                TemporaryExposureKeyFormat.TEKSignatureList.class,
+                TemporaryExposureKeyFormat.TEKSignatureList.Builder.class);
       }
 
       // Construct using TemporaryExposureKeyFormat.TEKSignatureList.newBuilder()
@@ -4668,17 +4906,17 @@ public final class TemporaryExposureKeyFormat {
         maybeForceBuilderInitialization();
       }
 
-      private Builder(
-          com.google.protobuf.GeneratedMessageV3.BuilderParent parent) {
+      private Builder(com.google.protobuf.GeneratedMessageV3.BuilderParent parent) {
         super(parent);
         maybeForceBuilderInitialization();
       }
+
       private void maybeForceBuilderInitialization() {
-        if (com.google.protobuf.GeneratedMessageV3
-                .alwaysUseFieldBuilders) {
+        if (com.google.protobuf.GeneratedMessageV3.alwaysUseFieldBuilders) {
           getSignaturesFieldBuilder();
         }
       }
+
       @java.lang.Override
       public Builder clear() {
         super.clear();
@@ -4692,8 +4930,7 @@ public final class TemporaryExposureKeyFormat {
       }
 
       @java.lang.Override
-      public com.google.protobuf.Descriptors.Descriptor
-          getDescriptorForType() {
+      public com.google.protobuf.Descriptors.Descriptor getDescriptorForType() {
         return TemporaryExposureKeyFormat.internal_static_TEKSignatureList_descriptor;
       }
 
@@ -4713,7 +4950,8 @@ public final class TemporaryExposureKeyFormat {
 
       @java.lang.Override
       public TemporaryExposureKeyFormat.TEKSignatureList buildPartial() {
-        TemporaryExposureKeyFormat.TEKSignatureList result = new TemporaryExposureKeyFormat.TEKSignatureList(this);
+        TemporaryExposureKeyFormat.TEKSignatureList result =
+            new TemporaryExposureKeyFormat.TEKSignatureList(this);
         int from_bitField0_ = bitField0_;
         if (signaturesBuilder_ == null) {
           if (((bitField0_ & 0x00000001) != 0)) {
@@ -4732,38 +4970,41 @@ public final class TemporaryExposureKeyFormat {
       public Builder clone() {
         return super.clone();
       }
+
       @java.lang.Override
       public Builder setField(
-          com.google.protobuf.Descriptors.FieldDescriptor field,
-          java.lang.Object value) {
+          com.google.protobuf.Descriptors.FieldDescriptor field, java.lang.Object value) {
         return super.setField(field, value);
       }
+
       @java.lang.Override
-      public Builder clearField(
-          com.google.protobuf.Descriptors.FieldDescriptor field) {
+      public Builder clearField(com.google.protobuf.Descriptors.FieldDescriptor field) {
         return super.clearField(field);
       }
+
       @java.lang.Override
-      public Builder clearOneof(
-          com.google.protobuf.Descriptors.OneofDescriptor oneof) {
+      public Builder clearOneof(com.google.protobuf.Descriptors.OneofDescriptor oneof) {
         return super.clearOneof(oneof);
       }
+
       @java.lang.Override
       public Builder setRepeatedField(
           com.google.protobuf.Descriptors.FieldDescriptor field,
-          int index, java.lang.Object value) {
+          int index,
+          java.lang.Object value) {
         return super.setRepeatedField(field, index, value);
       }
+
       @java.lang.Override
       public Builder addRepeatedField(
-          com.google.protobuf.Descriptors.FieldDescriptor field,
-          java.lang.Object value) {
+          com.google.protobuf.Descriptors.FieldDescriptor field, java.lang.Object value) {
         return super.addRepeatedField(field, value);
       }
+
       @java.lang.Override
       public Builder mergeFrom(com.google.protobuf.Message other) {
         if (other instanceof TemporaryExposureKeyFormat.TEKSignatureList) {
-          return mergeFrom((TemporaryExposureKeyFormat.TEKSignatureList)other);
+          return mergeFrom((TemporaryExposureKeyFormat.TEKSignatureList) other);
         } else {
           super.mergeFrom(other);
           return this;
@@ -4790,9 +5031,10 @@ public final class TemporaryExposureKeyFormat {
               signaturesBuilder_ = null;
               signatures_ = other.signatures_;
               bitField0_ = (bitField0_ & ~0x00000001);
-              signaturesBuilder_ = 
-                com.google.protobuf.GeneratedMessageV3.alwaysUseFieldBuilders ?
-                   getSignaturesFieldBuilder() : null;
+              signaturesBuilder_ =
+                  com.google.protobuf.GeneratedMessageV3.alwaysUseFieldBuilders
+                      ? getSignaturesFieldBuilder()
+                      : null;
             } else {
               signaturesBuilder_.addAllMessages(other.signatures_);
             }
@@ -4826,23 +5068,27 @@ public final class TemporaryExposureKeyFormat {
         }
         return this;
       }
+
       private int bitField0_;
 
       private java.util.List<TemporaryExposureKeyFormat.TEKSignature> signatures_ =
-        java.util.Collections.emptyList();
+          java.util.Collections.emptyList();
+
       private void ensureSignaturesIsMutable() {
         if (!((bitField0_ & 0x00000001) != 0)) {
-          signatures_ = new java.util.ArrayList<TemporaryExposureKeyFormat.TEKSignature>(signatures_);
+          signatures_ =
+              new java.util.ArrayList<TemporaryExposureKeyFormat.TEKSignature>(signatures_);
           bitField0_ |= 0x00000001;
-         }
+        }
       }
 
       private com.google.protobuf.RepeatedFieldBuilderV3<
-          TemporaryExposureKeyFormat.TEKSignature, TemporaryExposureKeyFormat.TEKSignature.Builder, TemporaryExposureKeyFormat.TEKSignatureOrBuilder> signaturesBuilder_;
+              TemporaryExposureKeyFormat.TEKSignature,
+              TemporaryExposureKeyFormat.TEKSignature.Builder,
+              TemporaryExposureKeyFormat.TEKSignatureOrBuilder>
+          signaturesBuilder_;
 
-      /**
-       * <code>repeated .TEKSignature signatures = 1;</code>
-       */
+      /** <code>repeated .TEKSignature signatures = 1;</code> */
       public java.util.List<TemporaryExposureKeyFormat.TEKSignature> getSignaturesList() {
         if (signaturesBuilder_ == null) {
           return java.util.Collections.unmodifiableList(signatures_);
@@ -4850,9 +5096,7 @@ public final class TemporaryExposureKeyFormat {
           return signaturesBuilder_.getMessageList();
         }
       }
-      /**
-       * <code>repeated .TEKSignature signatures = 1;</code>
-       */
+      /** <code>repeated .TEKSignature signatures = 1;</code> */
       public int getSignaturesCount() {
         if (signaturesBuilder_ == null) {
           return signatures_.size();
@@ -4860,9 +5104,7 @@ public final class TemporaryExposureKeyFormat {
           return signaturesBuilder_.getCount();
         }
       }
-      /**
-       * <code>repeated .TEKSignature signatures = 1;</code>
-       */
+      /** <code>repeated .TEKSignature signatures = 1;</code> */
       public TemporaryExposureKeyFormat.TEKSignature getSignatures(int index) {
         if (signaturesBuilder_ == null) {
           return signatures_.get(index);
@@ -4870,11 +5112,8 @@ public final class TemporaryExposureKeyFormat {
           return signaturesBuilder_.getMessage(index);
         }
       }
-      /**
-       * <code>repeated .TEKSignature signatures = 1;</code>
-       */
-      public Builder setSignatures(
-          int index, TemporaryExposureKeyFormat.TEKSignature value) {
+      /** <code>repeated .TEKSignature signatures = 1;</code> */
+      public Builder setSignatures(int index, TemporaryExposureKeyFormat.TEKSignature value) {
         if (signaturesBuilder_ == null) {
           if (value == null) {
             throw new NullPointerException();
@@ -4887,9 +5126,7 @@ public final class TemporaryExposureKeyFormat {
         }
         return this;
       }
-      /**
-       * <code>repeated .TEKSignature signatures = 1;</code>
-       */
+      /** <code>repeated .TEKSignature signatures = 1;</code> */
       public Builder setSignatures(
           int index, TemporaryExposureKeyFormat.TEKSignature.Builder builderForValue) {
         if (signaturesBuilder_ == null) {
@@ -4901,9 +5138,7 @@ public final class TemporaryExposureKeyFormat {
         }
         return this;
       }
-      /**
-       * <code>repeated .TEKSignature signatures = 1;</code>
-       */
+      /** <code>repeated .TEKSignature signatures = 1;</code> */
       public Builder addSignatures(TemporaryExposureKeyFormat.TEKSignature value) {
         if (signaturesBuilder_ == null) {
           if (value == null) {
@@ -4917,11 +5152,8 @@ public final class TemporaryExposureKeyFormat {
         }
         return this;
       }
-      /**
-       * <code>repeated .TEKSignature signatures = 1;</code>
-       */
-      public Builder addSignatures(
-          int index, TemporaryExposureKeyFormat.TEKSignature value) {
+      /** <code>repeated .TEKSignature signatures = 1;</code> */
+      public Builder addSignatures(int index, TemporaryExposureKeyFormat.TEKSignature value) {
         if (signaturesBuilder_ == null) {
           if (value == null) {
             throw new NullPointerException();
@@ -4934,9 +5166,7 @@ public final class TemporaryExposureKeyFormat {
         }
         return this;
       }
-      /**
-       * <code>repeated .TEKSignature signatures = 1;</code>
-       */
+      /** <code>repeated .TEKSignature signatures = 1;</code> */
       public Builder addSignatures(
           TemporaryExposureKeyFormat.TEKSignature.Builder builderForValue) {
         if (signaturesBuilder_ == null) {
@@ -4948,9 +5178,7 @@ public final class TemporaryExposureKeyFormat {
         }
         return this;
       }
-      /**
-       * <code>repeated .TEKSignature signatures = 1;</code>
-       */
+      /** <code>repeated .TEKSignature signatures = 1;</code> */
       public Builder addSignatures(
           int index, TemporaryExposureKeyFormat.TEKSignature.Builder builderForValue) {
         if (signaturesBuilder_ == null) {
@@ -4962,24 +5190,19 @@ public final class TemporaryExposureKeyFormat {
         }
         return this;
       }
-      /**
-       * <code>repeated .TEKSignature signatures = 1;</code>
-       */
+      /** <code>repeated .TEKSignature signatures = 1;</code> */
       public Builder addAllSignatures(
           java.lang.Iterable<? extends TemporaryExposureKeyFormat.TEKSignature> values) {
         if (signaturesBuilder_ == null) {
           ensureSignaturesIsMutable();
-          com.google.protobuf.AbstractMessageLite.Builder.addAll(
-              values, signatures_);
+          com.google.protobuf.AbstractMessageLite.Builder.addAll(values, signatures_);
           onChanged();
         } else {
           signaturesBuilder_.addAllMessages(values);
         }
         return this;
       }
-      /**
-       * <code>repeated .TEKSignature signatures = 1;</code>
-       */
+      /** <code>repeated .TEKSignature signatures = 1;</code> */
       public Builder clearSignatures() {
         if (signaturesBuilder_ == null) {
           signatures_ = java.util.Collections.emptyList();
@@ -4990,9 +5213,7 @@ public final class TemporaryExposureKeyFormat {
         }
         return this;
       }
-      /**
-       * <code>repeated .TEKSignature signatures = 1;</code>
-       */
+      /** <code>repeated .TEKSignature signatures = 1;</code> */
       public Builder removeSignatures(int index) {
         if (signaturesBuilder_ == null) {
           ensureSignaturesIsMutable();
@@ -5003,70 +5224,60 @@ public final class TemporaryExposureKeyFormat {
         }
         return this;
       }
-      /**
-       * <code>repeated .TEKSignature signatures = 1;</code>
-       */
-      public TemporaryExposureKeyFormat.TEKSignature.Builder getSignaturesBuilder(
-          int index) {
+      /** <code>repeated .TEKSignature signatures = 1;</code> */
+      public TemporaryExposureKeyFormat.TEKSignature.Builder getSignaturesBuilder(int index) {
         return getSignaturesFieldBuilder().getBuilder(index);
       }
-      /**
-       * <code>repeated .TEKSignature signatures = 1;</code>
-       */
-      public TemporaryExposureKeyFormat.TEKSignatureOrBuilder getSignaturesOrBuilder(
-          int index) {
+      /** <code>repeated .TEKSignature signatures = 1;</code> */
+      public TemporaryExposureKeyFormat.TEKSignatureOrBuilder getSignaturesOrBuilder(int index) {
         if (signaturesBuilder_ == null) {
-          return signatures_.get(index);  } else {
+          return signatures_.get(index);
+        } else {
           return signaturesBuilder_.getMessageOrBuilder(index);
         }
       }
-      /**
-       * <code>repeated .TEKSignature signatures = 1;</code>
-       */
-      public java.util.List<? extends TemporaryExposureKeyFormat.TEKSignatureOrBuilder> 
-           getSignaturesOrBuilderList() {
+      /** <code>repeated .TEKSignature signatures = 1;</code> */
+      public java.util.List<? extends TemporaryExposureKeyFormat.TEKSignatureOrBuilder>
+          getSignaturesOrBuilderList() {
         if (signaturesBuilder_ != null) {
           return signaturesBuilder_.getMessageOrBuilderList();
         } else {
           return java.util.Collections.unmodifiableList(signatures_);
         }
       }
-      /**
-       * <code>repeated .TEKSignature signatures = 1;</code>
-       */
+      /** <code>repeated .TEKSignature signatures = 1;</code> */
       public TemporaryExposureKeyFormat.TEKSignature.Builder addSignaturesBuilder() {
-        return getSignaturesFieldBuilder().addBuilder(
-            TemporaryExposureKeyFormat.TEKSignature.getDefaultInstance());
+        return getSignaturesFieldBuilder()
+            .addBuilder(TemporaryExposureKeyFormat.TEKSignature.getDefaultInstance());
       }
-      /**
-       * <code>repeated .TEKSignature signatures = 1;</code>
-       */
-      public TemporaryExposureKeyFormat.TEKSignature.Builder addSignaturesBuilder(
-          int index) {
-        return getSignaturesFieldBuilder().addBuilder(
-            index, TemporaryExposureKeyFormat.TEKSignature.getDefaultInstance());
+      /** <code>repeated .TEKSignature signatures = 1;</code> */
+      public TemporaryExposureKeyFormat.TEKSignature.Builder addSignaturesBuilder(int index) {
+        return getSignaturesFieldBuilder()
+            .addBuilder(index, TemporaryExposureKeyFormat.TEKSignature.getDefaultInstance());
       }
-      /**
-       * <code>repeated .TEKSignature signatures = 1;</code>
-       */
-      public java.util.List<TemporaryExposureKeyFormat.TEKSignature.Builder> 
-           getSignaturesBuilderList() {
+      /** <code>repeated .TEKSignature signatures = 1;</code> */
+      public java.util.List<TemporaryExposureKeyFormat.TEKSignature.Builder>
+          getSignaturesBuilderList() {
         return getSignaturesFieldBuilder().getBuilderList();
       }
+
       private com.google.protobuf.RepeatedFieldBuilderV3<
-          TemporaryExposureKeyFormat.TEKSignature, TemporaryExposureKeyFormat.TEKSignature.Builder, TemporaryExposureKeyFormat.TEKSignatureOrBuilder> 
+              TemporaryExposureKeyFormat.TEKSignature,
+              TemporaryExposureKeyFormat.TEKSignature.Builder,
+              TemporaryExposureKeyFormat.TEKSignatureOrBuilder>
           getSignaturesFieldBuilder() {
         if (signaturesBuilder_ == null) {
-          signaturesBuilder_ = new com.google.protobuf.RepeatedFieldBuilderV3<
-              TemporaryExposureKeyFormat.TEKSignature, TemporaryExposureKeyFormat.TEKSignature.Builder, TemporaryExposureKeyFormat.TEKSignatureOrBuilder>(
-                  signatures_,
-                  ((bitField0_ & 0x00000001) != 0),
-                  getParentForChildren(),
-                  isClean());
+          signaturesBuilder_ =
+              new com.google.protobuf.RepeatedFieldBuilderV3<
+                  TemporaryExposureKeyFormat.TEKSignature,
+                  TemporaryExposureKeyFormat.TEKSignature.Builder,
+                  TemporaryExposureKeyFormat.TEKSignatureOrBuilder>(
+                  signatures_, ((bitField0_ & 0x00000001) != 0), getParentForChildren(), isClean());
           signatures_ = null;
         }
         return signaturesBuilder_;
       }
+
       @java.lang.Override
       public final Builder setUnknownFields(
           final com.google.protobuf.UnknownFieldSet unknownFields) {
@@ -5079,12 +5290,12 @@ public final class TemporaryExposureKeyFormat {
         return super.mergeUnknownFields(unknownFields);
       }
 
-
       // @@protoc_insertion_point(builder_scope:TEKSignatureList)
     }
 
     // @@protoc_insertion_point(class_scope:TEKSignatureList)
     private static final TemporaryExposureKeyFormat.TEKSignatureList DEFAULT_INSTANCE;
+
     static {
       DEFAULT_INSTANCE = new TemporaryExposureKeyFormat.TEKSignatureList();
     }
@@ -5093,16 +5304,17 @@ public final class TemporaryExposureKeyFormat {
       return DEFAULT_INSTANCE;
     }
 
-    @java.lang.Deprecated public static final com.google.protobuf.Parser<TEKSignatureList>
-        PARSER = new com.google.protobuf.AbstractParser<TEKSignatureList>() {
-      @java.lang.Override
-      public TEKSignatureList parsePartialFrom(
-          com.google.protobuf.CodedInputStream input,
-          com.google.protobuf.ExtensionRegistryLite extensionRegistry)
-          throws com.google.protobuf.InvalidProtocolBufferException {
-        return new TEKSignatureList(input, extensionRegistry);
-      }
-    };
+    @java.lang.Deprecated
+    public static final com.google.protobuf.Parser<TEKSignatureList> PARSER =
+        new com.google.protobuf.AbstractParser<TEKSignatureList>() {
+          @java.lang.Override
+          public TEKSignatureList parsePartialFrom(
+              com.google.protobuf.CodedInputStream input,
+              com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+              throws com.google.protobuf.InvalidProtocolBufferException {
+            return new TEKSignatureList(input, extensionRegistry);
+          }
+        };
 
     public static com.google.protobuf.Parser<TEKSignatureList> parser() {
       return PARSER;
@@ -5117,14 +5329,16 @@ public final class TemporaryExposureKeyFormat {
     public TemporaryExposureKeyFormat.TEKSignatureList getDefaultInstanceForType() {
       return DEFAULT_INSTANCE;
     }
-
   }
 
-  public interface TEKSignatureOrBuilder extends
+  public interface TEKSignatureOrBuilder
+      extends
       // @@protoc_insertion_point(interface_extends:TEKSignature)
       com.google.protobuf.MessageOrBuilder {
 
     /**
+     *
+     *
      * <pre>
      * Info about the signing key, version, algorithm, etc
      * </pre>
@@ -5133,6 +5347,8 @@ public final class TemporaryExposureKeyFormat {
      */
     boolean hasSignatureInfo();
     /**
+     *
+     *
      * <pre>
      * Info about the signing key, version, algorithm, etc
      * </pre>
@@ -5141,6 +5357,8 @@ public final class TemporaryExposureKeyFormat {
      */
     TemporaryExposureKeyFormat.SignatureInfo getSignatureInfo();
     /**
+     *
+     *
      * <pre>
      * Info about the signing key, version, algorithm, etc
      * </pre>
@@ -5150,6 +5368,8 @@ public final class TemporaryExposureKeyFormat {
     TemporaryExposureKeyFormat.SignatureInfoOrBuilder getSignatureInfoOrBuilder();
 
     /**
+     *
+     *
      * <pre>
      * E.g., File 2 in batch size of 10. Ordinal, 1-based numbering.
      * E.g., Batch 2 of 10
@@ -5159,6 +5379,8 @@ public final class TemporaryExposureKeyFormat {
      */
     boolean hasBatchNum();
     /**
+     *
+     *
      * <pre>
      * E.g., File 2 in batch size of 10. Ordinal, 1-based numbering.
      * E.g., Batch 2 of 10
@@ -5168,16 +5390,14 @@ public final class TemporaryExposureKeyFormat {
      */
     int getBatchNum();
 
-    /**
-     * <code>optional int32 batch_size = 3;</code>
-     */
+    /** <code>optional int32 batch_size = 3;</code> */
     boolean hasBatchSize();
-    /**
-     * <code>optional int32 batch_size = 3;</code>
-     */
+    /** <code>optional int32 batch_size = 3;</code> */
     int getBatchSize();
 
     /**
+     *
+     *
      * <pre>
      * Signature in X9.62 format (ASN.1 SEQUENCE of two INTEGER fields)
      * </pre>
@@ -5186,6 +5406,8 @@ public final class TemporaryExposureKeyFormat {
      */
     boolean hasSignature();
     /**
+     *
+     *
      * <pre>
      * Signature in X9.62 format (ASN.1 SEQUENCE of two INTEGER fields)
      * </pre>
@@ -5194,27 +5416,26 @@ public final class TemporaryExposureKeyFormat {
      */
     com.google.protobuf.ByteString getSignature();
   }
-  /**
-   * Protobuf type {@code TEKSignature}
-   */
-  public  static final class TEKSignature extends
-      com.google.protobuf.GeneratedMessageV3 implements
+  /** Protobuf type {@code TEKSignature} */
+  public static final class TEKSignature extends com.google.protobuf.GeneratedMessageV3
+      implements
       // @@protoc_insertion_point(message_implements:TEKSignature)
       TEKSignatureOrBuilder {
-  private static final long serialVersionUID = 0L;
+    private static final long serialVersionUID = 0L;
     // Use TEKSignature.newBuilder() to construct.
     private TEKSignature(com.google.protobuf.GeneratedMessageV3.Builder<?> builder) {
       super(builder);
     }
+
     private TEKSignature() {
       signature_ = com.google.protobuf.ByteString.EMPTY;
     }
 
     @java.lang.Override
-    public final com.google.protobuf.UnknownFieldSet
-    getUnknownFields() {
+    public final com.google.protobuf.UnknownFieldSet getUnknownFields() {
       return this.unknownFields;
     }
+
     private TEKSignature(
         com.google.protobuf.CodedInputStream input,
         com.google.protobuf.ExtensionRegistryLite extensionRegistry)
@@ -5234,55 +5455,60 @@ public final class TemporaryExposureKeyFormat {
             case 0:
               done = true;
               break;
-            case 10: {
-              TemporaryExposureKeyFormat.SignatureInfo.Builder subBuilder = null;
-              if (((bitField0_ & 0x00000001) != 0)) {
-                subBuilder = signatureInfo_.toBuilder();
+            case 10:
+              {
+                TemporaryExposureKeyFormat.SignatureInfo.Builder subBuilder = null;
+                if (((bitField0_ & 0x00000001) != 0)) {
+                  subBuilder = signatureInfo_.toBuilder();
+                }
+                signatureInfo_ =
+                    input.readMessage(
+                        TemporaryExposureKeyFormat.SignatureInfo.PARSER, extensionRegistry);
+                if (subBuilder != null) {
+                  subBuilder.mergeFrom(signatureInfo_);
+                  signatureInfo_ = subBuilder.buildPartial();
+                }
+                bitField0_ |= 0x00000001;
+                break;
               }
-              signatureInfo_ = input.readMessage(TemporaryExposureKeyFormat.SignatureInfo.PARSER, extensionRegistry);
-              if (subBuilder != null) {
-                subBuilder.mergeFrom(signatureInfo_);
-                signatureInfo_ = subBuilder.buildPartial();
+            case 16:
+              {
+                bitField0_ |= 0x00000002;
+                batchNum_ = input.readInt32();
+                break;
               }
-              bitField0_ |= 0x00000001;
-              break;
-            }
-            case 16: {
-              bitField0_ |= 0x00000002;
-              batchNum_ = input.readInt32();
-              break;
-            }
-            case 24: {
-              bitField0_ |= 0x00000004;
-              batchSize_ = input.readInt32();
-              break;
-            }
-            case 34: {
-              bitField0_ |= 0x00000008;
-              signature_ = input.readBytes();
-              break;
-            }
-            default: {
-              if (!parseUnknownField(
-                  input, unknownFields, extensionRegistry, tag)) {
-                done = true;
+            case 24:
+              {
+                bitField0_ |= 0x00000004;
+                batchSize_ = input.readInt32();
+                break;
               }
-              break;
-            }
+            case 34:
+              {
+                bitField0_ |= 0x00000008;
+                signature_ = input.readBytes();
+                break;
+              }
+            default:
+              {
+                if (!parseUnknownField(input, unknownFields, extensionRegistry, tag)) {
+                  done = true;
+                }
+                break;
+              }
           }
         }
       } catch (com.google.protobuf.InvalidProtocolBufferException e) {
         throw e.setUnfinishedMessage(this);
       } catch (java.io.IOException e) {
-        throw new com.google.protobuf.InvalidProtocolBufferException(
-            e).setUnfinishedMessage(this);
+        throw new com.google.protobuf.InvalidProtocolBufferException(e).setUnfinishedMessage(this);
       } finally {
         this.unknownFields = unknownFields.build();
         makeExtensionsImmutable();
       }
     }
-    public static final com.google.protobuf.Descriptors.Descriptor
-        getDescriptor() {
+
+    public static final com.google.protobuf.Descriptors.Descriptor getDescriptor() {
       return TemporaryExposureKeyFormat.internal_static_TEKSignature_descriptor;
     }
 
@@ -5291,13 +5517,16 @@ public final class TemporaryExposureKeyFormat {
         internalGetFieldAccessorTable() {
       return TemporaryExposureKeyFormat.internal_static_TEKSignature_fieldAccessorTable
           .ensureFieldAccessorsInitialized(
-              TemporaryExposureKeyFormat.TEKSignature.class, TemporaryExposureKeyFormat.TEKSignature.Builder.class);
+              TemporaryExposureKeyFormat.TEKSignature.class,
+              TemporaryExposureKeyFormat.TEKSignature.Builder.class);
     }
 
     private int bitField0_;
     public static final int SIGNATURE_INFO_FIELD_NUMBER = 1;
     private TemporaryExposureKeyFormat.SignatureInfo signatureInfo_;
     /**
+     *
+     *
      * <pre>
      * Info about the signing key, version, algorithm, etc
      * </pre>
@@ -5308,6 +5537,8 @@ public final class TemporaryExposureKeyFormat {
       return ((bitField0_ & 0x00000001) != 0);
     }
     /**
+     *
+     *
      * <pre>
      * Info about the signing key, version, algorithm, etc
      * </pre>
@@ -5315,9 +5546,13 @@ public final class TemporaryExposureKeyFormat {
      * <code>optional .SignatureInfo signature_info = 1;</code>
      */
     public TemporaryExposureKeyFormat.SignatureInfo getSignatureInfo() {
-      return signatureInfo_ == null ? TemporaryExposureKeyFormat.SignatureInfo.getDefaultInstance() : signatureInfo_;
+      return signatureInfo_ == null
+          ? TemporaryExposureKeyFormat.SignatureInfo.getDefaultInstance()
+          : signatureInfo_;
     }
     /**
+     *
+     *
      * <pre>
      * Info about the signing key, version, algorithm, etc
      * </pre>
@@ -5325,12 +5560,16 @@ public final class TemporaryExposureKeyFormat {
      * <code>optional .SignatureInfo signature_info = 1;</code>
      */
     public TemporaryExposureKeyFormat.SignatureInfoOrBuilder getSignatureInfoOrBuilder() {
-      return signatureInfo_ == null ? TemporaryExposureKeyFormat.SignatureInfo.getDefaultInstance() : signatureInfo_;
+      return signatureInfo_ == null
+          ? TemporaryExposureKeyFormat.SignatureInfo.getDefaultInstance()
+          : signatureInfo_;
     }
 
     public static final int BATCH_NUM_FIELD_NUMBER = 2;
     private int batchNum_;
     /**
+     *
+     *
      * <pre>
      * E.g., File 2 in batch size of 10. Ordinal, 1-based numbering.
      * E.g., Batch 2 of 10
@@ -5342,6 +5581,8 @@ public final class TemporaryExposureKeyFormat {
       return ((bitField0_ & 0x00000002) != 0);
     }
     /**
+     *
+     *
      * <pre>
      * E.g., File 2 in batch size of 10. Ordinal, 1-based numbering.
      * E.g., Batch 2 of 10
@@ -5355,15 +5596,11 @@ public final class TemporaryExposureKeyFormat {
 
     public static final int BATCH_SIZE_FIELD_NUMBER = 3;
     private int batchSize_;
-    /**
-     * <code>optional int32 batch_size = 3;</code>
-     */
+    /** <code>optional int32 batch_size = 3;</code> */
     public boolean hasBatchSize() {
       return ((bitField0_ & 0x00000004) != 0);
     }
-    /**
-     * <code>optional int32 batch_size = 3;</code>
-     */
+    /** <code>optional int32 batch_size = 3;</code> */
     public int getBatchSize() {
       return batchSize_;
     }
@@ -5371,6 +5608,8 @@ public final class TemporaryExposureKeyFormat {
     public static final int SIGNATURE_FIELD_NUMBER = 4;
     private com.google.protobuf.ByteString signature_;
     /**
+     *
+     *
      * <pre>
      * Signature in X9.62 format (ASN.1 SEQUENCE of two INTEGER fields)
      * </pre>
@@ -5381,6 +5620,8 @@ public final class TemporaryExposureKeyFormat {
       return ((bitField0_ & 0x00000008) != 0);
     }
     /**
+     *
+     *
      * <pre>
      * Signature in X9.62 format (ASN.1 SEQUENCE of two INTEGER fields)
      * </pre>
@@ -5392,6 +5633,7 @@ public final class TemporaryExposureKeyFormat {
     }
 
     private byte memoizedIsInitialized = -1;
+
     @java.lang.Override
     public final boolean isInitialized() {
       byte isInitialized = memoizedIsInitialized;
@@ -5403,8 +5645,7 @@ public final class TemporaryExposureKeyFormat {
     }
 
     @java.lang.Override
-    public void writeTo(com.google.protobuf.CodedOutputStream output)
-                        throws java.io.IOException {
+    public void writeTo(com.google.protobuf.CodedOutputStream output) throws java.io.IOException {
       if (((bitField0_ & 0x00000001) != 0)) {
         output.writeMessage(1, getSignatureInfo());
       }
@@ -5427,20 +5668,16 @@ public final class TemporaryExposureKeyFormat {
 
       size = 0;
       if (((bitField0_ & 0x00000001) != 0)) {
-        size += com.google.protobuf.CodedOutputStream
-          .computeMessageSize(1, getSignatureInfo());
+        size += com.google.protobuf.CodedOutputStream.computeMessageSize(1, getSignatureInfo());
       }
       if (((bitField0_ & 0x00000002) != 0)) {
-        size += com.google.protobuf.CodedOutputStream
-          .computeInt32Size(2, batchNum_);
+        size += com.google.protobuf.CodedOutputStream.computeInt32Size(2, batchNum_);
       }
       if (((bitField0_ & 0x00000004) != 0)) {
-        size += com.google.protobuf.CodedOutputStream
-          .computeInt32Size(3, batchSize_);
+        size += com.google.protobuf.CodedOutputStream.computeInt32Size(3, batchSize_);
       }
       if (((bitField0_ & 0x00000008) != 0)) {
-        size += com.google.protobuf.CodedOutputStream
-          .computeBytesSize(4, signature_);
+        size += com.google.protobuf.CodedOutputStream.computeBytesSize(4, signature_);
       }
       size += unknownFields.getSerializedSize();
       memoizedSize = size;
@@ -5450,7 +5687,7 @@ public final class TemporaryExposureKeyFormat {
     @java.lang.Override
     public boolean equals(final java.lang.Object obj) {
       if (obj == this) {
-       return true;
+        return true;
       }
       if (!(obj instanceof TemporaryExposureKeyFormat.TEKSignature)) {
         return super.equals(obj);
@@ -5459,23 +5696,19 @@ public final class TemporaryExposureKeyFormat {
 
       if (hasSignatureInfo() != other.hasSignatureInfo()) return false;
       if (hasSignatureInfo()) {
-        if (!getSignatureInfo()
-            .equals(other.getSignatureInfo())) return false;
+        if (!getSignatureInfo().equals(other.getSignatureInfo())) return false;
       }
       if (hasBatchNum() != other.hasBatchNum()) return false;
       if (hasBatchNum()) {
-        if (getBatchNum()
-            != other.getBatchNum()) return false;
+        if (getBatchNum() != other.getBatchNum()) return false;
       }
       if (hasBatchSize() != other.hasBatchSize()) return false;
       if (hasBatchSize()) {
-        if (getBatchSize()
-            != other.getBatchSize()) return false;
+        if (getBatchSize() != other.getBatchSize()) return false;
       }
       if (hasSignature() != other.hasSignature()) return false;
       if (hasSignature()) {
-        if (!getSignature()
-            .equals(other.getSignature())) return false;
+        if (!getSignature().equals(other.getSignature())) return false;
       }
       if (!unknownFields.equals(other.unknownFields)) return false;
       return true;
@@ -5509,88 +5742,94 @@ public final class TemporaryExposureKeyFormat {
       return hash;
     }
 
-    public static TemporaryExposureKeyFormat.TEKSignature parseFrom(
-        java.nio.ByteBuffer data)
+    public static TemporaryExposureKeyFormat.TEKSignature parseFrom(java.nio.ByteBuffer data)
         throws com.google.protobuf.InvalidProtocolBufferException {
       return PARSER.parseFrom(data);
     }
+
     public static TemporaryExposureKeyFormat.TEKSignature parseFrom(
-        java.nio.ByteBuffer data,
-        com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+        java.nio.ByteBuffer data, com.google.protobuf.ExtensionRegistryLite extensionRegistry)
         throws com.google.protobuf.InvalidProtocolBufferException {
       return PARSER.parseFrom(data, extensionRegistry);
     }
+
     public static TemporaryExposureKeyFormat.TEKSignature parseFrom(
         com.google.protobuf.ByteString data)
         throws com.google.protobuf.InvalidProtocolBufferException {
       return PARSER.parseFrom(data);
     }
+
     public static TemporaryExposureKeyFormat.TEKSignature parseFrom(
         com.google.protobuf.ByteString data,
         com.google.protobuf.ExtensionRegistryLite extensionRegistry)
         throws com.google.protobuf.InvalidProtocolBufferException {
       return PARSER.parseFrom(data, extensionRegistry);
     }
+
     public static TemporaryExposureKeyFormat.TEKSignature parseFrom(byte[] data)
         throws com.google.protobuf.InvalidProtocolBufferException {
       return PARSER.parseFrom(data);
     }
+
     public static TemporaryExposureKeyFormat.TEKSignature parseFrom(
-        byte[] data,
-        com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+        byte[] data, com.google.protobuf.ExtensionRegistryLite extensionRegistry)
         throws com.google.protobuf.InvalidProtocolBufferException {
       return PARSER.parseFrom(data, extensionRegistry);
     }
+
     public static TemporaryExposureKeyFormat.TEKSignature parseFrom(java.io.InputStream input)
         throws java.io.IOException {
-      return com.google.protobuf.GeneratedMessageV3
-          .parseWithIOException(PARSER, input);
+      return com.google.protobuf.GeneratedMessageV3.parseWithIOException(PARSER, input);
     }
+
     public static TemporaryExposureKeyFormat.TEKSignature parseFrom(
-        java.io.InputStream input,
-        com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+        java.io.InputStream input, com.google.protobuf.ExtensionRegistryLite extensionRegistry)
         throws java.io.IOException {
-      return com.google.protobuf.GeneratedMessageV3
-          .parseWithIOException(PARSER, input, extensionRegistry);
+      return com.google.protobuf.GeneratedMessageV3.parseWithIOException(
+          PARSER, input, extensionRegistry);
     }
-    public static TemporaryExposureKeyFormat.TEKSignature parseDelimitedFrom(java.io.InputStream input)
-        throws java.io.IOException {
-      return com.google.protobuf.GeneratedMessageV3
-          .parseDelimitedWithIOException(PARSER, input);
-    }
+
     public static TemporaryExposureKeyFormat.TEKSignature parseDelimitedFrom(
-        java.io.InputStream input,
-        com.google.protobuf.ExtensionRegistryLite extensionRegistry)
-        throws java.io.IOException {
-      return com.google.protobuf.GeneratedMessageV3
-          .parseDelimitedWithIOException(PARSER, input, extensionRegistry);
+        java.io.InputStream input) throws java.io.IOException {
+      return com.google.protobuf.GeneratedMessageV3.parseDelimitedWithIOException(PARSER, input);
     }
+
+    public static TemporaryExposureKeyFormat.TEKSignature parseDelimitedFrom(
+        java.io.InputStream input, com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+        throws java.io.IOException {
+      return com.google.protobuf.GeneratedMessageV3.parseDelimitedWithIOException(
+          PARSER, input, extensionRegistry);
+    }
+
     public static TemporaryExposureKeyFormat.TEKSignature parseFrom(
-        com.google.protobuf.CodedInputStream input)
-        throws java.io.IOException {
-      return com.google.protobuf.GeneratedMessageV3
-          .parseWithIOException(PARSER, input);
+        com.google.protobuf.CodedInputStream input) throws java.io.IOException {
+      return com.google.protobuf.GeneratedMessageV3.parseWithIOException(PARSER, input);
     }
+
     public static TemporaryExposureKeyFormat.TEKSignature parseFrom(
         com.google.protobuf.CodedInputStream input,
         com.google.protobuf.ExtensionRegistryLite extensionRegistry)
         throws java.io.IOException {
-      return com.google.protobuf.GeneratedMessageV3
-          .parseWithIOException(PARSER, input, extensionRegistry);
+      return com.google.protobuf.GeneratedMessageV3.parseWithIOException(
+          PARSER, input, extensionRegistry);
     }
 
     @java.lang.Override
-    public Builder newBuilderForType() { return newBuilder(); }
+    public Builder newBuilderForType() {
+      return newBuilder();
+    }
+
     public static Builder newBuilder() {
       return DEFAULT_INSTANCE.toBuilder();
     }
+
     public static Builder newBuilder(TemporaryExposureKeyFormat.TEKSignature prototype) {
       return DEFAULT_INSTANCE.toBuilder().mergeFrom(prototype);
     }
+
     @java.lang.Override
     public Builder toBuilder() {
-      return this == DEFAULT_INSTANCE
-          ? new Builder() : new Builder().mergeFrom(this);
+      return this == DEFAULT_INSTANCE ? new Builder() : new Builder().mergeFrom(this);
     }
 
     @java.lang.Override
@@ -5599,15 +5838,13 @@ public final class TemporaryExposureKeyFormat {
       Builder builder = new Builder(parent);
       return builder;
     }
-    /**
-     * Protobuf type {@code TEKSignature}
-     */
-    public static final class Builder extends
-        com.google.protobuf.GeneratedMessageV3.Builder<Builder> implements
+    /** Protobuf type {@code TEKSignature} */
+    public static final class Builder
+        extends com.google.protobuf.GeneratedMessageV3.Builder<Builder>
+        implements
         // @@protoc_insertion_point(builder_implements:TEKSignature)
         TemporaryExposureKeyFormat.TEKSignatureOrBuilder {
-      public static final com.google.protobuf.Descriptors.Descriptor
-          getDescriptor() {
+      public static final com.google.protobuf.Descriptors.Descriptor getDescriptor() {
         return TemporaryExposureKeyFormat.internal_static_TEKSignature_descriptor;
       }
 
@@ -5616,7 +5853,8 @@ public final class TemporaryExposureKeyFormat {
           internalGetFieldAccessorTable() {
         return TemporaryExposureKeyFormat.internal_static_TEKSignature_fieldAccessorTable
             .ensureFieldAccessorsInitialized(
-                TemporaryExposureKeyFormat.TEKSignature.class, TemporaryExposureKeyFormat.TEKSignature.Builder.class);
+                TemporaryExposureKeyFormat.TEKSignature.class,
+                TemporaryExposureKeyFormat.TEKSignature.Builder.class);
       }
 
       // Construct using TemporaryExposureKeyFormat.TEKSignature.newBuilder()
@@ -5624,17 +5862,17 @@ public final class TemporaryExposureKeyFormat {
         maybeForceBuilderInitialization();
       }
 
-      private Builder(
-          com.google.protobuf.GeneratedMessageV3.BuilderParent parent) {
+      private Builder(com.google.protobuf.GeneratedMessageV3.BuilderParent parent) {
         super(parent);
         maybeForceBuilderInitialization();
       }
+
       private void maybeForceBuilderInitialization() {
-        if (com.google.protobuf.GeneratedMessageV3
-                .alwaysUseFieldBuilders) {
+        if (com.google.protobuf.GeneratedMessageV3.alwaysUseFieldBuilders) {
           getSignatureInfoFieldBuilder();
         }
       }
+
       @java.lang.Override
       public Builder clear() {
         super.clear();
@@ -5654,8 +5892,7 @@ public final class TemporaryExposureKeyFormat {
       }
 
       @java.lang.Override
-      public com.google.protobuf.Descriptors.Descriptor
-          getDescriptorForType() {
+      public com.google.protobuf.Descriptors.Descriptor getDescriptorForType() {
         return TemporaryExposureKeyFormat.internal_static_TEKSignature_descriptor;
       }
 
@@ -5675,7 +5912,8 @@ public final class TemporaryExposureKeyFormat {
 
       @java.lang.Override
       public TemporaryExposureKeyFormat.TEKSignature buildPartial() {
-        TemporaryExposureKeyFormat.TEKSignature result = new TemporaryExposureKeyFormat.TEKSignature(this);
+        TemporaryExposureKeyFormat.TEKSignature result =
+            new TemporaryExposureKeyFormat.TEKSignature(this);
         int from_bitField0_ = bitField0_;
         int to_bitField0_ = 0;
         if (((from_bitField0_ & 0x00000001) != 0)) {
@@ -5707,38 +5945,41 @@ public final class TemporaryExposureKeyFormat {
       public Builder clone() {
         return super.clone();
       }
+
       @java.lang.Override
       public Builder setField(
-          com.google.protobuf.Descriptors.FieldDescriptor field,
-          java.lang.Object value) {
+          com.google.protobuf.Descriptors.FieldDescriptor field, java.lang.Object value) {
         return super.setField(field, value);
       }
+
       @java.lang.Override
-      public Builder clearField(
-          com.google.protobuf.Descriptors.FieldDescriptor field) {
+      public Builder clearField(com.google.protobuf.Descriptors.FieldDescriptor field) {
         return super.clearField(field);
       }
+
       @java.lang.Override
-      public Builder clearOneof(
-          com.google.protobuf.Descriptors.OneofDescriptor oneof) {
+      public Builder clearOneof(com.google.protobuf.Descriptors.OneofDescriptor oneof) {
         return super.clearOneof(oneof);
       }
+
       @java.lang.Override
       public Builder setRepeatedField(
           com.google.protobuf.Descriptors.FieldDescriptor field,
-          int index, java.lang.Object value) {
+          int index,
+          java.lang.Object value) {
         return super.setRepeatedField(field, index, value);
       }
+
       @java.lang.Override
       public Builder addRepeatedField(
-          com.google.protobuf.Descriptors.FieldDescriptor field,
-          java.lang.Object value) {
+          com.google.protobuf.Descriptors.FieldDescriptor field, java.lang.Object value) {
         return super.addRepeatedField(field, value);
       }
+
       @java.lang.Override
       public Builder mergeFrom(com.google.protobuf.Message other) {
         if (other instanceof TemporaryExposureKeyFormat.TEKSignature) {
-          return mergeFrom((TemporaryExposureKeyFormat.TEKSignature)other);
+          return mergeFrom((TemporaryExposureKeyFormat.TEKSignature) other);
         } else {
           super.mergeFrom(other);
           return this;
@@ -5787,12 +6028,18 @@ public final class TemporaryExposureKeyFormat {
         }
         return this;
       }
+
       private int bitField0_;
 
       private TemporaryExposureKeyFormat.SignatureInfo signatureInfo_;
       private com.google.protobuf.SingleFieldBuilderV3<
-          TemporaryExposureKeyFormat.SignatureInfo, TemporaryExposureKeyFormat.SignatureInfo.Builder, TemporaryExposureKeyFormat.SignatureInfoOrBuilder> signatureInfoBuilder_;
+              TemporaryExposureKeyFormat.SignatureInfo,
+              TemporaryExposureKeyFormat.SignatureInfo.Builder,
+              TemporaryExposureKeyFormat.SignatureInfoOrBuilder>
+          signatureInfoBuilder_;
       /**
+       *
+       *
        * <pre>
        * Info about the signing key, version, algorithm, etc
        * </pre>
@@ -5803,6 +6050,8 @@ public final class TemporaryExposureKeyFormat {
         return ((bitField0_ & 0x00000001) != 0);
       }
       /**
+       *
+       *
        * <pre>
        * Info about the signing key, version, algorithm, etc
        * </pre>
@@ -5811,12 +6060,16 @@ public final class TemporaryExposureKeyFormat {
        */
       public TemporaryExposureKeyFormat.SignatureInfo getSignatureInfo() {
         if (signatureInfoBuilder_ == null) {
-          return signatureInfo_ == null ? TemporaryExposureKeyFormat.SignatureInfo.getDefaultInstance() : signatureInfo_;
+          return signatureInfo_ == null
+              ? TemporaryExposureKeyFormat.SignatureInfo.getDefaultInstance()
+              : signatureInfo_;
         } else {
           return signatureInfoBuilder_.getMessage();
         }
       }
       /**
+       *
+       *
        * <pre>
        * Info about the signing key, version, algorithm, etc
        * </pre>
@@ -5837,6 +6090,8 @@ public final class TemporaryExposureKeyFormat {
         return this;
       }
       /**
+       *
+       *
        * <pre>
        * Info about the signing key, version, algorithm, etc
        * </pre>
@@ -5855,6 +6110,8 @@ public final class TemporaryExposureKeyFormat {
         return this;
       }
       /**
+       *
+       *
        * <pre>
        * Info about the signing key, version, algorithm, etc
        * </pre>
@@ -5863,11 +6120,13 @@ public final class TemporaryExposureKeyFormat {
        */
       public Builder mergeSignatureInfo(TemporaryExposureKeyFormat.SignatureInfo value) {
         if (signatureInfoBuilder_ == null) {
-          if (((bitField0_ & 0x00000001) != 0) &&
-              signatureInfo_ != null &&
-              signatureInfo_ != TemporaryExposureKeyFormat.SignatureInfo.getDefaultInstance()) {
+          if (((bitField0_ & 0x00000001) != 0)
+              && signatureInfo_ != null
+              && signatureInfo_ != TemporaryExposureKeyFormat.SignatureInfo.getDefaultInstance()) {
             signatureInfo_ =
-              TemporaryExposureKeyFormat.SignatureInfo.newBuilder(signatureInfo_).mergeFrom(value).buildPartial();
+                TemporaryExposureKeyFormat.SignatureInfo.newBuilder(signatureInfo_)
+                    .mergeFrom(value)
+                    .buildPartial();
           } else {
             signatureInfo_ = value;
           }
@@ -5879,6 +6138,8 @@ public final class TemporaryExposureKeyFormat {
         return this;
       }
       /**
+       *
+       *
        * <pre>
        * Info about the signing key, version, algorithm, etc
        * </pre>
@@ -5896,6 +6157,8 @@ public final class TemporaryExposureKeyFormat {
         return this;
       }
       /**
+       *
+       *
        * <pre>
        * Info about the signing key, version, algorithm, etc
        * </pre>
@@ -5908,6 +6171,8 @@ public final class TemporaryExposureKeyFormat {
         return getSignatureInfoFieldBuilder().getBuilder();
       }
       /**
+       *
+       *
        * <pre>
        * Info about the signing key, version, algorithm, etc
        * </pre>
@@ -5918,11 +6183,14 @@ public final class TemporaryExposureKeyFormat {
         if (signatureInfoBuilder_ != null) {
           return signatureInfoBuilder_.getMessageOrBuilder();
         } else {
-          return signatureInfo_ == null ?
-              TemporaryExposureKeyFormat.SignatureInfo.getDefaultInstance() : signatureInfo_;
+          return signatureInfo_ == null
+              ? TemporaryExposureKeyFormat.SignatureInfo.getDefaultInstance()
+              : signatureInfo_;
         }
       }
       /**
+       *
+       *
        * <pre>
        * Info about the signing key, version, algorithm, etc
        * </pre>
@@ -5930,21 +6198,26 @@ public final class TemporaryExposureKeyFormat {
        * <code>optional .SignatureInfo signature_info = 1;</code>
        */
       private com.google.protobuf.SingleFieldBuilderV3<
-          TemporaryExposureKeyFormat.SignatureInfo, TemporaryExposureKeyFormat.SignatureInfo.Builder, TemporaryExposureKeyFormat.SignatureInfoOrBuilder> 
+              TemporaryExposureKeyFormat.SignatureInfo,
+              TemporaryExposureKeyFormat.SignatureInfo.Builder,
+              TemporaryExposureKeyFormat.SignatureInfoOrBuilder>
           getSignatureInfoFieldBuilder() {
         if (signatureInfoBuilder_ == null) {
-          signatureInfoBuilder_ = new com.google.protobuf.SingleFieldBuilderV3<
-              TemporaryExposureKeyFormat.SignatureInfo, TemporaryExposureKeyFormat.SignatureInfo.Builder, TemporaryExposureKeyFormat.SignatureInfoOrBuilder>(
-                  getSignatureInfo(),
-                  getParentForChildren(),
-                  isClean());
+          signatureInfoBuilder_ =
+              new com.google.protobuf.SingleFieldBuilderV3<
+                  TemporaryExposureKeyFormat.SignatureInfo,
+                  TemporaryExposureKeyFormat.SignatureInfo.Builder,
+                  TemporaryExposureKeyFormat.SignatureInfoOrBuilder>(
+                  getSignatureInfo(), getParentForChildren(), isClean());
           signatureInfo_ = null;
         }
         return signatureInfoBuilder_;
       }
 
-      private int batchNum_ ;
+      private int batchNum_;
       /**
+       *
+       *
        * <pre>
        * E.g., File 2 in batch size of 10. Ordinal, 1-based numbering.
        * E.g., Batch 2 of 10
@@ -5956,6 +6229,8 @@ public final class TemporaryExposureKeyFormat {
         return ((bitField0_ & 0x00000002) != 0);
       }
       /**
+       *
+       *
        * <pre>
        * E.g., File 2 in batch size of 10. Ordinal, 1-based numbering.
        * E.g., Batch 2 of 10
@@ -5967,6 +6242,8 @@ public final class TemporaryExposureKeyFormat {
         return batchNum_;
       }
       /**
+       *
+       *
        * <pre>
        * E.g., File 2 in batch size of 10. Ordinal, 1-based numbering.
        * E.g., Batch 2 of 10
@@ -5981,6 +6258,8 @@ public final class TemporaryExposureKeyFormat {
         return this;
       }
       /**
+       *
+       *
        * <pre>
        * E.g., File 2 in batch size of 10. Ordinal, 1-based numbering.
        * E.g., Batch 2 of 10
@@ -5995,31 +6274,23 @@ public final class TemporaryExposureKeyFormat {
         return this;
       }
 
-      private int batchSize_ ;
-      /**
-       * <code>optional int32 batch_size = 3;</code>
-       */
+      private int batchSize_;
+      /** <code>optional int32 batch_size = 3;</code> */
       public boolean hasBatchSize() {
         return ((bitField0_ & 0x00000004) != 0);
       }
-      /**
-       * <code>optional int32 batch_size = 3;</code>
-       */
+      /** <code>optional int32 batch_size = 3;</code> */
       public int getBatchSize() {
         return batchSize_;
       }
-      /**
-       * <code>optional int32 batch_size = 3;</code>
-       */
+      /** <code>optional int32 batch_size = 3;</code> */
       public Builder setBatchSize(int value) {
         bitField0_ |= 0x00000004;
         batchSize_ = value;
         onChanged();
         return this;
       }
-      /**
-       * <code>optional int32 batch_size = 3;</code>
-       */
+      /** <code>optional int32 batch_size = 3;</code> */
       public Builder clearBatchSize() {
         bitField0_ = (bitField0_ & ~0x00000004);
         batchSize_ = 0;
@@ -6029,6 +6300,8 @@ public final class TemporaryExposureKeyFormat {
 
       private com.google.protobuf.ByteString signature_ = com.google.protobuf.ByteString.EMPTY;
       /**
+       *
+       *
        * <pre>
        * Signature in X9.62 format (ASN.1 SEQUENCE of two INTEGER fields)
        * </pre>
@@ -6039,6 +6312,8 @@ public final class TemporaryExposureKeyFormat {
         return ((bitField0_ & 0x00000008) != 0);
       }
       /**
+       *
+       *
        * <pre>
        * Signature in X9.62 format (ASN.1 SEQUENCE of two INTEGER fields)
        * </pre>
@@ -6049,6 +6324,8 @@ public final class TemporaryExposureKeyFormat {
         return signature_;
       }
       /**
+       *
+       *
        * <pre>
        * Signature in X9.62 format (ASN.1 SEQUENCE of two INTEGER fields)
        * </pre>
@@ -6057,14 +6334,16 @@ public final class TemporaryExposureKeyFormat {
        */
       public Builder setSignature(com.google.protobuf.ByteString value) {
         if (value == null) {
-    throw new NullPointerException();
-  }
-  bitField0_ |= 0x00000008;
+          throw new NullPointerException();
+        }
+        bitField0_ |= 0x00000008;
         signature_ = value;
         onChanged();
         return this;
       }
       /**
+       *
+       *
        * <pre>
        * Signature in X9.62 format (ASN.1 SEQUENCE of two INTEGER fields)
        * </pre>
@@ -6077,6 +6356,7 @@ public final class TemporaryExposureKeyFormat {
         onChanged();
         return this;
       }
+
       @java.lang.Override
       public final Builder setUnknownFields(
           final com.google.protobuf.UnknownFieldSet unknownFields) {
@@ -6089,12 +6369,12 @@ public final class TemporaryExposureKeyFormat {
         return super.mergeUnknownFields(unknownFields);
       }
 
-
       // @@protoc_insertion_point(builder_scope:TEKSignature)
     }
 
     // @@protoc_insertion_point(class_scope:TEKSignature)
     private static final TemporaryExposureKeyFormat.TEKSignature DEFAULT_INSTANCE;
+
     static {
       DEFAULT_INSTANCE = new TemporaryExposureKeyFormat.TEKSignature();
     }
@@ -6103,16 +6383,17 @@ public final class TemporaryExposureKeyFormat {
       return DEFAULT_INSTANCE;
     }
 
-    @java.lang.Deprecated public static final com.google.protobuf.Parser<TEKSignature>
-        PARSER = new com.google.protobuf.AbstractParser<TEKSignature>() {
-      @java.lang.Override
-      public TEKSignature parsePartialFrom(
-          com.google.protobuf.CodedInputStream input,
-          com.google.protobuf.ExtensionRegistryLite extensionRegistry)
-          throws com.google.protobuf.InvalidProtocolBufferException {
-        return new TEKSignature(input, extensionRegistry);
-      }
-    };
+    @java.lang.Deprecated
+    public static final com.google.protobuf.Parser<TEKSignature> PARSER =
+        new com.google.protobuf.AbstractParser<TEKSignature>() {
+          @java.lang.Override
+          public TEKSignature parsePartialFrom(
+              com.google.protobuf.CodedInputStream input,
+              com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+              throws com.google.protobuf.InvalidProtocolBufferException {
+            return new TEKSignature(input, extensionRegistry);
+          }
+        };
 
     public static com.google.protobuf.Parser<TEKSignature> parser() {
       return PARSER;
@@ -6127,104 +6408,112 @@ public final class TemporaryExposureKeyFormat {
     public TemporaryExposureKeyFormat.TEKSignature getDefaultInstanceForType() {
       return DEFAULT_INSTANCE;
     }
-
   }
 
   private static final com.google.protobuf.Descriptors.Descriptor
-    internal_static_TemporaryExposureKeyExport_descriptor;
-  private static final 
-    com.google.protobuf.GeneratedMessageV3.FieldAccessorTable
+      internal_static_TemporaryExposureKeyExport_descriptor;
+  private static final com.google.protobuf.GeneratedMessageV3.FieldAccessorTable
       internal_static_TemporaryExposureKeyExport_fieldAccessorTable;
   private static final com.google.protobuf.Descriptors.Descriptor
-    internal_static_SignatureInfo_descriptor;
-  private static final 
-    com.google.protobuf.GeneratedMessageV3.FieldAccessorTable
+      internal_static_SignatureInfo_descriptor;
+  private static final com.google.protobuf.GeneratedMessageV3.FieldAccessorTable
       internal_static_SignatureInfo_fieldAccessorTable;
   private static final com.google.protobuf.Descriptors.Descriptor
-    internal_static_TemporaryExposureKey_descriptor;
-  private static final 
-    com.google.protobuf.GeneratedMessageV3.FieldAccessorTable
+      internal_static_TemporaryExposureKey_descriptor;
+  private static final com.google.protobuf.GeneratedMessageV3.FieldAccessorTable
       internal_static_TemporaryExposureKey_fieldAccessorTable;
   private static final com.google.protobuf.Descriptors.Descriptor
-    internal_static_TEKSignatureList_descriptor;
-  private static final 
-    com.google.protobuf.GeneratedMessageV3.FieldAccessorTable
+      internal_static_TEKSignatureList_descriptor;
+  private static final com.google.protobuf.GeneratedMessageV3.FieldAccessorTable
       internal_static_TEKSignatureList_fieldAccessorTable;
   private static final com.google.protobuf.Descriptors.Descriptor
-    internal_static_TEKSignature_descriptor;
-  private static final 
-    com.google.protobuf.GeneratedMessageV3.FieldAccessorTable
+      internal_static_TEKSignature_descriptor;
+  private static final com.google.protobuf.GeneratedMessageV3.FieldAccessorTable
       internal_static_TEKSignature_fieldAccessorTable;
 
-  public static com.google.protobuf.Descriptors.FileDescriptor
-      getDescriptor() {
+  public static com.google.protobuf.Descriptors.FileDescriptor getDescriptor() {
     return descriptor;
   }
-  private static  com.google.protobuf.Descriptors.FileDescriptor
-      descriptor;
+
+  private static com.google.protobuf.Descriptors.FileDescriptor descriptor;
+
   static {
     java.lang.String[] descriptorData = {
-      "\n TemporaryExposureKeyFormat.proto\"\321\001\n\032T" +
-      "emporaryExposureKeyExport\022\027\n\017start_times" +
-      "tamp\030\001 \001(\006\022\025\n\rend_timestamp\030\002 \001(\006\022\016\n\006reg" +
-      "ion\030\003 \001(\t\022\021\n\tbatch_num\030\004 \001(\005\022\022\n\nbatch_si" +
-      "ze\030\005 \001(\005\022\'\n\017signature_infos\030\006 \003(\0132\016.Sign" +
-      "atureInfo\022#\n\004keys\030\007 \003(\0132\025.TemporaryExpos" +
-      "ureKey\"\233\001\n\rSignatureInfo\022\025\n\rapp_bundle_i" +
-      "d\030\001 \001(\t\022\027\n\017android_package\030\002 \001(\t\022 \n\030veri" +
-      "fication_key_version\030\003 \001(\t\022\033\n\023verificati" +
-      "on_key_id\030\004 \001(\t\022\033\n\023signature_algorithm\030\005" +
-      " \001(\t\"\215\001\n\024TemporaryExposureKey\022\020\n\010key_dat" +
-      "a\030\001 \001(\014\022\037\n\027transmission_risk_level\030\002 \001(\005" +
-      "\022%\n\035rolling_start_interval_number\030\003 \001(\005\022" +
-      "\033\n\016rolling_period\030\004 \001(\005:\003144\"5\n\020TEKSigna" +
-      "tureList\022!\n\nsignatures\030\001 \003(\0132\r.TEKSignat" +
-      "ure\"p\n\014TEKSignature\022&\n\016signature_info\030\001 " +
-      "\001(\0132\016.SignatureInfo\022\021\n\tbatch_num\030\002 \001(\005\022\022" +
-      "\n\nbatch_size\030\003 \001(\005\022\021\n\tsignature\030\004 \001(\014"
+      "\n TemporaryExposureKeyFormat.proto\"\321\001\n\032T"
+          + "emporaryExposureKeyExport\022\027\n\017start_times"
+          + "tamp\030\001 \001(\006\022\025\n\rend_timestamp\030\002 \001(\006\022\016\n\006reg"
+          + "ion\030\003 \001(\t\022\021\n\tbatch_num\030\004 \001(\005\022\022\n\nbatch_si"
+          + "ze\030\005 \001(\005\022\'\n\017signature_infos\030\006 \003(\0132\016.Sign"
+          + "atureInfo\022#\n\004keys\030\007 \003(\0132\025.TemporaryExpos"
+          + "ureKey\"\233\001\n\rSignatureInfo\022\025\n\rapp_bundle_i"
+          + "d\030\001 \001(\t\022\027\n\017android_package\030\002 \001(\t\022 \n\030veri"
+          + "fication_key_version\030\003 \001(\t\022\033\n\023verificati"
+          + "on_key_id\030\004 \001(\t\022\033\n\023signature_algorithm\030\005"
+          + " \001(\t\"\215\001\n\024TemporaryExposureKey\022\020\n\010key_dat"
+          + "a\030\001 \001(\014\022\037\n\027transmission_risk_level\030\002 \001(\005"
+          + "\022%\n\035rolling_start_interval_number\030\003 \001(\005\022"
+          + "\033\n\016rolling_period\030\004 \001(\005:\003144\"5\n\020TEKSigna"
+          + "tureList\022!\n\nsignatures\030\001 \003(\0132\r.TEKSignat"
+          + "ure\"p\n\014TEKSignature\022&\n\016signature_info\030\001 "
+          + "\001(\0132\016.SignatureInfo\022\021\n\tbatch_num\030\002 \001(\005\022\022"
+          + "\n\nbatch_size\030\003 \001(\005\022\021\n\tsignature\030\004 \001(\014"
     };
     com.google.protobuf.Descriptors.FileDescriptor.InternalDescriptorAssigner assigner =
-        new com.google.protobuf.Descriptors.FileDescriptor.    InternalDescriptorAssigner() {
+        new com.google.protobuf.Descriptors.FileDescriptor.InternalDescriptorAssigner() {
           public com.google.protobuf.ExtensionRegistry assignDescriptors(
               com.google.protobuf.Descriptors.FileDescriptor root) {
             descriptor = root;
             return null;
           }
         };
-    com.google.protobuf.Descriptors.FileDescriptor
-      .internalBuildGeneratedFileFrom(descriptorData,
-        new com.google.protobuf.Descriptors.FileDescriptor[] {
-        }, assigner);
+    com.google.protobuf.Descriptors.FileDescriptor.internalBuildGeneratedFileFrom(
+        descriptorData, new com.google.protobuf.Descriptors.FileDescriptor[] {}, assigner);
     internal_static_TemporaryExposureKeyExport_descriptor =
-      getDescriptor().getMessageTypes().get(0);
-    internal_static_TemporaryExposureKeyExport_fieldAccessorTable = new
-      com.google.protobuf.GeneratedMessageV3.FieldAccessorTable(
-        internal_static_TemporaryExposureKeyExport_descriptor,
-        new java.lang.String[] { "StartTimestamp", "EndTimestamp", "Region", "BatchNum", "BatchSize", "SignatureInfos", "Keys", });
-    internal_static_SignatureInfo_descriptor =
-      getDescriptor().getMessageTypes().get(1);
-    internal_static_SignatureInfo_fieldAccessorTable = new
-      com.google.protobuf.GeneratedMessageV3.FieldAccessorTable(
-        internal_static_SignatureInfo_descriptor,
-        new java.lang.String[] { "AppBundleId", "AndroidPackage", "VerificationKeyVersion", "VerificationKeyId", "SignatureAlgorithm", });
-    internal_static_TemporaryExposureKey_descriptor =
-      getDescriptor().getMessageTypes().get(2);
-    internal_static_TemporaryExposureKey_fieldAccessorTable = new
-      com.google.protobuf.GeneratedMessageV3.FieldAccessorTable(
-        internal_static_TemporaryExposureKey_descriptor,
-        new java.lang.String[] { "KeyData", "TransmissionRiskLevel", "RollingStartIntervalNumber", "RollingPeriod", });
-    internal_static_TEKSignatureList_descriptor =
-      getDescriptor().getMessageTypes().get(3);
-    internal_static_TEKSignatureList_fieldAccessorTable = new
-      com.google.protobuf.GeneratedMessageV3.FieldAccessorTable(
-        internal_static_TEKSignatureList_descriptor,
-        new java.lang.String[] { "Signatures", });
-    internal_static_TEKSignature_descriptor =
-      getDescriptor().getMessageTypes().get(4);
-    internal_static_TEKSignature_fieldAccessorTable = new
-      com.google.protobuf.GeneratedMessageV3.FieldAccessorTable(
-        internal_static_TEKSignature_descriptor,
-        new java.lang.String[] { "SignatureInfo", "BatchNum", "BatchSize", "Signature", });
+        getDescriptor().getMessageTypes().get(0);
+    internal_static_TemporaryExposureKeyExport_fieldAccessorTable =
+        new com.google.protobuf.GeneratedMessageV3.FieldAccessorTable(
+            internal_static_TemporaryExposureKeyExport_descriptor,
+            new java.lang.String[] {
+              "StartTimestamp",
+              "EndTimestamp",
+              "Region",
+              "BatchNum",
+              "BatchSize",
+              "SignatureInfos",
+              "Keys",
+            });
+    internal_static_SignatureInfo_descriptor = getDescriptor().getMessageTypes().get(1);
+    internal_static_SignatureInfo_fieldAccessorTable =
+        new com.google.protobuf.GeneratedMessageV3.FieldAccessorTable(
+            internal_static_SignatureInfo_descriptor,
+            new java.lang.String[] {
+              "AppBundleId",
+              "AndroidPackage",
+              "VerificationKeyVersion",
+              "VerificationKeyId",
+              "SignatureAlgorithm",
+            });
+    internal_static_TemporaryExposureKey_descriptor = getDescriptor().getMessageTypes().get(2);
+    internal_static_TemporaryExposureKey_fieldAccessorTable =
+        new com.google.protobuf.GeneratedMessageV3.FieldAccessorTable(
+            internal_static_TemporaryExposureKey_descriptor,
+            new java.lang.String[] {
+              "KeyData", "TransmissionRiskLevel", "RollingStartIntervalNumber", "RollingPeriod",
+            });
+    internal_static_TEKSignatureList_descriptor = getDescriptor().getMessageTypes().get(3);
+    internal_static_TEKSignatureList_fieldAccessorTable =
+        new com.google.protobuf.GeneratedMessageV3.FieldAccessorTable(
+            internal_static_TEKSignatureList_descriptor,
+            new java.lang.String[] {
+              "Signatures",
+            });
+    internal_static_TEKSignature_descriptor = getDescriptor().getMessageTypes().get(4);
+    internal_static_TEKSignature_fieldAccessorTable =
+        new com.google.protobuf.GeneratedMessageV3.FieldAccessorTable(
+            internal_static_TEKSignature_descriptor,
+            new java.lang.String[] {
+              "SignatureInfo", "BatchNum", "BatchSize", "Signature",
+            });
   }
 
   // @@protoc_insertion_point(outer_class_scope)

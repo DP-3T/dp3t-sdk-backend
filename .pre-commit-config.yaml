@@ -1,0 +1,5 @@
+repos:
+- repo: https://github.com/c4dt/google-style-precommit-hook
+  rev: v1.0
+  hooks:
+  - id: google-style-java

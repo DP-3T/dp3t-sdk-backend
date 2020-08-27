@@ -10,42 +10,38 @@
 
 package org.dpppt.backend.sdk.model;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import javax.validation.constraints.NotNull;
 
-import com.fasterxml.jackson.annotation.JsonIgnore;
-
 public class Exposee {
-	@JsonIgnore
-	private Integer Id;
+  @JsonIgnore private Integer Id;
 
-	@NotNull
-	private String key;
+  @NotNull private String key;
 
-	@NotNull
-	private long keyDate;
+  @NotNull private long keyDate;
 
-	public String getKey() {
-		return key;
-	}
+  public String getKey() {
+    return key;
+  }
 
-	public void setKey(String key) {
-		this.key = key;
-	}
+  public void setKey(String key) {
+    this.key = key;
+  }
 
-	@JsonIgnore
-	public Integer getId() {
-		return Id;
-	}
+  @JsonIgnore
+  public Integer getId() {
+    return Id;
+  }
 
-	public void setId(Integer id) {
-		Id = id;
-	}
+  public void setId(Integer id) {
+    Id = id;
+  }
 
-	public long getKeyDate() {
-		return keyDate;
-	}
+  public long getKeyDate() {
+    return keyDate;
+  }
 
-	public void setKeyDate(long keyDate) {
-		this.keyDate = keyDate;
-	}
+  public void setKeyDate(long keyDate) {
+    this.keyDate = keyDate;
+  }
 }

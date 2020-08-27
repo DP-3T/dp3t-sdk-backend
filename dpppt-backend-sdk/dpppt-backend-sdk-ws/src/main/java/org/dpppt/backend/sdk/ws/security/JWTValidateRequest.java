@@ -17,66 +17,67 @@ import org.dpppt.backend.sdk.ws.util.ValidationUtils;
 import org.springframework.security.oauth2.jwt.Jwt;
 
 public class JWTValidateRequest implements ValidateRequest {
-	private final ValidationUtils validationUtils;
-	public JWTValidateRequest(ValidationUtils validationUtils) {
-		this.validationUtils = validationUtils;
-	}
+  private final ValidationUtils validationUtils;
 
-	@Override
-	public boolean isValid(Object authObject) {
-		if (authObject instanceof Jwt) {
-			Jwt token = (Jwt) authObject;
-			return token.containsClaim("scope") && token.getClaim("scope").equals("exposed");
-		}
-		return false;
-	}
+  public JWTValidateRequest(ValidationUtils validationUtils) {
+    this.validationUtils = validationUtils;
+  }
 
-	@Override
-	public long getKeyDate(UTCInstant now, Object authObject, Object others) throws InvalidDateException {
-		if (authObject instanceof Jwt) {
-			Jwt token = (Jwt) authObject;
-			var jwtKeyDate = UTCInstant.parseDate(token.getClaim("onset"));
-			if (others instanceof ExposeeRequest) {
-				ExposeeRequest request = (ExposeeRequest) others;
-				var requestKeyDate = UTCInstant.ofEpochMillis(request.getKeyDate());
-				if (!validationUtils.isDateInRange(requestKeyDate, now)
-				 || requestKeyDate.isBeforeEpochMillisOf(jwtKeyDate)){
-					throw new InvalidDateException();
-				} 
-				jwtKeyDate = UTCInstant.ofEpochMillis(request.getKeyDate());
-			}
-			return jwtKeyDate.getTimestamp();
-		}
-		throw new IllegalArgumentException();
-	}
+  @Override
+  public boolean isValid(Object authObject) {
+    if (authObject instanceof Jwt) {
+      Jwt token = (Jwt) authObject;
+      return token.containsClaim("scope") && token.getClaim("scope").equals("exposed");
+    }
+    return false;
+  }
 
-	@Override
-	public boolean isFakeRequest(Object authObject, Object others) {
-		if (authObject instanceof Jwt && others instanceof ExposeeRequest) {
-			Jwt token = (Jwt) authObject;
-			ExposeeRequest request = (ExposeeRequest) others;
-			boolean fake = false;
-			if (token.containsClaim("fake") && token.getClaimAsString("fake").equals("1")) {
-				fake = true;
-			}
-			if (request.isFake() == 1) {
-				fake = true;
-			}
-			return fake;
-		}
-		if(authObject instanceof Jwt && others instanceof ExposeeRequestList) {
-			Jwt token = (Jwt) authObject;
-			ExposeeRequestList request = (ExposeeRequestList) others;
-			boolean fake = false;
-			if (token.containsClaim("fake") && token.getClaimAsString("fake").equals("1")) {
-				fake = true;
-			}
-			if (request.isFake() == 1) {
-				fake = true;
-			}
-			return fake;
-		}
-		throw new IllegalArgumentException();
-	}
+  @Override
+  public long getKeyDate(UTCInstant now, Object authObject, Object others)
+      throws InvalidDateException {
+    if (authObject instanceof Jwt) {
+      Jwt token = (Jwt) authObject;
+      var jwtKeyDate = UTCInstant.parseDate(token.getClaim("onset"));
+      if (others instanceof ExposeeRequest) {
+        ExposeeRequest request = (ExposeeRequest) others;
+        var requestKeyDate = UTCInstant.ofEpochMillis(request.getKeyDate());
+        if (!validationUtils.isDateInRange(requestKeyDate, now)
+            || requestKeyDate.isBeforeEpochMillisOf(jwtKeyDate)) {
+          throw new InvalidDateException();
+        }
+        jwtKeyDate = UTCInstant.ofEpochMillis(request.getKeyDate());
+      }
+      return jwtKeyDate.getTimestamp();
+    }
+    throw new IllegalArgumentException();
+  }
 
+  @Override
+  public boolean isFakeRequest(Object authObject, Object others) {
+    if (authObject instanceof Jwt && others instanceof ExposeeRequest) {
+      Jwt token = (Jwt) authObject;
+      ExposeeRequest request = (ExposeeRequest) others;
+      boolean fake = false;
+      if (token.containsClaim("fake") && token.getClaimAsString("fake").equals("1")) {
+        fake = true;
+      }
+      if (request.isFake() == 1) {
+        fake = true;
+      }
+      return fake;
+    }
+    if (authObject instanceof Jwt && others instanceof ExposeeRequestList) {
+      Jwt token = (Jwt) authObject;
+      ExposeeRequestList request = (ExposeeRequestList) others;
+      boolean fake = false;
+      if (token.containsClaim("fake") && token.getClaimAsString("fake").equals("1")) {
+        fake = true;
+      }
+      if (request.isFake() == 1) {
+        fake = true;
+      }
+      return fake;
+    }
+    throw new IllegalArgumentException();
+  }
 }

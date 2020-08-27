@@ -12,59 +12,61 @@ package org.dpppt.backend.sdk.ws.security.gaen;
 
 import org.dpppt.backend.sdk.model.gaen.GaenKey;
 import org.dpppt.backend.sdk.model.gaen.GaenUnit;
+import org.dpppt.backend.sdk.utils.UTCInstant;
 import org.dpppt.backend.sdk.ws.security.ValidateRequest;
 import org.dpppt.backend.sdk.ws.util.ValidationUtils;
-import org.dpppt.backend.sdk.utils.UTCInstant;
 import org.springframework.security.oauth2.jwt.Jwt;
 
 public class JWTValidateRequest implements ValidateRequest {
-	private final ValidationUtils validationUtils;
-	public JWTValidateRequest(ValidationUtils validationUtils) {
-		this.validationUtils = validationUtils;
-	}
-	@Override
-	public boolean isValid(Object authObject) {
-		if (authObject instanceof Jwt) {
-			Jwt token = (Jwt) authObject;
-			return token.containsClaim("scope") && token.getClaim("scope").equals("exposed");
-		}
-		return false;
-	}
+  private final ValidationUtils validationUtils;
 
-	@Override
-	public long getKeyDate(UTCInstant now, Object authObject, Object others) throws InvalidDateException {
-		if (authObject instanceof Jwt) {
-			Jwt token = (Jwt) authObject;
-			var jwtKeyDate = UTCInstant.parseDate(token.getClaim("onset"));
-			if (others instanceof GaenKey) {
-                GaenKey request = (GaenKey) others;
-                var keyDate = UTCInstant.of(request.getRollingStartNumber(), GaenUnit.TenMinutes);
-				if (!validationUtils.isDateInRange(keyDate,now)
-				 ||	keyDate.isBeforeEpochMillisOf(jwtKeyDate)) {
-					throw new InvalidDateException();
-				}
-				jwtKeyDate = keyDate;
-			}
-			return jwtKeyDate.getTimestamp();
-		}
-		throw new IllegalArgumentException();
-	}
+  public JWTValidateRequest(ValidationUtils validationUtils) {
+    this.validationUtils = validationUtils;
+  }
 
-	@Override
-	public boolean isFakeRequest(Object authObject, Object others) {
-		if (authObject instanceof Jwt && others instanceof GaenKey) {
-			Jwt token = (Jwt) authObject;
-			GaenKey request = (GaenKey) others;
-			boolean fake = false;
-			if (token.containsClaim("fake") && token.getClaimAsString("fake").equals("1")) {
-				fake = true;
-			}
-			if (request.getFake() == 1) {
-				fake = true;
-			}
-			return fake;
-		}
-		throw new IllegalArgumentException();
-	}
+  @Override
+  public boolean isValid(Object authObject) {
+    if (authObject instanceof Jwt) {
+      Jwt token = (Jwt) authObject;
+      return token.containsClaim("scope") && token.getClaim("scope").equals("exposed");
+    }
+    return false;
+  }
 
+  @Override
+  public long getKeyDate(UTCInstant now, Object authObject, Object others)
+      throws InvalidDateException {
+    if (authObject instanceof Jwt) {
+      Jwt token = (Jwt) authObject;
+      var jwtKeyDate = UTCInstant.parseDate(token.getClaim("onset"));
+      if (others instanceof GaenKey) {
+        GaenKey request = (GaenKey) others;
+        var keyDate = UTCInstant.of(request.getRollingStartNumber(), GaenUnit.TenMinutes);
+        if (!validationUtils.isDateInRange(keyDate, now)
+            || keyDate.isBeforeEpochMillisOf(jwtKeyDate)) {
+          throw new InvalidDateException();
+        }
+        jwtKeyDate = keyDate;
+      }
+      return jwtKeyDate.getTimestamp();
+    }
+    throw new IllegalArgumentException();
+  }
+
+  @Override
+  public boolean isFakeRequest(Object authObject, Object others) {
+    if (authObject instanceof Jwt && others instanceof GaenKey) {
+      Jwt token = (Jwt) authObject;
+      GaenKey request = (GaenKey) others;
+      boolean fake = false;
+      if (token.containsClaim("fake") && token.getClaimAsString("fake").equals("1")) {
+        fake = true;
+      }
+      if (request.getFake() == 1) {
+        fake = true;
+      }
+      return fake;
+    }
+    throw new IllegalArgumentException();
+  }
 }

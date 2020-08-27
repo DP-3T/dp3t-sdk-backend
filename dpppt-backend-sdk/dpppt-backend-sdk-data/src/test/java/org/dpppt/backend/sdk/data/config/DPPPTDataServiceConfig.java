@@ -10,6 +10,9 @@
 
 package org.dpppt.backend.sdk.data.config;
 
+import java.security.NoSuchAlgorithmException;
+import java.time.Duration;
+import javax.sql.DataSource;
 import org.dpppt.backend.sdk.data.DPPPTDataService;
 import org.dpppt.backend.sdk.data.JDBCDPPPTDataServiceImpl;
 import org.dpppt.backend.sdk.data.JDBCRedeemDataServiceImpl;
@@ -24,52 +27,51 @@ import org.springframework.context.annotation.Configuration;
 import org.springframework.jdbc.datasource.embedded.EmbeddedDatabaseBuilder;
 import org.springframework.jdbc.datasource.embedded.EmbeddedDatabaseType;
 
-import java.security.NoSuchAlgorithmException;
-import java.time.Duration;
-
-import javax.sql.DataSource;
-
 @Configuration
 public class DPPPTDataServiceConfig {
 
-    @Value("${ws.gaen.randomkeysenabled: true}")
-    boolean randomkeysenabled;
-    @Value("${ws.exposedlist.releaseBucketDuration: 7200000}")
-	long releaseBucketDuration;
+  @Value("${ws.gaen.randomkeysenabled: true}")
+  boolean randomkeysenabled;
 
-    @Autowired
-    DataSource dataSource;
+  @Value("${ws.exposedlist.releaseBucketDuration: 7200000}")
+  long releaseBucketDuration;
 
-    @Bean
-    public DataSource fakeDataSource() {
-        return new EmbeddedDatabaseBuilder().generateUniqueName(true).setType(EmbeddedDatabaseType.HSQL).build();
-    }
+  @Autowired DataSource dataSource;
 
-    @Autowired
-    String dbType;
+  @Bean
+  public DataSource fakeDataSource() {
+    return new EmbeddedDatabaseBuilder()
+        .generateUniqueName(true)
+        .setType(EmbeddedDatabaseType.HSQL)
+        .build();
+  }
 
-    @Bean
-    public DPPPTDataService DPPPTDataService() {
-        return new JDBCDPPPTDataServiceImpl(dbType, dataSource);
-    }
+  @Autowired String dbType;
 
-    @Bean
-    public GAENDataService gaenDataService() {
-        return new JDBCGAENDataServiceImpl(dbType, dataSource, Duration.ofMillis(releaseBucketDuration));
-    }
+  @Bean
+  public DPPPTDataService DPPPTDataService() {
+    return new JDBCDPPPTDataServiceImpl(dbType, dataSource);
+  }
 
-    @Bean
-    public RedeemDataService redeemDataService() {
-        return new JDBCRedeemDataServiceImpl(dataSource);
-    }
+  @Bean
+  public GAENDataService gaenDataService() {
+    return new JDBCGAENDataServiceImpl(
+        dbType, dataSource, Duration.ofMillis(releaseBucketDuration));
+  }
 
-    @Bean
-    public GAENDataService fakeService() {
-        return new JDBCGAENDataServiceImpl("hsql", fakeDataSource(), Duration.ofMillis(releaseBucketDuration));
-    }
+  @Bean
+  public RedeemDataService redeemDataService() {
+    return new JDBCRedeemDataServiceImpl(dataSource);
+  }
 
-    @Bean
-    public FakeKeyService fakeKeyService() throws NoSuchAlgorithmException {
-        return new FakeKeyService(fakeService(), 10, 16, Duration.ofDays(21), randomkeysenabled);
-    }
+  @Bean
+  public GAENDataService fakeService() {
+    return new JDBCGAENDataServiceImpl(
+        "hsql", fakeDataSource(), Duration.ofMillis(releaseBucketDuration));
+  }
+
+  @Bean
+  public FakeKeyService fakeKeyService() throws NoSuchAlgorithmException {
+    return new FakeKeyService(fakeService(), 10, 16, Duration.ofDays(21), randomkeysenabled);
+  }
 }

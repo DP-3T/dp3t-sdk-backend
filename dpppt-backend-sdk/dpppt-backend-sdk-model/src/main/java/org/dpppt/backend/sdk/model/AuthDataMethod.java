@@ -11,6 +11,6 @@
 package org.dpppt.backend.sdk.model;
 
 public enum AuthDataMethod {
-
-	NONE, REDEEM_CODE;
+  NONE,
+  REDEEM_CODE;
 }

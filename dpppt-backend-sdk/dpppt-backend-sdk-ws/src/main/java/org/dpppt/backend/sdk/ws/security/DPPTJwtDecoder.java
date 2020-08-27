@@ -10,54 +10,52 @@
 
 package org.dpppt.backend.sdk.ws.security;
 
+import io.jsonwebtoken.Claims;
+import io.jsonwebtoken.JwtParser;
+import io.jsonwebtoken.Jwts;
 import java.security.PublicKey;
-
 import org.springframework.security.oauth2.core.OAuth2TokenValidator;
 import org.springframework.security.oauth2.jwt.Jwt;
 import org.springframework.security.oauth2.jwt.JwtDecoder;
 import org.springframework.security.oauth2.jwt.JwtException;
 
-import io.jsonwebtoken.Claims;
-import io.jsonwebtoken.JwtParser;
-import io.jsonwebtoken.Jwts;
-
 public class DPPTJwtDecoder implements JwtDecoder {
-	private final JwtParser parser;
-	private OAuth2TokenValidator<Jwt> validator;
+  private final JwtParser parser;
+  private OAuth2TokenValidator<Jwt> validator;
 
-	public DPPTJwtDecoder(PublicKey publicKey) {
-		parser = Jwts.parserBuilder().setSigningKey(publicKey).build();
-	}
+  public DPPTJwtDecoder(PublicKey publicKey) {
+    parser = Jwts.parserBuilder().setSigningKey(publicKey).build();
+  }
 
-	public void setJwtValidator(OAuth2TokenValidator<Jwt> validator) {
-		this.validator = validator;
-	}
+  public void setJwtValidator(OAuth2TokenValidator<Jwt> validator) {
+    this.validator = validator;
+  }
 
-	@Override
-	public Jwt decode(String token) throws JwtException {
-		try {
-			var t = parser.parseClaimsJws(token);
+  @Override
+  public Jwt decode(String token) throws JwtException {
+    try {
+      var t = parser.parseClaimsJws(token);
 
-			var headers = t.getHeader();
-			var claims = (Claims) t.getBody();
-			var iat = claims.getIssuedAt();
+      var headers = t.getHeader();
+      var claims = (Claims) t.getBody();
+      var iat = claims.getIssuedAt();
 
-			var springJwt = new Jwt(token, iat.toInstant(), claims.getExpiration().toInstant(), headers, claims);
+      var springJwt =
+          new Jwt(token, iat.toInstant(), claims.getExpiration().toInstant(), headers, claims);
 
-			if (validator != null) {
-				var validationResult = validator.validate(springJwt);
-				if (validationResult.hasErrors()) {
-					String errorMessage = "";
-					for (var error : validationResult.getErrors()) {
-						errorMessage += error.getDescription() + "\n";
-					}
-					throw new JwtException(errorMessage);
-				}
-			}
-			return springJwt;
-		} catch (io.jsonwebtoken.JwtException | IllegalArgumentException ex) {
-			throw new JwtException(ex.getMessage());
-		}
-
-	}
+      if (validator != null) {
+        var validationResult = validator.validate(springJwt);
+        if (validationResult.hasErrors()) {
+          String errorMessage = "";
+          for (var error : validationResult.getErrors()) {
+            errorMessage += error.getDescription() + "\n";
+          }
+          throw new JwtException(errorMessage);
+        }
+      }
+      return springJwt;
+    } catch (io.jsonwebtoken.JwtException | IllegalArgumentException ex) {
+      throw new JwtException(ex.getMessage());
+    }
+  }
 }
