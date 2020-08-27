@@ -31,6 +31,7 @@ import org.dpppt.backend.sdk.model.gaen.GaenKey;
 import org.dpppt.backend.sdk.model.gaen.GaenRequest;
 import org.dpppt.backend.sdk.model.gaen.GaenSecondDay;
 import org.dpppt.backend.sdk.model.gaen.GaenUnit;
+import org.dpppt.backend.sdk.utils.DurationExpiredException;
 import org.dpppt.backend.sdk.utils.UTCInstant;
 import org.dpppt.backend.sdk.ws.security.ValidateRequest;
 import org.dpppt.backend.sdk.ws.security.ValidateRequest.InvalidDateException;
@@ -207,7 +208,11 @@ public class GaenController {
     }
     Callable<ResponseEntity<String>> cb =
         () -> {
-          normalizeRequestTime(now.getTimestamp());
+          try {
+            now.normalizeDuration(requestTime);
+          } catch (DurationExpiredException e) {
+            logger.error("Total time spent in endpoint is longer than requestTime");
+          }
           return responseBuilder.body("OK");
         };
     return cb;
@@ -281,7 +286,11 @@ public class GaenController {
     }
 
     return () -> {
-      normalizeRequestTime(now.getTimestamp());
+      try {
+        now.normalizeDuration(requestTime);
+      } catch (DurationExpiredException e) {
+        logger.error("Total time spent in endpoint is longer than requestTime");
+      }
       return ResponseEntity.ok().body("OK");
     };
   }
@@ -379,16 +388,6 @@ public class GaenController {
     }
 
     return ResponseEntity.ok(dayBuckets);
-  }
-
-  private void normalizeRequestTime(long now) {
-    long after = UTCInstant.now().getTimestamp();
-    long duration = after - now;
-    try {
-      Thread.sleep(Math.max(requestTime.minusMillis(duration).toMillis(), 0));
-    } catch (Exception ex) {
-      logger.error("Couldn't equalize request time: {}", ex.toString());
-    }
   }
 
   private boolean hasNegativeRollingPeriod(GaenKey key) {
