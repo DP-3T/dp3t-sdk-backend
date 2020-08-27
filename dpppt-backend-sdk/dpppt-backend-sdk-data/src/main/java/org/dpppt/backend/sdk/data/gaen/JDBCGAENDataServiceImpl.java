@@ -66,7 +66,7 @@ public class JDBCGAENDataServiceImpl implements GAENDataService {
               + " transmission_risk_level, vals.received_at)";
     }
     var parameterList = new ArrayList<MapSqlParameterSource>();
-    // if delayedReceivedAt is supplied use it
+    // Calculate the `receivedAt` just at the end of the current releaseBucket.
     var receivedAt =
         delayedReceivedAt == null
             ? (now.getTimestamp() / releaseBucketDuration.toMillis() + 1)

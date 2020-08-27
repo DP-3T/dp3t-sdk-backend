@@ -154,11 +154,18 @@ public class GaenController {
       }
 
       if (key.getRollingPeriod().equals(0)) {
-        // currently only android seems to send 0 which can never be valid, since a non used key
-        // should not be submitted
-        // default value according to EN is 144, so just set it to that. If we ever get 0 from iOS
-        // we should log it, since
-        // this should not happen
+        // Additionally to delaying keys this feature also makes sure the rolling period is always
+        // set
+        // to 144 to make sure iOS 13.5.x does not ignore the TEK.
+        // Currently only Android seems to send 0 which can never be valid, since a non used key
+        // should not be submitted.
+        // This allows to check for the Google-TEKs also on iOS. Because the Rolling Proximity
+        // Identifier is based on the TEK and the unix epoch, this should work. The only downside is
+        // that iOS
+        // will not be able to optimize verification of the TEKs, because it will have to consider
+        // each
+        // TEK for a whole day.
+        logger.error("RollingPeriod should NOT be 0, fixing it and using 144");
         key.setRollingPeriod(GaenKey.GaenKeyDefaultRollingPeriod);
 
         // If this is a same day TEK we are delaying its release
