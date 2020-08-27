@@ -35,10 +35,8 @@ import java.time.Instant;
 import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
 import java.util.Base64;
-import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.Map.Entry;
 import java.util.zip.ZipEntry;
 import java.util.zip.ZipInputStream;
 import org.dpppt.backend.sdk.data.gaen.GAENDataService;
@@ -382,14 +380,14 @@ public class GaenControllerTest extends BaseControllerTest {
             midnight.minusDays(1).getTimestamp(),
             null,
             (now.getTimestamp() / releaseBucketDuration + 1) * releaseBucketDuration);
-    // all keys are in compatible
+    // all keys are invalid
     assertEquals(0, result.size());
     result =
         gaenDataService.getSortedExposedForKeyDate(
             midnight.getTimestamp(),
             null,
             (now.getTimestamp() / releaseBucketDuration + 1) * releaseBucketDuration);
-    // all keys are in compatible
+    // all keys are invalid
     assertEquals(0, result.size());
   }
 
@@ -704,7 +702,6 @@ public class GaenControllerTest extends BaseControllerTest {
                     .content(json(exposeeRequest)))
             .andExpect(request().asyncStarted())
             .andReturn();
-    // .getResponse();
     mockMvc.perform(asyncDispatch(response)).andExpect(status().is(400));
   }
 
@@ -1111,7 +1108,15 @@ public class GaenControllerTest extends BaseControllerTest {
       tmpKey.setTransmissionRiskLevel(0);
       keys.add(tmpKey);
     }
-    Map<Integer, Boolean> tests = Map.of(-2, false, -1, true, 0, true, 1, true, 2, false);
+
+    Map<Integer, Boolean> tests =
+        Map.of(
+            -2, false,
+            -1, true,
+            0, true,
+            1, true,
+            2, false);
+
     for (Map.Entry<Integer, Boolean> t : tests.entrySet()) {
       Integer offset = t.getKey();
       Boolean pass = t.getValue();
@@ -1186,11 +1191,16 @@ public class GaenControllerTest extends BaseControllerTest {
     var now = UTCInstant.now();
     var midnight = now.atStartOfDay();
 
-    insertNKeysPerDayInIntervalWithDebugFlag(
-        14, midnight.minusDays(4), midnight, midnight.minusDays(1), true);
+    // insert two times 10 keys per day for the last 14 days, with different
+    // received at. In total: 280 keys
+    insertNKeysPerDay(midnight, 14, 10, midnight.minusDays(1), true);
+    insertNKeysPerDay(midnight, 14, 10, midnight.minusHours(12), true);
 
-    insertNKeysPerDayInIntervalWithDebugFlag(
-        14, midnight.minusDays(4), midnight, midnight.minusHours(12), true);
+    // Request keys which have been received in the last day, must be 280 in total.
+    // This is the debug controller, which returns keys based on the 'received at',
+    // not based on the key date. So this request should return all keys with
+    // 'received at' of the last day.
+
     MockHttpServletResponse response =
         mockMvc
             .perform(
@@ -1198,8 +1208,7 @@ public class GaenControllerTest extends BaseControllerTest {
             .andExpect(status().is2xxSuccessful())
             .andReturn()
             .getResponse();
-
-    verifyZipInZipResponse(response, 0);
+    verifyZipInZipResponse(response, 280, 144);
   }
 
   @Test
@@ -1211,13 +1220,12 @@ public class GaenControllerTest extends BaseControllerTest {
     now = UTCInstant.now();
     var midnight = now.atStartOfDay();
 
-    // insert two times 5 keys per day for the last 14 days. the second batch has a
-    // different received at timestamp. (+6 hours)
-    insertNKeysPerDayInInterval(14, midnight.minusDays(4), now, now.minusDays(1));
+    // Insert two times 5 keys per day for the last 14 days. the second batch has a
+    // different 'received at' timestamp. (+12 hours compared to the first)
+    insertNKeysPerDay(midnight, 14, 5, midnight.minusDays(1), false);
+    insertNKeysPerDay(midnight, 14, 5, midnight.minusHours(12), false);
 
-    insertNKeysPerDayInInterval(14, midnight.minusDays(4), now, now.minusDays(12));
-
-    // request the keys with date date 1 day ago. no publish until.
+    // request the keys with key date 8 days ago. no publish until.
     MockHttpServletResponse response =
         mockMvc
             .perform(
@@ -1230,31 +1238,27 @@ public class GaenControllerTest extends BaseControllerTest {
     Long publishedUntil = Long.parseLong(response.getHeader("X-PUBLISHED-UNTIL"));
     assertTrue(publishedUntil < now.getTimestamp(), "Published until must be in the past");
 
+    // must contain 20 keys: 5 from the first insert, 5 from the second insert and
+    // 10 random keys
     verifyZipResponse(response, 20, 144);
 
-    // request again the keys with date date 1 day ago. with publish until, so that
+    // request again the keys with date date 8 days ago. with publish until, so that
     // we only get the second batch.
-    var bucketAfterSecondRelease =
-        Duration.ofMillis(midnight.getTimestamp())
-                .minusDays(1)
-                .plusHours(12)
-                .dividedBy(Duration.ofHours(2))
-            * 2
-            * 60
-            * 60
-            * 1000;
+    var bucketAfterSecondRelease = midnight.minusHours(12);
+
     MockHttpServletResponse responseWithPublishedAfter =
         mockMvc
             .perform(
                 get("/v1/gaen/exposed/" + midnight.minusDays(8).getTimestamp())
                     .header("User-Agent", "MockMVC")
-                    .param("publishedafter", Long.toString(bucketAfterSecondRelease)))
+                    .param(
+                        "publishedafter", Long.toString(bucketAfterSecondRelease.getTimestamp())))
             .andExpect(status().is2xxSuccessful())
             .andReturn()
             .getResponse();
 
-    // we always have 10
-    verifyZipResponse(responseWithPublishedAfter, 10, 144);
+    // must contain 15 keys: 5 from the second insert and 10 random keys
+    verifyZipResponse(responseWithPublishedAfter, 15, 144);
     UTCInstant.resetClock();
   }
 
@@ -1294,9 +1298,9 @@ public class GaenControllerTest extends BaseControllerTest {
     var now = UTCInstant.now();
     var midnight = now.atStartOfDay();
 
-    insertNKeysPerDayInInterval(14, midnight.minusDays(4), midnight, midnight.minusDays(1));
+    insertNKeysPerDay(midnight, 14, 10, midnight.minusDays(1), false);
+    insertNKeysPerDay(midnight, 14, 10, midnight.minusHours(12), false);
 
-    insertNKeysPerDayInInterval(14, midnight.minusDays(4), midnight, midnight.minusHours(12));
     // request the keys with date date 1 day ago. no publish until.
     MockHttpServletResponse response =
         mockMvc
@@ -1324,7 +1328,8 @@ public class GaenControllerTest extends BaseControllerTest {
     assertTrue(publishedUntil < System.currentTimeMillis(), "Published until must be in the past");
     assertEquals(expectedEtag, response.getHeader("etag"));
 
-    insertNKeysPerDayInInterval(14, midnight.minusDays(4), midnight, midnight.minusHours(12));
+    insertNKeysPerDay(midnight, 14, 10, midnight.minusHours(12), false);
+
     response =
         mockMvc
             .perform(
@@ -1360,22 +1365,34 @@ public class GaenControllerTest extends BaseControllerTest {
     assertTrue(authenticateError.contains("Unsigned Claims JWTs are not supported."));
   }
 
-  private void verifyZipInZipResponse(MockHttpServletResponse response, int expectKeyCount)
+  /** Verifies a zip in zip response, that each inner zip is again valid. */
+  private void verifyZipInZipResponse(
+      MockHttpServletResponse response, int expectKeyCount, int expectedRollingPeriod)
       throws Exception {
     ByteArrayInputStream baisOuter = new ByteArrayInputStream(response.getContentAsByteArray());
     ZipInputStream zipOuter = new ZipInputStream(baisOuter);
     ZipEntry entry = zipOuter.getNextEntry();
     while (entry != null) {
+      ZipInputStream zipInner =
+          new ZipInputStream(new ByteArrayInputStream(zipOuter.readAllBytes()));
+      verifyKeyZip(zipInner, expectKeyCount, expectedRollingPeriod);
       entry = zipOuter.getNextEntry();
     }
   }
 
+  /** Verifies a zip response, checks if keys and signature is correct. */
   private void verifyZipResponse(
       MockHttpServletResponse response, int expectKeyCount, int expectedRollingPeriod)
       throws IOException, NoSuchAlgorithmException, InvalidKeyException, SignatureException {
-    ByteArrayInputStream baisOuter = new ByteArrayInputStream(response.getContentAsByteArray());
-    ZipInputStream zipOuter = new ZipInputStream(baisOuter);
-    ZipEntry entry = zipOuter.getNextEntry();
+    ByteArrayInputStream baisZip = new ByteArrayInputStream(response.getContentAsByteArray());
+    ZipInputStream keyZipInputstream = new ZipInputStream(baisZip);
+    verifyKeyZip(keyZipInputstream, expectKeyCount, expectedRollingPeriod);
+  }
+
+  private void verifyKeyZip(
+      ZipInputStream keyZipInputstream, int expectKeyCount, int expectedRollingPeriod)
+      throws IOException, NoSuchAlgorithmException, InvalidKeyException, SignatureException {
+    ZipEntry entry = keyZipInputstream.getNextEntry();
     boolean foundData = false;
     boolean foundSignature = false;
 
@@ -1386,15 +1403,15 @@ public class GaenControllerTest extends BaseControllerTest {
     while (entry != null) {
       if (entry.getName().equals("export.bin")) {
         foundData = true;
-        exportBin = zipOuter.readAllBytes();
+        exportBin = keyZipInputstream.readAllBytes();
         keyProto = new byte[exportBin.length - 16];
         System.arraycopy(exportBin, 16, keyProto, 0, keyProto.length);
       }
       if (entry.getName().equals("export.sig")) {
         foundSignature = true;
-        signatureProto = zipOuter.readAllBytes();
+        signatureProto = keyZipInputstream.readAllBytes();
       }
-      entry = zipOuter.getNextEntry();
+      entry = keyZipInputstream.getNextEntry();
     }
 
     assertTrue(foundData, "export.bin not found in zip");
@@ -1418,57 +1435,38 @@ public class GaenControllerTest extends BaseControllerTest {
     assertEquals(expectKeyCount, export.getKeysCount());
   }
 
-  private void insertNKeysPerDayInIntervalWithDebugFlag(
-      int n, UTCInstant start, UTCInstant end, UTCInstant receivedAt, boolean debug)
-      throws Exception {
-    var current = start;
-    Map<Integer, Integer> rollingToCount = new HashMap<>();
-    while (current.isBeforeEpochMillisOf(end)) {
+  /**
+   * Creates keysPerDay for every day: lastDay, lastDay-1, ..., lastDay - daysBack + 1
+   *
+   * @param lastDay of the created keys
+   * @param daysBack of the key creation, counted including the lastDay
+   * @param keysPerDay that will be created for every day
+   * @param receivedAt as sent to the DB
+   * @param debug if true, inserts the keys in the debug table.
+   */
+  private void insertNKeysPerDay(
+      UTCInstant lastDay, int daysBack, int keysPerDay, UTCInstant receivedAt, boolean debug) {
+    SecureRandom random = new SecureRandom();
+    for (int d = 0; d < daysBack; d++) {
+      var currentKeyDate = lastDay.minusDays(d);
+      int currentRollingStartNumber = (int) currentKeyDate.get10MinutesSince1970();
       List<GaenKey> keys = new ArrayList<>();
-      SecureRandom random = new SecureRandom();
-      int lastRolling = (int) start.get10MinutesSince1970();
-      for (int i = 0; i < n; i++) {
+      for (int n = 0; n < keysPerDay; n++) {
         GaenKey key = new GaenKey();
         byte[] keyBytes = new byte[16];
         random.nextBytes(keyBytes);
         key.setKeyData(Base64.getEncoder().encodeToString(keyBytes));
         key.setRollingPeriod(144);
-        logger.info("Rolling Start number: " + lastRolling);
-        key.setRollingStartNumber(lastRolling);
+        key.setRollingStartNumber(currentRollingStartNumber);
         key.setTransmissionRiskLevel(1);
         key.setFake(0);
         keys.add(key);
-
-        Integer count = rollingToCount.get(lastRolling);
-        if (count == null) {
-          count = 0;
-        }
-        count = count + 1;
-        rollingToCount.put(lastRolling, count);
-
-        lastRolling -= Duration.ofDays(1).dividedBy(Duration.ofMinutes(10));
       }
       if (debug) {
         testGaenDataService.upsertExposeesDebug(keys, receivedAt);
       } else {
         testGaenDataService.upsertExposees(keys, receivedAt);
       }
-      current = current.plusDays(1);
     }
-    for (Entry<Integer, Integer> entry : rollingToCount.entrySet()) {
-      logger.info(
-          "Rolling start number: "
-              + entry.getKey()
-              + " -> count: "
-              + entry.getValue()
-              + " (received at: "
-              + receivedAt.toString()
-              + ")");
-    }
-  }
-
-  private void insertNKeysPerDayInInterval(
-      int n, UTCInstant start, UTCInstant end, UTCInstant receivedAt) throws Exception {
-    insertNKeysPerDayInIntervalWithDebugFlag(n, start, end, receivedAt, false);
   }
 }
