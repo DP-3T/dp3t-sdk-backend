@@ -302,11 +302,11 @@ public class GaenControllerTest extends BaseControllerTest {
 
 		var result = gaenDataService.getSortedExposedForKeyDate(midnight.minusDays(1).getTimestamp(), null,
 				(now.getTimestamp() / releaseBucketDuration + 1) * releaseBucketDuration);
-		// all keys are in compatible
+		// all keys are invalid
 		assertEquals(0, result.size());
 		result = gaenDataService.getSortedExposedForKeyDate(midnight.getTimestamp(), null,
 				(now.getTimestamp() / releaseBucketDuration + 1) * releaseBucketDuration);
-		// all keys are in compatible
+		// all keys are invalid
 		assertEquals(0, result.size());
 	}
 
@@ -536,7 +536,6 @@ public class GaenControllerTest extends BaseControllerTest {
 		MvcResult response = mockMvc.perform(post("/v1/gaen/exposed").contentType(MediaType.APPLICATION_JSON)
 				.header("Authorization", "Bearer " + token).header("User-Agent", "MockMVC")
 				.content(json(exposeeRequest))).andExpect(request().asyncStarted()).andReturn();
-		// .getResponse();
 		mockMvc.perform(asyncDispatch(response)).andExpect(status().is(400));
 	}
 
@@ -909,9 +908,9 @@ public class GaenControllerTest extends BaseControllerTest {
 		insertNKeysPerDay(midnight, 14, 10, midnight.minusHours(12), true);
 
 		// Request keys which have been received in the last day, must be 280 in total.
-		// This is the debug controller, which returns keys based on the received at, on
+		// This is the debug controller, which returns keys based on the 'received at',
 		// not based on the key date. So this request should return all keys with
-		// received at of the last day.
+		// 'received at' of the last day.
 
 		MockHttpServletResponse response = mockMvc
 				.perform(get("/v1/debug/exposed/" + midnight.getTimestamp()).header("User-Agent", "MockMVC"))
@@ -929,7 +928,7 @@ public class GaenControllerTest extends BaseControllerTest {
 		var midnight = now.atStartOfDay();
 
 		// Insert two times 5 keys per day for the last 14 days. the second batch has a
-		// different received at timestamp. (+12 hours compared to the first)
+		// different 'received at' timestamp. (+12 hours compared to the first)
 		insertNKeysPerDay(midnight, 14, 5, midnight.minusDays(1), false);
 		insertNKeysPerDay(midnight, 14, 5, midnight.minusHours(12), false);
 
@@ -967,8 +966,7 @@ public class GaenControllerTest extends BaseControllerTest {
 		var midnight = now.atStartOfDay();
 
 		MockHttpServletResponse response = mockMvc
-				.perform(
-						get("/v1/gaen/exposed/" + midnight.minusDays(8).getTimestamp()).header("User-Agent", "MockMVC"))
+				.perform(get("/v1/gaen/exposed/" + midnight.minusDays(8).getTimestamp()).header("User-Agent", "MockMVC"))
 				.andExpect(status().isOk()).andReturn().getResponse();
 		verifyZipResponse(response, 10, 144);
 	}
