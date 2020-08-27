@@ -14,17 +14,20 @@ import java.util.ArrayList;
 import java.util.List;
 
 public class BucketList {
-    List<Long> buckets;
-    public List<Long> getBuckets() {
-        return buckets;
+  List<Long> buckets;
+
+  public List<Long> getBuckets() {
+    return buckets;
+  }
+
+  public void setBuckets(List<Long> buckets) {
+    this.buckets = buckets;
+  }
+
+  public void addBucket(Long bucket) {
+    if (this.buckets == null) {
+      this.buckets = new ArrayList<Long>();
     }
-    public void setBuckets(List<Long> buckets) {
-        this.buckets = buckets;
-    }
-    public void addBucket(Long bucket) {
-        if(this.buckets == null) {
-            this.buckets = new ArrayList<Long>();
-        }
-        this.buckets.add(bucket);
-    }
+    this.buckets.add(bucket);
+  }
 }

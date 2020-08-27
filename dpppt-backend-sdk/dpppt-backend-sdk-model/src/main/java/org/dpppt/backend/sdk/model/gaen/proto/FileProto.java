@@ -4,77 +4,56 @@ package org.dpppt.backend.sdk.model.gaen.proto;
 
 public final class FileProto {
   private FileProto() {}
-  public static void registerAllExtensions(
-      com.google.protobuf.ExtensionRegistryLite registry) {
+
+  public static void registerAllExtensions(com.google.protobuf.ExtensionRegistryLite registry) {}
+
+  public static void registerAllExtensions(com.google.protobuf.ExtensionRegistry registry) {
+    registerAllExtensions((com.google.protobuf.ExtensionRegistryLite) registry);
   }
 
-  public static void registerAllExtensions(
-      com.google.protobuf.ExtensionRegistry registry) {
-    registerAllExtensions(
-        (com.google.protobuf.ExtensionRegistryLite) registry);
-  }
-  public interface FileOrBuilder extends
+  public interface FileOrBuilder
+      extends
       // @@protoc_insertion_point(interface_extends:File)
       com.google.protobuf.MessageOrBuilder {
 
-    /**
-     * <code>optional .Header header = 1;</code>
-     */
+    /** <code>optional .Header header = 1;</code> */
     boolean hasHeader();
-    /**
-     * <code>optional .Header header = 1;</code>
-     */
+    /** <code>optional .Header header = 1;</code> */
     FileProto.Header getHeader();
-    /**
-     * <code>optional .Header header = 1;</code>
-     */
+    /** <code>optional .Header header = 1;</code> */
     FileProto.HeaderOrBuilder getHeaderOrBuilder();
 
-    /**
-     * <code>repeated .Key key = 2;</code>
-     */
-    java.util.List<FileProto.Key> 
-        getKeyList();
-    /**
-     * <code>repeated .Key key = 2;</code>
-     */
+    /** <code>repeated .Key key = 2;</code> */
+    java.util.List<FileProto.Key> getKeyList();
+    /** <code>repeated .Key key = 2;</code> */
     FileProto.Key getKey(int index);
-    /**
-     * <code>repeated .Key key = 2;</code>
-     */
+    /** <code>repeated .Key key = 2;</code> */
     int getKeyCount();
-    /**
-     * <code>repeated .Key key = 2;</code>
-     */
-    java.util.List<? extends FileProto.KeyOrBuilder> 
-        getKeyOrBuilderList();
-    /**
-     * <code>repeated .Key key = 2;</code>
-     */
-    FileProto.KeyOrBuilder getKeyOrBuilder(
-        int index);
+    /** <code>repeated .Key key = 2;</code> */
+    java.util.List<? extends FileProto.KeyOrBuilder> getKeyOrBuilderList();
+    /** <code>repeated .Key key = 2;</code> */
+    FileProto.KeyOrBuilder getKeyOrBuilder(int index);
   }
-  /**
-   * Protobuf type {@code File}
-   */
-  public  static final class File extends
-      com.google.protobuf.GeneratedMessageV3 implements
+  /** Protobuf type {@code File} */
+  public static final class File extends com.google.protobuf.GeneratedMessageV3
+      implements
       // @@protoc_insertion_point(message_implements:File)
       FileOrBuilder {
-  private static final long serialVersionUID = 0L;
+    private static final long serialVersionUID = 0L;
     // Use File.newBuilder() to construct.
     private File(com.google.protobuf.GeneratedMessageV3.Builder<?> builder) {
       super(builder);
     }
+
     private File() {
       key_ = java.util.Collections.emptyList();
     }
 
     @java.lang.Override
-    public final com.google.protobuf.UnknownFieldSet
-    getUnknownFields() {
+    public final com.google.protobuf.UnknownFieldSet getUnknownFields() {
       return this.unknownFields;
     }
+
     private File(
         com.google.protobuf.CodedInputStream input,
         com.google.protobuf.ExtensionRegistryLite extensionRegistry)
@@ -94,42 +73,42 @@ public final class FileProto {
             case 0:
               done = true;
               break;
-            case 10: {
-              FileProto.Header.Builder subBuilder = null;
-              if (((bitField0_ & 0x00000001) != 0)) {
-                subBuilder = header_.toBuilder();
+            case 10:
+              {
+                FileProto.Header.Builder subBuilder = null;
+                if (((bitField0_ & 0x00000001) != 0)) {
+                  subBuilder = header_.toBuilder();
+                }
+                header_ = input.readMessage(FileProto.Header.PARSER, extensionRegistry);
+                if (subBuilder != null) {
+                  subBuilder.mergeFrom(header_);
+                  header_ = subBuilder.buildPartial();
+                }
+                bitField0_ |= 0x00000001;
+                break;
               }
-              header_ = input.readMessage(FileProto.Header.PARSER, extensionRegistry);
-              if (subBuilder != null) {
-                subBuilder.mergeFrom(header_);
-                header_ = subBuilder.buildPartial();
+            case 18:
+              {
+                if (!((mutable_bitField0_ & 0x00000002) != 0)) {
+                  key_ = new java.util.ArrayList<FileProto.Key>();
+                  mutable_bitField0_ |= 0x00000002;
+                }
+                key_.add(input.readMessage(FileProto.Key.PARSER, extensionRegistry));
+                break;
               }
-              bitField0_ |= 0x00000001;
-              break;
-            }
-            case 18: {
-              if (!((mutable_bitField0_ & 0x00000002) != 0)) {
-                key_ = new java.util.ArrayList<FileProto.Key>();
-                mutable_bitField0_ |= 0x00000002;
+            default:
+              {
+                if (!parseUnknownField(input, unknownFields, extensionRegistry, tag)) {
+                  done = true;
+                }
+                break;
               }
-              key_.add(
-                  input.readMessage(FileProto.Key.PARSER, extensionRegistry));
-              break;
-            }
-            default: {
-              if (!parseUnknownField(
-                  input, unknownFields, extensionRegistry, tag)) {
-                done = true;
-              }
-              break;
-            }
           }
         }
       } catch (com.google.protobuf.InvalidProtocolBufferException e) {
         throw e.setUnfinishedMessage(this);
       } catch (java.io.IOException e) {
-        throw new com.google.protobuf.InvalidProtocolBufferException(
-            e).setUnfinishedMessage(this);
+        throw new com.google.protobuf.InvalidProtocolBufferException(e).setUnfinishedMessage(this);
       } finally {
         if (((mutable_bitField0_ & 0x00000002) != 0)) {
           key_ = java.util.Collections.unmodifiableList(key_);
@@ -138,77 +117,59 @@ public final class FileProto {
         makeExtensionsImmutable();
       }
     }
-    public static final com.google.protobuf.Descriptors.Descriptor
-        getDescriptor() {
+
+    public static final com.google.protobuf.Descriptors.Descriptor getDescriptor() {
       return FileProto.internal_static_File_descriptor;
     }
 
     @java.lang.Override
     protected com.google.protobuf.GeneratedMessageV3.FieldAccessorTable
         internalGetFieldAccessorTable() {
-      return FileProto.internal_static_File_fieldAccessorTable
-          .ensureFieldAccessorsInitialized(
-              FileProto.File.class, FileProto.File.Builder.class);
+      return FileProto.internal_static_File_fieldAccessorTable.ensureFieldAccessorsInitialized(
+          FileProto.File.class, FileProto.File.Builder.class);
     }
 
     private int bitField0_;
     public static final int HEADER_FIELD_NUMBER = 1;
     private FileProto.Header header_;
-    /**
-     * <code>optional .Header header = 1;</code>
-     */
+    /** <code>optional .Header header = 1;</code> */
     public boolean hasHeader() {
       return ((bitField0_ & 0x00000001) != 0);
     }
-    /**
-     * <code>optional .Header header = 1;</code>
-     */
+    /** <code>optional .Header header = 1;</code> */
     public FileProto.Header getHeader() {
       return header_ == null ? FileProto.Header.getDefaultInstance() : header_;
     }
-    /**
-     * <code>optional .Header header = 1;</code>
-     */
+    /** <code>optional .Header header = 1;</code> */
     public FileProto.HeaderOrBuilder getHeaderOrBuilder() {
       return header_ == null ? FileProto.Header.getDefaultInstance() : header_;
     }
 
     public static final int KEY_FIELD_NUMBER = 2;
     private java.util.List<FileProto.Key> key_;
-    /**
-     * <code>repeated .Key key = 2;</code>
-     */
+    /** <code>repeated .Key key = 2;</code> */
     public java.util.List<FileProto.Key> getKeyList() {
       return key_;
     }
-    /**
-     * <code>repeated .Key key = 2;</code>
-     */
-    public java.util.List<? extends FileProto.KeyOrBuilder> 
-        getKeyOrBuilderList() {
+    /** <code>repeated .Key key = 2;</code> */
+    public java.util.List<? extends FileProto.KeyOrBuilder> getKeyOrBuilderList() {
       return key_;
     }
-    /**
-     * <code>repeated .Key key = 2;</code>
-     */
+    /** <code>repeated .Key key = 2;</code> */
     public int getKeyCount() {
       return key_.size();
     }
-    /**
-     * <code>repeated .Key key = 2;</code>
-     */
+    /** <code>repeated .Key key = 2;</code> */
     public FileProto.Key getKey(int index) {
       return key_.get(index);
     }
-    /**
-     * <code>repeated .Key key = 2;</code>
-     */
-    public FileProto.KeyOrBuilder getKeyOrBuilder(
-        int index) {
+    /** <code>repeated .Key key = 2;</code> */
+    public FileProto.KeyOrBuilder getKeyOrBuilder(int index) {
       return key_.get(index);
     }
 
     private byte memoizedIsInitialized = -1;
+
     @java.lang.Override
     public final boolean isInitialized() {
       byte isInitialized = memoizedIsInitialized;
@@ -220,8 +181,7 @@ public final class FileProto {
     }
 
     @java.lang.Override
-    public void writeTo(com.google.protobuf.CodedOutputStream output)
-                        throws java.io.IOException {
+    public void writeTo(com.google.protobuf.CodedOutputStream output) throws java.io.IOException {
       if (((bitField0_ & 0x00000001) != 0)) {
         output.writeMessage(1, getHeader());
       }
@@ -238,12 +198,10 @@ public final class FileProto {
 
       size = 0;
       if (((bitField0_ & 0x00000001) != 0)) {
-        size += com.google.protobuf.CodedOutputStream
-          .computeMessageSize(1, getHeader());
+        size += com.google.protobuf.CodedOutputStream.computeMessageSize(1, getHeader());
       }
       for (int i = 0; i < key_.size(); i++) {
-        size += com.google.protobuf.CodedOutputStream
-          .computeMessageSize(2, key_.get(i));
+        size += com.google.protobuf.CodedOutputStream.computeMessageSize(2, key_.get(i));
       }
       size += unknownFields.getSerializedSize();
       memoizedSize = size;
@@ -253,7 +211,7 @@ public final class FileProto {
     @java.lang.Override
     public boolean equals(final java.lang.Object obj) {
       if (obj == this) {
-       return true;
+        return true;
       }
       if (!(obj instanceof FileProto.File)) {
         return super.equals(obj);
@@ -262,11 +220,9 @@ public final class FileProto {
 
       if (hasHeader() != other.hasHeader()) return false;
       if (hasHeader()) {
-        if (!getHeader()
-            .equals(other.getHeader())) return false;
+        if (!getHeader().equals(other.getHeader())) return false;
       }
-      if (!getKeyList()
-          .equals(other.getKeyList())) return false;
+      if (!getKeyList().equals(other.getKeyList())) return false;
       if (!unknownFields.equals(other.unknownFields)) return false;
       return true;
     }
@@ -291,88 +247,92 @@ public final class FileProto {
       return hash;
     }
 
-    public static FileProto.File parseFrom(
-        java.nio.ByteBuffer data)
+    public static FileProto.File parseFrom(java.nio.ByteBuffer data)
         throws com.google.protobuf.InvalidProtocolBufferException {
       return PARSER.parseFrom(data);
     }
+
     public static FileProto.File parseFrom(
-        java.nio.ByteBuffer data,
-        com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+        java.nio.ByteBuffer data, com.google.protobuf.ExtensionRegistryLite extensionRegistry)
         throws com.google.protobuf.InvalidProtocolBufferException {
       return PARSER.parseFrom(data, extensionRegistry);
     }
-    public static FileProto.File parseFrom(
-        com.google.protobuf.ByteString data)
+
+    public static FileProto.File parseFrom(com.google.protobuf.ByteString data)
         throws com.google.protobuf.InvalidProtocolBufferException {
       return PARSER.parseFrom(data);
     }
+
     public static FileProto.File parseFrom(
         com.google.protobuf.ByteString data,
         com.google.protobuf.ExtensionRegistryLite extensionRegistry)
         throws com.google.protobuf.InvalidProtocolBufferException {
       return PARSER.parseFrom(data, extensionRegistry);
     }
+
     public static FileProto.File parseFrom(byte[] data)
         throws com.google.protobuf.InvalidProtocolBufferException {
       return PARSER.parseFrom(data);
     }
+
     public static FileProto.File parseFrom(
-        byte[] data,
-        com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+        byte[] data, com.google.protobuf.ExtensionRegistryLite extensionRegistry)
         throws com.google.protobuf.InvalidProtocolBufferException {
       return PARSER.parseFrom(data, extensionRegistry);
     }
-    public static FileProto.File parseFrom(java.io.InputStream input)
-        throws java.io.IOException {
-      return com.google.protobuf.GeneratedMessageV3
-          .parseWithIOException(PARSER, input);
+
+    public static FileProto.File parseFrom(java.io.InputStream input) throws java.io.IOException {
+      return com.google.protobuf.GeneratedMessageV3.parseWithIOException(PARSER, input);
     }
+
     public static FileProto.File parseFrom(
-        java.io.InputStream input,
-        com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+        java.io.InputStream input, com.google.protobuf.ExtensionRegistryLite extensionRegistry)
         throws java.io.IOException {
-      return com.google.protobuf.GeneratedMessageV3
-          .parseWithIOException(PARSER, input, extensionRegistry);
+      return com.google.protobuf.GeneratedMessageV3.parseWithIOException(
+          PARSER, input, extensionRegistry);
     }
+
     public static FileProto.File parseDelimitedFrom(java.io.InputStream input)
         throws java.io.IOException {
-      return com.google.protobuf.GeneratedMessageV3
-          .parseDelimitedWithIOException(PARSER, input);
+      return com.google.protobuf.GeneratedMessageV3.parseDelimitedWithIOException(PARSER, input);
     }
+
     public static FileProto.File parseDelimitedFrom(
-        java.io.InputStream input,
-        com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+        java.io.InputStream input, com.google.protobuf.ExtensionRegistryLite extensionRegistry)
         throws java.io.IOException {
-      return com.google.protobuf.GeneratedMessageV3
-          .parseDelimitedWithIOException(PARSER, input, extensionRegistry);
+      return com.google.protobuf.GeneratedMessageV3.parseDelimitedWithIOException(
+          PARSER, input, extensionRegistry);
     }
-    public static FileProto.File parseFrom(
-        com.google.protobuf.CodedInputStream input)
+
+    public static FileProto.File parseFrom(com.google.protobuf.CodedInputStream input)
         throws java.io.IOException {
-      return com.google.protobuf.GeneratedMessageV3
-          .parseWithIOException(PARSER, input);
+      return com.google.protobuf.GeneratedMessageV3.parseWithIOException(PARSER, input);
     }
+
     public static FileProto.File parseFrom(
         com.google.protobuf.CodedInputStream input,
         com.google.protobuf.ExtensionRegistryLite extensionRegistry)
         throws java.io.IOException {
-      return com.google.protobuf.GeneratedMessageV3
-          .parseWithIOException(PARSER, input, extensionRegistry);
+      return com.google.protobuf.GeneratedMessageV3.parseWithIOException(
+          PARSER, input, extensionRegistry);
     }
 
     @java.lang.Override
-    public Builder newBuilderForType() { return newBuilder(); }
+    public Builder newBuilderForType() {
+      return newBuilder();
+    }
+
     public static Builder newBuilder() {
       return DEFAULT_INSTANCE.toBuilder();
     }
+
     public static Builder newBuilder(FileProto.File prototype) {
       return DEFAULT_INSTANCE.toBuilder().mergeFrom(prototype);
     }
+
     @java.lang.Override
     public Builder toBuilder() {
-      return this == DEFAULT_INSTANCE
-          ? new Builder() : new Builder().mergeFrom(this);
+      return this == DEFAULT_INSTANCE ? new Builder() : new Builder().mergeFrom(this);
     }
 
     @java.lang.Override
@@ -381,24 +341,21 @@ public final class FileProto {
       Builder builder = new Builder(parent);
       return builder;
     }
-    /**
-     * Protobuf type {@code File}
-     */
-    public static final class Builder extends
-        com.google.protobuf.GeneratedMessageV3.Builder<Builder> implements
+    /** Protobuf type {@code File} */
+    public static final class Builder
+        extends com.google.protobuf.GeneratedMessageV3.Builder<Builder>
+        implements
         // @@protoc_insertion_point(builder_implements:File)
         FileProto.FileOrBuilder {
-      public static final com.google.protobuf.Descriptors.Descriptor
-          getDescriptor() {
+      public static final com.google.protobuf.Descriptors.Descriptor getDescriptor() {
         return FileProto.internal_static_File_descriptor;
       }
 
       @java.lang.Override
       protected com.google.protobuf.GeneratedMessageV3.FieldAccessorTable
           internalGetFieldAccessorTable() {
-        return FileProto.internal_static_File_fieldAccessorTable
-            .ensureFieldAccessorsInitialized(
-                FileProto.File.class, FileProto.File.Builder.class);
+        return FileProto.internal_static_File_fieldAccessorTable.ensureFieldAccessorsInitialized(
+            FileProto.File.class, FileProto.File.Builder.class);
       }
 
       // Construct using FileOuterClass.File.newBuilder()
@@ -406,18 +363,18 @@ public final class FileProto {
         maybeForceBuilderInitialization();
       }
 
-      private Builder(
-          com.google.protobuf.GeneratedMessageV3.BuilderParent parent) {
+      private Builder(com.google.protobuf.GeneratedMessageV3.BuilderParent parent) {
         super(parent);
         maybeForceBuilderInitialization();
       }
+
       private void maybeForceBuilderInitialization() {
-        if (com.google.protobuf.GeneratedMessageV3
-                .alwaysUseFieldBuilders) {
+        if (com.google.protobuf.GeneratedMessageV3.alwaysUseFieldBuilders) {
           getHeaderFieldBuilder();
           getKeyFieldBuilder();
         }
       }
+
       @java.lang.Override
       public Builder clear() {
         super.clear();
@@ -437,8 +394,7 @@ public final class FileProto {
       }
 
       @java.lang.Override
-      public com.google.protobuf.Descriptors.Descriptor
-          getDescriptorForType() {
+      public com.google.protobuf.Descriptors.Descriptor getDescriptorForType() {
         return FileProto.internal_static_File_descriptor;
       }
 
@@ -487,38 +443,41 @@ public final class FileProto {
       public Builder clone() {
         return super.clone();
       }
+
       @java.lang.Override
       public Builder setField(
-          com.google.protobuf.Descriptors.FieldDescriptor field,
-          java.lang.Object value) {
+          com.google.protobuf.Descriptors.FieldDescriptor field, java.lang.Object value) {
         return super.setField(field, value);
       }
+
       @java.lang.Override
-      public Builder clearField(
-          com.google.protobuf.Descriptors.FieldDescriptor field) {
+      public Builder clearField(com.google.protobuf.Descriptors.FieldDescriptor field) {
         return super.clearField(field);
       }
+
       @java.lang.Override
-      public Builder clearOneof(
-          com.google.protobuf.Descriptors.OneofDescriptor oneof) {
+      public Builder clearOneof(com.google.protobuf.Descriptors.OneofDescriptor oneof) {
         return super.clearOneof(oneof);
       }
+
       @java.lang.Override
       public Builder setRepeatedField(
           com.google.protobuf.Descriptors.FieldDescriptor field,
-          int index, java.lang.Object value) {
+          int index,
+          java.lang.Object value) {
         return super.setRepeatedField(field, index, value);
       }
+
       @java.lang.Override
       public Builder addRepeatedField(
-          com.google.protobuf.Descriptors.FieldDescriptor field,
-          java.lang.Object value) {
+          com.google.protobuf.Descriptors.FieldDescriptor field, java.lang.Object value) {
         return super.addRepeatedField(field, value);
       }
+
       @java.lang.Override
       public Builder mergeFrom(com.google.protobuf.Message other) {
         if (other instanceof FileProto.File) {
-          return mergeFrom((FileProto.File)other);
+          return mergeFrom((FileProto.File) other);
         } else {
           super.mergeFrom(other);
           return this;
@@ -548,9 +507,10 @@ public final class FileProto {
               keyBuilder_ = null;
               key_ = other.key_;
               bitField0_ = (bitField0_ & ~0x00000002);
-              keyBuilder_ = 
-                com.google.protobuf.GeneratedMessageV3.alwaysUseFieldBuilders ?
-                   getKeyFieldBuilder() : null;
+              keyBuilder_ =
+                  com.google.protobuf.GeneratedMessageV3.alwaysUseFieldBuilders
+                      ? getKeyFieldBuilder()
+                      : null;
             } else {
               keyBuilder_.addAllMessages(other.key_);
             }
@@ -584,20 +544,18 @@ public final class FileProto {
         }
         return this;
       }
+
       private int bitField0_;
 
       private FileProto.Header header_;
       private com.google.protobuf.SingleFieldBuilderV3<
-          FileProto.Header, FileProto.Header.Builder, FileProto.HeaderOrBuilder> headerBuilder_;
-      /**
-       * <code>optional .Header header = 1;</code>
-       */
+              FileProto.Header, FileProto.Header.Builder, FileProto.HeaderOrBuilder>
+          headerBuilder_;
+      /** <code>optional .Header header = 1;</code> */
       public boolean hasHeader() {
         return ((bitField0_ & 0x00000001) != 0);
       }
-      /**
-       * <code>optional .Header header = 1;</code>
-       */
+      /** <code>optional .Header header = 1;</code> */
       public FileProto.Header getHeader() {
         if (headerBuilder_ == null) {
           return header_ == null ? FileProto.Header.getDefaultInstance() : header_;
@@ -605,9 +563,7 @@ public final class FileProto {
           return headerBuilder_.getMessage();
         }
       }
-      /**
-       * <code>optional .Header header = 1;</code>
-       */
+      /** <code>optional .Header header = 1;</code> */
       public Builder setHeader(FileProto.Header value) {
         if (headerBuilder_ == null) {
           if (value == null) {
@@ -621,11 +577,8 @@ public final class FileProto {
         bitField0_ |= 0x00000001;
         return this;
       }
-      /**
-       * <code>optional .Header header = 1;</code>
-       */
-      public Builder setHeader(
-          FileProto.Header.Builder builderForValue) {
+      /** <code>optional .Header header = 1;</code> */
+      public Builder setHeader(FileProto.Header.Builder builderForValue) {
         if (headerBuilder_ == null) {
           header_ = builderForValue.build();
           onChanged();
@@ -635,16 +588,13 @@ public final class FileProto {
         bitField0_ |= 0x00000001;
         return this;
       }
-      /**
-       * <code>optional .Header header = 1;</code>
-       */
+      /** <code>optional .Header header = 1;</code> */
       public Builder mergeHeader(FileProto.Header value) {
         if (headerBuilder_ == null) {
-          if (((bitField0_ & 0x00000001) != 0) &&
-              header_ != null &&
-              header_ != FileProto.Header.getDefaultInstance()) {
-            header_ =
-              FileProto.Header.newBuilder(header_).mergeFrom(value).buildPartial();
+          if (((bitField0_ & 0x00000001) != 0)
+              && header_ != null
+              && header_ != FileProto.Header.getDefaultInstance()) {
+            header_ = FileProto.Header.newBuilder(header_).mergeFrom(value).buildPartial();
           } else {
             header_ = value;
           }
@@ -655,9 +605,7 @@ public final class FileProto {
         bitField0_ |= 0x00000001;
         return this;
       }
-      /**
-       * <code>optional .Header header = 1;</code>
-       */
+      /** <code>optional .Header header = 1;</code> */
       public Builder clearHeader() {
         if (headerBuilder_ == null) {
           header_ = null;
@@ -668,57 +616,48 @@ public final class FileProto {
         bitField0_ = (bitField0_ & ~0x00000001);
         return this;
       }
-      /**
-       * <code>optional .Header header = 1;</code>
-       */
+      /** <code>optional .Header header = 1;</code> */
       public FileProto.Header.Builder getHeaderBuilder() {
         bitField0_ |= 0x00000001;
         onChanged();
         return getHeaderFieldBuilder().getBuilder();
       }
-      /**
-       * <code>optional .Header header = 1;</code>
-       */
+      /** <code>optional .Header header = 1;</code> */
       public FileProto.HeaderOrBuilder getHeaderOrBuilder() {
         if (headerBuilder_ != null) {
           return headerBuilder_.getMessageOrBuilder();
         } else {
-          return header_ == null ?
-              FileProto.Header.getDefaultInstance() : header_;
+          return header_ == null ? FileProto.Header.getDefaultInstance() : header_;
         }
       }
-      /**
-       * <code>optional .Header header = 1;</code>
-       */
+      /** <code>optional .Header header = 1;</code> */
       private com.google.protobuf.SingleFieldBuilderV3<
-          FileProto.Header, FileProto.Header.Builder, FileProto.HeaderOrBuilder> 
+              FileProto.Header, FileProto.Header.Builder, FileProto.HeaderOrBuilder>
           getHeaderFieldBuilder() {
         if (headerBuilder_ == null) {
-          headerBuilder_ = new com.google.protobuf.SingleFieldBuilderV3<
-              FileProto.Header, FileProto.Header.Builder, FileProto.HeaderOrBuilder>(
-                  getHeader(),
-                  getParentForChildren(),
-                  isClean());
+          headerBuilder_ =
+              new com.google.protobuf.SingleFieldBuilderV3<
+                  FileProto.Header, FileProto.Header.Builder, FileProto.HeaderOrBuilder>(
+                  getHeader(), getParentForChildren(), isClean());
           header_ = null;
         }
         return headerBuilder_;
       }
 
-      private java.util.List<FileProto.Key> key_ =
-        java.util.Collections.emptyList();
+      private java.util.List<FileProto.Key> key_ = java.util.Collections.emptyList();
+
       private void ensureKeyIsMutable() {
         if (!((bitField0_ & 0x00000002) != 0)) {
           key_ = new java.util.ArrayList<FileProto.Key>(key_);
           bitField0_ |= 0x00000002;
-         }
+        }
       }
 
       private com.google.protobuf.RepeatedFieldBuilderV3<
-          FileProto.Key, FileProto.Key.Builder, FileProto.KeyOrBuilder> keyBuilder_;
+              FileProto.Key, FileProto.Key.Builder, FileProto.KeyOrBuilder>
+          keyBuilder_;
 
-      /**
-       * <code>repeated .Key key = 2;</code>
-       */
+      /** <code>repeated .Key key = 2;</code> */
       public java.util.List<FileProto.Key> getKeyList() {
         if (keyBuilder_ == null) {
           return java.util.Collections.unmodifiableList(key_);
@@ -726,9 +665,7 @@ public final class FileProto {
           return keyBuilder_.getMessageList();
         }
       }
-      /**
-       * <code>repeated .Key key = 2;</code>
-       */
+      /** <code>repeated .Key key = 2;</code> */
       public int getKeyCount() {
         if (keyBuilder_ == null) {
           return key_.size();
@@ -736,9 +673,7 @@ public final class FileProto {
           return keyBuilder_.getCount();
         }
       }
-      /**
-       * <code>repeated .Key key = 2;</code>
-       */
+      /** <code>repeated .Key key = 2;</code> */
       public FileProto.Key getKey(int index) {
         if (keyBuilder_ == null) {
           return key_.get(index);
@@ -746,11 +681,8 @@ public final class FileProto {
           return keyBuilder_.getMessage(index);
         }
       }
-      /**
-       * <code>repeated .Key key = 2;</code>
-       */
-      public Builder setKey(
-          int index, FileProto.Key value) {
+      /** <code>repeated .Key key = 2;</code> */
+      public Builder setKey(int index, FileProto.Key value) {
         if (keyBuilder_ == null) {
           if (value == null) {
             throw new NullPointerException();
@@ -763,11 +695,8 @@ public final class FileProto {
         }
         return this;
       }
-      /**
-       * <code>repeated .Key key = 2;</code>
-       */
-      public Builder setKey(
-          int index, FileProto.Key.Builder builderForValue) {
+      /** <code>repeated .Key key = 2;</code> */
+      public Builder setKey(int index, FileProto.Key.Builder builderForValue) {
         if (keyBuilder_ == null) {
           ensureKeyIsMutable();
           key_.set(index, builderForValue.build());
@@ -777,9 +706,7 @@ public final class FileProto {
         }
         return this;
       }
-      /**
-       * <code>repeated .Key key = 2;</code>
-       */
+      /** <code>repeated .Key key = 2;</code> */
       public Builder addKey(FileProto.Key value) {
         if (keyBuilder_ == null) {
           if (value == null) {
@@ -793,11 +720,8 @@ public final class FileProto {
         }
         return this;
       }
-      /**
-       * <code>repeated .Key key = 2;</code>
-       */
-      public Builder addKey(
-          int index, FileProto.Key value) {
+      /** <code>repeated .Key key = 2;</code> */
+      public Builder addKey(int index, FileProto.Key value) {
         if (keyBuilder_ == null) {
           if (value == null) {
             throw new NullPointerException();
@@ -810,11 +734,8 @@ public final class FileProto {
         }
         return this;
       }
-      /**
-       * <code>repeated .Key key = 2;</code>
-       */
-      public Builder addKey(
-          FileProto.Key.Builder builderForValue) {
+      /** <code>repeated .Key key = 2;</code> */
+      public Builder addKey(FileProto.Key.Builder builderForValue) {
         if (keyBuilder_ == null) {
           ensureKeyIsMutable();
           key_.add(builderForValue.build());
@@ -824,11 +745,8 @@ public final class FileProto {
         }
         return this;
       }
-      /**
-       * <code>repeated .Key key = 2;</code>
-       */
-      public Builder addKey(
-          int index, FileProto.Key.Builder builderForValue) {
+      /** <code>repeated .Key key = 2;</code> */
+      public Builder addKey(int index, FileProto.Key.Builder builderForValue) {
         if (keyBuilder_ == null) {
           ensureKeyIsMutable();
           key_.add(index, builderForValue.build());
@@ -838,24 +756,18 @@ public final class FileProto {
         }
         return this;
       }
-      /**
-       * <code>repeated .Key key = 2;</code>
-       */
-      public Builder addAllKey(
-          java.lang.Iterable<? extends FileProto.Key> values) {
+      /** <code>repeated .Key key = 2;</code> */
+      public Builder addAllKey(java.lang.Iterable<? extends FileProto.Key> values) {
         if (keyBuilder_ == null) {
           ensureKeyIsMutable();
-          com.google.protobuf.AbstractMessageLite.Builder.addAll(
-              values, key_);
+          com.google.protobuf.AbstractMessageLite.Builder.addAll(values, key_);
           onChanged();
         } else {
           keyBuilder_.addAllMessages(values);
         }
         return this;
       }
-      /**
-       * <code>repeated .Key key = 2;</code>
-       */
+      /** <code>repeated .Key key = 2;</code> */
       public Builder clearKey() {
         if (keyBuilder_ == null) {
           key_ = java.util.Collections.emptyList();
@@ -866,9 +778,7 @@ public final class FileProto {
         }
         return this;
       }
-      /**
-       * <code>repeated .Key key = 2;</code>
-       */
+      /** <code>repeated .Key key = 2;</code> */
       public Builder removeKey(int index) {
         if (keyBuilder_ == null) {
           ensureKeyIsMutable();
@@ -879,70 +789,52 @@ public final class FileProto {
         }
         return this;
       }
-      /**
-       * <code>repeated .Key key = 2;</code>
-       */
-      public FileProto.Key.Builder getKeyBuilder(
-          int index) {
+      /** <code>repeated .Key key = 2;</code> */
+      public FileProto.Key.Builder getKeyBuilder(int index) {
         return getKeyFieldBuilder().getBuilder(index);
       }
-      /**
-       * <code>repeated .Key key = 2;</code>
-       */
-      public FileProto.KeyOrBuilder getKeyOrBuilder(
-          int index) {
+      /** <code>repeated .Key key = 2;</code> */
+      public FileProto.KeyOrBuilder getKeyOrBuilder(int index) {
         if (keyBuilder_ == null) {
-          return key_.get(index);  } else {
+          return key_.get(index);
+        } else {
           return keyBuilder_.getMessageOrBuilder(index);
         }
       }
-      /**
-       * <code>repeated .Key key = 2;</code>
-       */
-      public java.util.List<? extends FileProto.KeyOrBuilder> 
-           getKeyOrBuilderList() {
+      /** <code>repeated .Key key = 2;</code> */
+      public java.util.List<? extends FileProto.KeyOrBuilder> getKeyOrBuilderList() {
         if (keyBuilder_ != null) {
           return keyBuilder_.getMessageOrBuilderList();
         } else {
           return java.util.Collections.unmodifiableList(key_);
         }
       }
-      /**
-       * <code>repeated .Key key = 2;</code>
-       */
+      /** <code>repeated .Key key = 2;</code> */
       public FileProto.Key.Builder addKeyBuilder() {
-        return getKeyFieldBuilder().addBuilder(
-            FileProto.Key.getDefaultInstance());
+        return getKeyFieldBuilder().addBuilder(FileProto.Key.getDefaultInstance());
       }
-      /**
-       * <code>repeated .Key key = 2;</code>
-       */
-      public FileProto.Key.Builder addKeyBuilder(
-          int index) {
-        return getKeyFieldBuilder().addBuilder(
-            index, FileProto.Key.getDefaultInstance());
+      /** <code>repeated .Key key = 2;</code> */
+      public FileProto.Key.Builder addKeyBuilder(int index) {
+        return getKeyFieldBuilder().addBuilder(index, FileProto.Key.getDefaultInstance());
       }
-      /**
-       * <code>repeated .Key key = 2;</code>
-       */
-      public java.util.List<FileProto.Key.Builder> 
-           getKeyBuilderList() {
+      /** <code>repeated .Key key = 2;</code> */
+      public java.util.List<FileProto.Key.Builder> getKeyBuilderList() {
         return getKeyFieldBuilder().getBuilderList();
       }
+
       private com.google.protobuf.RepeatedFieldBuilderV3<
-          FileProto.Key, FileProto.Key.Builder, FileProto.KeyOrBuilder> 
+              FileProto.Key, FileProto.Key.Builder, FileProto.KeyOrBuilder>
           getKeyFieldBuilder() {
         if (keyBuilder_ == null) {
-          keyBuilder_ = new com.google.protobuf.RepeatedFieldBuilderV3<
-              FileProto.Key, FileProto.Key.Builder, FileProto.KeyOrBuilder>(
-                  key_,
-                  ((bitField0_ & 0x00000002) != 0),
-                  getParentForChildren(),
-                  isClean());
+          keyBuilder_ =
+              new com.google.protobuf.RepeatedFieldBuilderV3<
+                  FileProto.Key, FileProto.Key.Builder, FileProto.KeyOrBuilder>(
+                  key_, ((bitField0_ & 0x00000002) != 0), getParentForChildren(), isClean());
           key_ = null;
         }
         return keyBuilder_;
       }
+
       @java.lang.Override
       public final Builder setUnknownFields(
           final com.google.protobuf.UnknownFieldSet unknownFields) {
@@ -955,12 +847,12 @@ public final class FileProto {
         return super.mergeUnknownFields(unknownFields);
       }
 
-
       // @@protoc_insertion_point(builder_scope:File)
     }
 
     // @@protoc_insertion_point(class_scope:File)
     private static final FileProto.File DEFAULT_INSTANCE;
+
     static {
       DEFAULT_INSTANCE = new FileProto.File();
     }
@@ -969,16 +861,17 @@ public final class FileProto {
       return DEFAULT_INSTANCE;
     }
 
-    @java.lang.Deprecated public static final com.google.protobuf.Parser<File>
-        PARSER = new com.google.protobuf.AbstractParser<File>() {
-      @java.lang.Override
-      public File parsePartialFrom(
-          com.google.protobuf.CodedInputStream input,
-          com.google.protobuf.ExtensionRegistryLite extensionRegistry)
-          throws com.google.protobuf.InvalidProtocolBufferException {
-        return new File(input, extensionRegistry);
-      }
-    };
+    @java.lang.Deprecated
+    public static final com.google.protobuf.Parser<File> PARSER =
+        new com.google.protobuf.AbstractParser<File>() {
+          @java.lang.Override
+          public File parsePartialFrom(
+              com.google.protobuf.CodedInputStream input,
+              com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+              throws com.google.protobuf.InvalidProtocolBufferException {
+            return new File(input, extensionRegistry);
+          }
+        };
 
     public static com.google.protobuf.Parser<File> parser() {
       return PARSER;
@@ -993,14 +886,16 @@ public final class FileProto {
     public FileProto.File getDefaultInstanceForType() {
       return DEFAULT_INSTANCE;
     }
-
   }
 
-  public interface HeaderOrBuilder extends
+  public interface HeaderOrBuilder
+      extends
       // @@protoc_insertion_point(interface_extends:Header)
       com.google.protobuf.MessageOrBuilder {
 
     /**
+     *
+     *
      * <pre>
      * Time window of keys in this file based on arrival to server, in UTC.
      * </pre>
@@ -1009,6 +904,8 @@ public final class FileProto {
      */
     boolean hasStartTimestamp();
     /**
+     *
+     *
      * <pre>
      * Time window of keys in this file based on arrival to server, in UTC.
      * </pre>
@@ -1017,16 +914,14 @@ public final class FileProto {
      */
     long getStartTimestamp();
 
-    /**
-     * <code>optional int64 endTimestamp = 2;</code>
-     */
+    /** <code>optional int64 endTimestamp = 2;</code> */
     boolean hasEndTimestamp();
-    /**
-     * <code>optional int64 endTimestamp = 2;</code>
-     */
+    /** <code>optional int64 endTimestamp = 2;</code> */
     long getEndTimestamp();
 
     /**
+     *
+     *
      * <pre>
      * Region for which these keys came from (e.g., country)
      * </pre>
@@ -1035,6 +930,8 @@ public final class FileProto {
      */
     boolean hasRegion();
     /**
+     *
+     *
      * <pre>
      * Region for which these keys came from (e.g., country)
      * </pre>
@@ -1043,16 +940,19 @@ public final class FileProto {
      */
     java.lang.String getRegion();
     /**
+     *
+     *
      * <pre>
      * Region for which these keys came from (e.g., country)
      * </pre>
      *
      * <code>optional string region = 3;</code>
      */
-    com.google.protobuf.ByteString
-        getRegionBytes();
+    com.google.protobuf.ByteString getRegionBytes();
 
     /**
+     *
+     *
      * <pre>
      * E.g., Batch 2 of 10
      * </pre>
@@ -1061,6 +961,8 @@ public final class FileProto {
      */
     boolean hasBatchNum();
     /**
+     *
+     *
      * <pre>
      * E.g., Batch 2 of 10
      * </pre>
@@ -1069,36 +971,31 @@ public final class FileProto {
      */
     int getBatchNum();
 
-    /**
-     * <code>optional int32 batchSize = 5;</code>
-     */
+    /** <code>optional int32 batchSize = 5;</code> */
     boolean hasBatchSize();
-    /**
-     * <code>optional int32 batchSize = 5;</code>
-     */
+    /** <code>optional int32 batchSize = 5;</code> */
     int getBatchSize();
   }
-  /**
-   * Protobuf type {@code Header}
-   */
-  public  static final class Header extends
-      com.google.protobuf.GeneratedMessageV3 implements
+  /** Protobuf type {@code Header} */
+  public static final class Header extends com.google.protobuf.GeneratedMessageV3
+      implements
       // @@protoc_insertion_point(message_implements:Header)
       HeaderOrBuilder {
-  private static final long serialVersionUID = 0L;
+    private static final long serialVersionUID = 0L;
     // Use Header.newBuilder() to construct.
     private Header(com.google.protobuf.GeneratedMessageV3.Builder<?> builder) {
       super(builder);
     }
+
     private Header() {
       region_ = "";
     }
 
     @java.lang.Override
-    public final com.google.protobuf.UnknownFieldSet
-    getUnknownFields() {
+    public final com.google.protobuf.UnknownFieldSet getUnknownFields() {
       return this.unknownFields;
     }
+
     private Header(
         com.google.protobuf.CodedInputStream input,
         com.google.protobuf.ExtensionRegistryLite extensionRegistry)
@@ -1118,68 +1015,73 @@ public final class FileProto {
             case 0:
               done = true;
               break;
-            case 8: {
-              bitField0_ |= 0x00000001;
-              startTimestamp_ = input.readInt64();
-              break;
-            }
-            case 16: {
-              bitField0_ |= 0x00000002;
-              endTimestamp_ = input.readInt64();
-              break;
-            }
-            case 26: {
-              com.google.protobuf.ByteString bs = input.readBytes();
-              bitField0_ |= 0x00000004;
-              region_ = bs;
-              break;
-            }
-            case 32: {
-              bitField0_ |= 0x00000008;
-              batchNum_ = input.readInt32();
-              break;
-            }
-            case 40: {
-              bitField0_ |= 0x00000010;
-              batchSize_ = input.readInt32();
-              break;
-            }
-            default: {
-              if (!parseUnknownField(
-                  input, unknownFields, extensionRegistry, tag)) {
-                done = true;
+            case 8:
+              {
+                bitField0_ |= 0x00000001;
+                startTimestamp_ = input.readInt64();
+                break;
               }
-              break;
-            }
+            case 16:
+              {
+                bitField0_ |= 0x00000002;
+                endTimestamp_ = input.readInt64();
+                break;
+              }
+            case 26:
+              {
+                com.google.protobuf.ByteString bs = input.readBytes();
+                bitField0_ |= 0x00000004;
+                region_ = bs;
+                break;
+              }
+            case 32:
+              {
+                bitField0_ |= 0x00000008;
+                batchNum_ = input.readInt32();
+                break;
+              }
+            case 40:
+              {
+                bitField0_ |= 0x00000010;
+                batchSize_ = input.readInt32();
+                break;
+              }
+            default:
+              {
+                if (!parseUnknownField(input, unknownFields, extensionRegistry, tag)) {
+                  done = true;
+                }
+                break;
+              }
           }
         }
       } catch (com.google.protobuf.InvalidProtocolBufferException e) {
         throw e.setUnfinishedMessage(this);
       } catch (java.io.IOException e) {
-        throw new com.google.protobuf.InvalidProtocolBufferException(
-            e).setUnfinishedMessage(this);
+        throw new com.google.protobuf.InvalidProtocolBufferException(e).setUnfinishedMessage(this);
       } finally {
         this.unknownFields = unknownFields.build();
         makeExtensionsImmutable();
       }
     }
-    public static final com.google.protobuf.Descriptors.Descriptor
-        getDescriptor() {
+
+    public static final com.google.protobuf.Descriptors.Descriptor getDescriptor() {
       return FileProto.internal_static_Header_descriptor;
     }
 
     @java.lang.Override
     protected com.google.protobuf.GeneratedMessageV3.FieldAccessorTable
         internalGetFieldAccessorTable() {
-      return FileProto.internal_static_Header_fieldAccessorTable
-          .ensureFieldAccessorsInitialized(
-              FileProto.Header.class, FileProto.Header.Builder.class);
+      return FileProto.internal_static_Header_fieldAccessorTable.ensureFieldAccessorsInitialized(
+          FileProto.Header.class, FileProto.Header.Builder.class);
     }
 
     private int bitField0_;
     public static final int STARTTIMESTAMP_FIELD_NUMBER = 1;
     private long startTimestamp_;
     /**
+     *
+     *
      * <pre>
      * Time window of keys in this file based on arrival to server, in UTC.
      * </pre>
@@ -1190,6 +1092,8 @@ public final class FileProto {
       return ((bitField0_ & 0x00000001) != 0);
     }
     /**
+     *
+     *
      * <pre>
      * Time window of keys in this file based on arrival to server, in UTC.
      * </pre>
@@ -1202,15 +1106,11 @@ public final class FileProto {
 
     public static final int ENDTIMESTAMP_FIELD_NUMBER = 2;
     private long endTimestamp_;
-    /**
-     * <code>optional int64 endTimestamp = 2;</code>
-     */
+    /** <code>optional int64 endTimestamp = 2;</code> */
     public boolean hasEndTimestamp() {
       return ((bitField0_ & 0x00000002) != 0);
     }
-    /**
-     * <code>optional int64 endTimestamp = 2;</code>
-     */
+    /** <code>optional int64 endTimestamp = 2;</code> */
     public long getEndTimestamp() {
       return endTimestamp_;
     }
@@ -1218,6 +1118,8 @@ public final class FileProto {
     public static final int REGION_FIELD_NUMBER = 3;
     private volatile java.lang.Object region_;
     /**
+     *
+     *
      * <pre>
      * Region for which these keys came from (e.g., country)
      * </pre>
@@ -1228,6 +1130,8 @@ public final class FileProto {
       return ((bitField0_ & 0x00000004) != 0);
     }
     /**
+     *
+     *
      * <pre>
      * Region for which these keys came from (e.g., country)
      * </pre>
@@ -1239,8 +1143,7 @@ public final class FileProto {
       if (ref instanceof java.lang.String) {
         return (java.lang.String) ref;
       } else {
-        com.google.protobuf.ByteString bs = 
-            (com.google.protobuf.ByteString) ref;
+        com.google.protobuf.ByteString bs = (com.google.protobuf.ByteString) ref;
         java.lang.String s = bs.toStringUtf8();
         if (bs.isValidUtf8()) {
           region_ = s;
@@ -1249,19 +1152,19 @@ public final class FileProto {
       }
     }
     /**
+     *
+     *
      * <pre>
      * Region for which these keys came from (e.g., country)
      * </pre>
      *
      * <code>optional string region = 3;</code>
      */
-    public com.google.protobuf.ByteString
-        getRegionBytes() {
+    public com.google.protobuf.ByteString getRegionBytes() {
       java.lang.Object ref = region_;
       if (ref instanceof java.lang.String) {
-        com.google.protobuf.ByteString b = 
-            com.google.protobuf.ByteString.copyFromUtf8(
-                (java.lang.String) ref);
+        com.google.protobuf.ByteString b =
+            com.google.protobuf.ByteString.copyFromUtf8((java.lang.String) ref);
         region_ = b;
         return b;
       } else {
@@ -1272,6 +1175,8 @@ public final class FileProto {
     public static final int BATCHNUM_FIELD_NUMBER = 4;
     private int batchNum_;
     /**
+     *
+     *
      * <pre>
      * E.g., Batch 2 of 10
      * </pre>
@@ -1282,6 +1187,8 @@ public final class FileProto {
       return ((bitField0_ & 0x00000008) != 0);
     }
     /**
+     *
+     *
      * <pre>
      * E.g., Batch 2 of 10
      * </pre>
@@ -1294,20 +1201,17 @@ public final class FileProto {
 
     public static final int BATCHSIZE_FIELD_NUMBER = 5;
     private int batchSize_;
-    /**
-     * <code>optional int32 batchSize = 5;</code>
-     */
+    /** <code>optional int32 batchSize = 5;</code> */
     public boolean hasBatchSize() {
       return ((bitField0_ & 0x00000010) != 0);
     }
-    /**
-     * <code>optional int32 batchSize = 5;</code>
-     */
+    /** <code>optional int32 batchSize = 5;</code> */
     public int getBatchSize() {
       return batchSize_;
     }
 
     private byte memoizedIsInitialized = -1;
+
     @java.lang.Override
     public final boolean isInitialized() {
       byte isInitialized = memoizedIsInitialized;
@@ -1319,8 +1223,7 @@ public final class FileProto {
     }
 
     @java.lang.Override
-    public void writeTo(com.google.protobuf.CodedOutputStream output)
-                        throws java.io.IOException {
+    public void writeTo(com.google.protobuf.CodedOutputStream output) throws java.io.IOException {
       if (((bitField0_ & 0x00000001) != 0)) {
         output.writeInt64(1, startTimestamp_);
       }
@@ -1346,23 +1249,19 @@ public final class FileProto {
 
       size = 0;
       if (((bitField0_ & 0x00000001) != 0)) {
-        size += com.google.protobuf.CodedOutputStream
-          .computeInt64Size(1, startTimestamp_);
+        size += com.google.protobuf.CodedOutputStream.computeInt64Size(1, startTimestamp_);
       }
       if (((bitField0_ & 0x00000002) != 0)) {
-        size += com.google.protobuf.CodedOutputStream
-          .computeInt64Size(2, endTimestamp_);
+        size += com.google.protobuf.CodedOutputStream.computeInt64Size(2, endTimestamp_);
       }
       if (((bitField0_ & 0x00000004) != 0)) {
         size += com.google.protobuf.GeneratedMessageV3.computeStringSize(3, region_);
       }
       if (((bitField0_ & 0x00000008) != 0)) {
-        size += com.google.protobuf.CodedOutputStream
-          .computeInt32Size(4, batchNum_);
+        size += com.google.protobuf.CodedOutputStream.computeInt32Size(4, batchNum_);
       }
       if (((bitField0_ & 0x00000010) != 0)) {
-        size += com.google.protobuf.CodedOutputStream
-          .computeInt32Size(5, batchSize_);
+        size += com.google.protobuf.CodedOutputStream.computeInt32Size(5, batchSize_);
       }
       size += unknownFields.getSerializedSize();
       memoizedSize = size;
@@ -1372,7 +1271,7 @@ public final class FileProto {
     @java.lang.Override
     public boolean equals(final java.lang.Object obj) {
       if (obj == this) {
-       return true;
+        return true;
       }
       if (!(obj instanceof FileProto.Header)) {
         return super.equals(obj);
@@ -1381,28 +1280,23 @@ public final class FileProto {
 
       if (hasStartTimestamp() != other.hasStartTimestamp()) return false;
       if (hasStartTimestamp()) {
-        if (getStartTimestamp()
-            != other.getStartTimestamp()) return false;
+        if (getStartTimestamp() != other.getStartTimestamp()) return false;
       }
       if (hasEndTimestamp() != other.hasEndTimestamp()) return false;
       if (hasEndTimestamp()) {
-        if (getEndTimestamp()
-            != other.getEndTimestamp()) return false;
+        if (getEndTimestamp() != other.getEndTimestamp()) return false;
       }
       if (hasRegion() != other.hasRegion()) return false;
       if (hasRegion()) {
-        if (!getRegion()
-            .equals(other.getRegion())) return false;
+        if (!getRegion().equals(other.getRegion())) return false;
       }
       if (hasBatchNum() != other.hasBatchNum()) return false;
       if (hasBatchNum()) {
-        if (getBatchNum()
-            != other.getBatchNum()) return false;
+        if (getBatchNum() != other.getBatchNum()) return false;
       }
       if (hasBatchSize() != other.hasBatchSize()) return false;
       if (hasBatchSize()) {
-        if (getBatchSize()
-            != other.getBatchSize()) return false;
+        if (getBatchSize() != other.getBatchSize()) return false;
       }
       if (!unknownFields.equals(other.unknownFields)) return false;
       return true;
@@ -1417,13 +1311,11 @@ public final class FileProto {
       hash = (19 * hash) + getDescriptor().hashCode();
       if (hasStartTimestamp()) {
         hash = (37 * hash) + STARTTIMESTAMP_FIELD_NUMBER;
-        hash = (53 * hash) + com.google.protobuf.Internal.hashLong(
-            getStartTimestamp());
+        hash = (53 * hash) + com.google.protobuf.Internal.hashLong(getStartTimestamp());
       }
       if (hasEndTimestamp()) {
         hash = (37 * hash) + ENDTIMESTAMP_FIELD_NUMBER;
-        hash = (53 * hash) + com.google.protobuf.Internal.hashLong(
-            getEndTimestamp());
+        hash = (53 * hash) + com.google.protobuf.Internal.hashLong(getEndTimestamp());
       }
       if (hasRegion()) {
         hash = (37 * hash) + REGION_FIELD_NUMBER;
@@ -1442,88 +1334,92 @@ public final class FileProto {
       return hash;
     }
 
-    public static FileProto.Header parseFrom(
-        java.nio.ByteBuffer data)
+    public static FileProto.Header parseFrom(java.nio.ByteBuffer data)
         throws com.google.protobuf.InvalidProtocolBufferException {
       return PARSER.parseFrom(data);
     }
+
     public static FileProto.Header parseFrom(
-        java.nio.ByteBuffer data,
-        com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+        java.nio.ByteBuffer data, com.google.protobuf.ExtensionRegistryLite extensionRegistry)
         throws com.google.protobuf.InvalidProtocolBufferException {
       return PARSER.parseFrom(data, extensionRegistry);
     }
-    public static FileProto.Header parseFrom(
-        com.google.protobuf.ByteString data)
+
+    public static FileProto.Header parseFrom(com.google.protobuf.ByteString data)
         throws com.google.protobuf.InvalidProtocolBufferException {
       return PARSER.parseFrom(data);
     }
+
     public static FileProto.Header parseFrom(
         com.google.protobuf.ByteString data,
         com.google.protobuf.ExtensionRegistryLite extensionRegistry)
         throws com.google.protobuf.InvalidProtocolBufferException {
       return PARSER.parseFrom(data, extensionRegistry);
     }
+
     public static FileProto.Header parseFrom(byte[] data)
         throws com.google.protobuf.InvalidProtocolBufferException {
       return PARSER.parseFrom(data);
     }
+
     public static FileProto.Header parseFrom(
-        byte[] data,
-        com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+        byte[] data, com.google.protobuf.ExtensionRegistryLite extensionRegistry)
         throws com.google.protobuf.InvalidProtocolBufferException {
       return PARSER.parseFrom(data, extensionRegistry);
     }
-    public static FileProto.Header parseFrom(java.io.InputStream input)
-        throws java.io.IOException {
-      return com.google.protobuf.GeneratedMessageV3
-          .parseWithIOException(PARSER, input);
+
+    public static FileProto.Header parseFrom(java.io.InputStream input) throws java.io.IOException {
+      return com.google.protobuf.GeneratedMessageV3.parseWithIOException(PARSER, input);
     }
+
     public static FileProto.Header parseFrom(
-        java.io.InputStream input,
-        com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+        java.io.InputStream input, com.google.protobuf.ExtensionRegistryLite extensionRegistry)
         throws java.io.IOException {
-      return com.google.protobuf.GeneratedMessageV3
-          .parseWithIOException(PARSER, input, extensionRegistry);
+      return com.google.protobuf.GeneratedMessageV3.parseWithIOException(
+          PARSER, input, extensionRegistry);
     }
+
     public static FileProto.Header parseDelimitedFrom(java.io.InputStream input)
         throws java.io.IOException {
-      return com.google.protobuf.GeneratedMessageV3
-          .parseDelimitedWithIOException(PARSER, input);
+      return com.google.protobuf.GeneratedMessageV3.parseDelimitedWithIOException(PARSER, input);
     }
+
     public static FileProto.Header parseDelimitedFrom(
-        java.io.InputStream input,
-        com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+        java.io.InputStream input, com.google.protobuf.ExtensionRegistryLite extensionRegistry)
         throws java.io.IOException {
-      return com.google.protobuf.GeneratedMessageV3
-          .parseDelimitedWithIOException(PARSER, input, extensionRegistry);
+      return com.google.protobuf.GeneratedMessageV3.parseDelimitedWithIOException(
+          PARSER, input, extensionRegistry);
     }
-    public static FileProto.Header parseFrom(
-        com.google.protobuf.CodedInputStream input)
+
+    public static FileProto.Header parseFrom(com.google.protobuf.CodedInputStream input)
         throws java.io.IOException {
-      return com.google.protobuf.GeneratedMessageV3
-          .parseWithIOException(PARSER, input);
+      return com.google.protobuf.GeneratedMessageV3.parseWithIOException(PARSER, input);
     }
+
     public static FileProto.Header parseFrom(
         com.google.protobuf.CodedInputStream input,
         com.google.protobuf.ExtensionRegistryLite extensionRegistry)
         throws java.io.IOException {
-      return com.google.protobuf.GeneratedMessageV3
-          .parseWithIOException(PARSER, input, extensionRegistry);
+      return com.google.protobuf.GeneratedMessageV3.parseWithIOException(
+          PARSER, input, extensionRegistry);
     }
 
     @java.lang.Override
-    public Builder newBuilderForType() { return newBuilder(); }
+    public Builder newBuilderForType() {
+      return newBuilder();
+    }
+
     public static Builder newBuilder() {
       return DEFAULT_INSTANCE.toBuilder();
     }
+
     public static Builder newBuilder(FileProto.Header prototype) {
       return DEFAULT_INSTANCE.toBuilder().mergeFrom(prototype);
     }
+
     @java.lang.Override
     public Builder toBuilder() {
-      return this == DEFAULT_INSTANCE
-          ? new Builder() : new Builder().mergeFrom(this);
+      return this == DEFAULT_INSTANCE ? new Builder() : new Builder().mergeFrom(this);
     }
 
     @java.lang.Override
@@ -1532,24 +1428,21 @@ public final class FileProto {
       Builder builder = new Builder(parent);
       return builder;
     }
-    /**
-     * Protobuf type {@code Header}
-     */
-    public static final class Builder extends
-        com.google.protobuf.GeneratedMessageV3.Builder<Builder> implements
+    /** Protobuf type {@code Header} */
+    public static final class Builder
+        extends com.google.protobuf.GeneratedMessageV3.Builder<Builder>
+        implements
         // @@protoc_insertion_point(builder_implements:Header)
         FileProto.HeaderOrBuilder {
-      public static final com.google.protobuf.Descriptors.Descriptor
-          getDescriptor() {
+      public static final com.google.protobuf.Descriptors.Descriptor getDescriptor() {
         return FileProto.internal_static_Header_descriptor;
       }
 
       @java.lang.Override
       protected com.google.protobuf.GeneratedMessageV3.FieldAccessorTable
           internalGetFieldAccessorTable() {
-        return FileProto.internal_static_Header_fieldAccessorTable
-            .ensureFieldAccessorsInitialized(
-                FileProto.Header.class, FileProto.Header.Builder.class);
+        return FileProto.internal_static_Header_fieldAccessorTable.ensureFieldAccessorsInitialized(
+            FileProto.Header.class, FileProto.Header.Builder.class);
       }
 
       // Construct using FileOuterClass.Header.newBuilder()
@@ -1557,16 +1450,15 @@ public final class FileProto {
         maybeForceBuilderInitialization();
       }
 
-      private Builder(
-          com.google.protobuf.GeneratedMessageV3.BuilderParent parent) {
+      private Builder(com.google.protobuf.GeneratedMessageV3.BuilderParent parent) {
         super(parent);
         maybeForceBuilderInitialization();
       }
+
       private void maybeForceBuilderInitialization() {
-        if (com.google.protobuf.GeneratedMessageV3
-                .alwaysUseFieldBuilders) {
-        }
+        if (com.google.protobuf.GeneratedMessageV3.alwaysUseFieldBuilders) {}
       }
+
       @java.lang.Override
       public Builder clear() {
         super.clear();
@@ -1584,8 +1476,7 @@ public final class FileProto {
       }
 
       @java.lang.Override
-      public com.google.protobuf.Descriptors.Descriptor
-          getDescriptorForType() {
+      public com.google.protobuf.Descriptors.Descriptor getDescriptorForType() {
         return FileProto.internal_static_Header_descriptor;
       }
 
@@ -1637,38 +1528,41 @@ public final class FileProto {
       public Builder clone() {
         return super.clone();
       }
+
       @java.lang.Override
       public Builder setField(
-          com.google.protobuf.Descriptors.FieldDescriptor field,
-          java.lang.Object value) {
+          com.google.protobuf.Descriptors.FieldDescriptor field, java.lang.Object value) {
         return super.setField(field, value);
       }
+
       @java.lang.Override
-      public Builder clearField(
-          com.google.protobuf.Descriptors.FieldDescriptor field) {
+      public Builder clearField(com.google.protobuf.Descriptors.FieldDescriptor field) {
         return super.clearField(field);
       }
+
       @java.lang.Override
-      public Builder clearOneof(
-          com.google.protobuf.Descriptors.OneofDescriptor oneof) {
+      public Builder clearOneof(com.google.protobuf.Descriptors.OneofDescriptor oneof) {
         return super.clearOneof(oneof);
       }
+
       @java.lang.Override
       public Builder setRepeatedField(
           com.google.protobuf.Descriptors.FieldDescriptor field,
-          int index, java.lang.Object value) {
+          int index,
+          java.lang.Object value) {
         return super.setRepeatedField(field, index, value);
       }
+
       @java.lang.Override
       public Builder addRepeatedField(
-          com.google.protobuf.Descriptors.FieldDescriptor field,
-          java.lang.Object value) {
+          com.google.protobuf.Descriptors.FieldDescriptor field, java.lang.Object value) {
         return super.addRepeatedField(field, value);
       }
+
       @java.lang.Override
       public Builder mergeFrom(com.google.protobuf.Message other) {
         if (other instanceof FileProto.Header) {
-          return mergeFrom((FileProto.Header)other);
+          return mergeFrom((FileProto.Header) other);
         } else {
           super.mergeFrom(other);
           return this;
@@ -1722,10 +1616,13 @@ public final class FileProto {
         }
         return this;
       }
+
       private int bitField0_;
 
-      private long startTimestamp_ ;
+      private long startTimestamp_;
       /**
+       *
+       *
        * <pre>
        * Time window of keys in this file based on arrival to server, in UTC.
        * </pre>
@@ -1736,6 +1633,8 @@ public final class FileProto {
         return ((bitField0_ & 0x00000001) != 0);
       }
       /**
+       *
+       *
        * <pre>
        * Time window of keys in this file based on arrival to server, in UTC.
        * </pre>
@@ -1746,6 +1645,8 @@ public final class FileProto {
         return startTimestamp_;
       }
       /**
+       *
+       *
        * <pre>
        * Time window of keys in this file based on arrival to server, in UTC.
        * </pre>
@@ -1759,6 +1660,8 @@ public final class FileProto {
         return this;
       }
       /**
+       *
+       *
        * <pre>
        * Time window of keys in this file based on arrival to server, in UTC.
        * </pre>
@@ -1772,31 +1675,23 @@ public final class FileProto {
         return this;
       }
 
-      private long endTimestamp_ ;
-      /**
-       * <code>optional int64 endTimestamp = 2;</code>
-       */
+      private long endTimestamp_;
+      /** <code>optional int64 endTimestamp = 2;</code> */
       public boolean hasEndTimestamp() {
         return ((bitField0_ & 0x00000002) != 0);
       }
-      /**
-       * <code>optional int64 endTimestamp = 2;</code>
-       */
+      /** <code>optional int64 endTimestamp = 2;</code> */
       public long getEndTimestamp() {
         return endTimestamp_;
       }
-      /**
-       * <code>optional int64 endTimestamp = 2;</code>
-       */
+      /** <code>optional int64 endTimestamp = 2;</code> */
       public Builder setEndTimestamp(long value) {
         bitField0_ |= 0x00000002;
         endTimestamp_ = value;
         onChanged();
         return this;
       }
-      /**
-       * <code>optional int64 endTimestamp = 2;</code>
-       */
+      /** <code>optional int64 endTimestamp = 2;</code> */
       public Builder clearEndTimestamp() {
         bitField0_ = (bitField0_ & ~0x00000002);
         endTimestamp_ = 0L;
@@ -1806,6 +1701,8 @@ public final class FileProto {
 
       private java.lang.Object region_ = "";
       /**
+       *
+       *
        * <pre>
        * Region for which these keys came from (e.g., country)
        * </pre>
@@ -1816,6 +1713,8 @@ public final class FileProto {
         return ((bitField0_ & 0x00000004) != 0);
       }
       /**
+       *
+       *
        * <pre>
        * Region for which these keys came from (e.g., country)
        * </pre>
@@ -1825,8 +1724,7 @@ public final class FileProto {
       public java.lang.String getRegion() {
         java.lang.Object ref = region_;
         if (!(ref instanceof java.lang.String)) {
-          com.google.protobuf.ByteString bs =
-              (com.google.protobuf.ByteString) ref;
+          com.google.protobuf.ByteString bs = (com.google.protobuf.ByteString) ref;
           java.lang.String s = bs.toStringUtf8();
           if (bs.isValidUtf8()) {
             region_ = s;
@@ -1837,19 +1735,19 @@ public final class FileProto {
         }
       }
       /**
+       *
+       *
        * <pre>
        * Region for which these keys came from (e.g., country)
        * </pre>
        *
        * <code>optional string region = 3;</code>
        */
-      public com.google.protobuf.ByteString
-          getRegionBytes() {
+      public com.google.protobuf.ByteString getRegionBytes() {
         java.lang.Object ref = region_;
         if (ref instanceof String) {
-          com.google.protobuf.ByteString b = 
-              com.google.protobuf.ByteString.copyFromUtf8(
-                  (java.lang.String) ref);
+          com.google.protobuf.ByteString b =
+              com.google.protobuf.ByteString.copyFromUtf8((java.lang.String) ref);
           region_ = b;
           return b;
         } else {
@@ -1857,23 +1755,26 @@ public final class FileProto {
         }
       }
       /**
+       *
+       *
        * <pre>
        * Region for which these keys came from (e.g., country)
        * </pre>
        *
        * <code>optional string region = 3;</code>
        */
-      public Builder setRegion(
-          java.lang.String value) {
+      public Builder setRegion(java.lang.String value) {
         if (value == null) {
-    throw new NullPointerException();
-  }
-  bitField0_ |= 0x00000004;
+          throw new NullPointerException();
+        }
+        bitField0_ |= 0x00000004;
         region_ = value;
         onChanged();
         return this;
       }
       /**
+       *
+       *
        * <pre>
        * Region for which these keys came from (e.g., country)
        * </pre>
@@ -1887,25 +1788,28 @@ public final class FileProto {
         return this;
       }
       /**
+       *
+       *
        * <pre>
        * Region for which these keys came from (e.g., country)
        * </pre>
        *
        * <code>optional string region = 3;</code>
        */
-      public Builder setRegionBytes(
-          com.google.protobuf.ByteString value) {
+      public Builder setRegionBytes(com.google.protobuf.ByteString value) {
         if (value == null) {
-    throw new NullPointerException();
-  }
-  bitField0_ |= 0x00000004;
+          throw new NullPointerException();
+        }
+        bitField0_ |= 0x00000004;
         region_ = value;
         onChanged();
         return this;
       }
 
-      private int batchNum_ ;
+      private int batchNum_;
       /**
+       *
+       *
        * <pre>
        * E.g., Batch 2 of 10
        * </pre>
@@ -1916,6 +1820,8 @@ public final class FileProto {
         return ((bitField0_ & 0x00000008) != 0);
       }
       /**
+       *
+       *
        * <pre>
        * E.g., Batch 2 of 10
        * </pre>
@@ -1926,6 +1832,8 @@ public final class FileProto {
         return batchNum_;
       }
       /**
+       *
+       *
        * <pre>
        * E.g., Batch 2 of 10
        * </pre>
@@ -1939,6 +1847,8 @@ public final class FileProto {
         return this;
       }
       /**
+       *
+       *
        * <pre>
        * E.g., Batch 2 of 10
        * </pre>
@@ -1952,37 +1862,30 @@ public final class FileProto {
         return this;
       }
 
-      private int batchSize_ ;
-      /**
-       * <code>optional int32 batchSize = 5;</code>
-       */
+      private int batchSize_;
+      /** <code>optional int32 batchSize = 5;</code> */
       public boolean hasBatchSize() {
         return ((bitField0_ & 0x00000010) != 0);
       }
-      /**
-       * <code>optional int32 batchSize = 5;</code>
-       */
+      /** <code>optional int32 batchSize = 5;</code> */
       public int getBatchSize() {
         return batchSize_;
       }
-      /**
-       * <code>optional int32 batchSize = 5;</code>
-       */
+      /** <code>optional int32 batchSize = 5;</code> */
       public Builder setBatchSize(int value) {
         bitField0_ |= 0x00000010;
         batchSize_ = value;
         onChanged();
         return this;
       }
-      /**
-       * <code>optional int32 batchSize = 5;</code>
-       */
+      /** <code>optional int32 batchSize = 5;</code> */
       public Builder clearBatchSize() {
         bitField0_ = (bitField0_ & ~0x00000010);
         batchSize_ = 0;
         onChanged();
         return this;
       }
+
       @java.lang.Override
       public final Builder setUnknownFields(
           final com.google.protobuf.UnknownFieldSet unknownFields) {
@@ -1995,12 +1898,12 @@ public final class FileProto {
         return super.mergeUnknownFields(unknownFields);
       }
 
-
       // @@protoc_insertion_point(builder_scope:Header)
     }
 
     // @@protoc_insertion_point(class_scope:Header)
     private static final FileProto.Header DEFAULT_INSTANCE;
+
     static {
       DEFAULT_INSTANCE = new FileProto.Header();
     }
@@ -2009,16 +1912,17 @@ public final class FileProto {
       return DEFAULT_INSTANCE;
     }
 
-    @java.lang.Deprecated public static final com.google.protobuf.Parser<Header>
-        PARSER = new com.google.protobuf.AbstractParser<Header>() {
-      @java.lang.Override
-      public Header parsePartialFrom(
-          com.google.protobuf.CodedInputStream input,
-          com.google.protobuf.ExtensionRegistryLite extensionRegistry)
-          throws com.google.protobuf.InvalidProtocolBufferException {
-        return new Header(input, extensionRegistry);
-      }
-    };
+    @java.lang.Deprecated
+    public static final com.google.protobuf.Parser<Header> PARSER =
+        new com.google.protobuf.AbstractParser<Header>() {
+          @java.lang.Override
+          public Header parsePartialFrom(
+              com.google.protobuf.CodedInputStream input,
+              com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+              throws com.google.protobuf.InvalidProtocolBufferException {
+            return new Header(input, extensionRegistry);
+          }
+        };
 
     public static com.google.protobuf.Parser<Header> parser() {
       return PARSER;
@@ -2033,14 +1937,16 @@ public final class FileProto {
     public FileProto.Header getDefaultInstanceForType() {
       return DEFAULT_INSTANCE;
     }
-
   }
 
-  public interface KeyOrBuilder extends
+  public interface KeyOrBuilder
+      extends
       // @@protoc_insertion_point(interface_extends:Key)
       com.google.protobuf.MessageOrBuilder {
 
     /**
+     *
+     *
      * <pre>
      * Key of infected user
      * </pre>
@@ -2049,6 +1955,8 @@ public final class FileProto {
      */
     boolean hasKeyData();
     /**
+     *
+     *
      * <pre>
      * Key of infected user
      * </pre>
@@ -2058,6 +1966,8 @@ public final class FileProto {
     com.google.protobuf.ByteString getKeyData();
 
     /**
+     *
+     *
      * <pre>
      * Interval number when the key's EKRollingPeriod started.
      * </pre>
@@ -2066,6 +1976,8 @@ public final class FileProto {
      */
     boolean hasRollingStartNumber();
     /**
+     *
+     *
      * <pre>
      * Interval number when the key's EKRollingPeriod started.
      * </pre>
@@ -2075,6 +1987,8 @@ public final class FileProto {
     int getRollingStartNumber();
 
     /**
+     *
+     *
      * <pre>
      * Number of 10-minute windows between key rolling.
      * </pre>
@@ -2083,6 +1997,8 @@ public final class FileProto {
      */
     boolean hasRollingPeriod();
     /**
+     *
+     *
      * <pre>
      * Number of 10-minute windows between key rolling.
      * </pre>
@@ -2092,6 +2008,8 @@ public final class FileProto {
     int getRollingPeriod();
 
     /**
+     *
+     *
      * <pre>
      * Risk of transmission associated with the person this key came from.
      * </pre>
@@ -2100,6 +2018,8 @@ public final class FileProto {
      */
     boolean hasTransmissionRiskLevel();
     /**
+     *
+     *
      * <pre>
      * Risk of transmission associated with the person this key came from.
      * </pre>
@@ -2108,27 +2028,26 @@ public final class FileProto {
      */
     int getTransmissionRiskLevel();
   }
-  /**
-   * Protobuf type {@code Key}
-   */
-  public  static final class Key extends
-      com.google.protobuf.GeneratedMessageV3 implements
+  /** Protobuf type {@code Key} */
+  public static final class Key extends com.google.protobuf.GeneratedMessageV3
+      implements
       // @@protoc_insertion_point(message_implements:Key)
       KeyOrBuilder {
-  private static final long serialVersionUID = 0L;
+    private static final long serialVersionUID = 0L;
     // Use Key.newBuilder() to construct.
     private Key(com.google.protobuf.GeneratedMessageV3.Builder<?> builder) {
       super(builder);
     }
+
     private Key() {
       keyData_ = com.google.protobuf.ByteString.EMPTY;
     }
 
     @java.lang.Override
-    public final com.google.protobuf.UnknownFieldSet
-    getUnknownFields() {
+    public final com.google.protobuf.UnknownFieldSet getUnknownFields() {
       return this.unknownFields;
     }
+
     private Key(
         com.google.protobuf.CodedInputStream input,
         com.google.protobuf.ExtensionRegistryLite extensionRegistry)
@@ -2148,62 +2067,66 @@ public final class FileProto {
             case 0:
               done = true;
               break;
-            case 10: {
-              bitField0_ |= 0x00000001;
-              keyData_ = input.readBytes();
-              break;
-            }
-            case 16: {
-              bitField0_ |= 0x00000002;
-              rollingStartNumber_ = input.readUInt32();
-              break;
-            }
-            case 24: {
-              bitField0_ |= 0x00000004;
-              rollingPeriod_ = input.readUInt32();
-              break;
-            }
-            case 32: {
-              bitField0_ |= 0x00000008;
-              transmissionRiskLevel_ = input.readInt32();
-              break;
-            }
-            default: {
-              if (!parseUnknownField(
-                  input, unknownFields, extensionRegistry, tag)) {
-                done = true;
+            case 10:
+              {
+                bitField0_ |= 0x00000001;
+                keyData_ = input.readBytes();
+                break;
               }
-              break;
-            }
+            case 16:
+              {
+                bitField0_ |= 0x00000002;
+                rollingStartNumber_ = input.readUInt32();
+                break;
+              }
+            case 24:
+              {
+                bitField0_ |= 0x00000004;
+                rollingPeriod_ = input.readUInt32();
+                break;
+              }
+            case 32:
+              {
+                bitField0_ |= 0x00000008;
+                transmissionRiskLevel_ = input.readInt32();
+                break;
+              }
+            default:
+              {
+                if (!parseUnknownField(input, unknownFields, extensionRegistry, tag)) {
+                  done = true;
+                }
+                break;
+              }
           }
         }
       } catch (com.google.protobuf.InvalidProtocolBufferException e) {
         throw e.setUnfinishedMessage(this);
       } catch (java.io.IOException e) {
-        throw new com.google.protobuf.InvalidProtocolBufferException(
-            e).setUnfinishedMessage(this);
+        throw new com.google.protobuf.InvalidProtocolBufferException(e).setUnfinishedMessage(this);
       } finally {
         this.unknownFields = unknownFields.build();
         makeExtensionsImmutable();
       }
     }
-    public static final com.google.protobuf.Descriptors.Descriptor
-        getDescriptor() {
+
+    public static final com.google.protobuf.Descriptors.Descriptor getDescriptor() {
       return FileProto.internal_static_Key_descriptor;
     }
 
     @java.lang.Override
     protected com.google.protobuf.GeneratedMessageV3.FieldAccessorTable
         internalGetFieldAccessorTable() {
-      return FileProto.internal_static_Key_fieldAccessorTable
-          .ensureFieldAccessorsInitialized(
-              FileProto.Key.class, FileProto.Key.Builder.class);
+      return FileProto.internal_static_Key_fieldAccessorTable.ensureFieldAccessorsInitialized(
+          FileProto.Key.class, FileProto.Key.Builder.class);
     }
 
     private int bitField0_;
     public static final int KEYDATA_FIELD_NUMBER = 1;
     private com.google.protobuf.ByteString keyData_;
     /**
+     *
+     *
      * <pre>
      * Key of infected user
      * </pre>
@@ -2214,6 +2137,8 @@ public final class FileProto {
       return ((bitField0_ & 0x00000001) != 0);
     }
     /**
+     *
+     *
      * <pre>
      * Key of infected user
      * </pre>
@@ -2227,6 +2152,8 @@ public final class FileProto {
     public static final int ROLLINGSTARTNUMBER_FIELD_NUMBER = 2;
     private int rollingStartNumber_;
     /**
+     *
+     *
      * <pre>
      * Interval number when the key's EKRollingPeriod started.
      * </pre>
@@ -2237,6 +2164,8 @@ public final class FileProto {
       return ((bitField0_ & 0x00000002) != 0);
     }
     /**
+     *
+     *
      * <pre>
      * Interval number when the key's EKRollingPeriod started.
      * </pre>
@@ -2250,6 +2179,8 @@ public final class FileProto {
     public static final int ROLLINGPERIOD_FIELD_NUMBER = 3;
     private int rollingPeriod_;
     /**
+     *
+     *
      * <pre>
      * Number of 10-minute windows between key rolling.
      * </pre>
@@ -2260,6 +2191,8 @@ public final class FileProto {
       return ((bitField0_ & 0x00000004) != 0);
     }
     /**
+     *
+     *
      * <pre>
      * Number of 10-minute windows between key rolling.
      * </pre>
@@ -2273,6 +2206,8 @@ public final class FileProto {
     public static final int TRANSMISSIONRISKLEVEL_FIELD_NUMBER = 4;
     private int transmissionRiskLevel_;
     /**
+     *
+     *
      * <pre>
      * Risk of transmission associated with the person this key came from.
      * </pre>
@@ -2283,6 +2218,8 @@ public final class FileProto {
       return ((bitField0_ & 0x00000008) != 0);
     }
     /**
+     *
+     *
      * <pre>
      * Risk of transmission associated with the person this key came from.
      * </pre>
@@ -2294,6 +2231,7 @@ public final class FileProto {
     }
 
     private byte memoizedIsInitialized = -1;
+
     @java.lang.Override
     public final boolean isInitialized() {
       byte isInitialized = memoizedIsInitialized;
@@ -2305,8 +2243,7 @@ public final class FileProto {
     }
 
     @java.lang.Override
-    public void writeTo(com.google.protobuf.CodedOutputStream output)
-                        throws java.io.IOException {
+    public void writeTo(com.google.protobuf.CodedOutputStream output) throws java.io.IOException {
       if (((bitField0_ & 0x00000001) != 0)) {
         output.writeBytes(1, keyData_);
       }
@@ -2329,20 +2266,16 @@ public final class FileProto {
 
       size = 0;
       if (((bitField0_ & 0x00000001) != 0)) {
-        size += com.google.protobuf.CodedOutputStream
-          .computeBytesSize(1, keyData_);
+        size += com.google.protobuf.CodedOutputStream.computeBytesSize(1, keyData_);
       }
       if (((bitField0_ & 0x00000002) != 0)) {
-        size += com.google.protobuf.CodedOutputStream
-          .computeUInt32Size(2, rollingStartNumber_);
+        size += com.google.protobuf.CodedOutputStream.computeUInt32Size(2, rollingStartNumber_);
       }
       if (((bitField0_ & 0x00000004) != 0)) {
-        size += com.google.protobuf.CodedOutputStream
-          .computeUInt32Size(3, rollingPeriod_);
+        size += com.google.protobuf.CodedOutputStream.computeUInt32Size(3, rollingPeriod_);
       }
       if (((bitField0_ & 0x00000008) != 0)) {
-        size += com.google.protobuf.CodedOutputStream
-          .computeInt32Size(4, transmissionRiskLevel_);
+        size += com.google.protobuf.CodedOutputStream.computeInt32Size(4, transmissionRiskLevel_);
       }
       size += unknownFields.getSerializedSize();
       memoizedSize = size;
@@ -2352,7 +2285,7 @@ public final class FileProto {
     @java.lang.Override
     public boolean equals(final java.lang.Object obj) {
       if (obj == this) {
-       return true;
+        return true;
       }
       if (!(obj instanceof FileProto.Key)) {
         return super.equals(obj);
@@ -2361,23 +2294,19 @@ public final class FileProto {
 
       if (hasKeyData() != other.hasKeyData()) return false;
       if (hasKeyData()) {
-        if (!getKeyData()
-            .equals(other.getKeyData())) return false;
+        if (!getKeyData().equals(other.getKeyData())) return false;
       }
       if (hasRollingStartNumber() != other.hasRollingStartNumber()) return false;
       if (hasRollingStartNumber()) {
-        if (getRollingStartNumber()
-            != other.getRollingStartNumber()) return false;
+        if (getRollingStartNumber() != other.getRollingStartNumber()) return false;
       }
       if (hasRollingPeriod() != other.hasRollingPeriod()) return false;
       if (hasRollingPeriod()) {
-        if (getRollingPeriod()
-            != other.getRollingPeriod()) return false;
+        if (getRollingPeriod() != other.getRollingPeriod()) return false;
       }
       if (hasTransmissionRiskLevel() != other.hasTransmissionRiskLevel()) return false;
       if (hasTransmissionRiskLevel()) {
-        if (getTransmissionRiskLevel()
-            != other.getTransmissionRiskLevel()) return false;
+        if (getTransmissionRiskLevel() != other.getTransmissionRiskLevel()) return false;
       }
       if (!unknownFields.equals(other.unknownFields)) return false;
       return true;
@@ -2411,88 +2340,92 @@ public final class FileProto {
       return hash;
     }
 
-    public static FileProto.Key parseFrom(
-        java.nio.ByteBuffer data)
+    public static FileProto.Key parseFrom(java.nio.ByteBuffer data)
         throws com.google.protobuf.InvalidProtocolBufferException {
       return PARSER.parseFrom(data);
     }
+
     public static FileProto.Key parseFrom(
-        java.nio.ByteBuffer data,
-        com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+        java.nio.ByteBuffer data, com.google.protobuf.ExtensionRegistryLite extensionRegistry)
         throws com.google.protobuf.InvalidProtocolBufferException {
       return PARSER.parseFrom(data, extensionRegistry);
     }
-    public static FileProto.Key parseFrom(
-        com.google.protobuf.ByteString data)
+
+    public static FileProto.Key parseFrom(com.google.protobuf.ByteString data)
         throws com.google.protobuf.InvalidProtocolBufferException {
       return PARSER.parseFrom(data);
     }
+
     public static FileProto.Key parseFrom(
         com.google.protobuf.ByteString data,
         com.google.protobuf.ExtensionRegistryLite extensionRegistry)
         throws com.google.protobuf.InvalidProtocolBufferException {
       return PARSER.parseFrom(data, extensionRegistry);
     }
+
     public static FileProto.Key parseFrom(byte[] data)
         throws com.google.protobuf.InvalidProtocolBufferException {
       return PARSER.parseFrom(data);
     }
+
     public static FileProto.Key parseFrom(
-        byte[] data,
-        com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+        byte[] data, com.google.protobuf.ExtensionRegistryLite extensionRegistry)
         throws com.google.protobuf.InvalidProtocolBufferException {
       return PARSER.parseFrom(data, extensionRegistry);
     }
-    public static FileProto.Key parseFrom(java.io.InputStream input)
-        throws java.io.IOException {
-      return com.google.protobuf.GeneratedMessageV3
-          .parseWithIOException(PARSER, input);
+
+    public static FileProto.Key parseFrom(java.io.InputStream input) throws java.io.IOException {
+      return com.google.protobuf.GeneratedMessageV3.parseWithIOException(PARSER, input);
     }
+
     public static FileProto.Key parseFrom(
-        java.io.InputStream input,
-        com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+        java.io.InputStream input, com.google.protobuf.ExtensionRegistryLite extensionRegistry)
         throws java.io.IOException {
-      return com.google.protobuf.GeneratedMessageV3
-          .parseWithIOException(PARSER, input, extensionRegistry);
+      return com.google.protobuf.GeneratedMessageV3.parseWithIOException(
+          PARSER, input, extensionRegistry);
     }
+
     public static FileProto.Key parseDelimitedFrom(java.io.InputStream input)
         throws java.io.IOException {
-      return com.google.protobuf.GeneratedMessageV3
-          .parseDelimitedWithIOException(PARSER, input);
+      return com.google.protobuf.GeneratedMessageV3.parseDelimitedWithIOException(PARSER, input);
     }
+
     public static FileProto.Key parseDelimitedFrom(
-        java.io.InputStream input,
-        com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+        java.io.InputStream input, com.google.protobuf.ExtensionRegistryLite extensionRegistry)
         throws java.io.IOException {
-      return com.google.protobuf.GeneratedMessageV3
-          .parseDelimitedWithIOException(PARSER, input, extensionRegistry);
+      return com.google.protobuf.GeneratedMessageV3.parseDelimitedWithIOException(
+          PARSER, input, extensionRegistry);
     }
-    public static FileProto.Key parseFrom(
-        com.google.protobuf.CodedInputStream input)
+
+    public static FileProto.Key parseFrom(com.google.protobuf.CodedInputStream input)
         throws java.io.IOException {
-      return com.google.protobuf.GeneratedMessageV3
-          .parseWithIOException(PARSER, input);
+      return com.google.protobuf.GeneratedMessageV3.parseWithIOException(PARSER, input);
     }
+
     public static FileProto.Key parseFrom(
         com.google.protobuf.CodedInputStream input,
         com.google.protobuf.ExtensionRegistryLite extensionRegistry)
         throws java.io.IOException {
-      return com.google.protobuf.GeneratedMessageV3
-          .parseWithIOException(PARSER, input, extensionRegistry);
+      return com.google.protobuf.GeneratedMessageV3.parseWithIOException(
+          PARSER, input, extensionRegistry);
     }
 
     @java.lang.Override
-    public Builder newBuilderForType() { return newBuilder(); }
+    public Builder newBuilderForType() {
+      return newBuilder();
+    }
+
     public static Builder newBuilder() {
       return DEFAULT_INSTANCE.toBuilder();
     }
+
     public static Builder newBuilder(FileProto.Key prototype) {
       return DEFAULT_INSTANCE.toBuilder().mergeFrom(prototype);
     }
+
     @java.lang.Override
     public Builder toBuilder() {
-      return this == DEFAULT_INSTANCE
-          ? new Builder() : new Builder().mergeFrom(this);
+      return this == DEFAULT_INSTANCE ? new Builder() : new Builder().mergeFrom(this);
     }
 
     @java.lang.Override
@@ -2501,24 +2434,21 @@ public final class FileProto {
       Builder builder = new Builder(parent);
       return builder;
     }
-    /**
-     * Protobuf type {@code Key}
-     */
-    public static final class Builder extends
-        com.google.protobuf.GeneratedMessageV3.Builder<Builder> implements
+    /** Protobuf type {@code Key} */
+    public static final class Builder
+        extends com.google.protobuf.GeneratedMessageV3.Builder<Builder>
+        implements
         // @@protoc_insertion_point(builder_implements:Key)
         FileProto.KeyOrBuilder {
-      public static final com.google.protobuf.Descriptors.Descriptor
-          getDescriptor() {
+      public static final com.google.protobuf.Descriptors.Descriptor getDescriptor() {
         return FileProto.internal_static_Key_descriptor;
       }
 
       @java.lang.Override
       protected com.google.protobuf.GeneratedMessageV3.FieldAccessorTable
           internalGetFieldAccessorTable() {
-        return FileProto.internal_static_Key_fieldAccessorTable
-            .ensureFieldAccessorsInitialized(
-                FileProto.Key.class, FileProto.Key.Builder.class);
+        return FileProto.internal_static_Key_fieldAccessorTable.ensureFieldAccessorsInitialized(
+            FileProto.Key.class, FileProto.Key.Builder.class);
       }
 
       // Construct using FileOuterClass.Key.newBuilder()
@@ -2526,16 +2456,15 @@ public final class FileProto {
         maybeForceBuilderInitialization();
       }
 
-      private Builder(
-          com.google.protobuf.GeneratedMessageV3.BuilderParent parent) {
+      private Builder(com.google.protobuf.GeneratedMessageV3.BuilderParent parent) {
         super(parent);
         maybeForceBuilderInitialization();
       }
+
       private void maybeForceBuilderInitialization() {
-        if (com.google.protobuf.GeneratedMessageV3
-                .alwaysUseFieldBuilders) {
-        }
+        if (com.google.protobuf.GeneratedMessageV3.alwaysUseFieldBuilders) {}
       }
+
       @java.lang.Override
       public Builder clear() {
         super.clear();
@@ -2551,8 +2480,7 @@ public final class FileProto {
       }
 
       @java.lang.Override
-      public com.google.protobuf.Descriptors.Descriptor
-          getDescriptorForType() {
+      public com.google.protobuf.Descriptors.Descriptor getDescriptorForType() {
         return FileProto.internal_static_Key_descriptor;
       }
 
@@ -2600,38 +2528,41 @@ public final class FileProto {
       public Builder clone() {
         return super.clone();
       }
+
       @java.lang.Override
       public Builder setField(
-          com.google.protobuf.Descriptors.FieldDescriptor field,
-          java.lang.Object value) {
+          com.google.protobuf.Descriptors.FieldDescriptor field, java.lang.Object value) {
         return super.setField(field, value);
       }
+
       @java.lang.Override
-      public Builder clearField(
-          com.google.protobuf.Descriptors.FieldDescriptor field) {
+      public Builder clearField(com.google.protobuf.Descriptors.FieldDescriptor field) {
         return super.clearField(field);
       }
+
       @java.lang.Override
-      public Builder clearOneof(
-          com.google.protobuf.Descriptors.OneofDescriptor oneof) {
+      public Builder clearOneof(com.google.protobuf.Descriptors.OneofDescriptor oneof) {
         return super.clearOneof(oneof);
       }
+
       @java.lang.Override
       public Builder setRepeatedField(
           com.google.protobuf.Descriptors.FieldDescriptor field,
-          int index, java.lang.Object value) {
+          int index,
+          java.lang.Object value) {
         return super.setRepeatedField(field, index, value);
       }
+
       @java.lang.Override
       public Builder addRepeatedField(
-          com.google.protobuf.Descriptors.FieldDescriptor field,
-          java.lang.Object value) {
+          com.google.protobuf.Descriptors.FieldDescriptor field, java.lang.Object value) {
         return super.addRepeatedField(field, value);
       }
+
       @java.lang.Override
       public Builder mergeFrom(com.google.protobuf.Message other) {
         if (other instanceof FileProto.Key) {
-          return mergeFrom((FileProto.Key)other);
+          return mergeFrom((FileProto.Key) other);
         } else {
           super.mergeFrom(other);
           return this;
@@ -2680,10 +2611,13 @@ public final class FileProto {
         }
         return this;
       }
+
       private int bitField0_;
 
       private com.google.protobuf.ByteString keyData_ = com.google.protobuf.ByteString.EMPTY;
       /**
+       *
+       *
        * <pre>
        * Key of infected user
        * </pre>
@@ -2694,6 +2628,8 @@ public final class FileProto {
         return ((bitField0_ & 0x00000001) != 0);
       }
       /**
+       *
+       *
        * <pre>
        * Key of infected user
        * </pre>
@@ -2704,6 +2640,8 @@ public final class FileProto {
         return keyData_;
       }
       /**
+       *
+       *
        * <pre>
        * Key of infected user
        * </pre>
@@ -2712,14 +2650,16 @@ public final class FileProto {
        */
       public Builder setKeyData(com.google.protobuf.ByteString value) {
         if (value == null) {
-    throw new NullPointerException();
-  }
-  bitField0_ |= 0x00000001;
+          throw new NullPointerException();
+        }
+        bitField0_ |= 0x00000001;
         keyData_ = value;
         onChanged();
         return this;
       }
       /**
+       *
+       *
        * <pre>
        * Key of infected user
        * </pre>
@@ -2733,8 +2673,10 @@ public final class FileProto {
         return this;
       }
 
-      private int rollingStartNumber_ ;
+      private int rollingStartNumber_;
       /**
+       *
+       *
        * <pre>
        * Interval number when the key's EKRollingPeriod started.
        * </pre>
@@ -2745,6 +2687,8 @@ public final class FileProto {
         return ((bitField0_ & 0x00000002) != 0);
       }
       /**
+       *
+       *
        * <pre>
        * Interval number when the key's EKRollingPeriod started.
        * </pre>
@@ -2755,6 +2699,8 @@ public final class FileProto {
         return rollingStartNumber_;
       }
       /**
+       *
+       *
        * <pre>
        * Interval number when the key's EKRollingPeriod started.
        * </pre>
@@ -2768,6 +2714,8 @@ public final class FileProto {
         return this;
       }
       /**
+       *
+       *
        * <pre>
        * Interval number when the key's EKRollingPeriod started.
        * </pre>
@@ -2781,8 +2729,10 @@ public final class FileProto {
         return this;
       }
 
-      private int rollingPeriod_ ;
+      private int rollingPeriod_;
       /**
+       *
+       *
        * <pre>
        * Number of 10-minute windows between key rolling.
        * </pre>
@@ -2793,6 +2743,8 @@ public final class FileProto {
         return ((bitField0_ & 0x00000004) != 0);
       }
       /**
+       *
+       *
        * <pre>
        * Number of 10-minute windows between key rolling.
        * </pre>
@@ -2803,6 +2755,8 @@ public final class FileProto {
         return rollingPeriod_;
       }
       /**
+       *
+       *
        * <pre>
        * Number of 10-minute windows between key rolling.
        * </pre>
@@ -2816,6 +2770,8 @@ public final class FileProto {
         return this;
       }
       /**
+       *
+       *
        * <pre>
        * Number of 10-minute windows between key rolling.
        * </pre>
@@ -2829,8 +2785,10 @@ public final class FileProto {
         return this;
       }
 
-      private int transmissionRiskLevel_ ;
+      private int transmissionRiskLevel_;
       /**
+       *
+       *
        * <pre>
        * Risk of transmission associated with the person this key came from.
        * </pre>
@@ -2841,6 +2799,8 @@ public final class FileProto {
         return ((bitField0_ & 0x00000008) != 0);
       }
       /**
+       *
+       *
        * <pre>
        * Risk of transmission associated with the person this key came from.
        * </pre>
@@ -2851,6 +2811,8 @@ public final class FileProto {
         return transmissionRiskLevel_;
       }
       /**
+       *
+       *
        * <pre>
        * Risk of transmission associated with the person this key came from.
        * </pre>
@@ -2864,6 +2826,8 @@ public final class FileProto {
         return this;
       }
       /**
+       *
+       *
        * <pre>
        * Risk of transmission associated with the person this key came from.
        * </pre>
@@ -2876,6 +2840,7 @@ public final class FileProto {
         onChanged();
         return this;
       }
+
       @java.lang.Override
       public final Builder setUnknownFields(
           final com.google.protobuf.UnknownFieldSet unknownFields) {
@@ -2888,12 +2853,12 @@ public final class FileProto {
         return super.mergeUnknownFields(unknownFields);
       }
 
-
       // @@protoc_insertion_point(builder_scope:Key)
     }
 
     // @@protoc_insertion_point(class_scope:Key)
     private static final FileProto.Key DEFAULT_INSTANCE;
+
     static {
       DEFAULT_INSTANCE = new FileProto.Key();
     }
@@ -2902,16 +2867,17 @@ public final class FileProto {
       return DEFAULT_INSTANCE;
     }
 
-    @java.lang.Deprecated public static final com.google.protobuf.Parser<Key>
-        PARSER = new com.google.protobuf.AbstractParser<Key>() {
-      @java.lang.Override
-      public Key parsePartialFrom(
-          com.google.protobuf.CodedInputStream input,
-          com.google.protobuf.ExtensionRegistryLite extensionRegistry)
-          throws com.google.protobuf.InvalidProtocolBufferException {
-        return new Key(input, extensionRegistry);
-      }
-    };
+    @java.lang.Deprecated
+    public static final com.google.protobuf.Parser<Key> PARSER =
+        new com.google.protobuf.AbstractParser<Key>() {
+          @java.lang.Override
+          public Key parsePartialFrom(
+              com.google.protobuf.CodedInputStream input,
+              com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+              throws com.google.protobuf.InvalidProtocolBufferException {
+            return new Key(input, extensionRegistry);
+          }
+        };
 
     public static com.google.protobuf.Parser<Key> parser() {
       return PARSER;
@@ -2926,71 +2892,76 @@ public final class FileProto {
     public FileProto.Key getDefaultInstanceForType() {
       return DEFAULT_INSTANCE;
     }
-
   }
 
-  private static final com.google.protobuf.Descriptors.Descriptor
-    internal_static_File_descriptor;
-  private static final 
-    com.google.protobuf.GeneratedMessageV3.FieldAccessorTable
+  private static final com.google.protobuf.Descriptors.Descriptor internal_static_File_descriptor;
+  private static final com.google.protobuf.GeneratedMessageV3.FieldAccessorTable
       internal_static_File_fieldAccessorTable;
-  private static final com.google.protobuf.Descriptors.Descriptor
-    internal_static_Header_descriptor;
-  private static final 
-    com.google.protobuf.GeneratedMessageV3.FieldAccessorTable
+  private static final com.google.protobuf.Descriptors.Descriptor internal_static_Header_descriptor;
+  private static final com.google.protobuf.GeneratedMessageV3.FieldAccessorTable
       internal_static_Header_fieldAccessorTable;
-  private static final com.google.protobuf.Descriptors.Descriptor
-    internal_static_Key_descriptor;
-  private static final 
-    com.google.protobuf.GeneratedMessageV3.FieldAccessorTable
+  private static final com.google.protobuf.Descriptors.Descriptor internal_static_Key_descriptor;
+  private static final com.google.protobuf.GeneratedMessageV3.FieldAccessorTable
       internal_static_Key_fieldAccessorTable;
 
-  public static com.google.protobuf.Descriptors.FileDescriptor
-      getDescriptor() {
+  public static com.google.protobuf.Descriptors.FileDescriptor getDescriptor() {
     return descriptor;
   }
-  private static  com.google.protobuf.Descriptors.FileDescriptor
-      descriptor;
+
+  private static com.google.protobuf.Descriptors.FileDescriptor descriptor;
+
   static {
     java.lang.String[] descriptorData = {
-      "\n\nfile.proto\"2\n\004File\022\027\n\006header\030\001 \001(\0132\007.H" +
-      "eader\022\021\n\003key\030\002 \003(\0132\004.Key\"k\n\006Header\022\026\n\016st" +
-      "artTimestamp\030\001 \001(\003\022\024\n\014endTimestamp\030\002 \001(\003" +
-      "\022\016\n\006region\030\003 \001(\t\022\020\n\010batchNum\030\004 \001(\005\022\021\n\tba" +
-      "tchSize\030\005 \001(\005\"h\n\003Key\022\017\n\007keyData\030\001 \001(\014\022\032\n" +
-      "\022rollingStartNumber\030\002 \001(\r\022\025\n\rrollingPeri" +
-      "od\030\003 \001(\r\022\035\n\025transmissionRiskLevel\030\004 \001(\005"
+      "\n\n"
+          + "file.proto\"2\n"
+          + "\004File\022\027\n"
+          + "\006header\030\001 \001(\0132\007.Header\022\021\n"
+          + "\003key\030\002 \003(\0132\004.Key\"k\n"
+          + "\006Header\022\026\n"
+          + "\016startTimestamp\030\001 \001(\003\022\024\n"
+          + "\014endTimestamp\030\002 \001(\003\022\016\n"
+          + "\006region\030\003 \001(\t\022\020\n"
+          + "\010batchNum\030\004 \001(\005\022\021\n"
+          + "\tbatchSize\030\005 \001(\005\"h\n"
+          + "\003Key\022\017\n"
+          + "\007keyData\030\001 \001(\014\022\032\n"
+          + "\022rollingStartNumber\030\002 \001(\r"
+          + "\022\025\n\r"
+          + "rollingPeriod\030\003 \001(\r"
+          + "\022\035\n"
+          + "\025transmissionRiskLevel\030\004 \001(\005"
     };
     com.google.protobuf.Descriptors.FileDescriptor.InternalDescriptorAssigner assigner =
-        new com.google.protobuf.Descriptors.FileDescriptor.    InternalDescriptorAssigner() {
+        new com.google.protobuf.Descriptors.FileDescriptor.InternalDescriptorAssigner() {
           public com.google.protobuf.ExtensionRegistry assignDescriptors(
               com.google.protobuf.Descriptors.FileDescriptor root) {
             descriptor = root;
             return null;
           }
         };
-    com.google.protobuf.Descriptors.FileDescriptor
-      .internalBuildGeneratedFileFrom(descriptorData,
-        new com.google.protobuf.Descriptors.FileDescriptor[] {
-        }, assigner);
-    internal_static_File_descriptor =
-      getDescriptor().getMessageTypes().get(0);
-    internal_static_File_fieldAccessorTable = new
-      com.google.protobuf.GeneratedMessageV3.FieldAccessorTable(
-        internal_static_File_descriptor,
-        new java.lang.String[] { "Header", "Key", });
-    internal_static_Header_descriptor =
-      getDescriptor().getMessageTypes().get(1);
-    internal_static_Header_fieldAccessorTable = new
-      com.google.protobuf.GeneratedMessageV3.FieldAccessorTable(
-        internal_static_Header_descriptor,
-        new java.lang.String[] { "StartTimestamp", "EndTimestamp", "Region", "BatchNum", "BatchSize", });
-    internal_static_Key_descriptor =
-      getDescriptor().getMessageTypes().get(2);
-    internal_static_Key_fieldAccessorTable = new
-      com.google.protobuf.GeneratedMessageV3.FieldAccessorTable(
-        internal_static_Key_descriptor,
-        new java.lang.String[] { "KeyData", "RollingStartNumber", "RollingPeriod", "TransmissionRiskLevel", });
+    com.google.protobuf.Descriptors.FileDescriptor.internalBuildGeneratedFileFrom(
+        descriptorData, new com.google.protobuf.Descriptors.FileDescriptor[] {}, assigner);
+    internal_static_File_descriptor = getDescriptor().getMessageTypes().get(0);
+    internal_static_File_fieldAccessorTable =
+        new com.google.protobuf.GeneratedMessageV3.FieldAccessorTable(
+            internal_static_File_descriptor,
+            new java.lang.String[] {
+              "Header", "Key",
+            });
+    internal_static_Header_descriptor = getDescriptor().getMessageTypes().get(1);
+    internal_static_Header_fieldAccessorTable =
+        new com.google.protobuf.GeneratedMessageV3.FieldAccessorTable(
+            internal_static_Header_descriptor,
+            new java.lang.String[] {
+              "StartTimestamp", "EndTimestamp", "Region", "BatchNum", "BatchSize",
+            });
+    internal_static_Key_descriptor = getDescriptor().getMessageTypes().get(2);
+    internal_static_Key_fieldAccessorTable =
+        new com.google.protobuf.GeneratedMessageV3.FieldAccessorTable(
+            internal_static_Key_descriptor,
+            new java.lang.String[] {
+              "KeyData", "RollingStartNumber", "RollingPeriod", "TransmissionRiskLevel",
+            });
   }
 
   // @@protoc_insertion_point(outer_class_scope)

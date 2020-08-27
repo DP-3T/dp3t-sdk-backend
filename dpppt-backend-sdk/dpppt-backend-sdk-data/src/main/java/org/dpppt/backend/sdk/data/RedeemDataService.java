@@ -14,19 +14,18 @@ import java.time.Duration;
 
 public interface RedeemDataService {
 
-	/**
-	 * Checks and inserts a publish uuid.
-	 * 
-	 * @param uuid
-	 * @return return true if the uuid has been inserted. if the uuid is not valid,
-	 *         returns false.
-	 */
-	boolean checkAndInsertPublishUUID(String uuid);
+  /**
+   * Checks and inserts a publish uuid.
+   *
+   * @param uuid
+   * @return return true if the uuid has been inserted. if the uuid is not valid, returns false.
+   */
+  boolean checkAndInsertPublishUUID(String uuid);
 
-	/**
-	 * Clean up db and remove entries older than the retention days.
-	 * 
-	 * @param retentionPeriod
-	 */
-	void cleanDB(Duration retentionPeriod);
+  /**
+   * Clean up db and remove entries older than the retention days.
+   *
+   * @param retentionPeriod
+   */
+  void cleanDB(Duration retentionPeriod);
 }

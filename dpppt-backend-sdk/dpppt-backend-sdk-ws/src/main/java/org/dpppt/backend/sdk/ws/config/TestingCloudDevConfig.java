@@ -10,9 +10,7 @@
 package org.dpppt.backend.sdk.ws.config;
 
 import java.util.Base64;
-
 import javax.sql.DataSource;
-
 import org.flywaydb.core.Flyway;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
@@ -21,41 +19,45 @@ import org.springframework.context.annotation.Profile;
 import org.springframework.jdbc.datasource.embedded.EmbeddedDatabaseBuilder;
 import org.springframework.jdbc.datasource.embedded.EmbeddedDatabaseType;
 
-
 @Configuration
 @Profile("test-cloud")
-public class TestingCloudDevConfig  extends WSCloudBaseConfig{
+public class TestingCloudDevConfig extends WSCloudBaseConfig {
 
-	@Value("${vcap.services.ecdsa_dev.credentials.privateKey}")
-	private String privateKey;
-	@Value("${vcap.services.ecdsa_dev.credentials.publicKey}")
-    public String publicKey;
-    
-	@Override
-    String getPrivateKey() {
-        return new String(Base64.getDecoder().decode(privateKey));
-    }
-    @Override
-    String getPublicKey() {
-        return new String(Base64.getDecoder().decode(publicKey));
-    }
+  @Value("${vcap.services.ecdsa_dev.credentials.privateKey}")
+  private String privateKey;
 
-	@Bean
-	DataSource hsqlSource() {
-		return new EmbeddedDatabaseBuilder().setType(EmbeddedDatabaseType.HSQL).build();
-	}
-	
+  @Value("${vcap.services.ecdsa_dev.credentials.publicKey}")
+  public String publicKey;
 
-	@Bean
-	@Override
-	public Flyway flyway() {
-		Flyway flyWay = Flyway.configure().dataSource(dataSource()).locations("classpath:/db/migration/hsqldb").load();
-		flyWay.migrate();
-		return flyWay;
-	}
+  @Override
+  String getPrivateKey() {
+    return new String(Base64.getDecoder().decode(privateKey));
+  }
 
-	@Override
-	public String getDbType() {
-		return "hsqldb";
-	}
+  @Override
+  String getPublicKey() {
+    return new String(Base64.getDecoder().decode(publicKey));
+  }
+
+  @Bean
+  DataSource hsqlSource() {
+    return new EmbeddedDatabaseBuilder().setType(EmbeddedDatabaseType.HSQL).build();
+  }
+
+  @Bean
+  @Override
+  public Flyway flyway() {
+    Flyway flyWay =
+        Flyway.configure()
+            .dataSource(dataSource())
+            .locations("classpath:/db/migration/hsqldb")
+            .load();
+    flyWay.migrate();
+    return flyWay;
+  }
+
+  @Override
+  public String getDbType() {
+    return "hsqldb";
+  }
 }

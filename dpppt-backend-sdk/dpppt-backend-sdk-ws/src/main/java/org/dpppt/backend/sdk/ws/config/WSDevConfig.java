@@ -11,9 +11,7 @@
 package org.dpppt.backend.sdk.ws.config;
 
 import java.util.Base64;
-
 import javax.sql.DataSource;
-
 import org.dpppt.backend.sdk.ws.security.KeyVault;
 import org.dpppt.backend.sdk.ws.security.KeyVault.PrivateKeyNoSuitableEncodingFoundException;
 import org.dpppt.backend.sdk.ws.security.KeyVault.PublicKeyNoSuitableEncodingFoundException;
@@ -29,64 +27,70 @@ import org.springframework.jdbc.datasource.embedded.EmbeddedDatabaseType;
 @Profile("dev")
 public class WSDevConfig extends WSBaseConfig {
 
-		
-	@Value("${ws.ecdsa.credentials.privateKey:}")
-	private String privateKey;
-	
-	@Value("${ws.ecdsa.credentials.publicKey:}")
-    public String publicKey;
+  @Value("${ws.ecdsa.credentials.privateKey:}")
+  private String privateKey;
 
-	@Bean
-	@Override
-	public DataSource dataSource() {
-		return new EmbeddedDatabaseBuilder().generateUniqueName(true).setType(EmbeddedDatabaseType.HSQL).build();
-	}
+  @Value("${ws.ecdsa.credentials.publicKey:}")
+  public String publicKey;
 
-	@Bean
-	@Override
-	public Flyway flyway() {
-		Flyway flyWay = Flyway.configure().dataSource(dataSource()).locations("classpath:/db/migration/hsqldb").load();
-		flyWay.migrate();
-		return flyWay;
-	}
+  @Bean
+  @Override
+  public DataSource dataSource() {
+    return new EmbeddedDatabaseBuilder()
+        .generateUniqueName(true)
+        .setType(EmbeddedDatabaseType.HSQL)
+        .build();
+  }
 
-	@Override
-	public String getDbType() {
-		return "hsqldb";
-	}
+  @Bean
+  @Override
+  public Flyway flyway() {
+    Flyway flyWay =
+        Flyway.configure()
+            .dataSource(dataSource())
+            .locations("classpath:/db/migration/hsqldb")
+            .load();
+    flyWay.migrate();
+    return flyWay;
+  }
 
-	@Bean
-	KeyVault keyVault() {
-		var privateKey = getPrivateKey();
-		var publicKey = getPublicKey();
-		
-		if(privateKey.isEmpty() || publicKey.isEmpty()) {
-			var kp = super.getKeyPair(algorithm);
-			var gaenKp = new KeyVault.KeyVaultKeyPair("gaen", kp);
-			var nextDayJWTKp = new KeyVault.KeyVaultKeyPair("nextDayJWT", kp);
-			var hashFilterKp = new KeyVault.KeyVaultKeyPair("hashFilter", kp);
-			return new KeyVault(gaenKp, nextDayJWTKp, hashFilterKp);
-		}
-		else {
-			var gaen = new KeyVault.KeyVaultEntry("gaen", getPrivateKey(), getPublicKey(), "EC");
-			var nextDayJWT = new KeyVault.KeyVaultEntry("nextDayJWT", getPrivateKey(), getPublicKey(), "EC");
-			var hashFilter = new KeyVault.KeyVaultEntry("hashFilter", getPrivateKey(), getPublicKey(), "EC"); 
+  @Override
+  public String getDbType() {
+    return "hsqldb";
+  }
 
-			try {
-				return new KeyVault(gaen, nextDayJWT, hashFilter);
-			} catch (PrivateKeyNoSuitableEncodingFoundException | PublicKeyNoSuitableEncodingFoundException e) {
-				throw new RuntimeException(e);
-			}
-		}
-	}
+  @Bean
+  KeyVault keyVault() {
+    var privateKey = getPrivateKey();
+    var publicKey = getPublicKey();
 
-    String getPrivateKey() {
-        return new String(Base64.getDecoder().decode(privateKey));
+    if (privateKey.isEmpty() || publicKey.isEmpty()) {
+      var kp = super.getKeyPair(algorithm);
+      var gaenKp = new KeyVault.KeyVaultKeyPair("gaen", kp);
+      var nextDayJWTKp = new KeyVault.KeyVaultKeyPair("nextDayJWT", kp);
+      var hashFilterKp = new KeyVault.KeyVaultKeyPair("hashFilter", kp);
+      return new KeyVault(gaenKp, nextDayJWTKp, hashFilterKp);
+    } else {
+      var gaen = new KeyVault.KeyVaultEntry("gaen", getPrivateKey(), getPublicKey(), "EC");
+      var nextDayJWT =
+          new KeyVault.KeyVaultEntry("nextDayJWT", getPrivateKey(), getPublicKey(), "EC");
+      var hashFilter =
+          new KeyVault.KeyVaultEntry("hashFilter", getPrivateKey(), getPublicKey(), "EC");
+
+      try {
+        return new KeyVault(gaen, nextDayJWT, hashFilter);
+      } catch (PrivateKeyNoSuitableEncodingFoundException
+          | PublicKeyNoSuitableEncodingFoundException e) {
+        throw new RuntimeException(e);
+      }
     }
+  }
 
-    String getPublicKey() {
-        return new String(Base64.getDecoder().decode(publicKey));
-    }
+  String getPrivateKey() {
+    return new String(Base64.getDecoder().decode(privateKey));
+  }
 
-
+  String getPublicKey() {
+    return new String(Base64.getDecoder().decode(publicKey));
+  }
 }

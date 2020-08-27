@@ -16,40 +16,39 @@ import java.time.temporal.TemporalUnit;
 
 public class GaenUnit implements TemporalUnit {
 
-	public static GaenUnit TenMinutes = new GaenUnit();
+  public static GaenUnit TenMinutes = new GaenUnit();
 
-	private static final int GAEN_MINUTES = 10;
+  private static final int GAEN_MINUTES = 10;
 
-	@Override
-	public Duration getDuration() {
+  @Override
+  public Duration getDuration() {
 
-		return Duration.ofMinutes(GAEN_MINUTES);
-	}
+    return Duration.ofMinutes(GAEN_MINUTES);
+  }
 
-	@Override
-	public boolean isDurationEstimated() {
-		return false;
-	}
+  @Override
+  public boolean isDurationEstimated() {
+    return false;
+  }
 
-	@Override
-	public boolean isDateBased() {
-		return false;
-	}
+  @Override
+  public boolean isDateBased() {
+    return false;
+  }
 
-	@Override
-	public boolean isTimeBased() {
-		return true;
-	}
+  @Override
+  public boolean isTimeBased() {
+    return true;
+  }
 
-	@Override
-	@SuppressWarnings("unchecked")
-	public <R extends Temporal> R addTo(R temporal, long amount) {
-		return (R) temporal.plus(this.getDuration().multipliedBy(amount));
-	}
+  @Override
+  @SuppressWarnings("unchecked")
+  public <R extends Temporal> R addTo(R temporal, long amount) {
+    return (R) temporal.plus(this.getDuration().multipliedBy(amount));
+  }
 
-	@Override
-	public long between(Temporal temporal1Inclusive, Temporal temporal2Exclusive) {
-		return ChronoUnit.MINUTES.between(temporal1Inclusive, temporal2Exclusive) / GAEN_MINUTES;
-	}
-
+  @Override
+  public long between(Temporal temporal1Inclusive, Temporal temporal2Exclusive) {
+    return ChronoUnit.MINUTES.between(temporal1Inclusive, temporal2Exclusive) / GAEN_MINUTES;
+  }
 }
