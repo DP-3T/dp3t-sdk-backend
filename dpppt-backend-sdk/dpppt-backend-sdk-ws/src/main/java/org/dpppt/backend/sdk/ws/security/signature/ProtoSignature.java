@@ -166,11 +166,13 @@ public class ProtoSignature {
 			ZipOutputStream zip = new ZipOutputStream(byteOut);
 
 			zip.putNextEntry(new ZipEntry("export.bin"));
-			byte[] exportBin = protoFile.toByteArray();
-			zip.write(EXPORT_MAGIC);
+			byte[] protoFileBytes = protoFile.toByteArray();
+			byte[] exportBin = new byte[EXPORT_MAGIC.length + protoFileBytes.length];
+			System.arraycopy(EXPORT_MAGIC, 0, exportBin, 0, EXPORT_MAGIC.length);
+			System.arraycopy(protoFileBytes, 0, exportBin, EXPORT_MAGIC.length, protoFileBytes.length);
 			zip.write(exportBin);
 			zip.closeEntry();
-
+			
 			var signatureList = getSignatureObject(exportBin);
 
 			byte[] exportSig = signatureList.toByteArray();

@@ -33,10 +33,8 @@ import java.time.Instant;
 import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
 import java.util.Base64;
-import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.Map.Entry;
 import java.util.zip.ZipEntry;
 import java.util.zip.ZipInputStream;
 
@@ -44,7 +42,6 @@ import org.dpppt.backend.sdk.data.gaen.GAENDataService;
 import org.dpppt.backend.sdk.model.gaen.GaenKey;
 import org.dpppt.backend.sdk.model.gaen.GaenRequest;
 import org.dpppt.backend.sdk.model.gaen.GaenSecondDay;
-import org.dpppt.backend.sdk.model.gaen.GaenUnit;
 import org.dpppt.backend.sdk.model.gaen.proto.TemporaryExposureKeyFormat;
 import org.dpppt.backend.sdk.model.gaen.proto.TemporaryExposureKeyFormat.TEKSignatureList;
 import org.dpppt.backend.sdk.model.gaen.proto.TemporaryExposureKeyFormat.TemporaryExposureKeyExport;
@@ -65,13 +62,12 @@ import org.springframework.transaction.annotation.Transactional;
 import io.jsonwebtoken.Jwt;
 import io.jsonwebtoken.Jwts;
 
-@ActiveProfiles({"actuator-security"})
+@ActiveProfiles({ "actuator-security" })
 @SpringBootTest(properties = { "ws.app.jwt.publickey=classpath://generated_pub.pem",
-		"logging.level.org.springframework.security=DEBUG", "ws.exposedlist.releaseBucketDuration=7200000", "ws.gaen.randomkeysenabled=true",
-	"ws.monitor.prometheus.user=prometheus",
-	"ws.monitor.prometheus.password=prometheus",
-	"management.endpoints.enabled-by-default=true",
-	"management.endpoints.web.exposure.include=*"})
+		"logging.level.org.springframework.security=DEBUG", "ws.exposedlist.releaseBucketDuration=7200000",
+		"ws.gaen.randomkeysenabled=true", "ws.monitor.prometheus.user=prometheus",
+		"ws.monitor.prometheus.password=prometheus", "management.endpoints.enabled-by-default=true",
+		"management.endpoints.web.exposure.include=*" })
 @Transactional
 public class GaenControllerTest extends BaseControllerTest {
 	@Autowired
@@ -92,24 +88,25 @@ public class GaenControllerTest extends BaseControllerTest {
 		assertNotNull(response);
 		assertEquals("Hello from DP3T WS", response.getContentAsString());
 	}
+
 	@Test
 	public void testActuatorSecurity() throws Exception {
 		var response = mockMvc.perform(get("/actuator/health")).andExpect(status().is2xxSuccessful()).andReturn()
 				.getResponse();
-		response = mockMvc.perform(get("/actuator/loggers")).andExpect(status().is(401)).andReturn()
-		.getResponse();
-		response = mockMvc.perform(get("/actuator/loggers").header("Authorization", "Basic cHJvbWV0aGV1czpwcm9tZXRoZXVz")).andExpect(status().isOk()).andReturn()
-		.getResponse();
-		response = mockMvc.perform(get("/actuator/prometheus")).andExpect(status().is(401)).andReturn()
-		.getResponse();
-		response = mockMvc.perform(get("/actuator/prometheus").header("Authorization", "Basic cHJvbWV0aGV1czpwcm9tZXRoZXVz")).andExpect(status().isOk()).andReturn()
-		.getResponse();
+		response = mockMvc.perform(get("/actuator/loggers")).andExpect(status().is(401)).andReturn().getResponse();
+		response = mockMvc
+				.perform(get("/actuator/loggers").header("Authorization", "Basic cHJvbWV0aGV1czpwcm9tZXRoZXVz"))
+				.andExpect(status().isOk()).andReturn().getResponse();
+		response = mockMvc.perform(get("/actuator/prometheus")).andExpect(status().is(401)).andReturn().getResponse();
+		response = mockMvc
+				.perform(get("/actuator/prometheus").header("Authorization", "Basic cHJvbWV0aGV1czpwcm9tZXRoZXVz"))
+				.andExpect(status().isOk()).andReturn().getResponse();
 	}
 
-	private void testNKeys(UTCInstant now,int n, boolean shouldSucceed) throws Exception{
+	private void testNKeys(UTCInstant now, int n, boolean shouldSucceed) throws Exception {
 		var requestList = new GaenRequest();
 		var gaenKey1 = new GaenKey();
-		gaenKey1.setRollingStartNumber((int)now.atStartOfDay().minusDays(1).get10MinutesSince1970());
+		gaenKey1.setRollingStartNumber((int) now.atStartOfDay().minusDays(1).get10MinutesSince1970());
 		gaenKey1.setKeyData(Base64.getEncoder().encodeToString("testKey32Bytes01".getBytes("UTF-8")));
 		gaenKey1.setRollingPeriod(0);
 		gaenKey1.setFake(0);
@@ -123,9 +120,9 @@ public class GaenControllerTest extends BaseControllerTest {
 		List<GaenKey> exposedKeys = new ArrayList<>();
 		exposedKeys.add(gaenKey1);
 		exposedKeys.add(gaenKey2);
-		for (int i = 0; i < n-2; i++) {
+		for (int i = 0; i < n - 2; i++) {
 			var tmpKey = new GaenKey();
-			tmpKey.setRollingStartNumber((int)now.atStartOfDay().get10MinutesSince1970());
+			tmpKey.setRollingStartNumber((int) now.atStartOfDay().get10MinutesSince1970());
 			tmpKey.setKeyData(Base64.getEncoder().encodeToString("testKey32Bytes--".getBytes("UTF-8")));
 			tmpKey.setRollingPeriod(144);
 			tmpKey.setFake(1);
@@ -137,17 +134,14 @@ public class GaenControllerTest extends BaseControllerTest {
 		requestList.setDelayedKeyDate((int) duration);
 		gaenKey1.setFake(0);
 		String token = createToken(now.plusMinutes(5));
-		var requestBuilder = mockMvc.perform(post("/v1/gaen/exposed")
-		.contentType(MediaType.APPLICATION_JSON).header("Authorization", "Bearer " + token)
-		.header("User-Agent", "MockMVC").content(json(requestList)));
+		var requestBuilder = mockMvc.perform(post("/v1/gaen/exposed").contentType(MediaType.APPLICATION_JSON)
+				.header("Authorization", "Bearer " + token).header("User-Agent", "MockMVC").content(json(requestList)));
 		MvcResult response;
 
-		if(shouldSucceed) {
-			response = requestBuilder.andExpect(request().asyncStarted())
-			.andReturn();
+		if (shouldSucceed) {
+			response = requestBuilder.andExpect(request().asyncStarted()).andReturn();
 			mockMvc.perform(asyncDispatch(response)).andExpect(status().is2xxSuccessful());
-		}
-		else {
+		} else {
 			response = requestBuilder.andExpect(status().is(400)).andReturn();
 			return;
 		}
@@ -155,15 +149,18 @@ public class GaenControllerTest extends BaseControllerTest {
 				.perform(post("/v1/gaen/exposed").contentType(MediaType.APPLICATION_JSON)
 						.header("Authorization", "Bearer " + jwtToken).header("User-Agent", "MockMVC")
 						.content(json(requestList)))
-				.andExpect(status().is(401)).andExpect(request().asyncNotStarted()).andExpect(content().string("")).andReturn();
+				.andExpect(status().is(401)).andExpect(request().asyncNotStarted()).andExpect(content().string(""))
+				.andReturn();
 
-		var result = gaenDataService.getSortedExposedForKeyDate(now.atStartOfDay().minusDays(1).getTimestamp(),null, (now.getTimestamp() / releaseBucketDuration + 1 )*releaseBucketDuration);
+		var result = gaenDataService.getSortedExposedForKeyDate(now.atStartOfDay().minusDays(1).getTimestamp(), null,
+				(now.getTimestamp() / releaseBucketDuration + 1) * releaseBucketDuration);
 		assertEquals(2, result.size());
-		for(var key : result) {
+		for (var key : result) {
 			assertEquals(Integer.valueOf(144), key.getRollingPeriod());
 		}
 
-		result = gaenDataService.getSortedExposedForKeyDate(now.atStartOfDay().minusDays(1).getTimestamp(),null, (now.getTimestamp() / releaseBucketDuration)*releaseBucketDuration);
+		result = gaenDataService.getSortedExposedForKeyDate(now.atStartOfDay().minusDays(1).getTimestamp(), null,
+				(now.getTimestamp() / releaseBucketDuration) * releaseBucketDuration);
 		assertEquals(0, result.size());
 	}
 
@@ -174,7 +171,7 @@ public class GaenControllerTest extends BaseControllerTest {
 		var requestList = new GaenRequest();
 		var gaenKey1 = new GaenKey();
 
-		gaenKey1.setRollingStartNumber((int)midnight.minusDays(30).get10MinutesSince1970());
+		gaenKey1.setRollingStartNumber((int) midnight.minusDays(30).get10MinutesSince1970());
 		gaenKey1.setKeyData(Base64.getEncoder().encodeToString("testKey32Bytes01".getBytes("UTF-8")));
 		gaenKey1.setRollingPeriod(0);
 		gaenKey1.setFake(0);
@@ -190,7 +187,7 @@ public class GaenControllerTest extends BaseControllerTest {
 		exposedKeys.add(gaenKey2);
 		for (int i = 0; i < 12; i++) {
 			var tmpKey = new GaenKey();
-			tmpKey.setRollingStartNumber((int)midnight.plusDays(10).get10MinutesSince1970());
+			tmpKey.setRollingStartNumber((int) midnight.plusDays(10).get10MinutesSince1970());
 			tmpKey.setKeyData(Base64.getEncoder().encodeToString("testKey32Bytes--".getBytes("UTF-8")));
 			tmpKey.setRollingPeriod(144);
 			tmpKey.setFake(0);
@@ -202,61 +199,64 @@ public class GaenControllerTest extends BaseControllerTest {
 		requestList.setDelayedKeyDate((int) duration);
 		gaenKey1.setFake(0);
 		String token = createToken(now.plusMinutes(5));
-		MvcResult response = mockMvc.perform(post("/v1/gaen/exposed")
-				.contentType(MediaType.APPLICATION_JSON).header("Authorization", "Bearer " + token)
-				.header("User-Agent", "MockMVC").content(json(requestList))).andExpect(request().asyncStarted())
-				.andReturn();
+		MvcResult response = mockMvc.perform(post("/v1/gaen/exposed").contentType(MediaType.APPLICATION_JSON)
+				.header("Authorization", "Bearer " + token).header("User-Agent", "MockMVC").content(json(requestList)))
+				.andExpect(request().asyncStarted()).andReturn();
 
 		mockMvc.perform(asyncDispatch(response)).andExpect(status().is2xxSuccessful());
 		response = mockMvc
 				.perform(post("/v1/gaen/exposed").contentType(MediaType.APPLICATION_JSON)
 						.header("Authorization", "Bearer " + jwtToken).header("User-Agent", "MockMVC")
 						.content(json(requestList)))
-				.andExpect(status().is(401)).andExpect(request().asyncNotStarted()).andExpect(content().string("")).andReturn();
+				.andExpect(status().is(401)).andExpect(request().asyncNotStarted()).andExpect(content().string(""))
+				.andReturn();
 
-		var result = gaenDataService.getSortedExposedForKeyDate(midnight.minusDays(1).getTimestamp(),null, (now.getTimestamp() / releaseBucketDuration + 1 )*releaseBucketDuration);
-		//all keys are in compatible
+		var result = gaenDataService.getSortedExposedForKeyDate(midnight.minusDays(1).getTimestamp(), null,
+				(now.getTimestamp() / releaseBucketDuration + 1) * releaseBucketDuration);
+		// all keys are in compatible
 		assertEquals(0, result.size());
 	}
 
 	@Transactional
 	public void testMultipleKeyUpload() throws Exception {
-		testNKeys(UTCInstant.now(),14, true);
+		testNKeys(UTCInstant.now(), 14, true);
 	}
+
 	@Test
 	@Transactional
 	public void testCanUploadMoreThan14Keys() throws Exception {
-		testNKeys(UTCInstant.now(),30, true);
+		testNKeys(UTCInstant.now(), 30, true);
 	}
+
 	@Test
 	@Transactional
 	public void testCannotUploadMoreThan30Keys() throws Exception {
-		testNKeys(UTCInstant.now(),31,false);
-		testNKeys(UTCInstant.now(),100,false);
-		testNKeys(UTCInstant.now(),1000,false);
+		testNKeys(UTCInstant.now(), 31, false);
+		testNKeys(UTCInstant.now(), 100, false);
+		testNKeys(UTCInstant.now(), 1000, false);
 	}
 
+	private Map<String, String> headers = Map.of("X-Content-Type-Options", "nosniff", "X-Frame-Options", "DENY",
+			"X-Xss-Protection", "1; mode=block");
 
-	private Map<String, String> headers= Map.of("X-Content-Type-Options","nosniff", "X-Frame-Options", "DENY", "X-Xss-Protection", "1; mode=block");
 	@Test
 	public void testSecurityHeaders() throws Exception {
 		MockHttpServletResponse response = mockMvc.perform(get("/v1")).andExpect(status().is2xxSuccessful()).andReturn()
-		.getResponse();
-		for(var header : headers.keySet()) {
+				.getResponse();
+		for (var header : headers.keySet()) {
 			assertTrue(response.containsHeader(header));
 			assertEquals(headers.get(header), response.getHeader(header));
-		} 
+		}
 		var now = UTCInstant.now();
 		var midnight = UTCInstant.today();
 		response = mockMvc
-			.perform(get("/v1/gaen/exposed/"
-					+ midnight.minusDays(8).getTimestamp())
-							.header("User-Agent", "MockMVC"))
-			.andExpect(status().is2xxSuccessful()).andReturn().getResponse();
-		for(var header : headers.keySet()) {
+				.perform(
+						get("/v1/gaen/exposed/" + midnight.minusDays(8).getTimestamp()).header("User-Agent", "MockMVC"))
+				.andExpect(status().is2xxSuccessful()).andReturn().getResponse();
+		for (var header : headers.keySet()) {
 			assertTrue(response.containsHeader(header));
 			assertEquals(headers.get(header), response.getHeader(header));
-		} 
+		}
 	}
 
 	@Test
@@ -265,13 +265,13 @@ public class GaenControllerTest extends BaseControllerTest {
 		var midnight = now.atStartOfDay();
 		var requestList = new GaenRequest();
 		var gaenKey1 = new GaenKey();
-		gaenKey1.setRollingStartNumber((int)midnight.get10MinutesSince1970());
+		gaenKey1.setRollingStartNumber((int) midnight.get10MinutesSince1970());
 		gaenKey1.setKeyData(Base64.getEncoder().encodeToString("testKey32Bytes--".getBytes("UTF-8")));
 		gaenKey1.setRollingPeriod(-1);
 		gaenKey1.setFake(0);
 		gaenKey1.setTransmissionRiskLevel(0);
 		var gaenKey2 = new GaenKey();
-		gaenKey2.setRollingStartNumber((int)midnight.minusDays(1).get10MinutesSince1970());
+		gaenKey2.setRollingStartNumber((int) midnight.minusDays(1).get10MinutesSince1970());
 		gaenKey2.setKeyData(Base64.getEncoder().encodeToString("testKey32Bytes--".getBytes("UTF-8")));
 		gaenKey2.setRollingPeriod(-5);
 		gaenKey2.setFake(0);
@@ -290,22 +290,23 @@ public class GaenControllerTest extends BaseControllerTest {
 			exposedKeys.add(tmpKey);
 		}
 		requestList.setGaenKeys(exposedKeys);
-		var duration = (int)midnight.plusDays(1).get10MinutesSince1970();
+		var duration = (int) midnight.plusDays(1).get10MinutesSince1970();
 		requestList.setDelayedKeyDate((int) duration);
 		gaenKey1.setFake(0);
 		String token = createToken(now.plusMinutes(5));
-		MvcResult response = mockMvc.perform(post("/v1/gaen/exposed")
-				.contentType(MediaType.APPLICATION_JSON).header("Authorization", "Bearer " + token)
-				.header("User-Agent", "MockMVC").content(json(requestList))).andExpect(request().asyncStarted())
-				.andReturn();
+		MvcResult response = mockMvc.perform(post("/v1/gaen/exposed").contentType(MediaType.APPLICATION_JSON)
+				.header("Authorization", "Bearer " + token).header("User-Agent", "MockMVC").content(json(requestList)))
+				.andExpect(request().asyncStarted()).andReturn();
 
 		mockMvc.perform(asyncDispatch(response)).andExpect(status().is(200));
 
-		var result = gaenDataService.getSortedExposedForKeyDate(midnight.minusDays(1).getTimestamp(),null, (now.getTimestamp() / releaseBucketDuration + 1 )*releaseBucketDuration);
-		//all keys are in compatible
+		var result = gaenDataService.getSortedExposedForKeyDate(midnight.minusDays(1).getTimestamp(), null,
+				(now.getTimestamp() / releaseBucketDuration + 1) * releaseBucketDuration);
+		// all keys are invalid
 		assertEquals(0, result.size());
-		result = gaenDataService.getSortedExposedForKeyDate(midnight.getTimestamp(),null, (now.getTimestamp() / releaseBucketDuration + 1 )*releaseBucketDuration);
-		//all keys are in compatible
+		result = gaenDataService.getSortedExposedForKeyDate(midnight.getTimestamp(), null,
+				(now.getTimestamp() / releaseBucketDuration + 1) * releaseBucketDuration);
+		// all keys are invalid
 		assertEquals(0, result.size());
 	}
 
@@ -349,10 +350,9 @@ public class GaenControllerTest extends BaseControllerTest {
 		requestList.setDelayedKeyDate((int) duration);
 
 		String token = createToken(true, now.plusMinutes(5));
-		MvcResult responseAsync = mockMvc.perform(post("/v1/gaen/exposed")
-				.contentType(MediaType.APPLICATION_JSON).header("Authorization", "Bearer " + token)
-				.header("User-Agent", "MockMVC").content(json(requestList))).andExpect(request().asyncStarted())
-				.andReturn();
+		MvcResult responseAsync = mockMvc.perform(post("/v1/gaen/exposed").contentType(MediaType.APPLICATION_JSON)
+				.header("Authorization", "Bearer " + token).header("User-Agent", "MockMVC").content(json(requestList)))
+				.andExpect(request().asyncStarted()).andReturn();
 		mockMvc.perform(asyncDispatch(responseAsync)).andExpect(status().is2xxSuccessful());
 		MockHttpServletResponse response = mockMvc
 				.perform(post("/v1/gaen/exposedlist").contentType(MediaType.APPLICATION_JSON)
@@ -401,10 +401,9 @@ public class GaenControllerTest extends BaseControllerTest {
 		requestList.setDelayedKeyDate((int) duration);
 
 		String token = createToken(true, now.plusMinutes(5));
-		MvcResult responseAsync = mockMvc.perform(post("/v1/gaen/exposed")
-				.contentType(MediaType.APPLICATION_JSON).header("Authorization", "Bearer " + token)
-				.header("User-Agent", "MockMVC").content(json(requestList))).andExpect(request().asyncStarted())
-				.andReturn();
+		MvcResult responseAsync = mockMvc.perform(post("/v1/gaen/exposed").contentType(MediaType.APPLICATION_JSON)
+				.header("Authorization", "Bearer " + token).header("User-Agent", "MockMVC").content(json(requestList)))
+				.andExpect(request().asyncStarted()).andReturn();
 		mockMvc.perform(asyncDispatch(responseAsync)).andExpect(status().is2xxSuccessful());
 		MockHttpServletResponse response = mockMvc
 				.perform(post("/v1/gaen/exposedlist").contentType(MediaType.APPLICATION_JSON)
@@ -453,10 +452,9 @@ public class GaenControllerTest extends BaseControllerTest {
 		requestList.setDelayedKeyDate((int) duration);
 
 		String token = createToken(false, now.plusMinutes(5));
-		MvcResult responseAsync = mockMvc.perform(post("/v1/gaen/exposed")
-				.contentType(MediaType.APPLICATION_JSON).header("Authorization", "Bearer " + token)
-				.header("User-Agent", "MockMVC").content(json(requestList))).andExpect(request().asyncStarted())
-				.andReturn();
+		MvcResult responseAsync = mockMvc.perform(post("/v1/gaen/exposed").contentType(MediaType.APPLICATION_JSON)
+				.header("Authorization", "Bearer " + token).header("User-Agent", "MockMVC").content(json(requestList)))
+				.andExpect(request().asyncStarted()).andReturn();
 		mockMvc.perform(asyncDispatch(responseAsync)).andExpect(status().is2xxSuccessful());
 		MockHttpServletResponse response = mockMvc
 				.perform(post("/v1/gaen/exposedlist").contentType(MediaType.APPLICATION_JSON)
@@ -474,10 +472,10 @@ public class GaenControllerTest extends BaseControllerTest {
 		List<GaenKey> exposedKeys = new ArrayList<GaenKey>();
 		requestList.setGaenKeys(exposedKeys);
 		String token = createToken(now.plusMinutes(5));
-		MvcResult responseAsync = mockMvc.perform(post("/v1/gaen/exposed")
-				.contentType(MediaType.APPLICATION_JSON).header("Authorization", "Bearer " + token)
-				.header("User-Agent", "MockMVC").content(json(requestList))).andExpect(request().asyncNotStarted()).andExpect(status().is(400)).andReturn();
-		
+		MvcResult responseAsync = mockMvc.perform(post("/v1/gaen/exposed").contentType(MediaType.APPLICATION_JSON)
+				.header("Authorization", "Bearer " + token).header("User-Agent", "MockMVC").content(json(requestList)))
+				.andExpect(request().asyncNotStarted()).andExpect(status().is(400)).andReturn();
+
 		MockHttpServletResponse response = mockMvc
 				.perform(post("/v1/gaen/exposedlist").contentType(MediaType.APPLICATION_JSON)
 						.header("Authorization", "Bearer " + jwtToken).header("User-Agent", "MockMVC")
@@ -495,9 +493,9 @@ public class GaenControllerTest extends BaseControllerTest {
 		requestList.setDelayedKeyDate((int) duration);
 
 		String token = createToken(now.plusMinutes(5));
-		MvcResult responseAsync = mockMvc.perform(post("/v1/gaen/exposed")
-				.contentType(MediaType.APPLICATION_JSON).header("Authorization", "Bearer " + token)
-				.header("User-Agent", "MockMVC").content(json(requestList))).andExpect(request().asyncNotStarted()).andExpect(status().is(400)).andReturn();
+		MvcResult responseAsync = mockMvc.perform(post("/v1/gaen/exposed").contentType(MediaType.APPLICATION_JSON)
+				.header("Authorization", "Bearer " + token).header("User-Agent", "MockMVC").content(json(requestList)))
+				.andExpect(request().asyncNotStarted()).andExpect(status().is(400)).andReturn();
 
 		MockHttpServletResponse response = mockMvc
 				.perform(post("/v1/gaen/exposedlist").contentType(MediaType.APPLICATION_JSON)
@@ -535,10 +533,9 @@ public class GaenControllerTest extends BaseControllerTest {
 		exposeeRequest.setGaenKeys(keys);
 
 		String token = createToken(true, now.plusMinutes(5));
-		MvcResult response = mockMvc.perform(post("/v1/gaen/exposed")
-				.contentType(MediaType.APPLICATION_JSON).header("Authorization", "Bearer " + token)
-				.header("User-Agent", "MockMVC").content(json(exposeeRequest))).andExpect(request().asyncStarted()).andReturn();
-				//.getResponse();
+		MvcResult response = mockMvc.perform(post("/v1/gaen/exposed").contentType(MediaType.APPLICATION_JSON)
+				.header("Authorization", "Bearer " + token).header("User-Agent", "MockMVC")
+				.content(json(exposeeRequest))).andExpect(request().asyncStarted()).andReturn();
 		mockMvc.perform(asyncDispatch(response)).andExpect(status().is(400));
 	}
 
@@ -570,12 +567,14 @@ public class GaenControllerTest extends BaseControllerTest {
 		}
 		exposeeRequest.setGaenKeys(keys);
 
-		String token = createToken(now.plusMinutes(5),
-				now.getLocalDate().format(DateTimeFormatter.ISO_DATE));
-		MvcResult response = mockMvc.perform(post("/v1/gaen/exposed")
-				.contentType(MediaType.APPLICATION_JSON).header("Authorization", "Bearer " + token)
-				.header("User-Agent", "MockMVC").content(json(exposeeRequest))).andExpect(request().asyncStarted()).andExpect(status().is(200)).andReturn();
-		var result = gaenDataService.getSortedExposedForKeyDate(midnight.minusDays(2).getTimestamp(),null, (now.getTimestamp() / releaseBucketDuration + 1 )*releaseBucketDuration);
+		String token = createToken(now.plusMinutes(5), now.getLocalDate().format(DateTimeFormatter.ISO_DATE));
+		MvcResult response = mockMvc
+				.perform(post("/v1/gaen/exposed").contentType(MediaType.APPLICATION_JSON)
+						.header("Authorization", "Bearer " + token).header("User-Agent", "MockMVC")
+						.content(json(exposeeRequest)))
+				.andExpect(request().asyncStarted()).andExpect(status().is(200)).andReturn();
+		var result = gaenDataService.getSortedExposedForKeyDate(midnight.minusDays(2).getTimestamp(), null,
+				(now.getTimestamp() / releaseBucketDuration + 1) * releaseBucketDuration);
 		assertEquals(0, result.size());
 	}
 
@@ -652,7 +651,8 @@ public class GaenControllerTest extends BaseControllerTest {
 						.header("Authorization", "Bearer " + token).header("User-Agent", "MockMVC")
 						.content(json(exposeeRequest)))
 				.andExpect(request().asyncStarted()).andExpect(status().is(200)).andReturn();
-		var result = gaenDataService.getSortedExposedForKeyDate(midnight.plusDays(2).getTimestamp(),null, (now.getTimestamp() / releaseBucketDuration + 1 )*releaseBucketDuration);
+		var result = gaenDataService.getSortedExposedForKeyDate(midnight.plusDays(2).getTimestamp(), null,
+				(now.getTimestamp() / releaseBucketDuration + 1) * releaseBucketDuration);
 		assertEquals(0, result.size());
 	}
 
@@ -684,15 +684,15 @@ public class GaenControllerTest extends BaseControllerTest {
 		}
 		exposeeRequest.setGaenKeys(keys);
 
-		String token = createToken(now.plusMinutes(5),
-				"2020-01-01");
+		String token = createToken(now.plusMinutes(5), "2020-01-01");
 
 		MvcResult response = mockMvc
 				.perform(post("/v1/gaen/exposed").contentType(MediaType.APPLICATION_JSON)
 						.header("Authorization", "Bearer " + token).header("User-Agent", "MockMVC")
 						.content(json(exposeeRequest)))
 				.andExpect(request().asyncStarted()).andExpect(status().is(200)).andReturn();
-		var result = gaenDataService.getSortedExposedForKeyDate(midnight.minusDays(22).getTimestamp(),null, (now.getTimestamp() / releaseBucketDuration + 1 )*releaseBucketDuration);
+		var result = gaenDataService.getSortedExposedForKeyDate(midnight.minusDays(22).getTimestamp(), null,
+				(now.getTimestamp() / releaseBucketDuration + 1) * releaseBucketDuration);
 		assertEquals(0, result.size());
 	}
 
@@ -707,16 +707,14 @@ public class GaenControllerTest extends BaseControllerTest {
 		GaenKey key = new GaenKey();
 		key.setKeyData(Base64.getEncoder().encodeToString("testKey32Bytes--".getBytes("UTF-8")));
 		key.setRollingPeriod(144);
-		key.setRollingStartNumber(
-				(int) now.get10MinutesSince1970());
+		key.setRollingStartNumber((int) now.get10MinutesSince1970());
 		key.setTransmissionRiskLevel(1);
 		key.setFake(1);
 		List<GaenKey> keys = new ArrayList<>();
 		keys.add(key);
 		for (int i = 0; i < 13; i++) {
 			var tmpKey = new GaenKey();
-			tmpKey.setRollingStartNumber(
-					(int) now.get10MinutesSince1970());
+			tmpKey.setRollingStartNumber((int) now.get10MinutesSince1970());
 			tmpKey.setKeyData(Base64.getEncoder().encodeToString("testKey32Bytes--".getBytes("UTF-8")));
 			tmpKey.setRollingPeriod(144);
 			tmpKey.setFake(1);
@@ -725,22 +723,18 @@ public class GaenControllerTest extends BaseControllerTest {
 		}
 		exposeeRequest.setGaenKeys(keys);
 
-		String token = createTokenWithScope(now.plusMinutes(5),
-				"not-exposed");
+		String token = createTokenWithScope(now.plusMinutes(5), "not-exposed");
 
-		MvcResult response = mockMvc
-				.perform(post("/v1/gaen/exposed").contentType(MediaType.APPLICATION_JSON)
-						.header("Authorization", "Bearer " + token).header("User-Agent", "MockMVC")
-						.content(json(exposeeRequest)))
-						.andExpect(request().asyncStarted())
-				.andReturn();
+		MvcResult response = mockMvc.perform(post("/v1/gaen/exposed").contentType(MediaType.APPLICATION_JSON)
+				.header("Authorization", "Bearer " + token).header("User-Agent", "MockMVC")
+				.content(json(exposeeRequest))).andExpect(request().asyncStarted()).andReturn();
 		mockMvc.perform(asyncDispatch(response)).andExpect(status().is(403)).andExpect(content().string(""));
 		// Also for a 403 response, the token cannot be used a 2nd time
 		response = mockMvc
 				.perform(post("/v1/gaen/exposed").contentType(MediaType.APPLICATION_JSON)
 						.header("Authorization", "Bearer " + token).header("User-Agent", "MockMVC")
 						.content(json(exposeeRequest)))
-						.andExpect(request().asyncNotStarted()).andExpect(status().is(401)).andExpect(content().string(""))
+				.andExpect(request().asyncNotStarted()).andExpect(status().is(401)).andExpect(content().string(""))
 				.andReturn();
 	}
 
@@ -765,10 +759,11 @@ public class GaenControllerTest extends BaseControllerTest {
 		exposeeRequest.setDelayedKeyDate(delayedKeyDateSent);
 		exposeeRequest.setGaenKeys(keys);
 		String token = createToken(now.plusMinutes(5));
-		MvcResult responseAsync = mockMvc.perform(post("/v1/gaen/exposed")
-				.contentType(MediaType.APPLICATION_JSON).header("Authorization", "Bearer " + token)
-				.header("User-Agent", "MockMVC").content(json(exposeeRequest))).andExpect(request().asyncStarted()).andReturn();
-		MockHttpServletResponse response = mockMvc.perform(asyncDispatch(responseAsync)).andExpect(status().is(200)).andReturn().getResponse();
+		MvcResult responseAsync = mockMvc.perform(post("/v1/gaen/exposed").contentType(MediaType.APPLICATION_JSON)
+				.header("Authorization", "Bearer " + token).header("User-Agent", "MockMVC")
+				.content(json(exposeeRequest))).andExpect(request().asyncStarted()).andReturn();
+		MockHttpServletResponse response = mockMvc.perform(asyncDispatch(responseAsync)).andExpect(status().is(200))
+				.andReturn().getResponse();
 		assertTrue(response.containsHeader("Authorization"), "Authorization header not found in response");
 		String jwtString = response.getHeader("Authorization").replace("Bearer ", "");
 		Jwt jwtToken = Jwts.parserBuilder().setSigningKey(keyVault.get("nextDayJWT").getPublic()).build()
@@ -808,10 +803,11 @@ public class GaenControllerTest extends BaseControllerTest {
 		exposeeRequest.setDelayedKeyDate(delayedKeyDateSent);
 		exposeeRequest.setGaenKeys(keys);
 		String token = createToken(now.plusMinutes(5));
-		MvcResult responseAsync = mockMvc.perform(post("/v1/gaen/exposed")
-				.contentType(MediaType.APPLICATION_JSON).header("Authorization", "Bearer " + token)
-				.header("User-Agent", "MockMVC").content(json(exposeeRequest))).andExpect(request().asyncStarted()).andReturn();
-		MockHttpServletResponse response = mockMvc.perform(asyncDispatch(responseAsync)).andExpect(status().is(200)).andReturn().getResponse();
+		MvcResult responseAsync = mockMvc.perform(post("/v1/gaen/exposed").contentType(MediaType.APPLICATION_JSON)
+				.header("Authorization", "Bearer " + token).header("User-Agent", "MockMVC")
+				.content(json(exposeeRequest))).andExpect(request().asyncStarted()).andReturn();
+		MockHttpServletResponse response = mockMvc.perform(asyncDispatch(responseAsync)).andExpect(status().is(200))
+				.andReturn().getResponse();
 		assertTrue(response.containsHeader("Authorization"), "Authorization header not found in response");
 		String jwtString = response.getHeader("Authorization").replace("Bearer ", "");
 		Jwt jwtToken = Jwts.parserBuilder().setSigningKey(keyVault.get("nextDayJWT").getPublic()).build()
@@ -846,11 +842,14 @@ public class GaenControllerTest extends BaseControllerTest {
 			tmpKey.setTransmissionRiskLevel(0);
 			keys.add(tmpKey);
 		}
-		Map<Integer, Boolean> tests = Map.of(-2, false,
+		
+		Map<Integer, Boolean> tests = Map.of(
+				-2, false, 
 				-1, true,
 				0, true,
 				1, true,
 				2, false);
+		
 		for (Map.Entry<Integer, Boolean> t : tests.entrySet()) {
 			Integer offset = t.getKey();
 			Boolean pass = t.getValue();
@@ -859,9 +858,9 @@ public class GaenControllerTest extends BaseControllerTest {
 			exposeeRequest.setDelayedKeyDate(delayedKeyDateSent);
 			exposeeRequest.setGaenKeys(keys);
 			String token = createToken(now.plusMinutes(5));
-			MvcResult responseAsync = mockMvc.perform(post("/v1/gaen/exposed")
-					.contentType(MediaType.APPLICATION_JSON).header("Authorization", "Bearer " + token)
-					.header("User-Agent", "MockMVC").content(json(exposeeRequest))).andExpect(request().asyncStarted()).andReturn();
+			MvcResult responseAsync = mockMvc.perform(post("/v1/gaen/exposed").contentType(MediaType.APPLICATION_JSON)
+					.header("Authorization", "Bearer " + token).header("User-Agent", "MockMVC")
+					.content(json(exposeeRequest))).andExpect(request().asyncStarted()).andReturn();
 			if (pass) {
 				mockMvc.perform(asyncDispatch(responseAsync)).andExpect(status().is(200)).andReturn().getResponse();
 			} else {
@@ -871,7 +870,7 @@ public class GaenControllerTest extends BaseControllerTest {
 	}
 
 	@Test
-	public void testTokenValiditySurpassesMaxJwtValidity() throws Exception{
+	public void testTokenValiditySurpassesMaxJwtValidity() throws Exception {
 		var now = UTCInstant.now();
 		var midnight = now.atStartOfDay();
 
@@ -893,30 +892,30 @@ public class GaenControllerTest extends BaseControllerTest {
 		int maxJWTValidityInMinutes = 60;
 		String token = createToken(now.plusMinutes(maxJWTValidityInMinutes + 1));
 
-		mockMvc.perform(post("/v1/gaen/exposed")
-						.contentType(MediaType.APPLICATION_JSON).header("Authorization", "Bearer " + token)
-						.header("User-Agent", "MockMVC").content(json(exposeeRequest))).andExpect(status().is(401));
-}
+		mockMvc.perform(post("/v1/gaen/exposed").contentType(MediaType.APPLICATION_JSON)
+				.header("Authorization", "Bearer " + token).header("User-Agent", "MockMVC")
+				.content(json(exposeeRequest))).andExpect(status().is(401));
+	}
 
 	@Test
 	public void testDebugController() throws Exception {
 		var now = UTCInstant.now();
 		var midnight = now.atStartOfDay();
 
-		insertNKeysPerDayInIntervalWithDebugFlag(14,
-				midnight.minusDays(4),
-				midnight, midnight.minusDays(1), true);
+		// insert two times 10 keys per day for the last 14 days, with different
+		// received at. In total: 280 keys
+		insertNKeysPerDay(midnight, 14, 10, midnight.minusDays(1), true);
+		insertNKeysPerDay(midnight, 14, 10, midnight.minusHours(12), true);
 
-		insertNKeysPerDayInIntervalWithDebugFlag(14,
-				midnight.minusDays(4),
-				midnight, midnight.minusHours(12), true);
+		// Request keys which have been received in the last day, must be 280 in total.
+		// This is the debug controller, which returns keys based on the 'received at',
+		// not based on the key date. So this request should return all keys with
+		// 'received at' of the last day.
+
 		MockHttpServletResponse response = mockMvc
-				.perform(get("/v1/debug/exposed/"
-						+ midnight.getTimestamp())
-								.header("User-Agent", "MockMVC"))
+				.perform(get("/v1/debug/exposed/" + midnight.getTimestamp()).header("User-Agent", "MockMVC"))
 				.andExpect(status().is2xxSuccessful()).andReturn().getResponse();
-
-		verifyZipInZipResponse(response, 0);
+		verifyZipInZipResponse(response, 280, 144);
 	}
 
 	@Test
@@ -928,40 +927,35 @@ public class GaenControllerTest extends BaseControllerTest {
 		now = UTCInstant.now();
 		var midnight = now.atStartOfDay();
 
-		// insert two times 5 keys per day for the last 14 days. the second batch has a
-		// different received at timestamp. (+6 hours)
-		insertNKeysPerDayInInterval(14,
-				midnight.minusDays(4),
-				now, now.minusDays(1));
+		// Insert two times 5 keys per day for the last 14 days. the second batch has a
+		// different 'received at' timestamp. (+12 hours compared to the first)
+		insertNKeysPerDay(midnight, 14, 5, midnight.minusDays(1), false);
+		insertNKeysPerDay(midnight, 14, 5, midnight.minusHours(12), false);
 
-		insertNKeysPerDayInInterval(14,
-				midnight.minusDays(4),
-				now, now.minusDays(12));
-
-		// request the keys with date date 1 day ago. no publish until.
+		// request the keys with key date 8 days ago. no publish until.
 		MockHttpServletResponse response = mockMvc
-				.perform(get("/v1/gaen/exposed/"
-						+ midnight.minusDays(8).getTimestamp())
-								.header("User-Agent", "MockMVC"))
+				.perform(
+						get("/v1/gaen/exposed/" + midnight.minusDays(8).getTimestamp()).header("User-Agent", "MockMVC"))
 				.andExpect(status().is2xxSuccessful()).andReturn().getResponse();
 
 		Long publishedUntil = Long.parseLong(response.getHeader("X-PUBLISHED-UNTIL"));
 		assertTrue(publishedUntil < now.getTimestamp(), "Published until must be in the past");
 
+		// must contain 20 keys: 5 from the first insert, 5 from the second insert and
+		// 10 random keys
 		verifyZipResponse(response, 20, 144);
 
-		// request again the keys with date date 1 day ago. with publish until, so that
+		// request again the keys with date date 8 days ago. with publish until, so that
 		// we only get the second batch.
-		var bucketAfterSecondRelease = Duration.ofMillis(midnight.getTimestamp()).minusDays(1).plusHours(12).dividedBy(Duration.ofHours(2)) * 2*60*60*1000;
+		var bucketAfterSecondRelease = midnight.minusHours(12);
+
 		MockHttpServletResponse responseWithPublishedAfter = mockMvc
-				.perform(get("/v1/gaen/exposed/"
-						+ midnight.minusDays(8).getTimestamp())
-								.header("User-Agent", "MockMVC").param("publishedafter",
-										Long.toString(bucketAfterSecondRelease)))
+				.perform(get("/v1/gaen/exposed/" + midnight.minusDays(8).getTimestamp()).header("User-Agent", "MockMVC")
+						.param("publishedafter", Long.toString(bucketAfterSecondRelease.getTimestamp())))
 				.andExpect(status().is2xxSuccessful()).andReturn().getResponse();
 
-		//we always have 10
-		verifyZipResponse(responseWithPublishedAfter, 10, 144);
+		// must contain 15 keys: 5 from the second insert and 10 random keys
+		verifyZipResponse(responseWithPublishedAfter, 15, 144);
 		UTCInstant.resetClock();
 	}
 
@@ -972,21 +966,17 @@ public class GaenControllerTest extends BaseControllerTest {
 		var midnight = now.atStartOfDay();
 
 		MockHttpServletResponse response = mockMvc
-				.perform(get("/v1/gaen/exposed/"
-						+ midnight.minusDays(8).getTimestamp())
-								.header("User-Agent", "MockMVC"))
+				.perform(get("/v1/gaen/exposed/" + midnight.minusDays(8).getTimestamp()).header("User-Agent", "MockMVC"))
 				.andExpect(status().isOk()).andReturn().getResponse();
 		verifyZipResponse(response, 10, 144);
 	}
-	
+
 	@Test
 	@Transactional(transactionManager = "testTransactionManager")
 	public void testTodayWeDontHaveKeys() throws Exception {
 		var midnight = UTCInstant.today();
 		MockHttpServletResponse response = mockMvc
-				.perform(get("/v1/gaen/exposed/"
-						+ midnight.getTimestamp())
-								.header("User-Agent", "MockMVC"))
+				.perform(get("/v1/gaen/exposed/" + midnight.getTimestamp()).header("User-Agent", "MockMVC"))
 				.andExpect(status().is(204)).andReturn().getResponse();
 	}
 
@@ -996,18 +986,13 @@ public class GaenControllerTest extends BaseControllerTest {
 		var now = UTCInstant.now();
 		var midnight = now.atStartOfDay();
 
-		insertNKeysPerDayInInterval(14,
-				midnight.minusDays(4),
-				midnight, midnight.minusDays(1));
+		insertNKeysPerDay(midnight, 14, 10, midnight.minusDays(1), false);
+		insertNKeysPerDay(midnight, 14, 10, midnight.minusHours(12), false);
 
-		insertNKeysPerDayInInterval(14,
-				midnight.minusDays(4),
-				midnight, midnight.minusHours(12));
 		// request the keys with date date 1 day ago. no publish until.
 		MockHttpServletResponse response = mockMvc
-				.perform(get("/v1/gaen/exposed/"
-						+ midnight.minusDays(8).getTimestamp())
-								.header("User-Agent", "MockMVC"))
+				.perform(
+						get("/v1/gaen/exposed/" + midnight.minusDays(8).getTimestamp()).header("User-Agent", "MockMVC"))
 				.andExpect(status().is2xxSuccessful()).andReturn().getResponse();
 
 		Long publishedUntil = Long.parseLong(response.getHeader("X-PUBLISHED-UNTIL"));
@@ -1015,56 +1000,67 @@ public class GaenControllerTest extends BaseControllerTest {
 		var expectedEtag = response.getHeader("etag");
 
 		response = mockMvc
-				.perform(get("/v1/gaen/exposed/"
-						+ midnight.minusDays(8).getTimestamp())
-								.header("User-Agent", "MockMVC"))
+				.perform(
+						get("/v1/gaen/exposed/" + midnight.minusDays(8).getTimestamp()).header("User-Agent", "MockMVC"))
 				.andExpect(status().is2xxSuccessful()).andReturn().getResponse();
 
 		publishedUntil = Long.parseLong(response.getHeader("X-PUBLISHED-UNTIL"));
 		assertTrue(publishedUntil < System.currentTimeMillis(), "Published until must be in the past");
 		assertEquals(expectedEtag, response.getHeader("etag"));
 
-		insertNKeysPerDayInInterval(14,
-				midnight.minusDays(4),
-				midnight, midnight.minusHours(12));
-				response = mockMvc
-				.perform(get("/v1/gaen/exposed/"
-						+ midnight.minusDays(8).getTimestamp())
-								.header("User-Agent", "MockMVC"))
+		insertNKeysPerDay(midnight, 14, 10, midnight.minusHours(12), false);
+
+		response = mockMvc
+				.perform(
+						get("/v1/gaen/exposed/" + midnight.minusDays(8).getTimestamp()).header("User-Agent", "MockMVC"))
 				.andExpect(status().is2xxSuccessful()).andReturn().getResponse();
 
 		publishedUntil = Long.parseLong(response.getHeader("X-PUBLISHED-UNTIL"));
 		assertTrue(publishedUntil < System.currentTimeMillis(), "Published until must be in the past");
 		assertNotEquals(expectedEtag, response.getHeader("etag"));
 	}
-	
+
 	@Test
 	public void testMalciousTokenFails() throws Exception {
 		var requestList = new GaenRequest();
 		List<GaenKey> exposedKeys = new ArrayList<GaenKey>();
 		requestList.setGaenKeys(exposedKeys);
 		String token = createMaliciousToken(UTCInstant.now().plusMinutes(5));
-		MvcResult response = mockMvc.perform(post("/v1/gaen/exposed")
-				.contentType(MediaType.APPLICATION_JSON).header("Authorization", "Bearer " + token)
-				.header("User-Agent", "MockMVC").content(json(requestList))).andExpect(request().asyncNotStarted()).andExpect(status().is(401)).andReturn();
+		MvcResult response = mockMvc.perform(post("/v1/gaen/exposed").contentType(MediaType.APPLICATION_JSON)
+				.header("Authorization", "Bearer " + token).header("User-Agent", "MockMVC").content(json(requestList)))
+				.andExpect(request().asyncNotStarted()).andExpect(status().is(401)).andReturn();
 		String authenticateError = response.getResponse().getHeader("www-authenticate");
 		assertTrue(authenticateError.contains("Unsigned Claims JWTs are not supported."));
 	}
 
-	private void verifyZipInZipResponse(MockHttpServletResponse response, int expectKeyCount) throws Exception {
+	/**
+	 * Verifies a zip in zip response, that each inner zip is again valid.
+	 */
+	private void verifyZipInZipResponse(MockHttpServletResponse response, int expectKeyCount, int expectedRollingPeriod)
+			throws Exception {
 		ByteArrayInputStream baisOuter = new ByteArrayInputStream(response.getContentAsByteArray());
 		ZipInputStream zipOuter = new ZipInputStream(baisOuter);
 		ZipEntry entry = zipOuter.getNextEntry();
-		while(entry != null) {
+		while (entry != null) {
+			ZipInputStream zipInner = new ZipInputStream(new ByteArrayInputStream(zipOuter.readAllBytes()));
+			verifyKeyZip(zipInner, expectKeyCount, expectedRollingPeriod);
 			entry = zipOuter.getNextEntry();
 		}
 	}
 
+	/**
+	 * Verifies a zip response, checks if keys and signature is correct.
+	 */
 	private void verifyZipResponse(MockHttpServletResponse response, int expectKeyCount, int expectedRollingPeriod)
 			throws IOException, NoSuchAlgorithmException, InvalidKeyException, SignatureException {
-		ByteArrayInputStream baisOuter = new ByteArrayInputStream(response.getContentAsByteArray());
-		ZipInputStream zipOuter = new ZipInputStream(baisOuter);
-		ZipEntry entry = zipOuter.getNextEntry();
+		ByteArrayInputStream baisZip = new ByteArrayInputStream(response.getContentAsByteArray());
+		ZipInputStream keyZipInputstream = new ZipInputStream(baisZip);
+		verifyKeyZip(keyZipInputstream, expectKeyCount, expectedRollingPeriod);
+	}
+
+	private void verifyKeyZip(ZipInputStream keyZipInputstream, int expectKeyCount, int expectedRollingPeriod)
+			throws IOException, NoSuchAlgorithmException, InvalidKeyException, SignatureException {
+		ZipEntry entry = keyZipInputstream.getNextEntry();
 		boolean foundData = false;
 		boolean foundSignature = false;
 
@@ -1075,15 +1071,15 @@ public class GaenControllerTest extends BaseControllerTest {
 		while (entry != null) {
 			if (entry.getName().equals("export.bin")) {
 				foundData = true;
-				exportBin = zipOuter.readAllBytes();
-				keyProto = new byte[exportBin.length-16];
+				exportBin = keyZipInputstream.readAllBytes();
+				keyProto = new byte[exportBin.length - 16];
 				System.arraycopy(exportBin, 16, keyProto, 0, keyProto.length);
 			}
 			if (entry.getName().equals("export.sig")) {
 				foundSignature = true;
-				signatureProto = zipOuter.readAllBytes();
+				signatureProto = keyZipInputstream.readAllBytes();
 			}
-			entry = zipOuter.getNextEntry();
+			entry = keyZipInputstream.getNextEntry();
 		}
 
 		assertTrue(foundData, "export.bin not found in zip");
@@ -1091,7 +1087,7 @@ public class GaenControllerTest extends BaseControllerTest {
 
 		TEKSignatureList list = TemporaryExposureKeyFormat.TEKSignatureList.parseFrom(signatureProto);
 		TemporaryExposureKeyExport export = TemporaryExposureKeyFormat.TemporaryExposureKeyExport.parseFrom(keyProto);
-		for(var key : export.getKeysList()) {
+		for (var key : export.getKeysList()) {
 			assertEquals(expectedRollingPeriod, key.getRollingPeriod());
 		}
 		var sig = list.getSignatures(0);
@@ -1105,50 +1101,40 @@ public class GaenControllerTest extends BaseControllerTest {
 		assertEquals(expectKeyCount, export.getKeysCount());
 	}
 
-	private void insertNKeysPerDayInIntervalWithDebugFlag(int n, UTCInstant start, UTCInstant end, UTCInstant receivedAt, boolean debug) throws Exception {
-		var current = start;
-		Map<Integer, Integer> rollingToCount = new HashMap<>();
-		while (current.isBeforeEpochMillisOf(end)) {
+	/**
+	 * Creates keysPerDay for every day: lastDay, lastDay-1, ..., lastDay - daysBack
+	 * + 1
+	 *
+	 * @param lastDay    of the created keys
+	 * @param daysBack   of the key creation, counted including the lastDay
+	 * @param keysPerDay that will be created for every day
+	 * @param receivedAt as sent to the DB
+	 * @param debug      if true, inserts the keys in the debug table.
+	 */
+	private void insertNKeysPerDay(UTCInstant lastDay, int daysBack, int keysPerDay, UTCInstant receivedAt,
+			boolean debug) {
+		SecureRandom random = new SecureRandom();
+		for (int d = 0; d < daysBack; d++) {
+			var currentKeyDate = lastDay.minusDays(d);
+			int currentRollingStartNumber = (int) currentKeyDate.get10MinutesSince1970();
 			List<GaenKey> keys = new ArrayList<>();
-			SecureRandom random = new SecureRandom();
-			int lastRolling = (int)start.get10MinutesSince1970();
-			for (int i = 0; i < n; i++) {
+			for (int n = 0; n < keysPerDay; n++) {
 				GaenKey key = new GaenKey();
 				byte[] keyBytes = new byte[16];
 				random.nextBytes(keyBytes);
 				key.setKeyData(Base64.getEncoder().encodeToString(keyBytes));
 				key.setRollingPeriod(144);
-				logger.info("Rolling Start number: " + lastRolling);
-				key.setRollingStartNumber(lastRolling);
+				key.setRollingStartNumber(currentRollingStartNumber);
 				key.setTransmissionRiskLevel(1);
 				key.setFake(0);
 				keys.add(key);
-				
-				Integer count = rollingToCount.get(lastRolling);
-				if (count == null) {
-					count = 0;
-				}
-				count = count + 1;
-				rollingToCount.put(lastRolling, count);
-				
-				lastRolling -= Duration.ofDays(1).dividedBy(Duration.ofMinutes(10));
-				
 			}
-			if(debug) {
+			if (debug) {
 				testGaenDataService.upsertExposeesDebug(keys, receivedAt);
 			} else {
 				testGaenDataService.upsertExposees(keys, receivedAt);
 			}
-			current = current.plusDays(1);
 		}
-		for (Entry<Integer, Integer> entry: rollingToCount.entrySet()) {
-			logger.info("Rolling start number: " + entry.getKey() + " -> count: " + entry.getValue() + " (received at: " + receivedAt.toString() + ")");
-		}
-	}
-
-	private void insertNKeysPerDayInInterval(int n, UTCInstant start, UTCInstant end, UTCInstant receivedAt)
-			throws Exception {
-		insertNKeysPerDayInIntervalWithDebugFlag(n, start, end, receivedAt, false);
 	}
 
 }
