@@ -11,7 +11,9 @@ package org.dpppt.backend.sdk.ws.util;
 
 import java.time.Duration;
 import java.util.Base64;
+import org.dpppt.backend.sdk.model.gaen.GaenKey;
 import org.dpppt.backend.sdk.utils.UTCInstant;
+import org.springframework.security.oauth2.jwt.Jwt;
 
 /** Offers a set of methods to validate the incoming requests from the mobile devices. */
 public class ValidationUtils {
@@ -63,6 +65,15 @@ public class ValidationUtils {
     // Because _now_ has a resolution of 1 millisecond, this precision is acceptable.
     return timestamp.isAfterEpochMillisOf(retention) && timestamp.isBeforeEpochMillisOf(now);
   }
+  /**
+   * Check if the given date is before now - retentionPeriod ... now
+   *
+   * @param timestamp to verify
+   * @return if the date is in the range
+   */
+  public boolean isBeforeRetention(UTCInstant timestamp, UTCInstant now) {
+    return timestamp.isBeforeDateOf(now.minus(retentionPeriod));
+  }
 
   /**
    * Check if the given timestamp is a valid key date: Must be midnight UTC.
@@ -90,8 +101,49 @@ public class ValidationUtils {
     return this.isDateInRange(batchReleaseTime, now);
   }
 
+  public void validateDelayedKeyDate(UTCInstant now, UTCInstant delayedKeyDate)
+      throws DelayedKeyDateIsInvalid {
+    if (delayedKeyDate.isBeforeDateOf(now.getLocalDate().minusDays(1))
+        || delayedKeyDate.isAfterDateOf(now.getLocalDate().plusDays(1))) {
+      throw new DelayedKeyDateIsInvalid();
+    }
+  }
+
+  public void checkForDelayedKeyDateClaim(Object principal, GaenKey delayedKey)
+      throws DelayedKeyDateClaimIsWrong {
+    if (principal instanceof Jwt
+        && Boolean.FALSE.equals(((Jwt) principal).containsClaim("delayedKeyDate"))) {
+      throw new DelayedKeyDateClaimIsWrong();
+    }
+    if (principal instanceof Jwt) {
+      var jwt = (Jwt) principal;
+      var claimKeyDate = Integer.parseInt(jwt.getClaimAsString("delayedKeyDate"));
+      if (!delayedKey.getRollingStartNumber().equals(claimKeyDate)) {
+        throw new DelayedKeyDateClaimIsWrong();
+      }
+    }
+  }
+
+  public boolean jwtIsFake(Object principal) {
+    return principal instanceof Jwt
+        && Boolean.TRUE.equals(((Jwt) principal).containsClaim("fake"))
+        && ((Jwt) principal).getClaim("fake").equals("1");
+  }
+
   public class BadBatchReleaseTimeException extends Exception {
 
     private static final long serialVersionUID = 618376703047108588L;
+  }
+
+  public class DelayedKeyDateIsInvalid extends Exception {
+
+    /** */
+    private static final long serialVersionUID = -2667236967819549686L;
+  }
+
+  public class DelayedKeyDateClaimIsWrong extends Exception {
+
+    /** */
+    private static final long serialVersionUID = 4683923905451080793L;
   }
 }

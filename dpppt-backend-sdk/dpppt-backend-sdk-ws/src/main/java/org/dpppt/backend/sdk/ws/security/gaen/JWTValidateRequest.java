@@ -25,25 +25,30 @@ public class JWTValidateRequest implements ValidateRequest {
   }
 
   @Override
-  public boolean isValid(Object authObject) {
+  public boolean isValid(Object authObject) throws WrongScopeException {
     if (authObject instanceof Jwt) {
       Jwt token = (Jwt) authObject;
-      return token.containsClaim("scope") && token.getClaim("scope").equals("exposed");
+      if (Boolean.TRUE.equals(token.containsClaim("scope"))
+          && token.getClaim("scope").equals("exposed")) {
+        return true;
+      }
+      throw new WrongScopeException();
     }
     return false;
   }
 
   @Override
-  public long getKeyDate(UTCInstant now, Object authObject, Object others)
-      throws InvalidDateException {
+  public long validateKeyDate(UTCInstant now, Object authObject, Object others)
+      throws ClaimIsBeforeOnsetException, InvalidDateException {
     if (authObject instanceof Jwt) {
       Jwt token = (Jwt) authObject;
       var jwtKeyDate = UTCInstant.parseDate(token.getClaim("onset"));
       if (others instanceof GaenKey) {
         GaenKey request = (GaenKey) others;
         var keyDate = UTCInstant.of(request.getRollingStartNumber(), GaenUnit.TenMinutes);
-        if (!validationUtils.isDateInRange(keyDate, now)
-            || keyDate.isBeforeEpochMillisOf(jwtKeyDate)) {
+        if (keyDate.isBeforeEpochMillisOf(jwtKeyDate)) {
+          throw new ClaimIsBeforeOnsetException();
+        } else if (!validationUtils.isDateInRange(keyDate, now)) {
           throw new InvalidDateException();
         }
         jwtKeyDate = keyDate;
@@ -59,7 +64,8 @@ public class JWTValidateRequest implements ValidateRequest {
       Jwt token = (Jwt) authObject;
       GaenKey request = (GaenKey) others;
       boolean fake = false;
-      if (token.containsClaim("fake") && token.getClaimAsString("fake").equals("1")) {
+      if (Boolean.TRUE.equals(token.containsClaim("fake"))
+          && token.getClaimAsString("fake").equals("1")) {
         fake = true;
       }
       if (request.getFake() == 1) {

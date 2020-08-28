@@ -830,17 +830,17 @@ public class GaenControllerTest extends BaseControllerTest {
 
     String token = createToken(now.plusMinutes(5));
 
-    MvcResult response =
-        mockMvc
-            .perform(
-                post("/v1/gaen/exposed")
-                    .contentType(MediaType.APPLICATION_JSON)
-                    .header("Authorization", "Bearer " + token)
-                    .header("User-Agent", "MockMVC")
-                    .content(json(exposeeRequest)))
-            .andExpect(request().asyncStarted())
-            .andExpect(status().is(200))
-            .andReturn();
+    mockMvc
+        .perform(
+            post("/v1/gaen/exposed")
+                .contentType(MediaType.APPLICATION_JSON)
+                .header("Authorization", "Bearer " + token)
+                .header("User-Agent", "MockMVC")
+                .content(json(exposeeRequest)))
+        .andExpect(request().asyncStarted())
+        .andExpect(status().is(200))
+        .andReturn();
+
     var result =
         gaenDataService.getSortedExposedForKeyDate(
             midnight.plusDays(2).getTimestamp(),
@@ -867,8 +867,7 @@ public class GaenControllerTest extends BaseControllerTest {
     keys.add(key);
     for (int i = 0; i < 13; i++) {
       var tmpKey = new GaenKey();
-      tmpKey.setRollingStartNumber(
-          (int) Duration.ofMillis(Instant.now().toEpochMilli()).dividedBy(Duration.ofMinutes(10)));
+      tmpKey.setRollingStartNumber((int) now.get10MinutesSince1970());
       tmpKey.setKeyData(Base64.getEncoder().encodeToString("testKey32Bytes--".getBytes("UTF-8")));
       tmpKey.setRollingPeriod(144);
       tmpKey.setFake(1);
@@ -879,17 +878,17 @@ public class GaenControllerTest extends BaseControllerTest {
 
     String token = createToken(now.plusMinutes(5), "2020-01-01");
 
-    MvcResult response =
-        mockMvc
-            .perform(
-                post("/v1/gaen/exposed")
-                    .contentType(MediaType.APPLICATION_JSON)
-                    .header("Authorization", "Bearer " + token)
-                    .header("User-Agent", "MockMVC")
-                    .content(json(exposeeRequest)))
-            .andExpect(request().asyncStarted())
-            .andExpect(status().is(200))
-            .andReturn();
+    mockMvc
+        .perform(
+            post("/v1/gaen/exposed")
+                .contentType(MediaType.APPLICATION_JSON)
+                .header("Authorization", "Bearer " + token)
+                .header("User-Agent", "MockMVC")
+                .content(json(exposeeRequest)))
+        .andExpect(request().asyncStarted())
+        .andExpect(status().is(200))
+        .andReturn();
+
     var result =
         gaenDataService.getSortedExposedForKeyDate(
             midnight.minusDays(22).getTimestamp(),
