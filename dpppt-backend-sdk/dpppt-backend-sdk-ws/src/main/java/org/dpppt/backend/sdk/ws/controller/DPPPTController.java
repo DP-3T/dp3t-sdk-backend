@@ -116,25 +116,25 @@ public class DPPPTController {
                       + " + OS-Version",
               example = "ch.ubique.android.starsdk;1.0;iOS;13.3")
           String userAgent,
-      @AuthenticationPrincipal Object principal) {
+      @AuthenticationPrincipal Object principal)
+      throws InvalidDateException, WrongScopeException, ClaimIsBeforeOnsetException {
     var now = UTCInstant.now();
-    long keyDate;
 
-    try {
-      if (!this.validateRequest.isValid(principal)) {
-        return ResponseEntity.status(HttpStatus.FORBIDDEN).build();
-      }
-      keyDate = this.validateRequest.validateKeyDate(now, principal, exposeeRequest);
-    } catch (WrongScopeException | ClaimIsBeforeOnsetException | InvalidDateException e) {
-      return ResponseEntity.status(HttpStatus.BAD_REQUEST).build();
+    if (!this.validateRequest.isValid(principal)) {
+      return ResponseEntity.status(HttpStatus.FORBIDDEN).build();
     }
-
     if (!validationUtils.isValidBase64Key(exposeeRequest.getKey())) {
       return new ResponseEntity<>("No valid base64 key", HttpStatus.BAD_REQUEST);
     }
     // TODO: should we give that information?
     Exposee exposee = new Exposee();
     exposee.setKey(exposeeRequest.getKey());
+    long keyDate;
+    try {
+      keyDate = this.validateRequest.validateKeyDate(now, principal, exposeeRequest);
+    } catch (ClaimIsBeforeOnsetException | InvalidDateException e) {
+      return ResponseEntity.status(HttpStatus.BAD_REQUEST).build();
+    }
 
     exposee.setKeyDate(keyDate);
     if (!this.validateRequest.isFakeRequest(principal, exposeeRequest)) {

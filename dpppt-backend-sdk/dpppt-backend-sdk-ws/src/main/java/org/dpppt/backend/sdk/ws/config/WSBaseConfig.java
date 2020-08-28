@@ -34,6 +34,15 @@ import org.dpppt.backend.sdk.data.gaen.JDBCGAENDataServiceImpl;
 import org.dpppt.backend.sdk.ws.controller.DPPPTController;
 import org.dpppt.backend.sdk.ws.controller.GaenController;
 import org.dpppt.backend.sdk.ws.filter.ResponseWrapperFilter;
+import org.dpppt.backend.sdk.ws.insertmanager.InsertManager;
+import org.dpppt.backend.sdk.ws.insertmanager.insertionfilters.Base64Filter;
+import org.dpppt.backend.sdk.ws.insertmanager.insertionfilters.KeysMatchingJWTFilter;
+import org.dpppt.backend.sdk.ws.insertmanager.insertionfilters.NonFakeKeysFilter;
+import org.dpppt.backend.sdk.ws.insertmanager.insertionfilters.RollingStartNumberAfterDayAfterTomorrowFilter;
+import org.dpppt.backend.sdk.ws.insertmanager.insertionfilters.RollingStartNumberInRetentionPeriodFilter;
+import org.dpppt.backend.sdk.ws.insertmanager.insertionfilters.ValidRollingPeriodFilter;
+import org.dpppt.backend.sdk.ws.insertmanager.insertionmodifier.IOSLegacyProblemRPLT144Modifier;
+import org.dpppt.backend.sdk.ws.insertmanager.insertionmodifier.OldAndroid0RPModifier;
 import org.dpppt.backend.sdk.ws.interceptor.HeaderInjector;
 import org.dpppt.backend.sdk.ws.security.KeyVault;
 import org.dpppt.backend.sdk.ws.security.NoValidateRequest;
@@ -45,6 +54,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.Lazy;
@@ -204,6 +214,40 @@ public abstract class WSBaseConfig implements SchedulingConfigurer, WebMvcConfig
   }
 
   @Bean
+  public InsertManager insertManager() {
+    var manager = new InsertManager(gaenDataService(), gaenValidationUtils());
+    manager.addFilter(new Base64Filter(gaenValidationUtils()));
+    manager.addFilter(new KeysMatchingJWTFilter(gaenRequestValidator, gaenValidationUtils()));
+    manager.addFilter(new RollingStartNumberAfterDayAfterTomorrowFilter());
+    manager.addFilter(new RollingStartNumberInRetentionPeriodFilter(gaenValidationUtils()));
+    manager.addFilter(new NonFakeKeysFilter());
+    manager.addFilter(new ValidRollingPeriodFilter());
+    return manager;
+  }
+
+  @ConditionalOnProperty(
+      value = "ws.app.gaen.insertmanager.android0rpmodifier",
+      havingValue = "true",
+      matchIfMissing = false)
+  @Bean
+  public OldAndroid0RPModifier oldAndroid0RPModifier(InsertManager manager) {
+    var androidModifier = new OldAndroid0RPModifier();
+    manager.addModifier(androidModifier);
+    return androidModifier;
+  }
+
+  @ConditionalOnProperty(
+      value = "ws.app.gaen.insertmanager.iosrplt144modifier",
+      havingValue = "true",
+      matchIfMissing = false)
+  @Bean
+  public IOSLegacyProblemRPLT144Modifier iosLegacyProblemRPLT144(InsertManager manager) {
+    var iosModifier = new IOSLegacyProblemRPLT144Modifier();
+    manager.addModifier(iosModifier);
+    return iosModifier;
+  }
+
+  @Bean
   public DPPPTController dppptSDKController() {
     ValidateRequest theValidator = requestValidator;
     if (theValidator == null) {
@@ -237,6 +281,7 @@ public abstract class WSBaseConfig implements SchedulingConfigurer, WebMvcConfig
       theValidator = backupValidator();
     }
     return new GaenController(
+        insertManager(),
         gaenDataService(),
         fakeKeyService(),
         theValidator,

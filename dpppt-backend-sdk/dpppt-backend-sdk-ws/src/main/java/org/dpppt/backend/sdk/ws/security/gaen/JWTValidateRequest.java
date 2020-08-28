@@ -18,11 +18,8 @@ import org.dpppt.backend.sdk.ws.util.ValidationUtils;
 import org.springframework.security.oauth2.jwt.Jwt;
 
 public class JWTValidateRequest implements ValidateRequest {
-  private final ValidationUtils validationUtils;
 
-  public JWTValidateRequest(ValidationUtils validationUtils) {
-    this.validationUtils = validationUtils;
-  }
+  public JWTValidateRequest(ValidationUtils validationUtils) {}
 
   @Override
   public boolean isValid(Object authObject) throws WrongScopeException {
@@ -39,7 +36,7 @@ public class JWTValidateRequest implements ValidateRequest {
 
   @Override
   public long validateKeyDate(UTCInstant now, Object authObject, Object others)
-      throws ClaimIsBeforeOnsetException, InvalidDateException {
+      throws ClaimIsBeforeOnsetException {
     if (authObject instanceof Jwt) {
       Jwt token = (Jwt) authObject;
       var jwtKeyDate = UTCInstant.parseDate(token.getClaim("onset"));
@@ -48,8 +45,6 @@ public class JWTValidateRequest implements ValidateRequest {
         var keyDate = UTCInstant.of(request.getRollingStartNumber(), GaenUnit.TenMinutes);
         if (keyDate.isBeforeEpochMillisOf(jwtKeyDate)) {
           throw new ClaimIsBeforeOnsetException();
-        } else if (!validationUtils.isDateInRange(keyDate, now)) {
-          throw new InvalidDateException();
         }
         jwtKeyDate = keyDate;
       }
