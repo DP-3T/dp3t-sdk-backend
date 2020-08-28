@@ -229,4 +229,24 @@ public class UTCInstant {
   public boolean isAfterToday() {
     return this.isAfterDateOf(UTCInstant.now());
   }
+
+  /**
+   * To avoid timing attacks where the duration of the API is used to infer what the user requested,
+   * all requests that change the database call this method to have the same duration, so an outside
+   * attacker cannot infer anything on the response time. If the caller already spent too much time,
+   * an exception is thrown.
+   *
+   * @param totalDuration how long the total duration should be
+   * @throws InterruptedException if the sleep failed
+   * @throws DurationExpiredException if the duration already passed
+   */
+  public void normalizeDuration(Duration totalDuration)
+      throws InterruptedException, DurationExpiredException {
+    Duration timeFillUp = totalDuration.minus(UTCInstant.now().getDuration(this));
+    if (timeFillUp.isNegative()) {
+      throw new DurationExpiredException("Duration of call was longer than requestDuration");
+    } else {
+      Thread.sleep(timeFillUp.toMillis());
+    }
+  }
 }
