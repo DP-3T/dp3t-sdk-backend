@@ -14,18 +14,30 @@ import org.dpppt.backend.sdk.utils.UTCInstant;
 
 public interface ValidateRequest {
 
-  public boolean isValid(Object authObject);
+  public boolean isValid(Object authObject) throws WrongScopeException;
 
   // authObject is the Principal, given from Springboot
   // others can be any object (currently it is the ExposeeRequest, since we want
   // to allow no auth without the jwt profile)
-  public long getKeyDate(UTCInstant now, Object authObject, Object others)
-      throws InvalidDateException;
+  public long validateKeyDate(UTCInstant now, Object authObject, Object others)
+      throws ClaimIsBeforeOnsetException, InvalidDateException;
 
   public boolean isFakeRequest(Object authObject, Object others);
 
   public class InvalidDateException extends Exception {
 
     private static final long serialVersionUID = 5886601055826066148L;
+  }
+
+  public class ClaimDoesNotMatchKeyDateException extends Exception {
+    private static final long serialVersionUID = 5886601055826066149L;
+  }
+
+  public class ClaimIsBeforeOnsetException extends Exception {
+    private static final long serialVersionUID = 5886601055826066150L;
+  }
+
+  public class WrongScopeException extends Exception {
+    private static final long serialVersionUID = 5886601055826066151L;
   }
 }

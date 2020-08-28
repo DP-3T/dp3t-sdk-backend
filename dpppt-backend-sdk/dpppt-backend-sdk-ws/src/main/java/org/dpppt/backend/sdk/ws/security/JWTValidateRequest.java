@@ -33,17 +33,18 @@ public class JWTValidateRequest implements ValidateRequest {
   }
 
   @Override
-  public long getKeyDate(UTCInstant now, Object authObject, Object others)
-      throws InvalidDateException {
+  public long validateKeyDate(UTCInstant now, Object authObject, Object others)
+      throws InvalidDateException, ClaimIsBeforeOnsetException {
     if (authObject instanceof Jwt) {
       Jwt token = (Jwt) authObject;
       var jwtKeyDate = UTCInstant.parseDate(token.getClaim("onset"));
       if (others instanceof ExposeeRequest) {
         ExposeeRequest request = (ExposeeRequest) others;
         var requestKeyDate = UTCInstant.ofEpochMillis(request.getKeyDate());
-        if (!validationUtils.isDateInRange(requestKeyDate, now)
-            || requestKeyDate.isBeforeEpochMillisOf(jwtKeyDate)) {
+        if (!validationUtils.isDateInRange(requestKeyDate, now)) {
           throw new InvalidDateException();
+        } else if (requestKeyDate.isBeforeEpochMillisOf(jwtKeyDate)) {
+          throw new ClaimIsBeforeOnsetException();
         }
         jwtKeyDate = UTCInstant.ofEpochMillis(request.getKeyDate());
       }

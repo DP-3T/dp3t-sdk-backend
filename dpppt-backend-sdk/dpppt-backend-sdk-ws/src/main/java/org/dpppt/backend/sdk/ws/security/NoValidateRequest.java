@@ -29,8 +29,8 @@ public class NoValidateRequest implements ValidateRequest {
   }
 
   @Override
-  public long getKeyDate(UTCInstant now, Object authObject, Object others)
-      throws InvalidDateException {
+  public long validateKeyDate(UTCInstant now, Object authObject, Object others)
+      throws ClaimIsBeforeOnsetException, InvalidDateException {
     if (others instanceof ExposeeRequest) {
       ExposeeRequest request = ((ExposeeRequest) others);
       var requestKeyDate = new UTCInstant(request.getKeyDate());

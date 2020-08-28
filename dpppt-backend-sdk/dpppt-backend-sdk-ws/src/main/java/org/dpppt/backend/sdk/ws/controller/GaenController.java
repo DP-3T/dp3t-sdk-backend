@@ -139,7 +139,13 @@ public class GaenController {
           @Documentation(description = "JWT token that can be verified by the backend server")
           Object principal) {
     var now = UTCInstant.now();
-    if (!this.validateRequest.isValid(principal)) {
+    boolean valid = false;
+    try {
+      valid = this.validateRequest.isValid(principal);
+    } catch (ValidateRequest.WrongScopeException e) {
+      logger.error("Got invalid scope: " + e);
+    }
+    if (!valid) {
       return () -> ResponseEntity.status(HttpStatus.FORBIDDEN).build();
     }
 
@@ -409,9 +415,9 @@ public class GaenController {
 
   private boolean hasInvalidKeyDate(UTCInstant now, Object principal, GaenKey key) {
     try {
-      this.validateRequest.getKeyDate(now, principal, key);
-    } catch (InvalidDateException invalidDate) {
-      logger.error(invalidDate.getLocalizedMessage());
+      this.validateRequest.validateKeyDate(now, principal, key);
+    } catch (InvalidDateException | ValidateRequest.ClaimIsBeforeOnsetException e) {
+      logger.error(e.getLocalizedMessage());
       return true;
     }
     return false;
