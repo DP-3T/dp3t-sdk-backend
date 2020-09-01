@@ -15,16 +15,21 @@ public class MockDataSource implements GAENDataService {
 
   @Override
   public void upsertExposeesDelayed(
-      List<GaenKey> keys, UTCInstant delayedReceivedAt, UTCInstant now) {}
+      List<GaenKey> keys, UTCInstant delayedReceivedAt, UTCInstant now) {
+    throw new RuntimeException("UPSERT_EXPOSEESDelayed");
+  }
 
   @Override
-  public int getMaxExposedIdForKeyDate(Long keyDate, Long publishedAfter, Long publishedUntil) {
+  public int getMaxExposedIdForKeyDate(
+      UTCInstant keyDate, UTCInstant publishedAfter, UTCInstant publishedUntil) {
+    // TODO Auto-generated method stub
     return 0;
   }
 
   @Override
   public List<GaenKey> getSortedExposedForKeyDate(
-      Long keyDate, Long publishedAfter, Long publishedUntil) {
+      UTCInstant keyDate, UTCInstant publishedAfter, UTCInstant publishedUntil) {
+    // TODO Auto-generated method stub
     return null;
   }
 

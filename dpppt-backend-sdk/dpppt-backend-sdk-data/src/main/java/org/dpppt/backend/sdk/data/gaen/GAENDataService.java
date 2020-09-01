@@ -21,6 +21,7 @@ public interface GAENDataService {
    * Upserts (Update or Inserts) the given list of exposed keys
    *
    * @param keys the list of exposed keys to upsert
+   * @param now time of the request
    */
   void upsertExposees(List<GaenKey> keys, UTCInstant now);
 
@@ -31,6 +32,7 @@ public interface GAENDataService {
    * @param keys the list of exposed keys to upsert
    * @param delayedReceivedAt the timestamp to use for the delayed release (if null use now rounded
    *     to next bucket)
+   * @param now time of the request
    */
   void upsertExposeesDelayed(List<GaenKey> keys, UTCInstant delayedReceivedAt, UTCInstant now);
 
@@ -42,7 +44,8 @@ public interface GAENDataService {
    * @param publishedUntil in milliseconds since Unix epoch
    * @return the maximum id of the stored exposed entries for the given batch
    */
-  int getMaxExposedIdForKeyDate(Long keyDate, Long publishedAfter, Long publishedUntil);
+  int getMaxExposedIdForKeyDate(
+      UTCInstant keyDate, UTCInstant publishedAfter, UTCInstant publishedUntil);
 
   /**
    * Returns all exposeed keys for the given batch.
@@ -52,7 +55,8 @@ public interface GAENDataService {
    * @param publishedUntil in milliseconds since Unix epoch
    * @return all exposeed keys for the given batch
    */
-  List<GaenKey> getSortedExposedForKeyDate(Long keyDate, Long publishedAfter, Long publishedUntil);
+  List<GaenKey> getSortedExposedForKeyDate(
+      UTCInstant keyDate, UTCInstant publishedAfter, UTCInstant publishedUntil);
 
   /**
    * deletes entries older than retentionperiod

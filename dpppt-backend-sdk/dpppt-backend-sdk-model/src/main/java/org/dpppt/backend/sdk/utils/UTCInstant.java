@@ -71,8 +71,8 @@ public class UTCInstant {
     return new UTCInstant(amount, unit);
   }
 
-  public static UTCInstant ofEpochMillis(long epochMillis) {
-    return new UTCInstant(epochMillis);
+  public static UTCInstant ofEpochMillis(Long epochMillis) {
+    return new UTCInstant(epochMillis == null ? 0 : epochMillis);
   }
 
   public static UTCInstant parseDate(String dateString) {
@@ -120,6 +120,20 @@ public class UTCInstant {
 
   public LocalTime getLocalTime() {
     return getLocalDateTime().toLocalTime();
+  }
+
+  public UTCInstant roundToPreviousBucket(Duration releaseBucketDuration) {
+    var roundedTimestamp =
+        (long) Math.floor(this.timestamp / releaseBucketDuration.toMillis())
+            * releaseBucketDuration.toMillis();
+    return new UTCInstant(roundedTimestamp);
+  }
+
+  public UTCInstant roundToNextBucket(Duration releaseBucketDuration) {
+    var roundedTimestamp =
+        ((long) Math.floor(this.timestamp / releaseBucketDuration.toMillis()) + 1)
+            * releaseBucketDuration.toMillis();
+    return new UTCInstant(roundedTimestamp);
   }
 
   public UTCInstant plus(Duration duration) {
