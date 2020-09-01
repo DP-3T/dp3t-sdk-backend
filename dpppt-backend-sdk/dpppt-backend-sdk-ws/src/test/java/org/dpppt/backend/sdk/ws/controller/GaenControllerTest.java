@@ -78,6 +78,8 @@ public class GaenControllerTest extends BaseControllerTest {
   @Autowired KeyVault keyVault;
   @Autowired GAENDataService gaenDataService;
   Long releaseBucketDuration = 7200000L;
+  private static final String androidUserAgent =
+      "ch.admin.bag.dp3t.dev;1.0.7;1595591959493;Android;29";
 
   private static final Logger logger = LoggerFactory.getLogger(GaenControllerTest.class);
 
@@ -164,7 +166,7 @@ public class GaenControllerTest extends BaseControllerTest {
             post("/v1/gaen/exposed")
                 .contentType(MediaType.APPLICATION_JSON)
                 .header("Authorization", "Bearer " + token)
-                .header("User-Agent", "ch.admin.bag.dp3t.dev;1.0.7;1595591959493;Android;29")
+                .header("User-Agent", androidUserAgent)
                 .content(json(requestList)));
     MvcResult response;
 
@@ -181,7 +183,7 @@ public class GaenControllerTest extends BaseControllerTest {
                 post("/v1/gaen/exposed")
                     .contentType(MediaType.APPLICATION_JSON)
                     .header("Authorization", "Bearer " + jwtToken)
-                    .header("User-Agent", "ch.admin.bag.dp3t.dev;1.0.7;1595591959493;Android;29")
+                    .header("User-Agent", androidUserAgent)
                     .content(json(requestList)))
             .andExpect(status().is(401))
             .andExpect(request().asyncNotStarted())
@@ -247,7 +249,7 @@ public class GaenControllerTest extends BaseControllerTest {
                 post("/v1/gaen/exposed")
                     .contentType(MediaType.APPLICATION_JSON)
                     .header("Authorization", "Bearer " + token)
-                    .header("User-Agent", "ch.admin.bag.dp3t.dev;1.0.7;1595591959493;Android;29")
+                    .header("User-Agent", androidUserAgent)
                     .content(json(requestList)))
             .andExpect(request().asyncStarted())
             .andReturn();
@@ -259,7 +261,7 @@ public class GaenControllerTest extends BaseControllerTest {
                 post("/v1/gaen/exposed")
                     .contentType(MediaType.APPLICATION_JSON)
                     .header("Authorization", "Bearer " + jwtToken)
-                    .header("User-Agent", "ch.admin.bag.dp3t.dev;1.0.7;1595591959493;Android;29")
+                    .header("User-Agent", androidUserAgent)
                     .content(json(requestList)))
             .andExpect(status().is(401))
             .andExpect(request().asyncNotStarted())
@@ -317,7 +319,7 @@ public class GaenControllerTest extends BaseControllerTest {
         mockMvc
             .perform(
                 get("/v1/gaen/exposed/" + midnight.minusDays(8).getTimestamp())
-                    .header("User-Agent", "ch.admin.bag.dp3t.dev;1.0.7;1595591959493;Android;29"))
+                    .header("User-Agent", androidUserAgent))
             .andExpect(status().is2xxSuccessful())
             .andReturn()
             .getResponse();
@@ -368,7 +370,7 @@ public class GaenControllerTest extends BaseControllerTest {
                 post("/v1/gaen/exposed")
                     .contentType(MediaType.APPLICATION_JSON)
                     .header("Authorization", "Bearer " + token)
-                    .header("User-Agent", "ch.admin.bag.dp3t.dev;1.0.7;1595591959493;Android;29")
+                    .header("User-Agent", androidUserAgent)
                     .content(json(requestList)))
             .andExpect(request().asyncStarted())
             .andReturn();
@@ -439,7 +441,7 @@ public class GaenControllerTest extends BaseControllerTest {
                 post("/v1/gaen/exposed")
                     .contentType(MediaType.APPLICATION_JSON)
                     .header("Authorization", "Bearer " + token)
-                    .header("User-Agent", "ch.admin.bag.dp3t.dev;1.0.7;1595591959493;Android;29")
+                    .header("User-Agent", androidUserAgent)
                     .content(json(requestList)))
             .andExpect(request().asyncStarted())
             .andReturn();
@@ -450,7 +452,7 @@ public class GaenControllerTest extends BaseControllerTest {
                 post("/v1/gaen/exposedlist")
                     .contentType(MediaType.APPLICATION_JSON)
                     .header("Authorization", "Bearer " + jwtToken)
-                    .header("User-Agent", "ch.admin.bag.dp3t.dev;1.0.7;1595591959493;Android;29")
+                    .header("User-Agent", androidUserAgent)
                     .content(json(requestList)))
             .andExpect(status().is(401))
             .andExpect(content().string(""))
@@ -506,7 +508,7 @@ public class GaenControllerTest extends BaseControllerTest {
                 post("/v1/gaen/exposed")
                     .contentType(MediaType.APPLICATION_JSON)
                     .header("Authorization", "Bearer " + token)
-                    .header("User-Agent", "ch.admin.bag.dp3t.dev;1.0.7;1595591959493;Android;29")
+                    .header("User-Agent", androidUserAgent)
                     .content(json(requestList)))
             .andExpect(request().asyncStarted())
             .andReturn();
@@ -517,7 +519,7 @@ public class GaenControllerTest extends BaseControllerTest {
                 post("/v1/gaen/exposedlist")
                     .contentType(MediaType.APPLICATION_JSON)
                     .header("Authorization", "Bearer " + jwtToken)
-                    .header("User-Agent", "ch.admin.bag.dp3t.dev;1.0.7;1595591959493;Android;29")
+                    .header("User-Agent", androidUserAgent)
                     .content(json(requestList)))
             .andExpect(status().is(401))
             .andExpect(content().string(""))
@@ -573,7 +575,7 @@ public class GaenControllerTest extends BaseControllerTest {
                 post("/v1/gaen/exposed")
                     .contentType(MediaType.APPLICATION_JSON)
                     .header("Authorization", "Bearer " + token)
-                    .header("User-Agent", "ch.admin.bag.dp3t.dev;1.0.7;1595591959493;Android;29")
+                    .header("User-Agent", androidUserAgent)
                     .content(json(requestList)))
             .andExpect(request().asyncStarted())
             .andReturn();
@@ -584,7 +586,7 @@ public class GaenControllerTest extends BaseControllerTest {
                 post("/v1/gaen/exposedlist")
                     .contentType(MediaType.APPLICATION_JSON)
                     .header("Authorization", "Bearer " + jwtToken)
-                    .header("User-Agent", "ch.admin.bag.dp3t.dev;1.0.7;1595591959493;Android;29")
+                    .header("User-Agent", androidUserAgent)
                     .content(json(requestList)))
             .andExpect(status().is(401))
             .andExpect(content().string(""))
@@ -607,7 +609,7 @@ public class GaenControllerTest extends BaseControllerTest {
                 post("/v1/gaen/exposed")
                     .contentType(MediaType.APPLICATION_JSON)
                     .header("Authorization", "Bearer " + token)
-                    .header("User-Agent", "ch.admin.bag.dp3t.dev;1.0.7;1595591959493;Android;29")
+                    .header("User-Agent", androidUserAgent)
                     .content(json(requestList)))
             .andExpect(request().asyncNotStarted())
             .andExpect(status().is(400))
@@ -619,7 +621,7 @@ public class GaenControllerTest extends BaseControllerTest {
                 post("/v1/gaen/exposedlist")
                     .contentType(MediaType.APPLICATION_JSON)
                     .header("Authorization", "Bearer " + jwtToken)
-                    .header("User-Agent", "ch.admin.bag.dp3t.dev;1.0.7;1595591959493;Android;29")
+                    .header("User-Agent", androidUserAgent)
                     .content(json(requestList)))
             .andExpect(status().is(401))
             .andExpect(content().string(""))
@@ -643,7 +645,7 @@ public class GaenControllerTest extends BaseControllerTest {
                 post("/v1/gaen/exposed")
                     .contentType(MediaType.APPLICATION_JSON)
                     .header("Authorization", "Bearer " + token)
-                    .header("User-Agent", "ch.admin.bag.dp3t.dev;1.0.7;1595591959493;Android;29")
+                    .header("User-Agent", androidUserAgent)
                     .content(json(requestList)))
             .andExpect(request().asyncNotStarted())
             .andExpect(status().is(400))
@@ -655,7 +657,7 @@ public class GaenControllerTest extends BaseControllerTest {
                 post("/v1/gaen/exposedlist")
                     .contentType(MediaType.APPLICATION_JSON)
                     .header("Authorization", "Bearer " + jwtToken)
-                    .header("User-Agent", "ch.admin.bag.dp3t.dev;1.0.7;1595591959493;Android;29")
+                    .header("User-Agent", androidUserAgent)
                     .content(json(requestList)))
             .andExpect(status().is(401))
             .andExpect(content().string(""))
@@ -697,7 +699,7 @@ public class GaenControllerTest extends BaseControllerTest {
             post("/v1/gaen/exposed")
                 .contentType(MediaType.APPLICATION_JSON)
                 .header("Authorization", "Bearer " + token)
-                .header("User-Agent", "ch.admin.bag.dp3t.dev;1.0.7;1595591959493;Android;29")
+                .header("User-Agent", androidUserAgent)
                 .content(json(exposeeRequest)))
         .andExpect(status().is(400))
         .andReturn();
@@ -741,7 +743,7 @@ public class GaenControllerTest extends BaseControllerTest {
                 post("/v1/gaen/exposed")
                     .contentType(MediaType.APPLICATION_JSON)
                     .header("Authorization", "Bearer " + token)
-                    .header("User-Agent", "ch.admin.bag.dp3t.dev;1.0.7;1595591959493;Android;29")
+                    .header("User-Agent", androidUserAgent)
                     .content(json(exposeeRequest)))
             .andExpect(request().asyncStarted())
             .andExpect(status().is(200))
@@ -791,7 +793,7 @@ public class GaenControllerTest extends BaseControllerTest {
                 post("/v1/gaen/exposed")
                     .contentType(MediaType.APPLICATION_JSON)
                     .header("Authorization", "Bearer " + token)
-                    .header("User-Agent", "ch.admin.bag.dp3t.dev;1.0.7;1595591959493;Android;29")
+                    .header("User-Agent", androidUserAgent)
                     .content(json(exposeeRequest)))
             .andExpect(request().asyncNotStarted())
             .andExpect(status().is4xxClientError())
@@ -833,7 +835,7 @@ public class GaenControllerTest extends BaseControllerTest {
                 post("/v1/gaen/exposed")
                     .contentType(MediaType.APPLICATION_JSON)
                     .header("Authorization", "Bearer " + token)
-                    .header("User-Agent", "ch.admin.bag.dp3t.dev;1.0.7;1595591959493;Android;29")
+                    .header("User-Agent", androidUserAgent)
                     .content(json(exposeeRequest)))
             .andExpect(status().is(200))
             .andReturn();
@@ -881,7 +883,7 @@ public class GaenControllerTest extends BaseControllerTest {
                 post("/v1/gaen/exposed")
                     .contentType(MediaType.APPLICATION_JSON)
                     .header("Authorization", "Bearer " + token)
-                    .header("User-Agent", "ch.admin.bag.dp3t.dev;1.0.7;1595591959493;Android;29")
+                    .header("User-Agent", androidUserAgent)
                     .content(json(exposeeRequest)))
             .andExpect(request().asyncStarted())
             .andExpect(status().is(200))
@@ -929,7 +931,7 @@ public class GaenControllerTest extends BaseControllerTest {
                 post("/v1/gaen/exposed")
                     .contentType(MediaType.APPLICATION_JSON)
                     .header("Authorization", "Bearer " + token)
-                    .header("User-Agent", "ch.admin.bag.dp3t.dev;1.0.7;1595591959493;Android;29")
+                    .header("User-Agent", androidUserAgent)
                     .content(json(exposeeRequest)))
             .andExpect(status().is(403))
             .andReturn();
@@ -941,7 +943,7 @@ public class GaenControllerTest extends BaseControllerTest {
                 post("/v1/gaen/exposed")
                     .contentType(MediaType.APPLICATION_JSON)
                     .header("Authorization", "Bearer " + token)
-                    .header("User-Agent", "ch.admin.bag.dp3t.dev;1.0.7;1595591959493;Android;29")
+                    .header("User-Agent", androidUserAgent)
                     .content(json(exposeeRequest)))
             .andExpect(request().asyncNotStarted())
             .andExpect(status().is(401))
@@ -978,7 +980,7 @@ public class GaenControllerTest extends BaseControllerTest {
                 post("/v1/gaen/exposed")
                     .contentType(MediaType.APPLICATION_JSON)
                     .header("Authorization", "Bearer " + token)
-                    .header("User-Agent", "ch.admin.bag.dp3t.dev;1.0.7;1595591959493;Android;29")
+                    .header("User-Agent", androidUserAgent)
                     .content(json(exposeeRequest)))
             .andExpect(request().asyncStarted())
             .andReturn();
@@ -1010,7 +1012,7 @@ public class GaenControllerTest extends BaseControllerTest {
                 post("/v1/gaen/exposednextday")
                     .contentType(MediaType.APPLICATION_JSON)
                     .header("Authorization", "Bearer " + jwtString)
-                    .header("User-Agent", "ch.admin.bag.dp3t.dev;1.0.7;1595591959493;Android;29")
+                    .header("User-Agent", androidUserAgent)
                     .content(json(secondDay)))
             .andExpect(request().asyncStarted())
             .andReturn();
@@ -1047,7 +1049,7 @@ public class GaenControllerTest extends BaseControllerTest {
                 post("/v1/gaen/exposed")
                     .contentType(MediaType.APPLICATION_JSON)
                     .header("Authorization", "Bearer " + token)
-                    .header("User-Agent", "ch.admin.bag.dp3t.dev;1.0.7;1595591959493;Android;29")
+                    .header("User-Agent", androidUserAgent)
                     .content(json(exposeeRequest)))
             .andExpect(request().asyncStarted())
             .andReturn();
@@ -1079,7 +1081,7 @@ public class GaenControllerTest extends BaseControllerTest {
                 post("/v1/gaen/exposednextday")
                     .contentType(MediaType.APPLICATION_JSON)
                     .header("Authorization", "Bearer " + jwtString)
-                    .header("User-Agent", "ch.admin.bag.dp3t.dev;1.0.7;1595591959493;Android;29")
+                    .header("User-Agent", androidUserAgent)
                     .content(json(secondDay)))
             .andExpect(request().asyncStarted())
             .andReturn();
@@ -1126,8 +1128,7 @@ public class GaenControllerTest extends BaseControllerTest {
                     post("/v1/gaen/exposed")
                         .contentType(MediaType.APPLICATION_JSON)
                         .header("Authorization", "Bearer " + token)
-                        .header(
-                            "User-Agent", "ch.admin.bag.dp3t.dev;1.0.7;1595591959493;Android;29")
+                        .header("User-Agent", androidUserAgent)
                         .content(json(exposeeRequest)))
                 .andExpect(request().asyncStarted())
                 .andReturn();
@@ -1143,8 +1144,7 @@ public class GaenControllerTest extends BaseControllerTest {
                     post("/v1/gaen/exposed")
                         .contentType(MediaType.APPLICATION_JSON)
                         .header("Authorization", "Bearer " + token)
-                        .header(
-                            "User-Agent", "ch.admin.bag.dp3t.dev;1.0.7;1595591959493;Android;29")
+                        .header("User-Agent", androidUserAgent)
                         .content(json(exposeeRequest)))
                 .andExpect(status().is(400))
                 .andReturn();
@@ -1182,7 +1182,7 @@ public class GaenControllerTest extends BaseControllerTest {
             post("/v1/gaen/exposed")
                 .contentType(MediaType.APPLICATION_JSON)
                 .header("Authorization", "Bearer " + token)
-                .header("User-Agent", "ch.admin.bag.dp3t.dev;1.0.7;1595591959493;Android;29")
+                .header("User-Agent", androidUserAgent)
                 .content(json(exposeeRequest)))
         .andExpect(status().is(401));
   }
@@ -1206,7 +1206,7 @@ public class GaenControllerTest extends BaseControllerTest {
         mockMvc
             .perform(
                 get("/v1/debug/exposed/" + midnight.getTimestamp())
-                    .header("User-Agent", "ch.admin.bag.dp3t.dev;1.0.7;1595591959493;Android;29"))
+                    .header("User-Agent", androidUserAgent))
             .andExpect(status().is2xxSuccessful())
             .andReturn()
             .getResponse();
@@ -1274,7 +1274,7 @@ public class GaenControllerTest extends BaseControllerTest {
         mockMvc
             .perform(
                 get("/v1/gaen/exposed/" + midnight.minusDays(8).getTimestamp())
-                    .header("User-Agent", "ch.admin.bag.dp3t.dev;1.0.7;1595591959493;Android;29"))
+                    .header("User-Agent", androidUserAgent))
             .andExpect(status().isOk())
             .andReturn()
             .getResponse();
@@ -1308,7 +1308,7 @@ public class GaenControllerTest extends BaseControllerTest {
         mockMvc
             .perform(
                 get("/v1/gaen/exposed/" + midnight.minusDays(8).getTimestamp())
-                    .header("User-Agent", "ch.admin.bag.dp3t.dev;1.0.7;1595591959493;Android;29"))
+                    .header("User-Agent", androidUserAgent))
             .andExpect(status().is2xxSuccessful())
             .andReturn()
             .getResponse();
@@ -1321,7 +1321,7 @@ public class GaenControllerTest extends BaseControllerTest {
         mockMvc
             .perform(
                 get("/v1/gaen/exposed/" + midnight.minusDays(8).getTimestamp())
-                    .header("User-Agent", "ch.admin.bag.dp3t.dev;1.0.7;1595591959493;Android;29"))
+                    .header("User-Agent", androidUserAgent))
             .andExpect(status().is2xxSuccessful())
             .andReturn()
             .getResponse();
@@ -1336,7 +1336,7 @@ public class GaenControllerTest extends BaseControllerTest {
         mockMvc
             .perform(
                 get("/v1/gaen/exposed/" + midnight.minusDays(8).getTimestamp())
-                    .header("User-Agent", "ch.admin.bag.dp3t.dev;1.0.7;1595591959493;Android;29"))
+                    .header("User-Agent", androidUserAgent))
             .andExpect(status().is2xxSuccessful())
             .andReturn()
             .getResponse();
