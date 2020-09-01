@@ -155,7 +155,7 @@
 			<plugin>
                 <groupId>ch.ubique.openapi</groupId>
                 <artifactId>springboot-swagger-3</artifactId>
-                <version>1.2.8</version>
+                <version>1.2.10</version>
                 <configuration>
                     <apiVersion>1.0-gapple</apiVersion>
                     <basePackages>
@@ -170,6 +170,7 @@
                     <controllers>
                         <controller>org.dpppt.backend.sdk.ws.controller.DPPPTController</controller>
 						<controller> org.dpppt.backend.sdk.ws.controller.GaenController</controller>
+						<controller>org.dpppt.backend.sdk.ws.controller.GaenV2Controller</controller>
                     </controllers>
                     <description>DP3T API</description>
                     <apiUrls>

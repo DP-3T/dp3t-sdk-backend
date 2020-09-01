@@ -280,6 +280,76 @@ paths:
         required: true
         schema:
           type: string
+  /v2/gaen/exposed:
+    post:
+      summary: addExposed
+      description: Endpoint used to upload exposure keys to the backend specifying
+        for which countries the keys are valid.
+      responses:
+        '200':
+          description: The exposed keys have been stored in the database
+          content:
+            application/json:
+              schema:
+                type: string
+        '400':
+          description: '- Invalid base64 encoding in GaenRequest- negative rolling
+            period- fake claim with non-fake keys'
+        '403':
+          description: Authentication failed
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/org.dpppt.backend.sdk.model.gaen.GaenV2UploadKeysRequest'
+        description: JSON Object containing all keys and a list of countries specifying
+          for which countries the keys are valid or more precise what countries have
+          been visited
+      parameters:
+      - name: User-Agent
+        in: header
+        description: App Identifier (PackageName/BundleIdentifier) + App-Version +
+          OS (Android/iOS) + OS-Version
+        example: ch.ubique.android.starsdk;1.0;iOS;13.3
+        required: true
+        schema:
+          type: string
+    get:
+      summary: getExposedKeys
+      description: Requests the exposed keys published _since_ originating from list
+        of _country_
+      responses:
+        '200':
+          description: zipped export.bin and export.sig of all keys in that interval
+          content:
+            application/octet-stream:
+              schema:
+                type: string
+                format: binary
+        '404':
+          description: Invalid _country_ or invalid _since_ (too far in the past/future,
+            not at bucket boundaries)
+      parameters:
+      - name: country
+        in: query
+        description: List of origin countries of requested keys. (iso-3166-1 alpha-2).
+          Must be padded with fake countries
+        example: CH
+        required: true
+        schema:
+          type: array
+          items:
+            type: string
+      - name: since
+        in: query
+        description: Timestamp to retrieve exposed keys since, in milliseconds since
+          Unix epoch (1970-01-01). It must indicate the beginning of a bucket.
+        example: '1593043200000'
+        required: true
+        schema:
+          type: integer
+          format: long
 components:
   schemas:
     org.dpppt.backend.sdk.model.BucketList:
@@ -352,6 +422,17 @@ components:
             $ref: '#/components/schemas/org.dpppt.backend.sdk.model.ExposedKey'
         fake:
           type: integer
+    org.dpppt.backend.sdk.model.gaen.CountryShareConfiguration:
+      type: object
+      properties:
+        countryCode:
+          type: string
+          description: A iso-3166-1 alpha-2 country code
+          example: '"CH"'
+        shareKeyWithCountry:
+          type: integer
+          description: 'Share key with country: 0 -> no share, 1 -> share'
+          example: '1'
     org.dpppt.backend.sdk.model.gaen.DayBuckets:
       type: object
       properties:
@@ -382,27 +463,27 @@ components:
         keyData:
           type: string
           description: Represents the 16-byte Temporary Exposure Key in base64
-          example: ''
+          example: XDM3NVwzNTZPvVwzMzNcMzA1
         rollingStartNumber:
           type: integer
           description: The ENIntervalNumber as number of 10-minute intervals since
             the Unix epoch (1970-01-01)
-          example: ''
+          example: '2659680'
         rollingPeriod:
           type: integer
           description: The TEKRollingPeriod indicates for how many 10-minute intervals
             the Temporary Exposure Key is valid
-          example: ''
+          example: '144'
         transmissionRiskLevel:
           type: integer
           description: According to the Google API description a value between 0 and
             4096, with higher values indicating a higher risk
-          example: ''
+          example: '0'
         fake:
           type: integer
           description: If fake = 0, the key is a valid key. If fake = 1, the key will
             be discarded.
-          example: ''
+          example: '1'
     org.dpppt.backend.sdk.model.gaen.GaenRequest:
       type: object
       required:
@@ -413,13 +494,20 @@ components:
           type: array
           items:
             $ref: '#/components/schemas/org.dpppt.backend.sdk.model.gaen.GaenKey'
-          description: 14 Temporary Exposure keys - zero or more of them might be
-            fake keys
+          description: Between 14 and 30 Temporary Exposure Keys - zero or more of
+            them might be fake keys. Starting with EN 1.5 it is possible that clients
+            send more than 14 keys.
           example: ''
         delayedKeyDate:
           type: integer
-          description: Unknown - has something to do with GAEN not exposing the current
-            day's key and that the current day's key will be delivered with 24h delay
+          description: Prior to version 1.5 Exposure Keys for the day of report weren't
+            available (since they were still used throughout this day RPI=144), so
+            the submission of the last key had to be delayed. This Unix timestamp
+            in milliseconds specifies, which key date the last key (which will be
+            submitted on the next day) will have. The backend then issues a JWT to
+            allow the submission of this last key with specified key date. This should
+            not be necessary after the Exposure Framework is able to send and handle
+            keys with RollingPeriod < 144 (e.g. only valid until submission).
           example: ''
     org.dpppt.backend.sdk.model.gaen.GaenSecondDay:
       type: object
@@ -428,6 +516,26 @@ components:
       properties:
         delayedKey:
           $ref: '#/components/schemas/org.dpppt.backend.sdk.model.gaen.GaenKey'
+    org.dpppt.backend.sdk.model.gaen.GaenV2UploadKeysRequest:
+      type: object
+      required:
+      - countriesForSharingKeys
+      - gaenKeys
+      properties:
+        countriesForSharingKeys:
+          type: array
+          items:
+            $ref: '#/components/schemas/org.dpppt.backend.sdk.model.gaen.CountryShareConfiguration'
+          description: List of all countries configured. For each country in the list,
+            sharing must be explicitly set
+          example: ''
+        gaenKeys:
+          type: array
+          items:
+            $ref: '#/components/schemas/org.dpppt.backend.sdk.model.gaen.GaenKey'
+          description: 30 Temporary Exposure Keys - zero or more of them might be
+            fake keys.
+          example: ''
     org.dpppt.backend.sdk.model.proto.Exposed.ProtoExposedList:
       type: object
       properties:

@@ -13,31 +13,38 @@ public class GaenKey {
 
   @NotNull
   @Size(min = 24, max = 24)
-  @Documentation(description = "Represents the 16-byte Temporary Exposure Key in base64")
+  @Documentation(
+      description = "Represents the 16-byte Temporary Exposure Key in base64",
+      example = "XDM3NVwzNTZPvVwzMzNcMzA1")
   private String keyData;
 
   @NotNull
   @Documentation(
       description =
-          "The ENIntervalNumber as number of 10-minute intervals since the Unix epoch (1970-01-01)")
+          "The ENIntervalNumber as number of 10-minute intervals since the Unix epoch (1970-01-01)",
+      example = "2659680")
   private Integer rollingStartNumber;
 
   @NotNull
   @Documentation(
       description =
           "The TEKRollingPeriod indicates for how many 10-minute intervals the Temporary Exposure"
-              + " Key is valid")
+              + " Key is valid",
+      example = "144")
   private Integer rollingPeriod;
 
   @NotNull
+  @Deprecated
   @Documentation(
       description =
           "According to the Google API description a value between 0 and 4096, with higher values"
-              + " indicating a higher risk")
+              + " indicating a higher risk",
+      example = "0")
   private Integer transmissionRiskLevel;
 
   @Documentation(
-      description = "If fake = 0, the key is a valid key. If fake = 1, the key will be discarded.")
+      description = "If fake = 0, the key is a valid key. If fake = 1, the key will be discarded.",
+      example = "1")
   private Integer fake = 0;
 
   public GaenKey() {}
