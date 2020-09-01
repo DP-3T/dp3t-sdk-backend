@@ -64,18 +64,18 @@ public class FakeKeyService {
   }
 
   public List<GaenKey> fillUpKeys(
-      List<GaenKey> keys, UTCInstant publishedafter, UTCInstant keyDate) {
+      List<GaenKey> keys, UTCInstant publishedafter, UTCInstant keyDate, UTCInstant now) {
     if (!isEnabled) {
       return keys;
     }
-    var today = UTCInstant.today();
+    var today = now.atStartOfDay();
     var keyLocalDate = keyDate.atStartOfDay();
     if (today.hasSameDateAs(keyLocalDate)) {
       return keys;
     }
     var fakeKeys =
         this.dataService.getSortedExposedForKeyDate(
-            keyDate, publishedafter, UTCInstant.today().plusDays(1));
+            keyDate, publishedafter, UTCInstant.today().plusDays(1), now);
 
     keys.addAll(fakeKeys);
     return keys;

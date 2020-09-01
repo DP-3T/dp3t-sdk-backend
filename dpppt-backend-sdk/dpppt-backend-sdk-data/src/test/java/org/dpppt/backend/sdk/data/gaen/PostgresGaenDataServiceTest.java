@@ -78,20 +78,20 @@ public class PostgresGaenDataServiceTest {
     var keysUntilToday = today.minusDays(21);
 
     var keys = new ArrayList<GaenKey>();
-    var emptyList = fakeKeyService.fillUpKeys(keys, null, noKeyAtThisDate);
+    var emptyList = fakeKeyService.fillUpKeys(keys, null, noKeyAtThisDate, now);
     assertEquals(0, emptyList.size());
     do {
       keys.clear();
-      var list = fakeKeyService.fillUpKeys(keys, null, keysUntilToday);
+      var list = fakeKeyService.fillUpKeys(keys, null, keysUntilToday, now);
 
       assertEquals(10, list.size());
-      list = fakeKeyService.fillUpKeys(keys, UTCInstant.now().plusHours(3), keysUntilToday);
+      list = fakeKeyService.fillUpKeys(keys, UTCInstant.now().plusHours(3), keysUntilToday, now);
       assertEquals(10, list.size());
       keysUntilToday = keysUntilToday.plusDays(1);
     } while (keysUntilToday.isBeforeDateOf(today));
 
     keys.clear();
-    emptyList = fakeKeyService.fillUpKeys(keys, null, noKeyAtThisDate);
+    emptyList = fakeKeyService.fillUpKeys(keys, null, noKeyAtThisDate, now);
     assertEquals(0, emptyList.size());
   }
 
@@ -149,13 +149,13 @@ public class PostgresGaenDataServiceTest {
         receivedAt.getInstant(), receivedAt.minusDays(1).getInstant(), key);
 
     List<GaenKey> sortedExposedForDay =
-        gaenDataService.getSortedExposedForKeyDate(receivedAt.minusDays(1), null, now);
+        gaenDataService.getSortedExposedForKeyDate(receivedAt.minusDays(1), null, now, now);
 
     assertFalse(sortedExposedForDay.isEmpty());
 
     gaenDataService.cleanDB(Duration.ofDays(21));
     sortedExposedForDay =
-        gaenDataService.getSortedExposedForKeyDate(receivedAt.minusDays(1), null, now);
+        gaenDataService.getSortedExposedForKeyDate(receivedAt.minusDays(1), null, now, now);
 
     assertTrue(sortedExposedForDay.isEmpty());
   }
@@ -180,7 +180,7 @@ public class PostgresGaenDataServiceTest {
 
     var returnedKeys =
         gaenDataService.getSortedExposedForKeyDate(
-            UTCInstant.today().minus(Duration.ofDays(1)), null, publishedUntil);
+            UTCInstant.today().minus(Duration.ofDays(1)), null, publishedUntil, now);
 
     assertEquals(keys.size(), returnedKeys.size());
     assertEquals(keys.get(0).getKeyData(), returnedKeys.get(0).getKeyData());
@@ -198,7 +198,7 @@ public class PostgresGaenDataServiceTest {
 
     var returnedKeys =
         gaenDataService.getSortedExposedForKeyDate(
-            receivedAt.minus(Duration.ofDays(2)), null, batchTime);
+            receivedAt.minus(Duration.ofDays(2)), null, batchTime, now);
 
     assertEquals(1, returnedKeys.size());
     GaenKey actual = returnedKeys.get(0);
@@ -206,12 +206,12 @@ public class PostgresGaenDataServiceTest {
 
     int maxExposedIdForBatchReleaseTime =
         gaenDataService.getMaxExposedIdForKeyDate(
-            receivedAt.minus(Duration.ofDays(2)), null, batchTime);
+            receivedAt.minus(Duration.ofDays(2)), null, batchTime, now);
     assertEquals(100, maxExposedIdForBatchReleaseTime);
 
     returnedKeys =
         gaenDataService.getSortedExposedForKeyDate(
-            receivedAt.minus(Duration.ofDays(2)), batchTime, batchTime.plusHours(2));
+            receivedAt.minus(Duration.ofDays(2)), batchTime, batchTime.plusHours(2), now);
     assertEquals(0, returnedKeys.size());
   }
 

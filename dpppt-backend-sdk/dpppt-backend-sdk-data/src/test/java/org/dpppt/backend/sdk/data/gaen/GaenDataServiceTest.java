@@ -61,7 +61,7 @@ public class GaenDataServiceTest {
 
     var returnedKeys =
         gaenDataService.getSortedExposedForKeyDate(
-            UTCInstant.today().minusDays(1), null, publishedUntil);
+            UTCInstant.today().minusDays(1), null, publishedUntil, now);
 
     assertEquals(keys.size(), returnedKeys.size());
     assertEquals(keys.get(1).getKeyData(), returnedKeys.get(0).getKeyData());

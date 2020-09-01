@@ -39,24 +39,26 @@ public interface GAENDataService {
   /**
    * Returns the maximum id of the stored exposed entries for the given batch.
    *
-   * @param keyDate in milliseconds since Unix epoch (1970-01-01)
-   * @param publishedAfter in milliseconds since Unix epoch
-   * @param publishedUntil in milliseconds since Unix epoch
+   * @param keyDate must be midnight UTC
+   * @param publishedAfter when publication should start
+   * @param publishedUntil last publication
+   * @param now the start of the query
    * @return the maximum id of the stored exposed entries for the given batch
    */
   int getMaxExposedIdForKeyDate(
-      UTCInstant keyDate, UTCInstant publishedAfter, UTCInstant publishedUntil);
+      UTCInstant keyDate, UTCInstant publishedAfter, UTCInstant publishedUntil, UTCInstant now);
 
   /**
    * Returns all exposeed keys for the given batch.
    *
-   * @param keyDate in milliseconds since Unix epoch (1970-01-01)
-   * @param publishedAfter in milliseconds since Unix epoch
-   * @param publishedUntil in milliseconds since Unix epoch
+   * @param keyDate must be midnight UTC
+   * @param publishedAfter when publication should start
+   * @param publishedUntil last publication
+   * @param now the start of the query
    * @return all exposeed keys for the given batch
    */
   List<GaenKey> getSortedExposedForKeyDate(
-      UTCInstant keyDate, UTCInstant publishedAfter, UTCInstant publishedUntil);
+      UTCInstant keyDate, UTCInstant publishedAfter, UTCInstant publishedUntil, UTCInstant now);
 
   /**
    * deletes entries older than retentionperiod

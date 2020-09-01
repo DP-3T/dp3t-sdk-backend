@@ -87,7 +87,7 @@ public class JDBCGAENDataServiceImpl implements GAENDataService {
   @Override
   @Transactional(readOnly = true)
   public int getMaxExposedIdForKeyDate(
-      UTCInstant keyDate, UTCInstant publishedAfter, UTCInstant publishedUntil) {
+      UTCInstant keyDate, UTCInstant publishedAfter, UTCInstant publishedUntil, UTCInstant now) {
     MapSqlParameterSource params = new MapSqlParameterSource();
     params.addValue("rollingPeriodStartNumberStart", keyDate.get10MinutesSince1970());
     params.addValue("rollingPeriodStartNumberEnd", keyDate.plusDays(1).get10MinutesSince1970());
@@ -98,6 +98,12 @@ public class JDBCGAENDataServiceImpl implements GAENDataService {
             + " rolling_start_number >= :rollingPeriodStartNumberStart"
             + " and rolling_start_number < :rollingPeriodStartNumberEnd"
             + " and received_at < :publishedUntil";
+    if (now != null) {
+      params.addValue(
+          "maxAllowedStartNumber",
+          now.roundToBucketStart(releaseBucketDuration).plusHours(2).get10MinutesSince1970());
+      sql += " and rolling_start_number < :maxAllowedStartNumber";
+    }
 
     if (publishedAfter != null) {
       params.addValue("publishedAfter", publishedAfter.getDate());
@@ -115,7 +121,7 @@ public class JDBCGAENDataServiceImpl implements GAENDataService {
   @Override
   @Transactional(readOnly = true)
   public List<GaenKey> getSortedExposedForKeyDate(
-      UTCInstant keyDate, UTCInstant publishedAfter, UTCInstant publishedUntil) {
+      UTCInstant keyDate, UTCInstant publishedAfter, UTCInstant publishedUntil, UTCInstant now) {
     MapSqlParameterSource params = new MapSqlParameterSource();
     params.addValue("rollingPeriodStartNumberStart", keyDate.get10MinutesSince1970());
     params.addValue("rollingPeriodStartNumberEnd", keyDate.plusDays(1).get10MinutesSince1970());
@@ -126,6 +132,13 @@ public class JDBCGAENDataServiceImpl implements GAENDataService {
             + " from t_gaen_exposed where rolling_start_number >= :rollingPeriodStartNumberStart"
             + " and rolling_start_number < :rollingPeriodStartNumberEnd and received_at <"
             + " :publishedUntil";
+
+    if (now != null) {
+      params.addValue(
+          "maxAllowedStartNumber",
+          now.roundToBucketStart(releaseBucketDuration).plusHours(2).get10MinutesSince1970());
+      sql += " and rolling_start_number + rolling_period < :maxAllowedStartNumber";
+    }
 
     if (publishedAfter != null) {
       params.addValue("publishedAfter", publishedAfter.getDate());
