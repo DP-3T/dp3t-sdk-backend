@@ -7,16 +7,9 @@ import org.dpppt.backend.sdk.semver.Version;
 import org.dpppt.backend.sdk.utils.UTCInstant;
 import org.dpppt.backend.sdk.ws.insertmanager.OSType;
 
-/**
- * Filters out fake keys from fake upload requests. Only Non-Fake keys are inserted into the
- * database.
- */
-public class NonFakeKeysFilter implements KeyInsertionFilter {
+/** Keep only Non-Fake keys, so that fake keys are not stored in the database. */
+public class RemoveFakeKeys implements KeyInsertionFilter {
 
-  /**
-   * Loops through the list of given keys and checks the fake flag. Only return keys that have fake
-   * flag set to 0
-   */
   @Override
   public List<GaenKey> filter(
       UTCInstant now,

@@ -13,19 +13,14 @@ import org.dpppt.backend.sdk.ws.util.ValidationUtils;
  * Checks if a key is in the configured retention period. If a key is before the retention period it
  * is filtered out, as it will not be relevant for the system anymore.
  */
-public class RollingStartNumberInRetentionPeriodFilter implements KeyInsertionFilter {
+public class EnforceRetentionPeriod implements KeyInsertionFilter {
 
   private final ValidationUtils validationUtils;
 
-  public RollingStartNumberInRetentionPeriodFilter(ValidationUtils validationUtils) {
+  public EnforceRetentionPeriod(ValidationUtils validationUtils) {
     this.validationUtils = validationUtils;
   }
 
-  /**
-   * Loops through all the keys and converts the rolling start number to a timestamp. Using {@link
-   * ValidationUtils#isBeforeRetention(UTCInstant, UTCInstant)} only keys are accepted that are not
-   * before the retention period. Keys before the retention period are filtered out.
-   */
   @Override
   public List<GaenKey> filter(
       UTCInstant now,

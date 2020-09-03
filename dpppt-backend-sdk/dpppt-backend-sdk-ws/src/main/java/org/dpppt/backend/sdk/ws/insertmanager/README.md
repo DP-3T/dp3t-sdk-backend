@@ -16,7 +16,7 @@ A valid key is defined as follows:
 - Rolling Period in [1..144]
 - Rolling start number inside the configured retention period
 - Rolling start number not too far in the future, more precisely not after the day after tomorrow at time of insertion
-- Key date must honor the onset date which is given by the healt authority
+- Key date must honor the onset date which is given by the health authority
 
 
 ## KeyInsertionFilter Interface
@@ -55,6 +55,12 @@ public interface KeyInsertionModifier {
 
 It gets a `now` object representing _the time the request started_ from the controller , a list of keys, some OS and app related information taken from the `UserAgent` (c.f. `InsertManager@exctractOS` and following) and a possible principal object, representing a authenticated state (e.g. a `JWT`). The function is marked to throw a `InsertException` to stop the inserting process.
 
+## Names
+
+The filters should be one of
+- `Assert` - lets either pass all keys or throws `InsertException`
+- `Remove` - explains which keys are removed
+- `Enforce` - explains which keys are kept
 
 ## InsertException
 
@@ -72,28 +78,28 @@ public abstract class WSBaseConfig implements SchedulingConfigurer, WebMvcConfig
   @Bean
   public InsertManager insertManager() {
     var manager = new InsertManager(gaenDataService(), gaenValidationUtils());
-    manager.addFilter(new Base64Filter(gaenValidationUtils()));
-    manager.addFilter(new KeysMatchingJWTFilter(gaenRequestValidator, gaenValidationUtils()));
-    manager.addFilter(new RollingStartNumberAfterDayAfterTomorrowFilter());
-    manager.addFilter(new RollingStartNumberInRetentionPeriodFilter(gaenValidationUtils()));
-    manager.addFilter(new NonFakeKeysFilter());
-    manager.addFilter(new ValidRollingPeriodFilter());
+    manager.addFilter(new AssertBase64(gaenValidationUtils()));
+    manager.addFilter(new EnforceMatchingJWTClaims(gaenRequestValidator, gaenValidationUtils()));
+    manager.addFilter(new RemoveKeysFromFuture());
+    manager.addFilter(new EnforceRetentionPeriod(gaenValidationUtils()));
+    manager.addFilter(new RemoveFakeKeys());
+    manager.addFilter(new EnforceValidRollingPeriod());
     return manager;
   }
 }
 ```
 
-- `Base64Filter`
+- `AssertBase64`
     > This filter validates that the key actually is a correctly encoded base64 string. Since we are using 16 bytes of key data, those can be represented with exactly 24 characters. The validation of the length is already done during model validation and is assumed to be correct when reaching the filter. This filter _throws_ a `KeyIsNotBase64Exception` if any of the keys is wrongly encoded. Every key submitted _MUST_ have correct base64 encoding
-- `KeysMatchingJWTFilter`: 
+- `EnforceMatchingJWTClaims`: 
     > This filter compares the supplied keys with information found in the JWT token. During the `exposed` request, the onset date, which will be set by the health authority and inserted as a claim into the JWT is the lower bound for allowed key dates. For the `exposednextday` the JWT contains the previously submitted and checked `delayedKeyDate`, which is compared to the actual supplied key.
-- `RollingStartNumberAfterDayAfterTomorrowFilter`: 
+- `RemoveKeysFromFuture`: 
     > Representing the maximum allowed time skew. Any key which is further in the future as the day after tomorrow is considered to be _maliciously_ or faulty (for example because of wrong date time settings) uploaded and is hence filtered out.
-- `RollingStartNumberInRetentionPeriodFilter`: 
+- `EnforceRetentionPeriod`: 
     > Only keys with key date in the configured retention period are inserted into the datbase. Any key which was valid earlier than `RetentionPeriod` is considered to be outdated and not saved in the database. The key would be removed during the next database clean anyways.
-- `NonFakeKeysFilter`
+- `RemoveFakeKeys`
     > Only keys that are non-fake are inserted into the database, more precicely keys that have the fake flag set to `0`.
-- `ValidRollingPeriodFilter`: 
+- `EnforceValidRollingPeriod`: 
     > The `RollingPeriod` represents the 10 minutes interval of the key's validity. Negative numbers are not possible, hence any key having a negative rolling period is considered to be _maliciously_ uploaded. Further, according to [Apple/Googles documentation](https://github.com/google/exposure-notifications-server/blob/main/docs/server_functional_requirements.md) values must be in [1..144]
 
 

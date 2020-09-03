@@ -20,11 +20,6 @@ public class OldAndroid0RPModifier implements KeyInsertionModifier {
 
   private static final Logger logger = LoggerFactory.getLogger(OldAndroid0RPModifier.class);
 
-  /**
-   * Loop through all the given keys and check if the rolling period is equal to 0. If so, set to
-   * 144. In case a key with rolling period 0 is received from an iOS client, an error log is
-   * printed.
-   */
   @Override
   public List<GaenKey> modify(
       UTCInstant now,
@@ -35,9 +30,7 @@ public class OldAndroid0RPModifier implements KeyInsertionModifier {
       Object principal) {
     for (GaenKey gaenKey : content) {
       if (gaenKey.getRollingPeriod().equals(0)) {
-        if (osType.equals(OSType.IOS)) {
-          logger.error("We got a rollingPeriod of 0 ({},{},{})", osType, osVersion, appVersion);
-        }
+        logger.error("We got a rollingPeriod of 0 ({},{},{})", osType, osVersion, appVersion);
         gaenKey.setRollingPeriod(144);
       }
     }

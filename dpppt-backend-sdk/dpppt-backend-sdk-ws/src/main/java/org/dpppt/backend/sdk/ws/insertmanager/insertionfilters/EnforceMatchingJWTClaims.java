@@ -11,22 +11,26 @@ import org.dpppt.backend.sdk.ws.security.ValidateRequest;
 import org.dpppt.backend.sdk.ws.security.ValidateRequest.ClaimIsBeforeOnsetException;
 import org.dpppt.backend.sdk.ws.security.ValidateRequest.InvalidDateException;
 import org.dpppt.backend.sdk.ws.util.ValidationUtils;
-import org.dpppt.backend.sdk.ws.util.ValidationUtils.DelayedKeyDateClaimIsWrong;
+import org.dpppt.backend.sdk.ws.util.ValidationUtils.DelayedKeyDateClaimIsMissing;
 import org.dpppt.backend.sdk.ws.util.ValidationUtils.DelayedKeyDateIsInvalid;
 
 /**
- * This filter compares the supplied keys with information found in the JWT token. During the
- * `exposed` request, the onset date, which will be set by the health authority and inserted as a
- * claim into the JWT is the lower bound for allowed key dates. For the `exposednextday` the JWT
- * contains the previously submitted and checked `delayedKeyDate`, which is compared to the actual
- * supplied key.
+ * * This filter compares the supplied keys with information found in the JWT token. Depending on
+ * the request, the following checks are made:
+ *
+ * <ul>
+ *   <li>`exposed`: the key dates must be >= the onset date, which was set by the health authority
+ *       and is available as a claim in the JWT
+ *   <li>`exposednextday`: the supplied key must match `delayedKeyDate`, which has been set as a
+ *       claim by a previous call to `exposed`
+ * </ul>
  */
-public class KeysMatchingJWTFilter implements KeyInsertionFilter {
+public class EnforceMatchingJWTClaims implements KeyInsertionFilter {
 
   private final ValidateRequest validateRequest;
   private final ValidationUtils validationUtils;
 
-  public KeysMatchingJWTFilter(ValidateRequest validateRequest, ValidationUtils utils) {
+  public EnforceMatchingJWTClaims(ValidateRequest validateRequest, ValidationUtils utils) {
     this.validateRequest = validateRequest;
     this.validationUtils = utils;
   }
@@ -43,11 +47,17 @@ public class KeysMatchingJWTFilter implements KeyInsertionFilter {
         .filter(
             key -> {
               try {
-                validationUtils.checkForDelayedKeyDateClaim(principal, key);
+                // getDelayedKeyDateClaim throws an exception if there is no delayedKeyDate claim
+                // available.
+                var delayedKeyDateClaim = validationUtils.getDelayedKeyDateClaim(principal);
+                // Found a delayedKeyDate claim, so it must be `/exposednextday`
                 var delayedKeyDate =
                     UTCInstant.of(key.getRollingStartNumber(), GaenUnit.TenMinutes);
-                return isValidDelayedKeyDate(now, delayedKeyDate);
-              } catch (DelayedKeyDateClaimIsWrong ex) {
+                return delayedKeyDateClaim.equals(delayedKeyDate)
+                    && isValidDelayedKeyDate(now, delayedKeyDate);
+
+              } catch (DelayedKeyDateClaimIsMissing ex) {
+                // Didn't find a delayedKeyDate claim, so it must be `/exposed`
                 return isValidKeyDate(key, principal, now);
               }
             })
@@ -65,7 +75,7 @@ public class KeysMatchingJWTFilter implements KeyInsertionFilter {
 
   private boolean isValidDelayedKeyDate(UTCInstant now, UTCInstant delayedKeyDate) {
     try {
-      validationUtils.validateDelayedKeyDate(now, delayedKeyDate);
+      validationUtils.assertDelayedKeyDate(now, delayedKeyDate);
       return true;
     } catch (DelayedKeyDateIsInvalid ex) {
       return false;

@@ -9,23 +9,17 @@ import org.dpppt.backend.sdk.ws.insertmanager.OSType;
 import org.dpppt.backend.sdk.ws.util.ValidationUtils;
 
 /**
- * All keys must be valid Base64 encoded. Non valid Base64 keys are not allowed and are filtered
- * out. This filter rejects the whole submitted batch of keys, if any of the keys is not valid
- * Base64, as this is a client error.
+ * Rejects a batch of keys if any of them have an invalid base64 encoding. Invalid base64 encodings
+ * point to a client error.
  */
-public class Base64Filter implements KeyInsertionFilter {
+public class AssertBase64 implements KeyInsertionFilter {
 
   private final ValidationUtils validationUtils;
 
-  public Base64Filter(ValidationUtils validationUtils) {
+  public AssertBase64(ValidationUtils validationUtils) {
     this.validationUtils = validationUtils;
   }
 
-  /**
-   * Loop through all keys and check for Base64 validity using {@link
-   * ValidationUtils#isValidBase64Key(String)} and count the number of invalid keys. If the count is
-   * > 0, a {@link KeyIsNotBase64Exception} is thrown which results in a client error.
-   */
   @Override
   public List<GaenKey> filter(
       UTCInstant now,
@@ -36,10 +30,10 @@ public class Base64Filter implements KeyInsertionFilter {
       Object principal)
       throws InsertException {
 
-    var numberOfInvalidKeys =
-        content.stream().filter(key -> !validationUtils.isValidBase64Key(key.getKeyData())).count();
+    var hasInvalidKeys =
+        content.stream().anyMatch(key -> !validationUtils.isValidBase64Key(key.getKeyData()));
 
-    if (numberOfInvalidKeys > 0) {
+    if (hasInvalidKeys) {
       throw new KeyIsNotBase64Exception();
     }
     return content;

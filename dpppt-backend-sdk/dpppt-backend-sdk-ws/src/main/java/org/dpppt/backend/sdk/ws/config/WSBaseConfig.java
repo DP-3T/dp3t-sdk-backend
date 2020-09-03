@@ -35,12 +35,12 @@ import org.dpppt.backend.sdk.ws.controller.DPPPTController;
 import org.dpppt.backend.sdk.ws.controller.GaenController;
 import org.dpppt.backend.sdk.ws.filter.ResponseWrapperFilter;
 import org.dpppt.backend.sdk.ws.insertmanager.InsertManager;
-import org.dpppt.backend.sdk.ws.insertmanager.insertionfilters.Base64Filter;
-import org.dpppt.backend.sdk.ws.insertmanager.insertionfilters.KeysMatchingJWTFilter;
-import org.dpppt.backend.sdk.ws.insertmanager.insertionfilters.NonFakeKeysFilter;
-import org.dpppt.backend.sdk.ws.insertmanager.insertionfilters.RollingStartNumberAfterDayAfterTomorrowFilter;
-import org.dpppt.backend.sdk.ws.insertmanager.insertionfilters.RollingStartNumberInRetentionPeriodFilter;
-import org.dpppt.backend.sdk.ws.insertmanager.insertionfilters.ValidRollingPeriodFilter;
+import org.dpppt.backend.sdk.ws.insertmanager.insertionfilters.AssertBase64;
+import org.dpppt.backend.sdk.ws.insertmanager.insertionfilters.EnforceMatchingJWTClaims;
+import org.dpppt.backend.sdk.ws.insertmanager.insertionfilters.EnforceRetentionPeriod;
+import org.dpppt.backend.sdk.ws.insertmanager.insertionfilters.EnforceValidRollingPeriod;
+import org.dpppt.backend.sdk.ws.insertmanager.insertionfilters.RemoveFakeKeys;
+import org.dpppt.backend.sdk.ws.insertmanager.insertionfilters.RemoveKeysFromFuture;
 import org.dpppt.backend.sdk.ws.insertmanager.insertionmodifier.IOSLegacyProblemRPLT144Modifier;
 import org.dpppt.backend.sdk.ws.insertmanager.insertionmodifier.OldAndroid0RPModifier;
 import org.dpppt.backend.sdk.ws.interceptor.HeaderInjector;
@@ -216,12 +216,12 @@ public abstract class WSBaseConfig implements SchedulingConfigurer, WebMvcConfig
   @Bean
   public InsertManager insertManager() {
     var manager = new InsertManager(gaenDataService(), gaenValidationUtils());
-    manager.addFilter(new Base64Filter(gaenValidationUtils()));
-    manager.addFilter(new KeysMatchingJWTFilter(gaenRequestValidator, gaenValidationUtils()));
-    manager.addFilter(new RollingStartNumberAfterDayAfterTomorrowFilter());
-    manager.addFilter(new RollingStartNumberInRetentionPeriodFilter(gaenValidationUtils()));
-    manager.addFilter(new NonFakeKeysFilter());
-    manager.addFilter(new ValidRollingPeriodFilter());
+    manager.addFilter(new AssertBase64(gaenValidationUtils()));
+    manager.addFilter(new EnforceMatchingJWTClaims(gaenRequestValidator, gaenValidationUtils()));
+    manager.addFilter(new RemoveKeysFromFuture());
+    manager.addFilter(new EnforceRetentionPeriod(gaenValidationUtils()));
+    manager.addFilter(new RemoveFakeKeys());
+    manager.addFilter(new EnforceValidRollingPeriod());
     return manager;
   }
 

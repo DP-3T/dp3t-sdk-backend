@@ -7,11 +7,16 @@ import org.dpppt.backend.sdk.utils.UTCInstant;
 import org.dpppt.backend.sdk.ws.insertmanager.OSType;
 
 /**
- * This key modifier makes sure, that rolling period is always set to 144. Default value according
- * to EN is 144, so just set it to that. This allows to check for the Google-TEKs also on iOS.
- * Because the Rolling Proximity Identifier is based on the TEK and the unix epoch, this should
- * work. The only downside is that iOS will not be able to optimize verification of the TEKs,
- * because it will have to consider each TEK for a whole day.
+ * Overwrite the rolling period with the default value of 144 so that iOS does not reject the keys.
+ * Since version 1.5 of the GAEN on Android, TEKs with a rolling period < 144 can be released.
+ * Unfortunately these keys are rejected by iOS, so this filter sets the default value. There are
+ * two downsides to this:
+ *
+ * <ul>
+ *   <li>some more work for the GAEN to verify the keys
+ *   <li>a same-day key with original rolling period < 144 will be released later and thus delay
+ *       detection of an eventual exposition
+ * </ul>
  */
 public class IOSLegacyProblemRPLT144Modifier implements KeyInsertionModifier {
 
