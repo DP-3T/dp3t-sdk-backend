@@ -13,9 +13,8 @@ import org.dpppt.backend.sdk.ws.insertmanager.OSType;
  * "https://github.com/google/exposure-notifications-server/blob/main/docs/server_functional_requirements.md#publishing-temporary-exposure-keys"
  * >EN documentation</a>
  */
-public class ValidRollingPeriodFilter implements KeyInsertionFilter {
+public class EnforceValidRollingPeriod implements KeyInsertionFilter {
 
-  /** Loop through given keys and filter out keys which have rolling period < 1 or > 144. */
   @Override
   public List<GaenKey> filter(
       UTCInstant now,

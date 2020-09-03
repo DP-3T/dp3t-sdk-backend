@@ -9,15 +9,10 @@ import org.dpppt.backend.sdk.utils.UTCInstant;
 import org.dpppt.backend.sdk.ws.insertmanager.OSType;
 
 /**
- * Checks if a key has rolling start number after the day after tomorrow. If so, the key is filtered
- * out, as this is not allowed by the system to insert keys too far in the future.
+ * Reject keys that are too far in the future. The `rollingStart` must not be later than tomorrow.
  */
-public class RollingStartNumberAfterDayAfterTomorrowFilter implements KeyInsertionFilter {
+public class RemoveKeysFromFuture implements KeyInsertionFilter {
 
-  /**
-   * Loops through all the keys and converts the rolling start number to a timstamp. The it is
-   * checked if the timestamp is before now + 2 days.
-   */
   @Override
   public List<GaenKey> filter(
       UTCInstant now,

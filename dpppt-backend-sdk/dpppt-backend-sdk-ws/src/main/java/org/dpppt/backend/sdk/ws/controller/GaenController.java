@@ -35,7 +35,7 @@ import org.dpppt.backend.sdk.utils.DurationExpiredException;
 import org.dpppt.backend.sdk.utils.UTCInstant;
 import org.dpppt.backend.sdk.ws.insertmanager.InsertException;
 import org.dpppt.backend.sdk.ws.insertmanager.InsertManager;
-import org.dpppt.backend.sdk.ws.insertmanager.insertionfilters.Base64Filter.KeyIsNotBase64Exception;
+import org.dpppt.backend.sdk.ws.insertmanager.insertionfilters.AssertBase64.KeyIsNotBase64Exception;
 import org.dpppt.backend.sdk.ws.security.ValidateRequest;
 import org.dpppt.backend.sdk.ws.security.ValidateRequest.ClaimIsBeforeOnsetException;
 import org.dpppt.backend.sdk.ws.security.ValidateRequest.InvalidDateException;
@@ -44,7 +44,7 @@ import org.dpppt.backend.sdk.ws.security.signature.ProtoSignature;
 import org.dpppt.backend.sdk.ws.security.signature.ProtoSignature.ProtoSignatureWrapper;
 import org.dpppt.backend.sdk.ws.util.ValidationUtils;
 import org.dpppt.backend.sdk.ws.util.ValidationUtils.BadBatchReleaseTimeException;
-import org.dpppt.backend.sdk.ws.util.ValidationUtils.DelayedKeyDateClaimIsWrong;
+import org.dpppt.backend.sdk.ws.util.ValidationUtils.DelayedKeyDateClaimIsMissing;
 import org.dpppt.backend.sdk.ws.util.ValidationUtils.DelayedKeyDateIsInvalid;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -154,7 +154,7 @@ public class GaenController {
     // configured Filters in the WSBaseConfig)
     insertIntoDatabaseIfJWTIsNotFake(gaenRequest.getGaenKeys(), userAgent, principal, now);
 
-    this.validationUtils.validateDelayedKeyDate(
+    this.validationUtils.assertDelayedKeyDate(
         now, UTCInstant.of(gaenRequest.getDelayedKeyDate(), GaenUnit.TenMinutes));
 
     var responseBuilder = ResponseEntity.ok();
@@ -215,10 +215,12 @@ public class GaenController {
                   "JWT token that can be verified by the backend server, must have been created by"
                       + " /v1/gaen/exposed and contain the delayedKeyDate")
           Object principal)
-      throws KeyIsNotBase64Exception, DelayedKeyDateClaimIsWrong {
+      throws KeyIsNotBase64Exception, DelayedKeyDateClaimIsMissing {
     var now = UTCInstant.now();
 
-    validationUtils.checkForDelayedKeyDateClaim(principal, gaenSecondDay.getDelayedKey());
+    // Throws an exception if the claim doesn't exist. The actual verification is done in the
+    // filters.
+    validationUtils.getDelayedKeyDateClaim(principal);
 
     // Filter out non valid keys and insert them into the database (c.f. InsertManager and
     // configured Filters in the WSBaseConfig)
@@ -349,7 +351,7 @@ public class GaenController {
     }
   }
 
-  @ExceptionHandler({DelayedKeyDateClaimIsWrong.class})
+  @ExceptionHandler({DelayedKeyDateClaimIsMissing.class})
   @ResponseStatus(HttpStatus.BAD_REQUEST)
   public ResponseEntity<String> delayedClaimIsWrong() {
     return ResponseEntity.badRequest().body("DelayedKeyDateClaim is wrong");
