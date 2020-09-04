@@ -68,7 +68,7 @@ An `InsertException` can be thrown inside an implementation of the `InsertionFil
 
 ## Default Filters
 
-Looking at the `WSBaseConfig`, we can see that during construction of the `InsertManager` bean, a set of default filters are added:
+Looking at the `WSBaseConfig`, we can see that two instances of the `InsertManager` are constructed, one for the `exposed` request and one for the `exposedNextDay` request, both are supplied wit a set of default filters:
 
 ```java
 public abstract class WSBaseConfig implements SchedulingConfigurer, WebMvcConfigurer {
@@ -76,23 +76,38 @@ public abstract class WSBaseConfig implements SchedulingConfigurer, WebMvcConfig
   // ...
     
   @Bean
-  public InsertManager insertManager() {
+  public InsertManager insertManagerExposed() {
     var manager = new InsertManager(gaenDataService(), gaenValidationUtils());
     manager.addFilter(new AssertBase64(gaenValidationUtils()));
-    manager.addFilter(new EnforceMatchingJWTClaims(gaenRequestValidator, gaenValidationUtils()));
+    manager.addFilter(new EnforceMatchingJWTClaimsForExposed(gaenRequestValidator));
     manager.addFilter(new RemoveKeysFromFuture());
     manager.addFilter(new EnforceRetentionPeriod(gaenValidationUtils()));
     manager.addFilter(new RemoveFakeKeys());
     manager.addFilter(new EnforceValidRollingPeriod());
     return manager;
   }
+
+  @Bean
+  public InsertManager insertManagerExposedNextDay() {
+    var manager = new InsertManager(gaenDataService(), gaenValidationUtils());
+    manager.addFilter(new AssertBase64(gaenValidationUtils()));
+    manager.addFilter(new EnforceMatchingJWTClaimsForExposedNextDay(gaenValidationUtils()));
+    manager.addFilter(new RemoveKeysFromFuture());
+    manager.addFilter(new EnforceRetentionPeriod(gaenValidationUtils()));
+    manager.addFilter(new RemoveFakeKeys());
+    manager.addFilter(new EnforceValidRollingPeriod());
+    return manager;
+  }
+
 }
 ```
 
 - `AssertBase64`
     > This filter validates that the key actually is a correctly encoded base64 string. Since we are using 16 bytes of key data, those can be represented with exactly 24 characters. The validation of the length is already done during model validation and is assumed to be correct when reaching the filter. This filter _throws_ a `KeyIsNotBase64Exception` if any of the keys is wrongly encoded. Every key submitted _MUST_ have correct base64 encoding
-- `EnforceMatchingJWTClaims`: 
-    > This filter compares the supplied keys with information found in the JWT token. During the `exposed` request, the onset date, which will be set by the health authority and inserted as a claim into the JWT is the lower bound for allowed key dates. For the `exposednextday` the JWT contains the previously submitted and checked `delayedKeyDate`, which is compared to the actual supplied key.
+- `EnforceMatchingJWTClaimsForExposed`: 
+    > This filter compares the supplied keys with information found in the JWT token for the `exposed` request. It makes sure, that the onset date, which will be set by the health authority and inserted as a claim into the JWT is the lower bound for allowed key dates.
+- `EnforceMatchingJWTClaimsForExposedNextDay`: 
+    > This filter compares the supplied keys with information found in the JWT token for the `exposednextday` request. It makes sure, that the JWT contains the previously submitted and checked `delayedKeyDate`, which is compared to the actual supplied key.  
 - `RemoveKeysFromFuture`: 
     > Representing the maximum allowed time skew. Any key which is further in the future as the day after tomorrow is considered to be _maliciously_ or faulty (for example because of wrong date time settings) uploaded and is hence filtered out.
 - `EnforceRetentionPeriod`: 

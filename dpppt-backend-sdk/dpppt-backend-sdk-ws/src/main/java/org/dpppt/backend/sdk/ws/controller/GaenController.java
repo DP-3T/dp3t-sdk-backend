@@ -27,7 +27,6 @@ import javax.validation.Valid;
 import org.dpppt.backend.sdk.data.gaen.FakeKeyService;
 import org.dpppt.backend.sdk.data.gaen.GAENDataService;
 import org.dpppt.backend.sdk.model.gaen.DayBuckets;
-import org.dpppt.backend.sdk.model.gaen.GaenKey;
 import org.dpppt.backend.sdk.model.gaen.GaenRequest;
 import org.dpppt.backend.sdk.model.gaen.GaenSecondDay;
 import org.dpppt.backend.sdk.model.gaen.GaenUnit;
@@ -86,7 +85,8 @@ public class GaenController {
   private final Duration requestTime;
   private final ValidateRequest validateRequest;
   private final ValidationUtils validationUtils;
-  private final InsertManager insertManager;
+  private final InsertManager insertManagerExposed;
+  private final InsertManager insertManagerExposedNextDay;
   private final GAENDataService dataService;
   private final FakeKeyService fakeKeyService;
   private final Duration exposedListCacheControl;
@@ -94,7 +94,8 @@ public class GaenController {
   private final ProtoSignature gaenSigner;
 
   public GaenController(
-      InsertManager insertManager,
+      InsertManager insertManagerExposed,
+      InsertManager insertManagerExposedNextDay,
       GAENDataService dataService,
       FakeKeyService fakeKeyService,
       ValidateRequest validateRequest,
@@ -104,7 +105,8 @@ public class GaenController {
       Duration requestTime,
       Duration exposedListCacheControl,
       PrivateKey secondDayKey) {
-    this.insertManager = insertManager;
+    this.insertManagerExposed = insertManagerExposed;
+    this.insertManagerExposedNextDay = insertManagerExposedNextDay;
     this.dataService = dataService;
     this.fakeKeyService = fakeKeyService;
     this.releaseBucketDuration = releaseBucketDuration;
@@ -145,14 +147,14 @@ public class GaenController {
       @AuthenticationPrincipal
           @Documentation(description = "JWT token that can be verified by the backend server")
           Object principal)
-      throws WrongScopeException, KeyIsNotBase64Exception, DelayedKeyDateIsInvalid {
+      throws DelayedKeyDateIsInvalid, InsertException, WrongScopeException {
     var now = UTCInstant.now();
 
     this.validateRequest.isValid(principal);
 
     // Filter out non valid keys and insert them into the database (c.f. InsertManager and
     // configured Filters in the WSBaseConfig)
-    insertIntoDatabaseIfJWTIsNotFake(gaenRequest.getGaenKeys(), userAgent, principal, now);
+    insertManagerExposed.insertIntoDatabase(gaenRequest.getGaenKeys(), userAgent, principal, now);
 
     this.validationUtils.assertDelayedKeyDate(
         now, UTCInstant.of(gaenRequest.getDelayedKeyDate(), GaenUnit.TenMinutes));
@@ -215,7 +217,7 @@ public class GaenController {
                   "JWT token that can be verified by the backend server, must have been created by"
                       + " /v1/gaen/exposed and contain the delayedKeyDate")
           Object principal)
-      throws KeyIsNotBase64Exception, DelayedKeyDateClaimIsMissing {
+      throws DelayedKeyDateClaimIsMissing, InsertException {
     var now = UTCInstant.now();
 
     // Throws an exception if the claim doesn't exist. The actual verification is done in the
@@ -224,7 +226,8 @@ public class GaenController {
 
     // Filter out non valid keys and insert them into the database (c.f. InsertManager and
     // configured Filters in the WSBaseConfig)
-    insertIntoDatabaseIfJWTIsNotFake(gaenSecondDay.getDelayedKey(), userAgent, principal, now);
+    insertManagerExposedNextDay.insertIntoDatabase(
+        List.of(gaenSecondDay.getDelayedKey()), userAgent, principal, now);
 
     return () -> {
       try {
@@ -329,26 +332,6 @@ public class GaenController {
     }
 
     return ResponseEntity.ok(dayBuckets);
-  }
-
-  private void insertIntoDatabaseIfJWTIsNotFake(
-      GaenKey key, String userAgent, Object principal, UTCInstant now)
-      throws KeyIsNotBase64Exception {
-    List<GaenKey> keys = new ArrayList<>();
-    keys.add(key);
-    insertIntoDatabaseIfJWTIsNotFake(keys, userAgent, principal, now);
-  }
-
-  private void insertIntoDatabaseIfJWTIsNotFake(
-      List<GaenKey> keys, String userAgent, Object principal, UTCInstant now)
-      throws KeyIsNotBase64Exception {
-    try {
-      insertManager.insertIntoDatabase(keys, userAgent, principal, now);
-    } catch (KeyIsNotBase64Exception ex) {
-      throw ex;
-    } catch (InsertException ex) {
-      logger.info("Unknown exception thrown: ", ex);
-    }
   }
 
   @ExceptionHandler({DelayedKeyDateClaimIsMissing.class})

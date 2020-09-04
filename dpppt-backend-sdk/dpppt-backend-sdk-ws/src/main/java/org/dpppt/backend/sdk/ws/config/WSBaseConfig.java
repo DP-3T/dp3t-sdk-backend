@@ -36,7 +36,8 @@ import org.dpppt.backend.sdk.ws.controller.GaenController;
 import org.dpppt.backend.sdk.ws.filter.ResponseWrapperFilter;
 import org.dpppt.backend.sdk.ws.insertmanager.InsertManager;
 import org.dpppt.backend.sdk.ws.insertmanager.insertionfilters.AssertBase64;
-import org.dpppt.backend.sdk.ws.insertmanager.insertionfilters.EnforceMatchingJWTClaims;
+import org.dpppt.backend.sdk.ws.insertmanager.insertionfilters.EnforceMatchingJWTClaimsForExposed;
+import org.dpppt.backend.sdk.ws.insertmanager.insertionfilters.EnforceMatchingJWTClaimsForExposedNextDay;
 import org.dpppt.backend.sdk.ws.insertmanager.insertionfilters.EnforceRetentionPeriod;
 import org.dpppt.backend.sdk.ws.insertmanager.insertionfilters.EnforceValidRollingPeriod;
 import org.dpppt.backend.sdk.ws.insertmanager.insertionfilters.RemoveFakeKeys;
@@ -214,10 +215,22 @@ public abstract class WSBaseConfig implements SchedulingConfigurer, WebMvcConfig
   }
 
   @Bean
-  public InsertManager insertManager() {
+  public InsertManager insertManagerExposed() {
     var manager = new InsertManager(gaenDataService(), gaenValidationUtils());
     manager.addFilter(new AssertBase64(gaenValidationUtils()));
-    manager.addFilter(new EnforceMatchingJWTClaims(gaenRequestValidator, gaenValidationUtils()));
+    manager.addFilter(new EnforceMatchingJWTClaimsForExposed(gaenRequestValidator));
+    manager.addFilter(new RemoveKeysFromFuture());
+    manager.addFilter(new EnforceRetentionPeriod(gaenValidationUtils()));
+    manager.addFilter(new RemoveFakeKeys());
+    manager.addFilter(new EnforceValidRollingPeriod());
+    return manager;
+  }
+
+  @Bean
+  public InsertManager insertManagerExposedNextDay() {
+    var manager = new InsertManager(gaenDataService(), gaenValidationUtils());
+    manager.addFilter(new AssertBase64(gaenValidationUtils()));
+    manager.addFilter(new EnforceMatchingJWTClaimsForExposedNextDay(gaenValidationUtils()));
     manager.addFilter(new RemoveKeysFromFuture());
     manager.addFilter(new EnforceRetentionPeriod(gaenValidationUtils()));
     manager.addFilter(new RemoveFakeKeys());
@@ -281,7 +294,8 @@ public abstract class WSBaseConfig implements SchedulingConfigurer, WebMvcConfig
       theValidator = backupValidator();
     }
     return new GaenController(
-        insertManager(),
+        insertManagerExposed(),
+        insertManagerExposedNextDay(),
         gaenDataService(),
         fakeKeyService(),
         theValidator,
