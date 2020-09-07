@@ -9,14 +9,14 @@ import org.dpppt.backend.sdk.ws.insertmanager.OSType;
 import org.dpppt.backend.sdk.ws.util.ValidationUtils;
 
 /**
- * Rejects a batch of keys if any of them have an invalid base64 encoding. Invalid base64 encodings
- * point to a client error.
+ * Rejects a batch of keys if any of them have an invalid base64 encoding or doesn't have the
+ * correct length. Invalid base64 encodings or wrong key lengths point to a client error.
  */
-public class AssertBase64 implements KeyInsertionFilter {
+public class AssertKeyFormat implements KeyInsertionFilter {
 
   private final ValidationUtils validationUtils;
 
-  public AssertBase64(ValidationUtils validationUtils) {
+  public AssertKeyFormat(ValidationUtils validationUtils) {
     this.validationUtils = validationUtils;
   }
 
@@ -31,15 +31,15 @@ public class AssertBase64 implements KeyInsertionFilter {
       throws InsertException {
 
     var hasInvalidKeys =
-        content.stream().anyMatch(key -> !validationUtils.isValidBase64Key(key.getKeyData()));
+        content.stream().anyMatch(key -> !validationUtils.isValidKeyFormat(key.getKeyData()));
 
     if (hasInvalidKeys) {
-      throw new KeyIsNotBase64Exception();
+      throw new KeyFormatException();
     }
     return content;
   }
 
-  public class KeyIsNotBase64Exception extends InsertException {
+  public class KeyFormatException extends InsertException {
 
     /** */
     private static final long serialVersionUID = -918099046973553472L;

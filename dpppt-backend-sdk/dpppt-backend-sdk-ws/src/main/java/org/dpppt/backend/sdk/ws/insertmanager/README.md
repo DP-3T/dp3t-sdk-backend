@@ -11,7 +11,7 @@ Encapsulating the logic into smaller pieces of code, should allow for easier and
 
 ## Valid Keys
 A valid key is defined as follows:
-- Base64 Encoded key
+- Base64 Encoded key with correct length of 32 bytes
 - Non Fake
 - Rolling Period in [1..144]
 - Rolling start number inside the configured retention period
@@ -78,7 +78,7 @@ public abstract class WSBaseConfig implements SchedulingConfigurer, WebMvcConfig
   @Bean
   public InsertManager insertManagerExposed() {
     var manager = new InsertManager(gaenDataService(), gaenValidationUtils());
-    manager.addFilter(new AssertBase64(gaenValidationUtils()));
+    manager.addFilter(new AssertKeyFormst(gaenValidationUtils()));
     manager.addFilter(new EnforceMatchingJWTClaimsForExposed(gaenRequestValidator));
     manager.addFilter(new RemoveKeysFromFuture());
     manager.addFilter(new EnforceRetentionPeriod(gaenValidationUtils()));
@@ -90,7 +90,7 @@ public abstract class WSBaseConfig implements SchedulingConfigurer, WebMvcConfig
   @Bean
   public InsertManager insertManagerExposedNextDay() {
     var manager = new InsertManager(gaenDataService(), gaenValidationUtils());
-    manager.addFilter(new AssertBase64(gaenValidationUtils()));
+    manager.addFilter(new AssertKeyFormat(gaenValidationUtils()));
     manager.addFilter(new EnforceMatchingJWTClaimsForExposedNextDay(gaenValidationUtils()));
     manager.addFilter(new RemoveKeysFromFuture());
     manager.addFilter(new EnforceRetentionPeriod(gaenValidationUtils()));
@@ -102,8 +102,12 @@ public abstract class WSBaseConfig implements SchedulingConfigurer, WebMvcConfig
 }
 ```
 
-- `AssertBase64`
-    > This filter validates that the key actually is a correctly encoded base64 string. Since we are using 16 bytes of key data, those can be represented with exactly 24 characters. The validation of the length is already done during model validation and is assumed to be correct when reaching the filter. This filter _throws_ a `KeyIsNotBase64Exception` if any of the keys is wrongly encoded. Every key submitted _MUST_ have correct base64 encoding
+- `AssertKeyFormat`
+    > This filter validates that the key actually is a correctly encoded base64 string and has the correct length. Since
+     we are using 16 bytes of key data, those can be represented with exactly 24 characters. The validation of the 
+     length is already done during model validation and is assumed to be correct when reaching the filter. This 
+     filter _throws_ a `KeyFormatException` if any of the keys is wrongly encoded. Every key submitted _MUST_ have 
+     correct base64 encoding and have the correct length.
 - `EnforceMatchingJWTClaimsForExposed`: 
     > This filter compares the supplied keys with information found in the JWT token for the `exposed` request. It makes sure, that the onset date, which will be set by the health authority and inserted as a claim into the JWT is the lower bound for allowed key dates.
 - `EnforceMatchingJWTClaimsForExposedNextDay`: 

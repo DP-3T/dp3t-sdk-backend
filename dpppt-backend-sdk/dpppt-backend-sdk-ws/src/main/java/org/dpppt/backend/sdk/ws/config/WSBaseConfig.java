@@ -35,7 +35,7 @@ import org.dpppt.backend.sdk.ws.controller.DPPPTController;
 import org.dpppt.backend.sdk.ws.controller.GaenController;
 import org.dpppt.backend.sdk.ws.filter.ResponseWrapperFilter;
 import org.dpppt.backend.sdk.ws.insertmanager.InsertManager;
-import org.dpppt.backend.sdk.ws.insertmanager.insertionfilters.AssertBase64;
+import org.dpppt.backend.sdk.ws.insertmanager.insertionfilters.AssertKeyFormat;
 import org.dpppt.backend.sdk.ws.insertmanager.insertionfilters.EnforceMatchingJWTClaimsForExposed;
 import org.dpppt.backend.sdk.ws.insertmanager.insertionfilters.EnforceMatchingJWTClaimsForExposedNextDay;
 import org.dpppt.backend.sdk.ws.insertmanager.insertionfilters.EnforceRetentionPeriod;
@@ -217,7 +217,7 @@ public abstract class WSBaseConfig implements SchedulingConfigurer, WebMvcConfig
   @Bean
   public InsertManager insertManagerExposed() {
     var manager = new InsertManager(gaenDataService(), gaenValidationUtils());
-    manager.addFilter(new AssertBase64(gaenValidationUtils()));
+    manager.addFilter(new AssertKeyFormat(gaenValidationUtils()));
     manager.addFilter(new EnforceMatchingJWTClaimsForExposed(gaenRequestValidator));
     manager.addFilter(new RemoveKeysFromFuture());
     manager.addFilter(new EnforceRetentionPeriod(gaenValidationUtils()));
@@ -229,7 +229,7 @@ public abstract class WSBaseConfig implements SchedulingConfigurer, WebMvcConfig
   @Bean
   public InsertManager insertManagerExposedNextDay() {
     var manager = new InsertManager(gaenDataService(), gaenValidationUtils());
-    manager.addFilter(new AssertBase64(gaenValidationUtils()));
+    manager.addFilter(new AssertKeyFormat(gaenValidationUtils()));
     manager.addFilter(new EnforceMatchingJWTClaimsForExposedNextDay(gaenValidationUtils()));
     manager.addFilter(new RemoveKeysFromFuture());
     manager.addFilter(new EnforceRetentionPeriod(gaenValidationUtils()));

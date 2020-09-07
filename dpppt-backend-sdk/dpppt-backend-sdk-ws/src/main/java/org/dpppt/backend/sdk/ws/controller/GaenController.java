@@ -34,7 +34,7 @@ import org.dpppt.backend.sdk.utils.DurationExpiredException;
 import org.dpppt.backend.sdk.utils.UTCInstant;
 import org.dpppt.backend.sdk.ws.insertmanager.InsertException;
 import org.dpppt.backend.sdk.ws.insertmanager.InsertManager;
-import org.dpppt.backend.sdk.ws.insertmanager.insertionfilters.AssertBase64.KeyIsNotBase64Exception;
+import org.dpppt.backend.sdk.ws.insertmanager.insertionfilters.AssertKeyFormat.KeyFormatException;
 import org.dpppt.backend.sdk.ws.security.ValidateRequest;
 import org.dpppt.backend.sdk.ws.security.ValidateRequest.ClaimIsBeforeOnsetException;
 import org.dpppt.backend.sdk.ws.security.ValidateRequest.InvalidDateException;
@@ -355,7 +355,7 @@ public class GaenController {
     BadBatchReleaseTimeException.class,
     DateTimeParseException.class,
     ClaimIsBeforeOnsetException.class,
-    KeyIsNotBase64Exception.class
+    KeyFormatException.class
   })
   @ResponseStatus(HttpStatus.BAD_REQUEST)
   public ResponseEntity<Object> invalidArguments() {
