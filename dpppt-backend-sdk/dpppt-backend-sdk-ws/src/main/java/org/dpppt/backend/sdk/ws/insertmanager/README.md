@@ -1,15 +1,32 @@
 # Insert-Manager
 
-## Idea
-The Insert-Manager was introduced to reduce logic in controllers. The idea is to provide a second abstraction layer next to the `DataServices` to provide for possible generic validation and normalization. For this there are two mechanisems: modifiers and filters
+The Insert-Manager is used to reduce logic in the controllers. 
+It provides a second abstraction layer next to the `DataServices` to provide generic validation and normalization. 
+Encapsulating the logic into smaller pieces of code allows for easier and better reviews of the respective 
+filters and modifiers.
+Furthermore, each filter or modifier can be documented individually, without having to document each place where it 
+is applied.
 
-The Insert-Manager holds a list of `KeyInsertionFilter`, which provide some code, to either filter for invalid data data. Each filter can decide to either skip respective keys, or throw a `InsertException`. Throwing an exception aborts the current insert request, and throws to the controller. Inside the controller the exception can be mapped to a respective error message and http status code.
+The insert-manager uses two lists: `modifiers` and `filters`.
+First the modifies are run on the keys, then the filters, in the order as they're given to the `InsertManager`
 
-Additionally the Insert-Manager can be configured to hold a list of `KeyInsertModifier`. Modifiers are can be used to modify incoming keys before inserting into the database. (for example to fix buggy clients)
+```text
 
-Encapsulating the logic into smaller pieces of code, should allow for easier and better reviews of the respective filters and modifiers. Further, for each filter or modifier an extensive documentation can be provided, without cluttering the code with too many comments. 
+Mobile Client -> Backend -> InsertManager ( Modifiers -> Filters ) -> Database
+
+```
+
+The Insert-Manager holds a list of `KeyInsertionFilter`, which provide code to filter for invalid data. 
+Each filter can decide to either skip respective keys, or throw an `InsertException`. 
+Throwing an exception aborts the current insert request, and the exception is bubbled up to the controller.
+Inside the controller the exception can be mapped to a specific error message and an HTTP status code.
+
+Additionally the Insert-Manager can be configured to hold a list of `KeyInsertModifier`.
+Modifiers can modify incoming keys before inserting them into the database, for example to fix buggy clients.
+
 
 ## Valid Keys
+
 A valid key is defined as follows:
 - Base64 Encoded key with correct length of 32 bytes
 - Non Fake
@@ -20,6 +37,7 @@ A valid key is defined as follows:
 
 
 ## KeyInsertionFilter Interface
+
 The `KeyInsertionFilter` interface has the following signature:
 
 ```java
@@ -37,7 +55,9 @@ public interface KeyInsertionFilter {
 
 It gets a `now` object representing _the time the request started_ from the controller , a list of keys, some OS and app related information taken from the `UserAgent` (c.f. `InsertManager@exctractOS` and following) and a possible principal object, representing a authenticated state (e.g. a `JWT`). The function is marked to throw a `InsertException` to stop the inserting process.
 
+
 ## KeyInsertionModifier Interface
+
 The `KeyInsertionModifier` interface has the following signature:
 
 ```java
@@ -55,6 +75,7 @@ public interface KeyInsertionModifier {
 
 It gets a `now` object representing _the time the request started_ from the controller , a list of keys, some OS and app related information taken from the `UserAgent` (c.f. `InsertManager@exctractOS` and following) and a possible principal object, representing a authenticated state (e.g. a `JWT`). The function is marked to throw a `InsertException` to stop the inserting process.
 
+
 ## Names
 
 The filters should be one of
@@ -62,9 +83,11 @@ The filters should be one of
 - `Remove` - explains which keys are removed
 - `Enforce` - explains which keys are kept
 
+
 ## InsertException
 
 An `InsertException` can be thrown inside an implementation of the `InsertionFilter` interface to mark an insert as "unrecoverable" and abort it. Such "unrecoverable" states might be patterns in the uploaded model, which allows for packet sniffing and/or information gathering.
+
 
 ## Default Filters
 
@@ -123,14 +146,15 @@ public abstract class WSBaseConfig implements SchedulingConfigurer, WebMvcConfig
 
 
 ## Additonal Modifiers
+
 - `IOSLegacyProblemRPLT144FModifier`
     > This modifier makes sure, that rolling period is always set to 144. Default value according to EN is 144, so just set it to that. This allows to check for the Google-TEKs also on iOS. Because the Rolling Proximity Identifier is based on the TEK and the unix epoch, this should work. The only downside is that iOS will not be able to optimize verification of the TEKs, because it will have to consider each TEK for a whole day.
 - `OldAndroid0RPModifier`: 
     > Some early builds of Google's Exposure Notification API returned TEKs with rolling period set to '0'. According to the specification, this is invalid and will cause both Android and iOS to drop/ignore the key. To mitigate ignoring TEKs from these builds alltogether, the rolling period is increased to '144' (one full day). This should not happen anymore and can be removed in the near future. Until then we are going to log whenever this happens to be able to monitor this problem.
 
 
-
 ## Configuration 
+
 During construction, instances of `GAENDataService` and `ValidationUtils` are needed. Further, any filter or modifier can be added to the list with `addFilter(KeyInsertionFilter filter)` or `addModifier(KeyInsertionModifier)`. Ideally, this happens inside the [`WSBaseConfig`](../config/WSBaseConfig.java), where default filters are added right after constructing the `InsertManager`. 
 
 To allow for conditional `KeyInsertionFilters` or `KeyInsertionModifiers` refer to the following snippet:
