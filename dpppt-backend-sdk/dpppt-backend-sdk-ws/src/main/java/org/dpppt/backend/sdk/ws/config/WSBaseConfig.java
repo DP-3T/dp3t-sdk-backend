@@ -238,6 +238,10 @@ public abstract class WSBaseConfig implements SchedulingConfigurer, WebMvcConfig
     return manager;
   }
 
+  /**
+   * Even though there are probably no android devices left that send TEKs with rollingPeriod of 0,
+   * this modifier will not hurt. Every TEK with rollingPeriod of 0 will be reported.
+   */
   @ConditionalOnProperty(
       value = "ws.app.gaen.insertmanager.android0rpmodifier",
       havingValue = "true",
@@ -249,6 +253,11 @@ public abstract class WSBaseConfig implements SchedulingConfigurer, WebMvcConfig
     return androidModifier;
   }
 
+  /**
+   * This modifier will most probably not be enabled, as there should be very little iOS devices
+   * left that cannot handle a non-144 rollingPeriod key. Also, up to 8th of September 2020, Android
+   * did not release same day keys.
+   */
   @ConditionalOnProperty(
       value = "ws.app.gaen.insertmanager.iosrplt144modifier",
       havingValue = "true",
