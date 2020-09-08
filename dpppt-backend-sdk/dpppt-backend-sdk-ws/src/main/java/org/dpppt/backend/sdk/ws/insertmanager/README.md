@@ -78,7 +78,7 @@ public abstract class WSBaseConfig implements SchedulingConfigurer, WebMvcConfig
   @Bean
   public InsertManager insertManagerExposed() {
     var manager = new InsertManager(gaenDataService(), gaenValidationUtils());
-    manager.addFilter(new AssertKeyFormst(gaenValidationUtils()));
+    manager.addFilter(new AssertKeyFormat(gaenValidationUtils()));
     manager.addFilter(new EnforceMatchingJWTClaimsForExposed(gaenRequestValidator));
     manager.addFilter(new RemoveKeysFromFuture());
     manager.addFilter(new EnforceRetentionPeriod(gaenValidationUtils()));
