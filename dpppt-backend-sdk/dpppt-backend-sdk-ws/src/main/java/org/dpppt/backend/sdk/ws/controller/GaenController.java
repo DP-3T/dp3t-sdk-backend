@@ -279,7 +279,7 @@ public class GaenController {
     }
 
     // calculate exposed until bucket
-    UTCInstant publishedUntil = now.roundToPreviousBucket(releaseBucketDuration);
+    UTCInstant publishedUntil = now.roundToBucketStart(releaseBucketDuration);
 
     var exposedKeys =
         dataService.getSortedExposedForKeyDate(

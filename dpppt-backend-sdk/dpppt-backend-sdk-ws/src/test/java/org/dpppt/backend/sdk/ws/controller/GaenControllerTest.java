@@ -200,9 +200,7 @@ public class GaenControllerTest extends BaseControllerTest {
 
     result =
         gaenDataService.getSortedExposedForKeyDate(
-            now.atStartOfDay().minusDays(1),
-            null,
-            now.roundToPreviousBucket(releaseBucketDuration));
+            now.atStartOfDay().minusDays(1), null, now.roundToBucketStart(releaseBucketDuration));
     assertEquals(0, result.size());
   }
 

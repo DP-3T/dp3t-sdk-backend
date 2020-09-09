@@ -122,18 +122,24 @@ public class UTCInstant {
     return getLocalDateTime().toLocalTime();
   }
 
-  public UTCInstant roundToPreviousBucket(Duration releaseBucketDuration) {
-    var roundedTimestamp =
-        (long) Math.floor(this.timestamp / releaseBucketDuration.toMillis())
-            * releaseBucketDuration.toMillis();
-    return new UTCInstant(roundedTimestamp);
+  /**
+   * @param releaseBucketDuration
+   * @return the start of the bucket this UTCInstant is in. If the UTCInstant is already at the
+   *     start of a bucket, it will be returned as-is.
+   */
+  public UTCInstant roundToBucketStart(Duration releaseBucketDuration) {
+    var rounding = releaseBucketDuration.toMillis();
+    return new UTCInstant((this.timestamp / rounding) * rounding);
   }
 
+  /**
+   * @param releaseBucketDuration
+   * @return the start of the next bucket of this UTCInstant. If the UTCInstant is at the beginning
+   *     of a bucket, the next bucket will be returned.
+   */
   public UTCInstant roundToNextBucket(Duration releaseBucketDuration) {
-    var roundedTimestamp =
-        ((long) Math.floor(this.timestamp / releaseBucketDuration.toMillis()) + 1)
-            * releaseBucketDuration.toMillis();
-    return new UTCInstant(roundedTimestamp);
+    var rounding = releaseBucketDuration.toMillis();
+    return new UTCInstant(((this.timestamp / rounding) + 1) * rounding);
   }
 
   public UTCInstant plus(Duration duration) {
@@ -242,6 +248,10 @@ public class UTCInstant {
 
   public boolean isAfterToday() {
     return this.isAfterDateOf(UTCInstant.now());
+  }
+
+  public boolean equals(UTCInstant o) {
+    return this.timestamp == o.timestamp;
   }
 
   /**
