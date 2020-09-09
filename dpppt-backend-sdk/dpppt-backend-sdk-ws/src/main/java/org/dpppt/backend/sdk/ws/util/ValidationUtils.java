@@ -36,18 +36,15 @@ public class ValidationUtils {
   }
 
   /**
-   * Check the validty of a base64 value
+   * Check the validity of a base64 encoded key by decoding it and checking the key length
    *
    * @param value representation of a base64 value
    * @return if _value_ is a valid representation
    */
-  public boolean isValidBase64Key(String value) {
+  public boolean isValidKeyFormat(String value) {
     try {
       byte[] key = Base64.getDecoder().decode(value);
-      if (key.length != KEY_LENGTH_BYTES) {
-        return false;
-      }
-      return true;
+      return key.length == KEY_LENGTH_BYTES;
     } catch (Exception e) {
       return false;
     }

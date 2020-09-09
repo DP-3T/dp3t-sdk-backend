@@ -123,7 +123,7 @@ public class DPPPTController {
     if (!this.validateRequest.isValid(principal)) {
       return ResponseEntity.status(HttpStatus.FORBIDDEN).build();
     }
-    if (!validationUtils.isValidBase64Key(exposeeRequest.getKey())) {
+    if (!validationUtils.isValidKeyFormat(exposeeRequest.getKey())) {
       return new ResponseEntity<>("No valid base64 key", HttpStatus.BAD_REQUEST);
     }
     // TODO: should we give that information?
@@ -186,7 +186,7 @@ public class DPPPTController {
 
     List<Exposee> exposees = new ArrayList<>();
     for (var exposedKey : exposeeRequests.getExposedKeys()) {
-      if (!validationUtils.isValidBase64Key(exposedKey.getKey())) {
+      if (!validationUtils.isValidKeyFormat(exposedKey.getKey())) {
         return new ResponseEntity<>("No valid base64 key", HttpStatus.BAD_REQUEST);
       }
 
