@@ -306,17 +306,17 @@ public class DPPPTControllerTest extends BaseControllerTest {
         createToken(
             UTCInstant.now().plusMinutes(5),
             UTCInstant.now().getLocalDate().format(DateTimeFormatter.ISO_DATE));
-
-    mockMvc
-        .perform(
-            post("/v1/exposed")
-                .contentType(MediaType.APPLICATION_JSON)
-                .header("Authorization", "Bearer " + token)
-                .header("User-Agent", "MockMVC")
-                .content(json(exposeeRequest)))
-        .andExpect(status().is(400))
-        .andReturn()
-        .getResponse();
+    MockHttpServletResponse response =
+        mockMvc
+            .perform(
+                post("/v1/exposed")
+                    .contentType(MediaType.APPLICATION_JSON)
+                    .header("Authorization", "Bearer " + token)
+                    .header("User-Agent", "MockMVC")
+                    .content(json(exposeeRequest)))
+            .andExpect(status().is(400))
+            .andReturn()
+            .getResponse();
   }
 
   @Test

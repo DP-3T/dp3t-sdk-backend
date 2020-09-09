@@ -34,6 +34,16 @@ import org.dpppt.backend.sdk.data.gaen.JDBCGAENDataServiceImpl;
 import org.dpppt.backend.sdk.ws.controller.DPPPTController;
 import org.dpppt.backend.sdk.ws.controller.GaenController;
 import org.dpppt.backend.sdk.ws.filter.ResponseWrapperFilter;
+import org.dpppt.backend.sdk.ws.insertmanager.InsertManager;
+import org.dpppt.backend.sdk.ws.insertmanager.insertionfilters.AssertKeyFormat;
+import org.dpppt.backend.sdk.ws.insertmanager.insertionfilters.EnforceMatchingJWTClaimsForExposed;
+import org.dpppt.backend.sdk.ws.insertmanager.insertionfilters.EnforceMatchingJWTClaimsForExposedNextDay;
+import org.dpppt.backend.sdk.ws.insertmanager.insertionfilters.EnforceRetentionPeriod;
+import org.dpppt.backend.sdk.ws.insertmanager.insertionfilters.EnforceValidRollingPeriod;
+import org.dpppt.backend.sdk.ws.insertmanager.insertionfilters.RemoveFakeKeys;
+import org.dpppt.backend.sdk.ws.insertmanager.insertionfilters.RemoveKeysFromFuture;
+import org.dpppt.backend.sdk.ws.insertmanager.insertionmodifier.IOSLegacyProblemRPLT144Modifier;
+import org.dpppt.backend.sdk.ws.insertmanager.insertionmodifier.OldAndroid0RPModifier;
 import org.dpppt.backend.sdk.ws.interceptor.HeaderInjector;
 import org.dpppt.backend.sdk.ws.security.KeyVault;
 import org.dpppt.backend.sdk.ws.security.NoValidateRequest;
@@ -45,6 +55,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.Lazy;
@@ -204,6 +215,61 @@ public abstract class WSBaseConfig implements SchedulingConfigurer, WebMvcConfig
   }
 
   @Bean
+  public InsertManager insertManagerExposed() {
+    var manager = new InsertManager(gaenDataService(), gaenValidationUtils());
+    manager.addFilter(new AssertKeyFormat(gaenValidationUtils()));
+    manager.addFilter(new EnforceMatchingJWTClaimsForExposed(gaenRequestValidator));
+    manager.addFilter(new RemoveKeysFromFuture());
+    manager.addFilter(new EnforceRetentionPeriod(gaenValidationUtils()));
+    manager.addFilter(new RemoveFakeKeys());
+    manager.addFilter(new EnforceValidRollingPeriod());
+    return manager;
+  }
+
+  @Bean
+  public InsertManager insertManagerExposedNextDay() {
+    var manager = new InsertManager(gaenDataService(), gaenValidationUtils());
+    manager.addFilter(new AssertKeyFormat(gaenValidationUtils()));
+    manager.addFilter(new EnforceMatchingJWTClaimsForExposedNextDay(gaenValidationUtils()));
+    manager.addFilter(new RemoveKeysFromFuture());
+    manager.addFilter(new EnforceRetentionPeriod(gaenValidationUtils()));
+    manager.addFilter(new RemoveFakeKeys());
+    manager.addFilter(new EnforceValidRollingPeriod());
+    return manager;
+  }
+
+  /**
+   * Even though there are probably no android devices left that send TEKs with rollingPeriod of 0,
+   * this modifier will not hurt. Every TEK with rollingPeriod of 0 will be reported.
+   */
+  @ConditionalOnProperty(
+      value = "ws.app.gaen.insertmanager.android0rpmodifier",
+      havingValue = "true",
+      matchIfMissing = false)
+  @Bean
+  public OldAndroid0RPModifier oldAndroid0RPModifier(InsertManager manager) {
+    var androidModifier = new OldAndroid0RPModifier();
+    manager.addModifier(androidModifier);
+    return androidModifier;
+  }
+
+  /**
+   * This modifier will most probably not be enabled, as there should be very little iOS devices
+   * left that cannot handle a non-144 rollingPeriod key. Also, up to 8th of September 2020, Android
+   * did not release same day keys.
+   */
+  @ConditionalOnProperty(
+      value = "ws.app.gaen.insertmanager.iosrplt144modifier",
+      havingValue = "true",
+      matchIfMissing = false)
+  @Bean
+  public IOSLegacyProblemRPLT144Modifier iosLegacyProblemRPLT144(InsertManager manager) {
+    var iosModifier = new IOSLegacyProblemRPLT144Modifier();
+    manager.addModifier(iosModifier);
+    return iosModifier;
+  }
+
+  @Bean
   public DPPPTController dppptSDKController() {
     ValidateRequest theValidator = requestValidator;
     if (theValidator == null) {
@@ -237,6 +303,8 @@ public abstract class WSBaseConfig implements SchedulingConfigurer, WebMvcConfig
       theValidator = backupValidator();
     }
     return new GaenController(
+        insertManagerExposed(),
+        insertManagerExposedNextDay(),
         gaenDataService(),
         fakeKeyService(),
         theValidator,

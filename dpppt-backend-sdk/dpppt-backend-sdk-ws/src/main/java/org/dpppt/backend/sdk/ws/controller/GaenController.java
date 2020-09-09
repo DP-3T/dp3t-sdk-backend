@@ -27,18 +27,24 @@ import javax.validation.Valid;
 import org.dpppt.backend.sdk.data.gaen.FakeKeyService;
 import org.dpppt.backend.sdk.data.gaen.GAENDataService;
 import org.dpppt.backend.sdk.model.gaen.DayBuckets;
-import org.dpppt.backend.sdk.model.gaen.GaenKey;
 import org.dpppt.backend.sdk.model.gaen.GaenRequest;
 import org.dpppt.backend.sdk.model.gaen.GaenSecondDay;
 import org.dpppt.backend.sdk.model.gaen.GaenUnit;
 import org.dpppt.backend.sdk.utils.DurationExpiredException;
 import org.dpppt.backend.sdk.utils.UTCInstant;
+import org.dpppt.backend.sdk.ws.insertmanager.InsertException;
+import org.dpppt.backend.sdk.ws.insertmanager.InsertManager;
+import org.dpppt.backend.sdk.ws.insertmanager.insertionfilters.AssertKeyFormat.KeyFormatException;
 import org.dpppt.backend.sdk.ws.security.ValidateRequest;
+import org.dpppt.backend.sdk.ws.security.ValidateRequest.ClaimIsBeforeOnsetException;
 import org.dpppt.backend.sdk.ws.security.ValidateRequest.InvalidDateException;
+import org.dpppt.backend.sdk.ws.security.ValidateRequest.WrongScopeException;
 import org.dpppt.backend.sdk.ws.security.signature.ProtoSignature;
 import org.dpppt.backend.sdk.ws.security.signature.ProtoSignature.ProtoSignatureWrapper;
 import org.dpppt.backend.sdk.ws.util.ValidationUtils;
 import org.dpppt.backend.sdk.ws.util.ValidationUtils.BadBatchReleaseTimeException;
+import org.dpppt.backend.sdk.ws.util.ValidationUtils.DelayedKeyDateClaimIsMissing;
+import org.dpppt.backend.sdk.ws.util.ValidationUtils.DelayedKeyDateIsInvalid;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.http.CacheControl;
@@ -79,6 +85,8 @@ public class GaenController {
   private final Duration requestTime;
   private final ValidateRequest validateRequest;
   private final ValidationUtils validationUtils;
+  private final InsertManager insertManagerExposed;
+  private final InsertManager insertManagerExposedNextDay;
   private final GAENDataService dataService;
   private final FakeKeyService fakeKeyService;
   private final Duration exposedListCacheControl;
@@ -86,6 +94,8 @@ public class GaenController {
   private final ProtoSignature gaenSigner;
 
   public GaenController(
+      InsertManager insertManagerExposed,
+      InsertManager insertManagerExposedNextDay,
       GAENDataService dataService,
       FakeKeyService fakeKeyService,
       ValidateRequest validateRequest,
@@ -95,6 +105,8 @@ public class GaenController {
       Duration requestTime,
       Duration exposedListCacheControl,
       PrivateKey secondDayKey) {
+    this.insertManagerExposed = insertManagerExposed;
+    this.insertManagerExposedNextDay = insertManagerExposedNextDay;
     this.dataService = dataService;
     this.fakeKeyService = fakeKeyService;
     this.releaseBucketDuration = releaseBucketDuration;
@@ -113,10 +125,7 @@ public class GaenController {
               + " to the current day's exposed key",
       responses = {
         "200=>The exposed keys have been stored in the database",
-        "400=> "
-            + "- Invalid base64 encoding in GaenRequest"
-            + "- negative rolling period"
-            + "- fake claim with non-fake keys",
+        "400=>Invalid base64 encoding in GaenRequest",
         "403=>Authentication failed"
       })
   public @ResponseBody Callable<ResponseEntity<String>> addExposed(
@@ -137,69 +146,18 @@ public class GaenController {
           String userAgent,
       @AuthenticationPrincipal
           @Documentation(description = "JWT token that can be verified by the backend server")
-          Object principal) {
+          Object principal)
+      throws DelayedKeyDateIsInvalid, InsertException, WrongScopeException {
     var now = UTCInstant.now();
-    boolean valid = false;
-    try {
-      valid = this.validateRequest.isValid(principal);
-    } catch (ValidateRequest.WrongScopeException e) {
-      logger.error("Got invalid scope: " + e);
-    }
-    if (!valid) {
-      return () -> ResponseEntity.status(HttpStatus.FORBIDDEN).build();
-    }
 
-    List<GaenKey> nonFakeKeys = new ArrayList<>();
-    for (var key : gaenRequest.getGaenKeys()) {
-      if (!validationUtils.isValidBase64Key(key.getKeyData())) {
-        return () -> new ResponseEntity<>("No valid base64 key", HttpStatus.BAD_REQUEST);
-      }
-      if (this.validateRequest.isFakeRequest(principal, key)
-          || hasNegativeRollingPeriod(key)
-          || hasInvalidKeyDate(now, principal, key)) {
-        continue;
-      }
+    this.validateRequest.isValid(principal);
 
-      if (key.getRollingPeriod().equals(0)) {
-        // Additionally to delaying keys this feature also makes sure the rolling period is always
-        // set
-        // to 144 to make sure iOS 13.5.x does not ignore the TEK.
-        // Currently only Android seems to send 0 which can never be valid, since a non used key
-        // should not be submitted.
-        // This allows to check for the Google-TEKs also on iOS. Because the Rolling Proximity
-        // Identifier is based on the TEK and the unix epoch, this should work. The only downside is
-        // that iOS
-        // will not be able to optimize verification of the TEKs, because it will have to consider
-        // each
-        // TEK for a whole day.
-        logger.error("RollingPeriod should NOT be 0, fixing it and using 144");
-        key.setRollingPeriod(GaenKey.GaenKeyDefaultRollingPeriod);
+    // Filter out non valid keys and insert them into the database (c.f. InsertManager and
+    // configured Filters in the WSBaseConfig)
+    insertManagerExposed.insertIntoDatabase(gaenRequest.getGaenKeys(), userAgent, principal, now);
 
-        // If this is a same day TEK we are delaying its release
-        nonFakeKeys.add(key);
-      }
-      nonFakeKeys.add(key);
-    }
-
-    if (principal instanceof Jwt
-        && ((Jwt) principal).containsClaim("fake")
-        && ((Jwt) principal).getClaim("fake").equals("1")
-        && !nonFakeKeys.isEmpty()) {
-      return () ->
-          ResponseEntity.badRequest().body("Claim is fake but list contains non fake keys");
-    }
-    if (!nonFakeKeys.isEmpty()) {
-      dataService.upsertExposees(nonFakeKeys, now);
-    }
-
-    var delayedKeyDateUTCInstant =
-        UTCInstant.of(gaenRequest.getDelayedKeyDate(), GaenUnit.TenMinutes);
-    if (delayedKeyDateUTCInstant.isBeforeDateOf(now.getLocalDate().minusDays(1))
-        || delayedKeyDateUTCInstant.isAfterDateOf(now.getLocalDate().plusDays(1))) {
-      return () ->
-          ResponseEntity.badRequest()
-              .body("delayedKeyDate date must be between yesterday and tomorrow");
-    }
+    this.validationUtils.assertDelayedKeyDate(
+        now, UTCInstant.of(gaenRequest.getDelayedKeyDate(), GaenUnit.TenMinutes));
 
     var responseBuilder = ResponseEntity.ok();
     if (principal instanceof Jwt) {
@@ -240,8 +198,7 @@ public class GaenController {
         "200=>The exposed key has been stored in the backend",
         "400=>"
             + "- Ivnalid base64 encoded Temporary Exposure Key"
-            + "- TEK-date does not match delayedKeyDAte claim in Jwt"
-            + "- TEK has negative rolling period",
+            + "- TEK-date does not match delayedKeyDAte claim in Jwt",
         "403=>No delayedKeyDate claim in authentication"
       })
   public @ResponseBody Callable<ResponseEntity<String>> addExposedSecond(
@@ -259,44 +216,18 @@ public class GaenController {
               description =
                   "JWT token that can be verified by the backend server, must have been created by"
                       + " /v1/gaen/exposed and contain the delayedKeyDate")
-          Object principal) {
+          Object principal)
+      throws DelayedKeyDateClaimIsMissing, InsertException {
     var now = UTCInstant.now();
 
-    if (!validationUtils.isValidBase64Key(gaenSecondDay.getDelayedKey().getKeyData())) {
-      return () -> new ResponseEntity<>("No valid base64 key", HttpStatus.BAD_REQUEST);
-    }
-    if (principal instanceof Jwt && !((Jwt) principal).containsClaim("delayedKeyDate")) {
-      return () ->
-          ResponseEntity.status(HttpStatus.FORBIDDEN).body("claim does not contain delayedKeyDate");
-    }
-    if (principal instanceof Jwt) {
-      var jwt = (Jwt) principal;
-      var claimKeyDate = Integer.parseInt(jwt.getClaimAsString("delayedKeyDate"));
-      if (!gaenSecondDay.getDelayedKey().getRollingStartNumber().equals(claimKeyDate)) {
-        return () -> ResponseEntity.badRequest().body("keyDate does not match claim keyDate");
-      }
-    }
+    // Throws an exception if the claim doesn't exist. The actual verification is done in the
+    // filters.
+    validationUtils.getDelayedKeyDateClaim(principal);
 
-    if (!this.validateRequest.isFakeRequest(principal, gaenSecondDay.getDelayedKey())) {
-      if (gaenSecondDay.getDelayedKey().getRollingPeriod().equals(0)) {
-        // currently only android seems to send 0 which can never be valid, since a non used key
-        // should not be submitted
-        // default value according to EN is 144, so just set it to that. If we ever get 0 from iOS
-        // we should log it, since
-        // this should not happen
-        gaenSecondDay.getDelayedKey().setRollingPeriod(GaenKey.GaenKeyDefaultRollingPeriod);
-        if (userAgent.toLowerCase().contains("ios")) {
-          logger.error("Received a rolling period of 0 for an iOS User-Agent");
-        }
-      } else if (gaenSecondDay.getDelayedKey().getRollingPeriod() < 0) {
-        return () ->
-            ResponseEntity.status(HttpStatus.BAD_REQUEST)
-                .body("Rolling Period MUST NOT be negative.");
-      }
-      List<GaenKey> keys = new ArrayList<>();
-      keys.add(gaenSecondDay.getDelayedKey());
-      dataService.upsertExposees(keys, now);
-    }
+    // Filter out non valid keys and insert them into the database (c.f. InsertManager and
+    // configured Filters in the WSBaseConfig)
+    insertManagerExposedNextDay.insertIntoDatabase(
+        List.of(gaenSecondDay.getDelayedKey()), userAgent, principal, now);
 
     return () -> {
       try {
@@ -335,19 +266,19 @@ public class GaenController {
           Long publishedafter)
       throws BadBatchReleaseTimeException, IOException, InvalidKeyException, SignatureException,
           NoSuchAlgorithmException {
-    var utcNow = UTCInstant.now();
+    var now = UTCInstant.now();
     if (!validationUtils.isValidKeyDate(UTCInstant.ofEpochMillis(keyDate))) {
       return ResponseEntity.notFound().build();
     }
     if (publishedafter != null
         && !validationUtils.isValidBatchReleaseTime(
-            UTCInstant.ofEpochMillis(publishedafter), utcNow)) {
+            UTCInstant.ofEpochMillis(publishedafter), now)) {
       return ResponseEntity.notFound().build();
     }
 
-    long now = utcNow.getTimestamp();
     // calculate exposed until bucket
-    long publishedUntil = now - (now % releaseBucketDuration.toMillis());
+    long publishedUntil =
+        now.getTimestamp() - (now.getTimestamp() % releaseBucketDuration.toMillis());
 
     var exposedKeys =
         dataService.getSortedExposedForKeyDate(keyDate, publishedafter, publishedUntil);
@@ -403,24 +334,17 @@ public class GaenController {
     return ResponseEntity.ok(dayBuckets);
   }
 
-  private boolean hasNegativeRollingPeriod(GaenKey key) {
-    Integer rollingPeriod = key.getRollingPeriod();
-    if (key.getRollingPeriod() < 0) {
-      logger.error("Detected key with negative rolling period {}", rollingPeriod);
-      return true;
-    } else {
-      return false;
-    }
+  @ExceptionHandler({DelayedKeyDateClaimIsMissing.class})
+  @ResponseStatus(HttpStatus.BAD_REQUEST)
+  public ResponseEntity<String> delayedClaimIsWrong() {
+    return ResponseEntity.badRequest().body("DelayedKeyDateClaim is wrong");
   }
 
-  private boolean hasInvalidKeyDate(UTCInstant now, Object principal, GaenKey key) {
-    try {
-      this.validateRequest.validateKeyDate(now, principal, key);
-    } catch (InvalidDateException | ValidateRequest.ClaimIsBeforeOnsetException e) {
-      logger.error(e.getLocalizedMessage());
-      return true;
-    }
-    return false;
+  @ExceptionHandler({DelayedKeyDateIsInvalid.class})
+  @ResponseStatus(HttpStatus.BAD_REQUEST)
+  public ResponseEntity<String> delayedKeyDateIsInvalid() {
+    return ResponseEntity.badRequest()
+        .body("DelayedKeyDate must be between yesterday and tomorrow");
   }
 
   @ExceptionHandler({
@@ -429,10 +353,18 @@ public class GaenController {
     JsonProcessingException.class,
     MethodArgumentNotValidException.class,
     BadBatchReleaseTimeException.class,
-    DateTimeParseException.class
+    DateTimeParseException.class,
+    ClaimIsBeforeOnsetException.class,
+    KeyFormatException.class
   })
   @ResponseStatus(HttpStatus.BAD_REQUEST)
   public ResponseEntity<Object> invalidArguments() {
     return ResponseEntity.badRequest().build();
+  }
+
+  @ExceptionHandler({WrongScopeException.class})
+  @ResponseStatus(HttpStatus.FORBIDDEN)
+  public ResponseEntity<Object> forbidden() {
+    return ResponseEntity.status(HttpStatus.FORBIDDEN).build();
   }
 }

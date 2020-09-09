@@ -71,7 +71,7 @@ public class DebugController {
 
     List<GaenKey> nonFakeKeys = new ArrayList<>();
     for (var key : gaenRequest.getGaenKeys()) {
-      if (!validationUtils.isValidBase64Key(key.getKeyData())) {
+      if (!validationUtils.isValidKeyFormat(key.getKeyData())) {
         return new ResponseEntity<>("No valid base64 key", HttpStatus.BAD_REQUEST);
       }
       this.validateRequest.validateKeyDate(now, principal, key);

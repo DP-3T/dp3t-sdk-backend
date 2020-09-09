@@ -11,7 +11,7 @@ package org.dpppt.backend.sdk.ws.util;
 
 import java.time.Duration;
 import java.util.Base64;
-import org.dpppt.backend.sdk.model.gaen.GaenKey;
+import org.dpppt.backend.sdk.model.gaen.GaenUnit;
 import org.dpppt.backend.sdk.utils.UTCInstant;
 import org.springframework.security.oauth2.jwt.Jwt;
 
@@ -36,18 +36,15 @@ public class ValidationUtils {
   }
 
   /**
-   * Check the validty of a base64 value
+   * Check the validity of a base64 encoded key by decoding it and checking the key length
    *
    * @param value representation of a base64 value
    * @return if _value_ is a valid representation
    */
-  public boolean isValidBase64Key(String value) {
+  public boolean isValidKeyFormat(String value) {
     try {
       byte[] key = Base64.getDecoder().decode(value);
-      if (key.length != KEY_LENGTH_BYTES) {
-        return false;
-      }
-      return true;
+      return key.length == KEY_LENGTH_BYTES;
     } catch (Exception e) {
       return false;
     }
@@ -101,7 +98,7 @@ public class ValidationUtils {
     return this.isDateInRange(batchReleaseTime, now);
   }
 
-  public void validateDelayedKeyDate(UTCInstant now, UTCInstant delayedKeyDate)
+  public void assertDelayedKeyDate(UTCInstant now, UTCInstant delayedKeyDate)
       throws DelayedKeyDateIsInvalid {
     if (delayedKeyDate.isBeforeDateOf(now.getLocalDate().minusDays(1))
         || delayedKeyDate.isAfterDateOf(now.getLocalDate().plusDays(1))) {
@@ -109,19 +106,15 @@ public class ValidationUtils {
     }
   }
 
-  public void checkForDelayedKeyDateClaim(Object principal, GaenKey delayedKey)
-      throws DelayedKeyDateClaimIsWrong {
-    if (principal instanceof Jwt
-        && Boolean.FALSE.equals(((Jwt) principal).containsClaim("delayedKeyDate"))) {
-      throw new DelayedKeyDateClaimIsWrong();
-    }
+  public UTCInstant getDelayedKeyDateClaim(Object principal) throws DelayedKeyDateClaimIsMissing {
     if (principal instanceof Jwt) {
       var jwt = (Jwt) principal;
-      var claimKeyDate = Integer.parseInt(jwt.getClaimAsString("delayedKeyDate"));
-      if (!delayedKey.getRollingStartNumber().equals(claimKeyDate)) {
-        throw new DelayedKeyDateClaimIsWrong();
+      if (jwt.containsClaim("delayedKeyDate")) {
+        return UTCInstant.of(
+            Integer.parseInt(jwt.getClaimAsString("delayedKeyDate")), GaenUnit.TenMinutes);
       }
     }
+    throw new DelayedKeyDateClaimIsMissing();
   }
 
   public boolean jwtIsFake(Object principal) {
@@ -141,7 +134,7 @@ public class ValidationUtils {
     private static final long serialVersionUID = -2667236967819549686L;
   }
 
-  public class DelayedKeyDateClaimIsWrong extends Exception {
+  public class DelayedKeyDateClaimIsMissing extends Exception {
 
     /** */
     private static final long serialVersionUID = 4683923905451080793L;
