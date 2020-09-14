@@ -2,6 +2,7 @@ package org.dpppt.backend.sdk.ws.insertmanager;
 
 import java.util.ArrayList;
 import java.util.List;
+import org.dpppt.backend.sdk.data.gaen.DebugGAENDataService;
 import org.dpppt.backend.sdk.data.gaen.GAENDataService;
 import org.dpppt.backend.sdk.model.gaen.GaenKey;
 import org.dpppt.backend.sdk.semver.Version;
@@ -28,11 +29,25 @@ public class InsertManager {
   private final GAENDataService dataService;
   private final ValidationUtils validationUtils;
 
+  private DebugGAENDataService debugDataService;
+
   private static final Logger logger = LoggerFactory.getLogger(InsertManager.class);
 
   public InsertManager(GAENDataService dataService, ValidationUtils validationUtils) {
     this.dataService = dataService;
     this.validationUtils = validationUtils;
+    this.debugDataService = null;
+  }
+
+  private InsertManager(DebugGAENDataService debugDataService, ValidationUtils validationUtils) {
+    this.debugDataService = debugDataService;
+    this.validationUtils = validationUtils;
+    this.dataService = null;
+  }
+
+  public static InsertManager getDebugInsertManager(
+      DebugGAENDataService debugDataService, ValidationUtils validationUtils) {
+    return new InsertManager(debugDataService, validationUtils);
   }
 
   public void addFilter(KeyInsertionFilter filter) {
@@ -60,7 +75,37 @@ public class InsertManager {
     if (keys == null || keys.isEmpty()) {
       return;
     }
+    var internalKeys = filterAndModify(keys, header, principal, now);
+    // if no keys remain or this is a fake request, just return. Else, insert the
+    // remaining keys.
+    if (internalKeys.isEmpty() || validationUtils.jwtIsFake(principal)) {
+      return;
+    } else {
+      dataService.upsertExposees(internalKeys, now);
+    }
+  }
 
+  public void insertIntoDatabaseDEBUG(
+      String deviceName, List<GaenKey> keys, String header, Object principal, UTCInstant now)
+      throws InsertException {
+    if (keys == null || keys.isEmpty()) {
+      return;
+    }
+    var internalKeys = filterAndModify(keys, header, principal, now);
+    // if no keys remain or this is a fake request, just return. Else, insert the
+    // remaining keys.
+    if (internalKeys.isEmpty() || validationUtils.jwtIsFake(principal)) {
+      return;
+    } else {
+      debugDataService.upsertExposees(deviceName, internalKeys);
+    }
+  }
+
+  private List<GaenKey> filterAndModify(
+      List<GaenKey> keys, String header, Object principal, UTCInstant now) throws InsertException {
+    if (debugDataService != null) {
+      logger.warn("DebugDataService is not null, don't use this in production!");
+    }
     var internalKeys = keys;
     var headerParts = header.split(";");
     if (headerParts.length != 5) {
@@ -83,14 +128,7 @@ public class InsertManager {
     for (KeyInsertionFilter filter : filterList) {
       internalKeys = filter.filter(now, internalKeys, osType, osVersion, appVersion, principal);
     }
-
-    // if no keys remain or this is a fake request, just return. Else, insert the
-    // remaining keys.
-    if (internalKeys.isEmpty() || validationUtils.jwtIsFake(principal)) {
-      return;
-    } else {
-      dataService.upsertExposees(internalKeys, now);
-    }
+    return internalKeys;
   }
 
   /**

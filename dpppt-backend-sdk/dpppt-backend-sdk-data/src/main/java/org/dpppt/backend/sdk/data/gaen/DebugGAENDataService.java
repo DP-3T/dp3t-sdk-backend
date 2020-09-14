@@ -10,9 +10,11 @@
 
 package org.dpppt.backend.sdk.data.gaen;
 
+import java.time.Duration;
 import java.util.List;
 import java.util.Map;
 import org.dpppt.backend.sdk.model.gaen.GaenKey;
+import org.dpppt.backend.sdk.utils.UTCInstant;
 
 public interface DebugGAENDataService {
 
@@ -32,5 +34,5 @@ public interface DebugGAENDataService {
    * @return all exposed keys for the given batch from the debug store
    */
   Map<String, List<GaenKey>> getSortedExposedForBatchReleaseTime(
-      Long batchReleaseTime, long releaseBucketDuration);
+      UTCInstant batchReleaseTime, Duration releaseBucketDuration);
 }
