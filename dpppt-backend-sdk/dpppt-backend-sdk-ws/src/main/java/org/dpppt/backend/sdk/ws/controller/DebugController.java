@@ -22,8 +22,6 @@ import org.dpppt.backend.sdk.ws.security.ValidateRequest.InvalidDateException;
 import org.dpppt.backend.sdk.ws.security.ValidateRequest.WrongScopeException;
 import org.dpppt.backend.sdk.ws.security.signature.ProtoSignature;
 import org.dpppt.backend.sdk.ws.util.ValidationUtils.BadBatchReleaseTimeException;
-import org.dpppt.backend.sdk.ws.util.ValidationUtils.DelayedKeyDateClaimIsMissing;
-import org.dpppt.backend.sdk.ws.util.ValidationUtils.DelayedKeyDateIsInvalid;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
@@ -71,8 +69,7 @@ public class DebugController {
       @RequestHeader(value = "User-Agent", required = true) String userAgent,
       @RequestHeader(value = "X-Device-Name", required = true) String deviceName,
       @AuthenticationPrincipal Object principal)
-      throws InvalidDateException, ClaimIsBeforeOnsetException, WrongScopeException,
-          InsertException {
+      throws WrongScopeException, InsertException {
     var now = UTCInstant.now();
     this.validateRequest.isValid(principal);
 
@@ -139,19 +136,6 @@ public class DebugController {
     } catch (Exception ex) {
 
     }
-  }
-
-  @ExceptionHandler({DelayedKeyDateClaimIsMissing.class})
-  @ResponseStatus(HttpStatus.BAD_REQUEST)
-  public ResponseEntity<String> delayedClaimIsWrong() {
-    return ResponseEntity.badRequest().body("DelayedKeyDateClaim is wrong");
-  }
-
-  @ExceptionHandler({DelayedKeyDateIsInvalid.class})
-  @ResponseStatus(HttpStatus.BAD_REQUEST)
-  public ResponseEntity<String> delayedKeyDateIsInvalid() {
-    return ResponseEntity.badRequest()
-        .body("DelayedKeyDate must be between yesterday and tomorrow");
   }
 
   @ExceptionHandler({
