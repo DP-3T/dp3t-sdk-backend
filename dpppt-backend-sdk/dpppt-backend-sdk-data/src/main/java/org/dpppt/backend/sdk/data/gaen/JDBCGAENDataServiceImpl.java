@@ -103,10 +103,11 @@ public class JDBCGAENDataServiceImpl implements GAENDataService {
             + " rolling_start_number >= :rollingPeriodStartNumberStart"
             + " and rolling_start_number < :rollingPeriodStartNumberEnd"
             + " and received_at < :publishedUntil";
-
+    // we need to subtract the time skew since we want to release it iff rolling_start_number +
+    // rolling_period + timeSkew < NOW
     params.addValue(
         "maxAllowedStartNumber",
-        now.roundToBucketStart(releaseBucketDuration).plus(timeSkew).get10MinutesSince1970());
+        now.roundToBucketStart(releaseBucketDuration).minus(timeSkew).get10MinutesSince1970());
     sql += " and rolling_start_number < :maxAllowedStartNumber";
 
     if (publishedAfter != null) {
@@ -136,10 +137,11 @@ public class JDBCGAENDataServiceImpl implements GAENDataService {
             + " from t_gaen_exposed where rolling_start_number >= :rollingPeriodStartNumberStart"
             + " and rolling_start_number < :rollingPeriodStartNumberEnd and received_at <"
             + " :publishedUntil";
-
+    // we need to subtract the time skew since we want to release it iff rolling_start_number +
+    // rolling_period + timeSkew < NOW
     params.addValue(
         "maxAllowedStartNumber",
-        now.roundToBucketStart(releaseBucketDuration).plus(timeSkew).get10MinutesSince1970());
+        now.roundToBucketStart(releaseBucketDuration).minus(timeSkew).get10MinutesSince1970());
     sql += " and rolling_start_number + rolling_period < :maxAllowedStartNumber";
 
     if (publishedAfter != null) {
