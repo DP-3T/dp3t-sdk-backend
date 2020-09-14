@@ -78,9 +78,7 @@ public class InsertManager {
     var internalKeys = filterAndModify(keys, header, principal, now);
     // if no keys remain or this is a fake request, just return. Else, insert the
     // remaining keys.
-    if (internalKeys.isEmpty() || validationUtils.jwtIsFake(principal)) {
-      return;
-    } else {
+    if (!internalKeys.isEmpty() && !validationUtils.jwtIsFake(principal)) {
       dataService.upsertExposees(internalKeys, now);
     }
   }
@@ -94,9 +92,7 @@ public class InsertManager {
     var internalKeys = filterAndModify(keys, header, principal, now);
     // if no keys remain or this is a fake request, just return. Else, insert the
     // remaining keys.
-    if (internalKeys.isEmpty() || validationUtils.jwtIsFake(principal)) {
-      return;
-    } else {
+    if (!internalKeys.isEmpty() && !validationUtils.jwtIsFake(principal)) {
       debugDataService.upsertExposees(deviceName, internalKeys);
     }
   }
