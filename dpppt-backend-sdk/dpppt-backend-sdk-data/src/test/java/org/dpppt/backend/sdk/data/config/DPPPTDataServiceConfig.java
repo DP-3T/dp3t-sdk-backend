@@ -36,8 +36,8 @@ public class DPPPTDataServiceConfig {
   @Value("${ws.exposedlist.releaseBucketDuration: 7200000}")
   long releaseBucketDuration;
 
-  @Value("${ws.gaen.timeskew: PT2h}")
-  Duration timeSkew;
+  // @Value("${ws.app.gaen.timeskew:PT2h}")
+  Duration timeSkew = Duration.ofHours(2);
 
   @Autowired DataSource dataSource;
 

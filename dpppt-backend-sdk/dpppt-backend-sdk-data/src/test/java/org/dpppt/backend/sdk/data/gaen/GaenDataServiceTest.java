@@ -2,7 +2,9 @@ package org.dpppt.backend.sdk.data.gaen;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
+import java.time.Clock;
 import java.time.Duration;
+import java.time.ZoneOffset;
 import java.util.Base64;
 import java.util.List;
 import org.dpppt.backend.sdk.data.config.DPPPTDataServiceConfig;
@@ -10,6 +12,7 @@ import org.dpppt.backend.sdk.data.config.FlyWayConfig;
 import org.dpppt.backend.sdk.data.config.RedeemDataServiceConfig;
 import org.dpppt.backend.sdk.data.config.StandaloneDataConfig;
 import org.dpppt.backend.sdk.model.gaen.GaenKey;
+import org.dpppt.backend.sdk.model.gaen.GaenUnit;
 import org.dpppt.backend.sdk.utils.UTCInstant;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -65,5 +68,46 @@ public class GaenDataServiceTest {
 
     assertEquals(keys.size(), returnedKeys.size());
     assertEquals(keys.get(1).getKeyData(), returnedKeys.get(0).getKeyData());
+  }
+
+  @Test
+  public void testNoEarlyRelease() throws Exception {
+    Clock twoOClock = Clock.fixed(UTCInstant.today().plusHours(2).getInstant(), ZoneOffset.UTC);
+    Clock elevenOClock = Clock.fixed(UTCInstant.today().plusHours(11).getInstant(), ZoneOffset.UTC);
+    Clock fourteenOClock =
+        Clock.fixed(UTCInstant.today().plusHours(14).getInstant(), ZoneOffset.UTC);
+
+    UTCInstant.setClock(twoOClock);
+    var now = UTCInstant.now();
+    var tmpKey = new GaenKey();
+    tmpKey.setRollingStartNumber((int) now.atStartOfDay().get10MinutesSince1970());
+    tmpKey.setKeyData(Base64.getEncoder().encodeToString("testKey32Bytes--".getBytes("UTF-8")));
+    tmpKey.setRollingPeriod(
+        (int) Duration.ofHours(10).dividedBy(GaenUnit.TenMinutes.getDuration()));
+    tmpKey.setFake(0);
+    tmpKey.setTransmissionRiskLevel(0);
+
+    gaenDataService.upsertExposees(List.of(tmpKey), now);
+    // key was inserted with a rolling period of 10 hours, which means the key is not allowed to be
+    // released before 12, but since 12 already is in the 14 O'Clock bucket, it is not released
+    // before 14:00
+
+    // eleven O'clock no key
+    UTCInstant.setClock(elevenOClock);
+    now = UTCInstant.now();
+
+    UTCInstant publishedUntil = now.roundToNextBucket(BUCKET_LENGTH).plusMinutes(1);
+    var returnedKeys =
+        gaenDataService.getSortedExposedForKeyDate(UTCInstant.today(), null, publishedUntil, now);
+    assertEquals(0, returnedKeys.size());
+
+    // twelve O'clock release the key
+    UTCInstant.setClock(fourteenOClock);
+    now = UTCInstant.now().plusMinutes(1);
+
+    publishedUntil = now.roundToNextBucket(BUCKET_LENGTH);
+    returnedKeys =
+        gaenDataService.getSortedExposedForKeyDate(UTCInstant.today(), null, publishedUntil, now);
+    assertEquals(1, returnedKeys.size());
   }
 }
