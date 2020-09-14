@@ -128,7 +128,7 @@ public class UTCInstant {
    *     start of a bucket, it will be returned as-is.
    */
   public UTCInstant roundToBucketStart(Duration releaseBucketDuration) {
-    var rounding = releaseBucketDuration.toMillis();
+    long rounding = releaseBucketDuration.toMillis();
     return new UTCInstant((this.timestamp / rounding) * rounding);
   }
 
@@ -138,7 +138,7 @@ public class UTCInstant {
    *     of a bucket, the next bucket will be returned.
    */
   public UTCInstant roundToNextBucket(Duration releaseBucketDuration) {
-    var rounding = releaseBucketDuration.toMillis();
+    long rounding = releaseBucketDuration.toMillis();
     return new UTCInstant(((this.timestamp / rounding) + 1) * rounding);
   }
 
