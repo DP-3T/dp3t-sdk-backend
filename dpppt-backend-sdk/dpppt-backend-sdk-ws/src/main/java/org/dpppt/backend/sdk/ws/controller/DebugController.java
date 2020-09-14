@@ -1,30 +1,35 @@
 package org.dpppt.backend.sdk.ws.controller;
 
+import com.fasterxml.jackson.core.JsonProcessingException;
 import java.io.IOException;
 import java.security.InvalidKeyException;
 import java.security.NoSuchAlgorithmException;
 import java.security.SignatureException;
 import java.time.Duration;
+import java.time.format.DateTimeParseException;
 import java.util.ArrayList;
-import java.util.List;
 import javax.validation.Valid;
 import org.dpppt.backend.sdk.data.gaen.DebugGAENDataService;
 import org.dpppt.backend.sdk.model.gaen.DayBuckets;
-import org.dpppt.backend.sdk.model.gaen.GaenKey;
 import org.dpppt.backend.sdk.model.gaen.GaenRequest;
 import org.dpppt.backend.sdk.utils.UTCInstant;
+import org.dpppt.backend.sdk.ws.insertmanager.InsertException;
+import org.dpppt.backend.sdk.ws.insertmanager.InsertManager;
+import org.dpppt.backend.sdk.ws.insertmanager.insertionfilters.AssertKeyFormat.KeyFormatException;
 import org.dpppt.backend.sdk.ws.security.ValidateRequest;
 import org.dpppt.backend.sdk.ws.security.ValidateRequest.ClaimIsBeforeOnsetException;
 import org.dpppt.backend.sdk.ws.security.ValidateRequest.InvalidDateException;
 import org.dpppt.backend.sdk.ws.security.ValidateRequest.WrongScopeException;
 import org.dpppt.backend.sdk.ws.security.signature.ProtoSignature;
-import org.dpppt.backend.sdk.ws.util.ValidationUtils;
 import org.dpppt.backend.sdk.ws.util.ValidationUtils.BadBatchReleaseTimeException;
+import org.dpppt.backend.sdk.ws.util.ValidationUtils.DelayedKeyDateClaimIsMissing;
+import org.dpppt.backend.sdk.ws.util.ValidationUtils.DelayedKeyDateIsInvalid;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
-import org.springframework.security.oauth2.jwt.Jwt;
 import org.springframework.stereotype.Controller;
+import org.springframework.web.bind.MethodArgumentNotValidException;
+import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
@@ -32,13 +37,14 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestHeader;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.ResponseBody;
+import org.springframework.web.bind.annotation.ResponseStatus;
 import org.springframework.web.context.request.WebRequest;
 
 @Controller
 @RequestMapping("/v1/debug")
 public class DebugController {
   private final ValidateRequest validateRequest;
-  private final ValidationUtils validationUtils;
+  private final InsertManager insertManager;
   private final Duration releaseBucketDuration;
   private final Duration requestTime;
   private final ProtoSignature gaenSigner;
@@ -48,15 +54,15 @@ public class DebugController {
       DebugGAENDataService dataService,
       ProtoSignature gaenSigner,
       ValidateRequest validateRequest,
-      ValidationUtils validationUtils,
+      InsertManager insertManager,
       Duration releaseBucketDuration,
       Duration requestTime) {
     this.validateRequest = validateRequest;
-    this.validationUtils = validationUtils;
     this.releaseBucketDuration = releaseBucketDuration;
     this.requestTime = requestTime;
     this.gaenSigner = gaenSigner;
     this.dataService = dataService;
+    this.insertManager = insertManager;
   }
 
   @PostMapping(value = "/exposed")
@@ -65,32 +71,15 @@ public class DebugController {
       @RequestHeader(value = "User-Agent", required = true) String userAgent,
       @RequestHeader(value = "X-Device-Name", required = true) String deviceName,
       @AuthenticationPrincipal Object principal)
-      throws InvalidDateException, ClaimIsBeforeOnsetException, WrongScopeException {
+      throws InvalidDateException, ClaimIsBeforeOnsetException, WrongScopeException,
+          InsertException {
     var now = UTCInstant.now();
     this.validateRequest.isValid(principal);
 
-    List<GaenKey> nonFakeKeys = new ArrayList<>();
-    for (var key : gaenRequest.getGaenKeys()) {
-      if (!validationUtils.isValidKeyFormat(key.getKeyData())) {
-        return new ResponseEntity<>("No valid base64 key", HttpStatus.BAD_REQUEST);
-      }
-      this.validateRequest.validateKeyDate(now, principal, key);
-      if (this.validateRequest.isFakeRequest(principal, key)) {
-        continue;
-      } else {
-        nonFakeKeys.add(key);
-      }
-    }
-    if (principal instanceof Jwt
-        && ((Jwt) principal).containsClaim("fake")
-        && ((Jwt) principal).getClaim("fake").equals("1")
-        && !nonFakeKeys.isEmpty()) {
-      return ResponseEntity.badRequest().body("Claim is fake but list contains non fake keys");
-    }
-    if (!nonFakeKeys.isEmpty()) {
-      dataService.upsertExposees(deviceName, nonFakeKeys);
-    }
-
+    // Filter out non valid keys and insert them into the database (c.f. InsertManager and
+    // configured Filters in the WSBaseConfig)
+    insertManager.insertIntoDatabaseDEBUG(
+        deviceName, gaenRequest.getGaenKeys(), userAgent, principal, now);
     var responseBuilder = ResponseEntity.ok();
 
     normalizeRequestTime(now.getTimestamp());
@@ -104,13 +93,14 @@ public class DebugController {
           NoSuchAlgorithmException, SignatureException {
 
     var batchReleaseTimeDuration = Duration.ofMillis(batchReleaseTime);
+
     if (batchReleaseTime % releaseBucketDuration.toMillis() != 0) {
       return ResponseEntity.notFound().build();
     }
 
     var exposedKeys =
         dataService.getSortedExposedForBatchReleaseTime(
-            batchReleaseTimeDuration.toMillis(), releaseBucketDuration.toMillis());
+            UTCInstant.ofEpochMillis(batchReleaseTime), releaseBucketDuration);
 
     byte[] payload = gaenSigner.getPayload(exposedKeys);
 
@@ -149,5 +139,39 @@ public class DebugController {
     } catch (Exception ex) {
 
     }
+  }
+
+  @ExceptionHandler({DelayedKeyDateClaimIsMissing.class})
+  @ResponseStatus(HttpStatus.BAD_REQUEST)
+  public ResponseEntity<String> delayedClaimIsWrong() {
+    return ResponseEntity.badRequest().body("DelayedKeyDateClaim is wrong");
+  }
+
+  @ExceptionHandler({DelayedKeyDateIsInvalid.class})
+  @ResponseStatus(HttpStatus.BAD_REQUEST)
+  public ResponseEntity<String> delayedKeyDateIsInvalid() {
+    return ResponseEntity.badRequest()
+        .body("DelayedKeyDate must be between yesterday and tomorrow");
+  }
+
+  @ExceptionHandler({
+    IllegalArgumentException.class,
+    InvalidDateException.class,
+    JsonProcessingException.class,
+    MethodArgumentNotValidException.class,
+    BadBatchReleaseTimeException.class,
+    DateTimeParseException.class,
+    ClaimIsBeforeOnsetException.class,
+    KeyFormatException.class
+  })
+  @ResponseStatus(HttpStatus.BAD_REQUEST)
+  public ResponseEntity<Object> invalidArguments() {
+    return ResponseEntity.badRequest().build();
+  }
+
+  @ExceptionHandler({WrongScopeException.class})
+  @ResponseStatus(HttpStatus.FORBIDDEN)
+  public ResponseEntity<Object> forbidden() {
+    return ResponseEntity.status(HttpStatus.FORBIDDEN).build();
   }
 }
