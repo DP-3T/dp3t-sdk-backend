@@ -267,26 +267,28 @@ public class GaenController {
       throws BadBatchReleaseTimeException, IOException, InvalidKeyException, SignatureException,
           NoSuchAlgorithmException {
     var now = UTCInstant.now();
+    var publishedAfterInstant = UTCInstant.ofEpochMillis(publishedafter);
+    var keyDateInstant = UTCInstant.ofEpochMillis(keyDate);
+
     if (!validationUtils.isValidKeyDate(UTCInstant.ofEpochMillis(keyDate))) {
       return ResponseEntity.notFound().build();
     }
     if (publishedafter != null
-        && !validationUtils.isValidBatchReleaseTime(
-            UTCInstant.ofEpochMillis(publishedafter), now)) {
+        && !validationUtils.isValidBatchReleaseTime(publishedAfterInstant, now)) {
       return ResponseEntity.notFound().build();
     }
 
     // calculate exposed until bucket
-    long publishedUntil =
-        now.getTimestamp() - (now.getTimestamp() % releaseBucketDuration.toMillis());
+    UTCInstant publishedUntil = now.roundToBucketStart(releaseBucketDuration);
 
     var exposedKeys =
-        dataService.getSortedExposedForKeyDate(keyDate, publishedafter, publishedUntil);
-    exposedKeys = fakeKeyService.fillUpKeys(exposedKeys, publishedafter, keyDate);
+        dataService.getSortedExposedForKeyDate(
+            keyDateInstant, publishedAfterInstant, publishedUntil);
+    exposedKeys = fakeKeyService.fillUpKeys(exposedKeys, publishedAfterInstant, keyDateInstant);
     if (exposedKeys.isEmpty()) {
       return ResponseEntity.noContent()
           .cacheControl(CacheControl.maxAge(exposedListCacheControl))
-          .header("X-PUBLISHED-UNTIL", Long.toString(publishedUntil))
+          .header("X-PUBLISHED-UNTIL", Long.toString(publishedUntil.getTimestamp()))
           .build();
     }
 
@@ -294,7 +296,7 @@ public class GaenController {
 
     return ResponseEntity.ok()
         .cacheControl(CacheControl.maxAge(exposedListCacheControl))
-        .header("X-PUBLISHED-UNTIL", Long.toString(publishedUntil))
+        .header("X-PUBLISHED-UNTIL", Long.toString(publishedUntil.getTimestamp()))
         .body(payload.getZip());
   }
 

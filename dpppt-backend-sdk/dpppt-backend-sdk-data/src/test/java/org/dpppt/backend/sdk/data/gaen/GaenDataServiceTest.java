@@ -52,17 +52,16 @@ public class GaenDataServiceTest {
     tmpKey2.setFake(0);
     tmpKey2.setTransmissionRiskLevel(0);
     List<GaenKey> keys = List.of(tmpKey, tmpKey2);
-    var utcNow = UTCInstant.now();
-    gaenDataService.upsertExposees(keys, utcNow);
+    var now = UTCInstant.now();
+    gaenDataService.upsertExposees(keys, now);
 
-    long now = utcNow.getTimestamp();
     // calculate exposed until bucket, but get bucket in the future, as keys have
     // been inserted with timestamp now.
-    long publishedUntil = now - (now % BUCKET_LENGTH.toMillis()) + BUCKET_LENGTH.toMillis();
+    UTCInstant publishedUntil = now.roundToNextBucket(BUCKET_LENGTH);
 
     var returnedKeys =
         gaenDataService.getSortedExposedForKeyDate(
-            UTCInstant.today().minusDays(1).getTimestamp(), null, publishedUntil);
+            UTCInstant.today().minusDays(1), null, publishedUntil);
 
     assertEquals(keys.size(), returnedKeys.size());
     assertEquals(keys.get(1).getKeyData(), returnedKeys.get(0).getKeyData());

@@ -77,9 +77,9 @@ public class GaenControllerTest extends BaseControllerTest {
   @Autowired ProtoSignature signer;
   @Autowired KeyVault keyVault;
   @Autowired GAENDataService gaenDataService;
-  Long releaseBucketDuration = 7200000L;
   private static final String androidUserAgent =
       "ch.admin.bag.dp3t.dev;1.0.7;1595591959493;Android;29";
+  Duration releaseBucketDuration = Duration.ofMillis(7200000L);
 
   private static final Logger logger = LoggerFactory.getLogger(GaenControllerTest.class);
 
@@ -192,9 +192,7 @@ public class GaenControllerTest extends BaseControllerTest {
 
     var result =
         gaenDataService.getSortedExposedForKeyDate(
-            now.atStartOfDay().minusDays(1).getTimestamp(),
-            null,
-            (now.getTimestamp() / releaseBucketDuration + 1) * releaseBucketDuration);
+            now.atStartOfDay().minusDays(1), null, now.roundToNextBucket(releaseBucketDuration));
     assertEquals(2, result.size());
     for (var key : result) {
       assertEquals(Integer.valueOf(144), key.getRollingPeriod());
@@ -202,9 +200,7 @@ public class GaenControllerTest extends BaseControllerTest {
 
     result =
         gaenDataService.getSortedExposedForKeyDate(
-            now.atStartOfDay().minusDays(1).getTimestamp(),
-            null,
-            (now.getTimestamp() / releaseBucketDuration) * releaseBucketDuration);
+            now.atStartOfDay().minusDays(1), null, now.roundToBucketStart(releaseBucketDuration));
     assertEquals(0, result.size());
   }
 
@@ -232,7 +228,7 @@ public class GaenControllerTest extends BaseControllerTest {
     for (int i = 0; i < 12; i++) {
       var tmpKey = new GaenKey();
       tmpKey.setRollingStartNumber((int) midnight.plusDays(10).get10MinutesSince1970());
-      tmpKey.setKeyData(Base64.getEncoder().encodeToString("testKey32Bytes--".getBytes("UTF-8")));
+      tmpKey.setKeyData(Base64.getEncoder().encodeToString("testKey32Bytes03".getBytes("UTF-8")));
       tmpKey.setRollingPeriod(144);
       tmpKey.setFake(0);
       tmpKey.setTransmissionRiskLevel(0);
@@ -270,10 +266,8 @@ public class GaenControllerTest extends BaseControllerTest {
 
     var result =
         gaenDataService.getSortedExposedForKeyDate(
-            midnight.minusDays(1).getTimestamp(),
-            null,
-            (now.getTimestamp() / releaseBucketDuration + 1) * releaseBucketDuration);
-    // all keys are in compatible
+            midnight.minusDays(1), null, now.roundToNextBucket(releaseBucketDuration));
+    // all keys are invalid
     assertEquals(0, result.size());
   }
 
@@ -379,16 +373,12 @@ public class GaenControllerTest extends BaseControllerTest {
 
     var result =
         gaenDataService.getSortedExposedForKeyDate(
-            midnight.minusDays(1).getTimestamp(),
-            null,
-            (now.getTimestamp() / releaseBucketDuration + 1) * releaseBucketDuration);
+            midnight.minusDays(1), null, now.roundToNextBucket(releaseBucketDuration));
     // all keys are invalid
     assertEquals(0, result.size());
     result =
         gaenDataService.getSortedExposedForKeyDate(
-            midnight.getTimestamp(),
-            null,
-            (now.getTimestamp() / releaseBucketDuration + 1) * releaseBucketDuration);
+            midnight, null, now.roundToNextBucket(releaseBucketDuration));
     // all keys are invalid
     assertEquals(0, result.size());
   }
@@ -750,9 +740,8 @@ public class GaenControllerTest extends BaseControllerTest {
             .andReturn();
     var result =
         gaenDataService.getSortedExposedForKeyDate(
-            midnight.minusDays(2).getTimestamp(),
-            null,
-            (now.getTimestamp() / releaseBucketDuration + 1) * releaseBucketDuration);
+            midnight.minusDays(2), null, now.roundToNextBucket(releaseBucketDuration));
+
     assertEquals(0, result.size());
   }
 
@@ -837,13 +826,13 @@ public class GaenControllerTest extends BaseControllerTest {
                     .header("Authorization", "Bearer " + token)
                     .header("User-Agent", androidUserAgent)
                     .content(json(exposeeRequest)))
+            .andExpect(request().asyncStarted())
             .andExpect(status().is(200))
             .andReturn();
     var result =
         gaenDataService.getSortedExposedForKeyDate(
-            midnight.plusDays(2).getTimestamp(),
-            null,
-            (now.getTimestamp() / releaseBucketDuration + 1) * releaseBucketDuration);
+            midnight.plusDays(2), null, now.roundToNextBucket(releaseBucketDuration));
+
     assertEquals(0, result.size());
   }
 
@@ -890,9 +879,7 @@ public class GaenControllerTest extends BaseControllerTest {
             .andReturn();
     var result =
         gaenDataService.getSortedExposedForKeyDate(
-            midnight.minusDays(22).getTimestamp(),
-            null,
-            (now.getTimestamp() / releaseBucketDuration + 1) * releaseBucketDuration);
+            midnight.minusDays(22), null, now.roundToNextBucket(releaseBucketDuration));
     assertEquals(0, result.size());
   }
 

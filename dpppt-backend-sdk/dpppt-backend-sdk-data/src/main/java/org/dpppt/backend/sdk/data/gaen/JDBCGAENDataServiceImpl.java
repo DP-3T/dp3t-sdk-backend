@@ -69,17 +69,15 @@ public class JDBCGAENDataServiceImpl implements GAENDataService {
     // Calculate the `receivedAt` just at the end of the current releaseBucket.
     var receivedAt =
         delayedReceivedAt == null
-            ? (now.getTimestamp() / releaseBucketDuration.toMillis() + 1)
-                    * releaseBucketDuration.toMillis()
-                - 1
-            : delayedReceivedAt.getTimestamp();
+            ? now.roundToNextBucket(releaseBucketDuration).minus(Duration.ofMillis(1))
+            : delayedReceivedAt;
     for (var gaenKey : gaenKeys) {
       MapSqlParameterSource params = new MapSqlParameterSource();
       params.addValue("key", gaenKey.getKeyData());
       params.addValue("rolling_start_number", gaenKey.getRollingStartNumber());
       params.addValue("rolling_period", gaenKey.getRollingPeriod());
       params.addValue("transmission_risk_level", gaenKey.getTransmissionRiskLevel());
-      params.addValue("received_at", UTCInstant.ofEpochMillis(receivedAt).getDate());
+      params.addValue("received_at", receivedAt.getDate());
 
       parameterList.add(params);
     }
@@ -88,14 +86,12 @@ public class JDBCGAENDataServiceImpl implements GAENDataService {
 
   @Override
   @Transactional(readOnly = true)
-  public int getMaxExposedIdForKeyDate(Long keyDate, Long publishedAfter, Long publishedUntil) {
+  public int getMaxExposedIdForKeyDate(
+      UTCInstant keyDate, UTCInstant publishedAfter, UTCInstant publishedUntil) {
     MapSqlParameterSource params = new MapSqlParameterSource();
-    params.addValue(
-        "rollingPeriodStartNumberStart", UTCInstant.ofEpochMillis(keyDate).get10MinutesSince1970());
-    params.addValue(
-        "rollingPeriodStartNumberEnd",
-        UTCInstant.ofEpochMillis(keyDate).plusDays(1).get10MinutesSince1970());
-    params.addValue("publishedUntil", UTCInstant.ofEpochMillis(publishedUntil).getDate());
+    params.addValue("rollingPeriodStartNumberStart", keyDate.get10MinutesSince1970());
+    params.addValue("rollingPeriodStartNumberEnd", keyDate.plusDays(1).get10MinutesSince1970());
+    params.addValue("publishedUntil", publishedUntil.getDate());
 
     String sql =
         "select max(pk_exposed_id) from t_gaen_exposed where"
@@ -104,7 +100,7 @@ public class JDBCGAENDataServiceImpl implements GAENDataService {
             + " and received_at < :publishedUntil";
 
     if (publishedAfter != null) {
-      params.addValue("publishedAfter", UTCInstant.ofEpochMillis(publishedAfter).getDate());
+      params.addValue("publishedAfter", publishedAfter.getDate());
       sql += " and received_at >= :publishedAfter";
     }
 
@@ -119,14 +115,11 @@ public class JDBCGAENDataServiceImpl implements GAENDataService {
   @Override
   @Transactional(readOnly = true)
   public List<GaenKey> getSortedExposedForKeyDate(
-      Long keyDate, Long publishedAfter, Long publishedUntil) {
+      UTCInstant keyDate, UTCInstant publishedAfter, UTCInstant publishedUntil) {
     MapSqlParameterSource params = new MapSqlParameterSource();
-    params.addValue(
-        "rollingPeriodStartNumberStart", UTCInstant.ofEpochMillis(keyDate).get10MinutesSince1970());
-    params.addValue(
-        "rollingPeriodStartNumberEnd",
-        UTCInstant.ofEpochMillis(keyDate).plusDays(1).get10MinutesSince1970());
-    params.addValue("publishedUntil", UTCInstant.ofEpochMillis(publishedUntil).getDate());
+    params.addValue("rollingPeriodStartNumberStart", keyDate.get10MinutesSince1970());
+    params.addValue("rollingPeriodStartNumberEnd", keyDate.plusDays(1).get10MinutesSince1970());
+    params.addValue("publishedUntil", publishedUntil.getDate());
 
     String sql =
         "select pk_exposed_id, key, rolling_start_number, rolling_period, transmission_risk_level"
@@ -135,7 +128,7 @@ public class JDBCGAENDataServiceImpl implements GAENDataService {
             + " :publishedUntil";
 
     if (publishedAfter != null) {
-      params.addValue("publishedAfter", UTCInstant.ofEpochMillis(publishedAfter).getDate());
+      params.addValue("publishedAfter", publishedAfter.getDate());
       sql += " and received_at >= :publishedAfter";
     }
 
