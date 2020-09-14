@@ -30,12 +30,17 @@ public class JDBCGAENDataServiceImpl implements GAENDataService {
   private final String dbType;
   private final NamedParameterJdbcTemplate jt;
   private final Duration releaseBucketDuration;
+  // Time skew means the duration for how long a key still is valid __after__ it has expired (e.g 2h
+  // for now
+  // https://developer.apple.com/documentation/exposurenotification/setting_up_a_key_server?language=objc)
+  private final Duration timeSkew;
 
   public JDBCGAENDataServiceImpl(
-      String dbType, DataSource dataSource, Duration releaseBucketDuration) {
+      String dbType, DataSource dataSource, Duration releaseBucketDuration, Duration timeSkew) {
     this.dbType = dbType;
     this.jt = new NamedParameterJdbcTemplate(dataSource);
     this.releaseBucketDuration = releaseBucketDuration;
+    this.timeSkew = timeSkew;
   }
 
   @Override
@@ -101,7 +106,7 @@ public class JDBCGAENDataServiceImpl implements GAENDataService {
 
     params.addValue(
         "maxAllowedStartNumber",
-        now.roundToBucketStart(releaseBucketDuration).plusHours(2).get10MinutesSince1970());
+        now.roundToBucketStart(releaseBucketDuration).plus(timeSkew).get10MinutesSince1970());
     sql += " and rolling_start_number < :maxAllowedStartNumber";
 
     if (publishedAfter != null) {
@@ -134,7 +139,7 @@ public class JDBCGAENDataServiceImpl implements GAENDataService {
 
     params.addValue(
         "maxAllowedStartNumber",
-        now.roundToBucketStart(releaseBucketDuration).plusHours(2).get10MinutesSince1970());
+        now.roundToBucketStart(releaseBucketDuration).plus(timeSkew).get10MinutesSince1970());
     sql += " and rolling_start_number + rolling_period < :maxAllowedStartNumber";
 
     if (publishedAfter != null) {

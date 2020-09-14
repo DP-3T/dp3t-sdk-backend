@@ -36,6 +36,9 @@ public class DPPPTDataServiceConfig {
   @Value("${ws.exposedlist.releaseBucketDuration: 7200000}")
   long releaseBucketDuration;
 
+  @Value("${ws.gaen.timeskew: PT2h}")
+  Duration timeSkew;
+
   @Autowired DataSource dataSource;
 
   @Bean
@@ -56,7 +59,7 @@ public class DPPPTDataServiceConfig {
   @Bean
   public GAENDataService gaenDataService() {
     return new JDBCGAENDataServiceImpl(
-        dbType, dataSource, Duration.ofMillis(releaseBucketDuration));
+        dbType, dataSource, Duration.ofMillis(releaseBucketDuration), timeSkew);
   }
 
   @Bean
@@ -67,7 +70,7 @@ public class DPPPTDataServiceConfig {
   @Bean
   public GAENDataService fakeService() {
     return new JDBCGAENDataServiceImpl(
-        "hsql", fakeDataSource(), Duration.ofMillis(releaseBucketDuration));
+        "hsql", fakeDataSource(), Duration.ofMillis(releaseBucketDuration), timeSkew);
   }
 
   @Bean
