@@ -109,5 +109,6 @@ public class GaenDataServiceTest {
     returnedKeys =
         gaenDataService.getSortedExposedForKeyDate(UTCInstant.today(), null, publishedUntil, now);
     assertEquals(1, returnedKeys.size());
+    UTCInstant.resetClock();
   }
 }
