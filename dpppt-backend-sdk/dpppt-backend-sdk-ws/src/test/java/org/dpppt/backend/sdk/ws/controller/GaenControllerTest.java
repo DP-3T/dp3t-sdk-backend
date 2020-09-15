@@ -135,19 +135,19 @@ public class GaenControllerTest extends BaseControllerTest {
     var requestList = new GaenRequest();
     var gaenKey1 = new GaenKey();
     gaenKey1.setRollingStartNumber((int) now.atStartOfDay().minusDays(1).get10MinutesSince1970());
-    gaenKey1.setKeyData(Base64.getEncoder().encodeToString("testKey32Bytes01".getBytes("UTF-8")));
+    gaenKey1.setKeyData(Base64.getEncoder().encodeToString("testKey32Bytesa1".getBytes("UTF-8")));
     gaenKey1.setRollingPeriod(144);
     gaenKey1.setFake(0);
     gaenKey1.setTransmissionRiskLevel(0);
     var gaenKey2 = new GaenKey();
     gaenKey2.setRollingStartNumber((int) now.atStartOfDay().minusDays(1).get10MinutesSince1970());
-    gaenKey2.setKeyData(Base64.getEncoder().encodeToString("testKey32Bytes02".getBytes("UTF-8")));
+    gaenKey2.setKeyData(Base64.getEncoder().encodeToString("testKey32Bytesb2".getBytes("UTF-8")));
     gaenKey2.setRollingPeriod(144);
     gaenKey2.setFake(0);
     gaenKey2.setTransmissionRiskLevel(0);
     var gaenKey3 = new GaenKey();
     gaenKey3.setRollingStartNumber((int) now.atStartOfDay().get10MinutesSince1970());
-    gaenKey3.setKeyData(Base64.getEncoder().encodeToString("testKey32Bytes03".getBytes("UTF-8")));
+    gaenKey3.setKeyData(Base64.getEncoder().encodeToString("testKey32Bytesc3".getBytes("UTF-8")));
     gaenKey3.setRollingPeriod(144);
     gaenKey3.setFake(0);
     gaenKey3.setTransmissionRiskLevel(0);
@@ -158,7 +158,7 @@ public class GaenControllerTest extends BaseControllerTest {
     for (int i = 0; i < n - 3; i++) {
       var tmpKey = new GaenKey();
       tmpKey.setRollingStartNumber((int) now.atStartOfDay().get10MinutesSince1970());
-      tmpKey.setKeyData(Base64.getEncoder().encodeToString("testKey32Bytes--".getBytes("UTF-8")));
+      tmpKey.setKeyData(Base64.getEncoder().encodeToString("testKey32Bytesaa".getBytes("UTF-8")));
       tmpKey.setRollingPeriod(144);
       tmpKey.setFake(1);
       tmpKey.setTransmissionRiskLevel(0);
@@ -217,8 +217,8 @@ public class GaenControllerTest extends BaseControllerTest {
             now);
     assertEquals(0, result.size());
 
-    // third key should be released tomorrow
-    var tomorrow2AM = now.atStartOfDay().plusDays(1).plusHours(2).plusSeconds(1);
+    // third key should be released tomorrow (at four)
+    var tomorrow2AM = now.atStartOfDay().plusDays(1).plusHours(4).plusSeconds(1);
     result =
         gaenDataService.getSortedExposedForKeyDate(
             now.atStartOfDay(),
