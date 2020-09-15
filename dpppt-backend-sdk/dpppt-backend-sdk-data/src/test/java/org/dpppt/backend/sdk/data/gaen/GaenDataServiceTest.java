@@ -43,14 +43,14 @@ public class GaenDataServiceTest {
     var tmpKey = new GaenKey();
     tmpKey.setRollingStartNumber(
         (int) UTCInstant.today().minus(Duration.ofDays(1)).get10MinutesSince1970());
-    tmpKey.setKeyData(Base64.getEncoder().encodeToString("testKey32Bytes--".getBytes("UTF-8")));
+    tmpKey.setKeyData(Base64.getEncoder().encodeToString("testKey32Bytes01".getBytes("UTF-8")));
     tmpKey.setRollingPeriod(144);
     tmpKey.setFake(0);
     tmpKey.setTransmissionRiskLevel(0);
     var tmpKey2 = new GaenKey();
     tmpKey2.setRollingStartNumber(
         (int) UTCInstant.today().minus(Duration.ofDays(1)).get10MinutesSince1970());
-    tmpKey2.setKeyData(Base64.getEncoder().encodeToString("testKey33Bytes--".getBytes("UTF-8")));
+    tmpKey2.setKeyData(Base64.getEncoder().encodeToString("testKey32Bytes02".getBytes("UTF-8")));
     tmpKey2.setRollingPeriod(144);
     tmpKey2.setFake(0);
     tmpKey2.setTransmissionRiskLevel(0);
@@ -64,7 +64,7 @@ public class GaenDataServiceTest {
 
     var returnedKeys =
         gaenDataService.getSortedExposedForKeyDate(
-            UTCInstant.today().minusDays(1), null, publishedUntil, now.plusMinutes(1));
+            UTCInstant.today().minusDays(1), null, publishedUntil, now);
 
     assertEquals(keys.size(), returnedKeys.size());
     assertEquals(keys.get(1).getKeyData(), returnedKeys.get(0).getKeyData());
