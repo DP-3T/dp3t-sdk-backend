@@ -103,7 +103,7 @@ public class GaenDataServiceTest {
 
     // twelve O'clock release the key
     UTCInstant.setClock(fourteenOClock);
-    now = UTCInstant.now().plusMinutes(1);
+    now = UTCInstant.now();
 
     publishedUntil = now.roundToNextBucket(BUCKET_LENGTH);
     returnedKeys =

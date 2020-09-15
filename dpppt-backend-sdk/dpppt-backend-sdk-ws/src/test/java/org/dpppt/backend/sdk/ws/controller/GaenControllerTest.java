@@ -1418,24 +1418,26 @@ public class GaenControllerTest extends BaseControllerTest {
                     .content(json(exposeeRequest)))
             .andExpect(request().asyncStarted())
             .andReturn();
+    mockMvc.perform(asyncDispatch(responseAsync)).andExpect(status().isOk());
 
-    Clock tomorrow =
-        Clock.fixed(UTCInstant.today().plusDays(1).plusHours(4).getInstant(), ZoneOffset.UTC);
-
+    var tooEarlyInstant = UTCInstant.today();
     MockHttpServletResponse response =
         mockMvc
             .perform(
-                get("/v1/gaen/exposed/" + UTCInstant.today().getTimestamp())
+                get("/v1/gaen/exposed/" + tooEarlyInstant.getTimestamp())
                     .header("User-Agent", androidUserAgent))
             .andExpect(status().is(204))
             .andReturn()
             .getResponse();
 
-    UTCInstant.setClock(tomorrow);
+    Clock fourAMTomorrow =
+        Clock.fixed(UTCInstant.today().plusDays(1).plusHours(4).getInstant(), ZoneOffset.UTC);
+
+    UTCInstant.setClock(fourAMTomorrow);
     response =
         mockMvc
             .perform(
-                get("/v1/gaen/exposed/" + UTCInstant.today().minusDays(1).getTimestamp())
+                get("/v1/gaen/exposed/" + tooEarlyInstant.getTimestamp())
                     .header("User-Agent", androidUserAgent))
             .andExpect(status().isOk())
             .andReturn()
