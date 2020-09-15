@@ -1387,6 +1387,47 @@ public class GaenControllerTest extends BaseControllerTest {
     assertTrue(authenticateError.contains("Unsigned Claims JWTs are not supported."));
   }
 
+  @Test
+  public void testUploadTodaysKeyWillBeReleasedTomorrow() throws Exception {
+    GaenRequest exposeeRequest = new GaenRequest();
+    List<GaenKey> keys = new ArrayList<>();
+    for (int i = 0; i < 30; i++) {
+      var tmpKey = new GaenKey();
+      tmpKey.setRollingStartNumber((int) UTCInstant.today().minusDays(i).get10MinutesSince1970());
+      var keyData = "testKey32Bytes-" + i;
+      tmpKey.setKeyData(Base64.getEncoder().encodeToString(keyData.getBytes("UTF-8")));
+      tmpKey.setRollingPeriod(144);
+      tmpKey.setFake(0);
+      tmpKey.setTransmissionRiskLevel(0);
+      keys.add(tmpKey);
+    }
+    exposeeRequest.setGaenKeys(keys);
+
+    Clock tomorrow =
+        Clock.fixed(UTCInstant.today().plusDays(1).plusHours(6).getInstant(), ZoneOffset.UTC);
+
+    MockHttpServletResponse response =
+        mockMvc
+            .perform(
+                get("/v1/gaen/exposed/" + UTCInstant.today().getTimestamp())
+                    .header("User-Agent", androidUserAgent))
+            .andExpect(status().is(204))
+            .andReturn()
+            .getResponse();
+
+    UTCInstant.setClock(tomorrow);
+    response =
+        mockMvc
+            .perform(
+                get("/v1/gaen/exposed/" + UTCInstant.today().minusDays(1).getTimestamp())
+                    .header("User-Agent", androidUserAgent))
+            .andExpect(status().isOk())
+            .andReturn()
+            .getResponse();
+    verifyZipResponse(response, 1, 144);
+    UTCInstant.resetClock();
+  }
+
   /** Verifies a zip in zip response, that each inner zip is again valid. */
   private void verifyZipInZipResponse(
       MockHttpServletResponse response, int expectKeyCount, int expectedRollingPeriod)
