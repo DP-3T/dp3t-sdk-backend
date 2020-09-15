@@ -37,7 +37,9 @@ public interface GAENDataService {
   void upsertExposeesDelayed(List<GaenKey> keys, UTCInstant delayedReceivedAt, UTCInstant now);
 
   /**
-   * Returns all exposeed keys for the given batch.
+   * Returns all exposeed keys for the given batch, where a batch is parametrized with keyDate (for
+   * which day was the key used) publishedAfter/publishedUntil (when was the key published) and now
+   * (has the key expired or not, based on rollingStartNumber and rollingPeriod).
    *
    * @param keyDate must be midnight UTC
    * @param publishedAfter when publication should start
