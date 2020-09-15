@@ -32,6 +32,7 @@ import java.security.SignatureException;
 import java.time.Clock;
 import java.time.Duration;
 import java.time.Instant;
+import java.time.ZoneOffset;
 import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
 import java.util.Base64;
@@ -1394,7 +1395,7 @@ public class GaenControllerTest extends BaseControllerTest {
     for (int i = 0; i < 30; i++) {
       var tmpKey = new GaenKey();
       tmpKey.setRollingStartNumber((int) UTCInstant.today().minusDays(i).get10MinutesSince1970());
-      var keyData = "testKey32Bytes-" + i;
+      var keyData = String.format("testKey32Bytes%02d", i);
       tmpKey.setKeyData(Base64.getEncoder().encodeToString(keyData.getBytes("UTF-8")));
       tmpKey.setRollingPeriod(144);
       tmpKey.setFake(0);
@@ -1403,8 +1404,23 @@ public class GaenControllerTest extends BaseControllerTest {
     }
     exposeeRequest.setGaenKeys(keys);
 
+    var delayedKeyDateSent = (int) UTCInstant.today().get10MinutesSince1970();
+    exposeeRequest.setDelayedKeyDate(delayedKeyDateSent);
+
+    String token = createToken(UTCInstant.now().plusMinutes(5));
+    MvcResult responseAsync =
+        mockMvc
+            .perform(
+                post("/v1/gaen/exposed")
+                    .contentType(MediaType.APPLICATION_JSON)
+                    .header("Authorization", "Bearer " + token)
+                    .header("User-Agent", androidUserAgent)
+                    .content(json(exposeeRequest)))
+            .andExpect(request().asyncStarted())
+            .andReturn();
+
     Clock tomorrow =
-        Clock.fixed(UTCInstant.today().plusDays(1).plusHours(6).getInstant(), ZoneOffset.UTC);
+        Clock.fixed(UTCInstant.today().plusDays(1).plusHours(4).getInstant(), ZoneOffset.UTC);
 
     MockHttpServletResponse response =
         mockMvc

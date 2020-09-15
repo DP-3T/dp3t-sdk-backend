@@ -72,6 +72,8 @@ public class PostgresGaenDataServiceTest {
 
   @Test
   public void testFakeKeyContainsKeysForLast21Days() {
+    Clock threeOClock = Clock.fixed(UTCInstant.today().plusHours(4).getInstant(), ZoneOffset.UTC);
+    UTCInstant.setClock(threeOClock);
     var today = UTCInstant.today();
     var now = UTCInstant.now();
     var noKeyAtThisDate = today.minusDays(22);
@@ -93,6 +95,8 @@ public class PostgresGaenDataServiceTest {
     keys.clear();
     emptyList = fakeKeyService.fillUpKeys(keys, null, noKeyAtThisDate, now);
     assertEquals(0, emptyList.size());
+
+    UTCInstant.resetClock();
   }
 
   @Test

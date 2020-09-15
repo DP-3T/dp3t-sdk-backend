@@ -40,8 +40,8 @@ public class FakeKeyService {
 
   public void updateFakeKeys() {
     deleteAllKeys();
-    var currentKeyDate = UTCInstant.now();
-    var tmpDate = currentKeyDate.minusDays(retentionPeriod.toDays());
+    var currentKeyDate = UTCInstant.today();
+    var tmpDate = currentKeyDate.minusDays(retentionPeriod.toDays()).atStartOfDay();
     logger.debug("Fill Fake keys. Start: " + currentKeyDate + " End: " + tmpDate);
     do {
       var keys = new ArrayList<GaenKey>();
