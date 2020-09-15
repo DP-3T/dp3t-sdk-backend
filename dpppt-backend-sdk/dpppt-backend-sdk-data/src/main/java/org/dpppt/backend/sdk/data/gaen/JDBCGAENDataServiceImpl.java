@@ -105,11 +105,16 @@ public class JDBCGAENDataServiceImpl implements GAENDataService {
             + " :publishedUntil";
     // we need to subtract the time skew since we want to release it iff rolling_start_number +
     // rolling_period + timeSkew < NOW
+    // note though that since we use `<` instead of `<=` a key which is valid until 24:00 will be
+    // accepted until 02:00 (by the clients, so we MUST NOT release it before 02:00), but 02:00 lies
+    // in the bucket of 04:00. So the key will be released
+    // earliest 04:00.
     params.addValue(
         "maxAllowedStartNumber",
         now.roundToBucketStart(releaseBucketDuration).minus(timeSkew).get10MinutesSince1970());
     sql += " and rolling_start_number + rolling_period < :maxAllowedStartNumber";
 
+    // note that received_at is always rounded to `next_bucket` - 1ms to difuse actual upload time
     if (publishedAfter != null) {
       params.addValue("publishedAfter", publishedAfter.getDate());
       sql += " and received_at >= :publishedAfter";
