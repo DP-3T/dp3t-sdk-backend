@@ -91,40 +91,6 @@ public class JDBCGAENDataServiceImpl implements GAENDataService {
 
   @Override
   @Transactional(readOnly = true)
-  public int getMaxExposedIdForKeyDate(
-      UTCInstant keyDate, UTCInstant publishedAfter, UTCInstant publishedUntil, UTCInstant now) {
-    MapSqlParameterSource params = new MapSqlParameterSource();
-    params.addValue("rollingPeriodStartNumberStart", keyDate.get10MinutesSince1970());
-    params.addValue("rollingPeriodStartNumberEnd", keyDate.plusDays(1).get10MinutesSince1970());
-    params.addValue("publishedUntil", publishedUntil.getDate());
-
-    String sql =
-        "select max(pk_exposed_id) from t_gaen_exposed where"
-            + " rolling_start_number >= :rollingPeriodStartNumberStart"
-            + " and rolling_start_number < :rollingPeriodStartNumberEnd"
-            + " and received_at < :publishedUntil";
-    // we need to subtract the time skew since we want to release it iff rolling_start_number +
-    // rolling_period + timeSkew < NOW
-    params.addValue(
-        "maxAllowedStartNumber",
-        now.roundToBucketStart(releaseBucketDuration).minus(timeSkew).get10MinutesSince1970());
-    sql += " and rolling_start_number < :maxAllowedStartNumber";
-
-    if (publishedAfter != null) {
-      params.addValue("publishedAfter", publishedAfter.getDate());
-      sql += " and received_at >= :publishedAfter";
-    }
-
-    Integer maxId = jt.queryForObject(sql, params, Integer.class);
-    if (maxId == null) {
-      return 0;
-    } else {
-      return maxId;
-    }
-  }
-
-  @Override
-  @Transactional(readOnly = true)
   public List<GaenKey> getSortedExposedForKeyDate(
       UTCInstant keyDate, UTCInstant publishedAfter, UTCInstant publishedUntil, UTCInstant now) {
     MapSqlParameterSource params = new MapSqlParameterSource();

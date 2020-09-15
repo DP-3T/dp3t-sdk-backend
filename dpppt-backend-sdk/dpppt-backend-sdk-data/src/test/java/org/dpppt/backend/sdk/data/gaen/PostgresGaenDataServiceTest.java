@@ -208,11 +208,6 @@ public class PostgresGaenDataServiceTest {
     GaenKey actual = returnedKeys.get(0);
     assertEquals(actual.getKeyData(), key);
 
-    int maxExposedIdForBatchReleaseTime =
-        gaenDataService.getMaxExposedIdForKeyDate(
-            receivedAt.minus(Duration.ofDays(2)), null, batchTime, now);
-    assertEquals(100, maxExposedIdForBatchReleaseTime);
-
     returnedKeys =
         gaenDataService.getSortedExposedForKeyDate(
             receivedAt.minus(Duration.ofDays(2)), batchTime, batchTime.plusHours(2), now);

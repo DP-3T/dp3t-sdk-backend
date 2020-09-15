@@ -37,18 +37,6 @@ public interface GAENDataService {
   void upsertExposeesDelayed(List<GaenKey> keys, UTCInstant delayedReceivedAt, UTCInstant now);
 
   /**
-   * Returns the maximum id of the stored exposed entries for the given batch.
-   *
-   * @param keyDate must be midnight UTC
-   * @param publishedAfter when publication should start
-   * @param publishedUntil last publication
-   * @param now the start of the query
-   * @return the maximum id of the stored exposed entries for the given batch
-   */
-  int getMaxExposedIdForKeyDate(
-      UTCInstant keyDate, UTCInstant publishedAfter, UTCInstant publishedUntil, UTCInstant now);
-
-  /**
    * Returns all exposeed keys for the given batch.
    *
    * @param keyDate must be midnight UTC

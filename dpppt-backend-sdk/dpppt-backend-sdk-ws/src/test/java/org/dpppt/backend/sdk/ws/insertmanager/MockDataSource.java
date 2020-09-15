@@ -20,13 +20,6 @@ public class MockDataSource implements GAENDataService {
   }
 
   @Override
-  public int getMaxExposedIdForKeyDate(
-      UTCInstant keyDate, UTCInstant publishedAfter, UTCInstant publishedUntil, UTCInstant now) {
-    // TODO Auto-generated method stub
-    return 0;
-  }
-
-  @Override
   public List<GaenKey> getSortedExposedForKeyDate(
       UTCInstant keyDate, UTCInstant publishedAfter, UTCInstant publishedUntil, UTCInstant now) {
     // TODO Auto-generated method stub
