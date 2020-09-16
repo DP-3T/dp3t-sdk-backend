@@ -71,32 +71,31 @@ public class PostgresGaenDataServiceTest {
   }
 
   @Test
-  public void testFakeKeyContainsKeysForLast21Days() {
+  public void testFakeKeyContainsKeysForLast21Days() throws Exception {
     Clock threeOClock = Clock.fixed(UTCInstant.today().plusHours(4).getInstant(), ZoneOffset.UTC);
-    UTCInstant.setClock(threeOClock);
-    var today = UTCInstant.today();
-    var now = UTCInstant.now();
-    var noKeyAtThisDate = today.minusDays(22);
-    var keysUntilToday = today.minusDays(21);
+    try (var lockedClock = UTCInstant.setClock(threeOClock)) {
+      var today = UTCInstant.today();
+      var now = UTCInstant.now();
+      var noKeyAtThisDate = today.minusDays(22);
+      var keysUntilToday = today.minusDays(21);
 
-    var keys = new ArrayList<GaenKey>();
-    var emptyList = fakeKeyService.fillUpKeys(keys, null, noKeyAtThisDate, now);
-    assertEquals(0, emptyList.size());
-    do {
+      var keys = new ArrayList<GaenKey>();
+      var emptyList = fakeKeyService.fillUpKeys(keys, null, noKeyAtThisDate, now);
+      assertEquals(0, emptyList.size());
+      do {
+        keys.clear();
+        var list = fakeKeyService.fillUpKeys(keys, null, keysUntilToday, now);
+
+        assertEquals(10, list.size());
+        list = fakeKeyService.fillUpKeys(keys, UTCInstant.now().plusHours(3), keysUntilToday, now);
+        assertEquals(10, list.size());
+        keysUntilToday = keysUntilToday.plusDays(1);
+      } while (keysUntilToday.isBeforeDateOf(today));
+
       keys.clear();
-      var list = fakeKeyService.fillUpKeys(keys, null, keysUntilToday, now);
-
-      assertEquals(10, list.size());
-      list = fakeKeyService.fillUpKeys(keys, UTCInstant.now().plusHours(3), keysUntilToday, now);
-      assertEquals(10, list.size());
-      keysUntilToday = keysUntilToday.plusDays(1);
-    } while (keysUntilToday.isBeforeDateOf(today));
-
-    keys.clear();
-    emptyList = fakeKeyService.fillUpKeys(keys, null, noKeyAtThisDate, now);
-    assertEquals(0, emptyList.size());
-
-    UTCInstant.resetClock();
+      emptyList = fakeKeyService.fillUpKeys(keys, null, noKeyAtThisDate, now);
+      assertEquals(0, emptyList.size());
+    }
   }
 
   @Test
@@ -120,27 +119,28 @@ public class PostgresGaenDataServiceTest {
     Clock nextDay =
         Clock.fixed(localDateNow.plusDays(2).plusMinutes(2).getInstant(), ZoneOffset.UTC);
 
-    UTCInstant.setClock(twoMinutesToMidnight);
-
-    boolean actual =
-        redeemDataService.checkAndInsertPublishUUID("bc77d983-2359-48e8-835a-de673fe53ccb");
-    assertTrue(actual);
+    try (var lockedClock = UTCInstant.setClock(twoMinutesToMidnight)) {
+      boolean actual =
+          redeemDataService.checkAndInsertPublishUUID("bc77d983-2359-48e8-835a-de673fe53ccb");
+      assertTrue(actual);
+    }
 
     // token is still valid for 1 minute
-    UTCInstant.setClock(twoMinutesAfterMidnight);
+    try (var lockedClock = UTCInstant.setClock(twoMinutesAfterMidnight)) {
+      redeemDataService.cleanDB(Duration.ofDays(1));
 
-    redeemDataService.cleanDB(Duration.ofDays(1));
+      boolean actual =
+          redeemDataService.checkAndInsertPublishUUID("bc77d983-2359-48e8-835a-de673fe53ccb");
+      assertFalse(actual);
+    }
 
-    actual = redeemDataService.checkAndInsertPublishUUID("bc77d983-2359-48e8-835a-de673fe53ccb");
-    assertFalse(actual);
+    try (var lockedClock = UTCInstant.setClock(nextDay)) {
+      redeemDataService.cleanDB(Duration.ofDays(1));
 
-    UTCInstant.setClock(nextDay);
-
-    redeemDataService.cleanDB(Duration.ofDays(1));
-
-    actual = redeemDataService.checkAndInsertPublishUUID("bc77d983-2359-48e8-835a-de673fe53ccb");
-    assertTrue(actual);
-    UTCInstant.resetClock();
+      boolean actual =
+          redeemDataService.checkAndInsertPublishUUID("bc77d983-2359-48e8-835a-de673fe53ccb");
+      assertTrue(actual);
+    }
   }
 
   @Test

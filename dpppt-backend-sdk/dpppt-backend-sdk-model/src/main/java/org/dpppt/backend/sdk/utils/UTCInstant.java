@@ -1,5 +1,7 @@
 package org.dpppt.backend.sdk.utils;
 
+import java.io.Closeable;
+import java.io.IOException;
 import java.time.Clock;
 import java.time.Duration;
 import java.time.Instant;
@@ -21,7 +23,7 @@ import org.dpppt.backend.sdk.model.gaen.GaenUnit;
  * <p>IMPORTANT: `Local*` classes do not carry any timezone informations. As such, all comparisons
  * are made regarding 'UTC'
  */
-public class UTCInstant {
+public class UTCInstant implements Closeable {
   private final long timestamp;
   private static Clock currentClock = Clock.systemUTC();
 
@@ -54,8 +56,12 @@ public class UTCInstant {
   }
 
   // TODO: make protected and subclass for use in tests
-  public static void setClock(Clock clock) {
+  public static UTCInstant setClock(Clock clock) {
+    if (currentClock != Clock.systemUTC()) {
+      return null;
+    }
     currentClock = clock;
+    return UTCInstant.now();
   }
 
   public static void resetClock() {
@@ -272,5 +278,10 @@ public class UTCInstant {
     } else {
       Thread.sleep(timeFillUp.toMillis());
     }
+  }
+
+  @Override
+  public void close() throws IOException {
+    UTCInstant.resetClock();
   }
 }
