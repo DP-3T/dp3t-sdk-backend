@@ -1,11 +1,25 @@
 package org.dpppt.backend.sdk.ws.controller;
 
 import ch.ubique.openapi.docannotations.Documentation;
+import com.fasterxml.jackson.core.JsonProcessingException;
+import java.time.format.DateTimeParseException;
 import java.util.List;
 import org.dpppt.backend.sdk.model.gaen.GaenV2UploadKeysRequest;
+import org.dpppt.backend.sdk.utils.UTCInstant;
+import org.dpppt.backend.sdk.ws.insertmanager.InsertException;
+import org.dpppt.backend.sdk.ws.insertmanager.InsertManager;
+import org.dpppt.backend.sdk.ws.insertmanager.insertionfilters.AssertKeyFormat.KeyFormatException;
+import org.dpppt.backend.sdk.ws.security.ValidateRequest;
+import org.dpppt.backend.sdk.ws.security.ValidateRequest.ClaimIsBeforeOnsetException;
+import org.dpppt.backend.sdk.ws.security.ValidateRequest.InvalidDateException;
+import org.dpppt.backend.sdk.ws.security.ValidateRequest.WrongScopeException;
+import org.dpppt.backend.sdk.ws.util.ValidationUtils.BadBatchReleaseTimeException;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.stereotype.Controller;
+import org.springframework.web.bind.MethodArgumentNotValidException;
+import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
@@ -13,6 +27,7 @@ import org.springframework.web.bind.annotation.RequestHeader;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.ResponseBody;
+import org.springframework.web.bind.annotation.ResponseStatus;
 
 /**
  * This is a new controller to simplify the sending and receiving of keys. It will be used by the
@@ -31,6 +46,15 @@ public class GaenV2Controller {
    * Detailed per-day travel information is not available from the current UI * 2. For simplicity
    * the UI should probably also not aim to request this information
    */
+  private final InsertManager insertManager;
+
+  private final ValidateRequest validateRequest;
+
+  public GaenV2Controller(InsertManager insertManager, ValidateRequest validateRequest) {
+    this.insertManager = insertManager;
+    this.validateRequest = validateRequest;
+  }
+
   @PostMapping(value = "/exposed")
   @Documentation(
       description =
@@ -61,7 +85,20 @@ public class GaenV2Controller {
           String userAgent,
       @AuthenticationPrincipal
           @Documentation(description = "JWT token that can be verified by the backend server")
-          Object principal) {
+          Object principal)
+      throws WrongScopeException, InsertException {
+    var now = UTCInstant.now();
+
+    this.validateRequest.isValid(principal);
+
+    // Filter out non valid keys and insert them into the database (c.f. InsertManager and
+    // configured Filters in the WSBaseConfig)
+    insertManager.insertIntoDatabase(
+        gaenV2Request.getGaenKeys(),
+        gaenV2Request.getCountriesForSharingKeys(),
+        userAgent,
+        principal,
+        now);
     return null;
   }
 
@@ -92,5 +129,26 @@ public class GaenV2Controller {
           long since) {
 
     return null;
+  }
+
+  @ExceptionHandler({
+    IllegalArgumentException.class,
+    InvalidDateException.class,
+    JsonProcessingException.class,
+    MethodArgumentNotValidException.class,
+    BadBatchReleaseTimeException.class,
+    DateTimeParseException.class,
+    ClaimIsBeforeOnsetException.class,
+    KeyFormatException.class
+  })
+  @ResponseStatus(HttpStatus.BAD_REQUEST)
+  public ResponseEntity<Object> invalidArguments() {
+    return ResponseEntity.badRequest().build();
+  }
+
+  @ExceptionHandler({WrongScopeException.class})
+  @ResponseStatus(HttpStatus.FORBIDDEN)
+  public ResponseEntity<Object> forbidden() {
+    return ResponseEntity.status(HttpStatus.FORBIDDEN).build();
   }
 }
