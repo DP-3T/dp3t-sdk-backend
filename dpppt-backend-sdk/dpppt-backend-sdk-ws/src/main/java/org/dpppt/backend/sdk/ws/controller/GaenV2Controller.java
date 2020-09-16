@@ -2,9 +2,20 @@ package org.dpppt.backend.sdk.ws.controller;
 
 import ch.ubique.openapi.docannotations.Documentation;
 import com.fasterxml.jackson.core.JsonProcessingException;
+import java.io.IOException;
+import java.security.InvalidKeyException;
+import java.security.NoSuchAlgorithmException;
+import java.security.SignatureException;
+import java.time.Duration;
 import java.time.format.DateTimeParseException;
+import java.util.ArrayList;
 import java.util.List;
+import java.util.concurrent.Callable;
+import javax.validation.Valid;
+import org.dpppt.backend.sdk.data.gaen.FakeKeyService;
+import org.dpppt.backend.sdk.model.gaen.GaenKey;
 import org.dpppt.backend.sdk.model.gaen.GaenV2UploadKeysRequest;
+import org.dpppt.backend.sdk.utils.DurationExpiredException;
 import org.dpppt.backend.sdk.utils.UTCInstant;
 import org.dpppt.backend.sdk.ws.insertmanager.InsertException;
 import org.dpppt.backend.sdk.ws.insertmanager.InsertManager;
@@ -13,7 +24,13 @@ import org.dpppt.backend.sdk.ws.security.ValidateRequest;
 import org.dpppt.backend.sdk.ws.security.ValidateRequest.ClaimIsBeforeOnsetException;
 import org.dpppt.backend.sdk.ws.security.ValidateRequest.InvalidDateException;
 import org.dpppt.backend.sdk.ws.security.ValidateRequest.WrongScopeException;
+import org.dpppt.backend.sdk.ws.security.signature.ProtoSignature;
+import org.dpppt.backend.sdk.ws.security.signature.ProtoSignature.ProtoSignatureWrapper;
+import org.dpppt.backend.sdk.ws.util.ValidationUtils;
 import org.dpppt.backend.sdk.ws.util.ValidationUtils.BadBatchReleaseTimeException;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import org.springframework.http.CacheControl;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
@@ -46,13 +63,36 @@ public class GaenV2Controller {
    * Detailed per-day travel information is not available from the current UI * 2. For simplicity
    * the UI should probably also not aim to request this information
    */
+  private static final Logger logger = LoggerFactory.getLogger(GaenV2Controller.class);
+
   private final InsertManager insertManager;
 
   private final ValidateRequest validateRequest;
 
-  public GaenV2Controller(InsertManager insertManager, ValidateRequest validateRequest) {
+  private final ValidationUtils validationUtils;
+  private final FakeKeyService fakeKeyService;
+  private final ProtoSignature gaenSigner;
+  private final Duration releaseBucketDuration;
+  private final Duration requestTime;
+  private final Duration exposedListCacheControl;
+
+  public GaenV2Controller(
+      InsertManager insertManager,
+      ValidateRequest validateRequest,
+      ValidationUtils validationUtils,
+      FakeKeyService fakeKeyService,
+      ProtoSignature gaenSigner,
+      Duration releaseBucketDuration,
+      Duration requestTime,
+      Duration exposedListCacheControl) {
     this.insertManager = insertManager;
     this.validateRequest = validateRequest;
+    this.validationUtils = validationUtils;
+    this.fakeKeyService = fakeKeyService;
+    this.gaenSigner = gaenSigner;
+    this.releaseBucketDuration = releaseBucketDuration;
+    this.requestTime = requestTime;
+    this.exposedListCacheControl = exposedListCacheControl;
   }
 
   @PostMapping(value = "/exposed")
@@ -68,12 +108,13 @@ public class GaenV2Controller {
             + "- fake claim with non-fake keys",
         "403=>Authentication failed"
       })
-  public @ResponseBody ResponseEntity<String> addExposed(
+  public @ResponseBody Callable<ResponseEntity<String>> addExposed(
       @Documentation(
               description =
                   "JSON Object containing all keys and a list of countries specifying for which"
                       + " countries the keys are valid or more precise what countries have been"
                       + " visited")
+          @Valid
           @RequestBody
           GaenV2UploadKeysRequest gaenV2Request,
       @RequestHeader(value = "User-Agent")
@@ -91,7 +132,8 @@ public class GaenV2Controller {
 
     this.validateRequest.isValid(principal);
 
-    // Filter out non valid keys and insert them into the database (c.f. InsertManager and
+    // Filter out non valid keys and insert them into the database (c.f.
+    // InsertManager and
     // configured Filters in the WSBaseConfig)
     insertManager.insertIntoDatabase(
         gaenV2Request.getGaenKeys(),
@@ -99,7 +141,17 @@ public class GaenV2Controller {
         userAgent,
         principal,
         now);
-    return null;
+    var responseBuilder = ResponseEntity.ok();
+    Callable<ResponseEntity<String>> cb =
+        () -> {
+          try {
+            now.normalizeDuration(requestTime);
+          } catch (DurationExpiredException e) {
+            logger.error("Total time spent in endpoint is longer than requestTime");
+          }
+          return responseBuilder.body("OK");
+        };
+    return cb;
   }
 
   // GET for Key Download
@@ -126,9 +178,32 @@ public class GaenV2Controller {
                       + " (1970-01-01). It must indicate the beginning of a bucket.",
               example = "1593043200000")
           @RequestParam
-          long since) {
+          long since)
+      throws BadBatchReleaseTimeException, InvalidKeyException, SignatureException,
+          NoSuchAlgorithmException, IOException {
+    var now = UTCInstant.now();
+    var keysSince = UTCInstant.ofEpochMillis(since);
+    if (!validationUtils.isValidBatchReleaseTime(keysSince, now)) {
+      return ResponseEntity.notFound().build();
+    }
+    UTCInstant publishedUntil = now.roundToBucketStart(releaseBucketDuration);
+    // TODO: get keys based on countries
+    var exposedKeys = new ArrayList<GaenKey>();
 
-    return null;
+    // TODO We need padding
+
+    if (exposedKeys.isEmpty()) {
+      return ResponseEntity.noContent()
+          .cacheControl(CacheControl.maxAge(exposedListCacheControl))
+          .header("X-PUBLISHED-UNTIL", Long.toString(publishedUntil.getTimestamp()))
+          .build();
+    }
+    ProtoSignatureWrapper payload = gaenSigner.getPayload(exposedKeys);
+
+    return ResponseEntity.ok()
+        .cacheControl(CacheControl.maxAge(exposedListCacheControl))
+        .header("X-PUBLISHED-UNTIL", Long.toString(publishedUntil.getTimestamp()))
+        .body(payload.getZip());
   }
 
   @ExceptionHandler({
