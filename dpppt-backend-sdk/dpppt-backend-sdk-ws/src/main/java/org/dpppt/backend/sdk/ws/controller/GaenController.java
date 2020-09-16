@@ -283,8 +283,9 @@ public class GaenController {
 
     var exposedKeys =
         dataService.getSortedExposedForKeyDate(
-            keyDateInstant, publishedAfterInstant, publishedUntil);
-    exposedKeys = fakeKeyService.fillUpKeys(exposedKeys, publishedAfterInstant, keyDateInstant);
+            keyDateInstant, publishedAfterInstant, publishedUntil, now);
+    exposedKeys =
+        fakeKeyService.fillUpKeys(exposedKeys, publishedAfterInstant, keyDateInstant, now);
     if (exposedKeys.isEmpty()) {
       return ResponseEntity.noContent()
           .cacheControl(CacheControl.maxAge(exposedListCacheControl))

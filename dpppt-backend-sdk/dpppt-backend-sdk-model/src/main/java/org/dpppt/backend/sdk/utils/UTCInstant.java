@@ -1,5 +1,7 @@
 package org.dpppt.backend.sdk.utils;
 
+import java.io.Closeable;
+import java.io.IOException;
 import java.time.Clock;
 import java.time.Duration;
 import java.time.Instant;
@@ -21,7 +23,7 @@ import org.dpppt.backend.sdk.model.gaen.GaenUnit;
  * <p>IMPORTANT: `Local*` classes do not carry any timezone informations. As such, all comparisons
  * are made regarding 'UTC'
  */
-public class UTCInstant {
+public class UTCInstant implements Closeable {
   private final long timestamp;
   private static Clock currentClock = Clock.systemUTC();
 
@@ -53,9 +55,34 @@ public class UTCInstant {
     this.timestamp = offsetDateTime.toInstant().toEpochMilli();
   }
 
-  // TODO: make protected and subclass for use in tests
-  public static void setClock(Clock clock) {
+  /**
+   * <b>This function should only be used in test classes</b> ~~or if you absolutely sure that you
+   * need it~~. <br>
+   * It changes the static field clock, which means now() and today() return values based on this
+   * new clock. The method returns null if the clock is different to systemUTC, meaning it already
+   * has been changed elsewhere.
+   *
+   * <p>We use https://github.com/DP-3T/dp3t-sdk-backend/issues/246 to track improvements to this
+   * method, including but not limited to
+   *
+   * <ul>
+   *   <li>Using now(Clock clock) and today(Clock clock) with a injected Clock into controllers.
+   *   <li>Using beans
+   * </ul>
+   *
+   * <br>
+   *
+   * @param clock the clock, which should be used for all further invocations of now() or today()
+   * @return Returns a now object, which can be used for the try-with statement. This is the
+   *     recommended way of using it, since it guarantees that resetClock() is called as soon as the
+   *     instance goes out of scope
+   */
+  public static UTCInstant setClock(Clock clock) {
+    if (currentClock != Clock.systemUTC()) {
+      return null;
+    }
     currentClock = clock;
+    return UTCInstant.now();
   }
 
   public static void resetClock() {
@@ -272,5 +299,10 @@ public class UTCInstant {
     } else {
       Thread.sleep(timeFillUp.toMillis());
     }
+  }
+
+  @Override
+  public void close() throws IOException {
+    UTCInstant.resetClock();
   }
 }

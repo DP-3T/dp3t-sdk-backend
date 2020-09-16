@@ -40,8 +40,8 @@ public class FakeKeyService {
 
   public void updateFakeKeys() {
     deleteAllKeys();
-    var currentKeyDate = UTCInstant.now();
-    var tmpDate = currentKeyDate.minusDays(retentionPeriod.toDays());
+    var currentKeyDate = UTCInstant.today();
+    var tmpDate = currentKeyDate.minusDays(retentionPeriod.toDays()).atStartOfDay();
     logger.debug("Fill Fake keys. Start: " + currentKeyDate + " End: " + tmpDate);
     do {
       var keys = new ArrayList<GaenKey>();
@@ -64,18 +64,18 @@ public class FakeKeyService {
   }
 
   public List<GaenKey> fillUpKeys(
-      List<GaenKey> keys, UTCInstant publishedafter, UTCInstant keyDate) {
+      List<GaenKey> keys, UTCInstant publishedafter, UTCInstant keyDate, UTCInstant now) {
     if (!isEnabled) {
       return keys;
     }
-    var today = UTCInstant.today();
+    var today = now.atStartOfDay();
     var keyLocalDate = keyDate.atStartOfDay();
     if (today.hasSameDateAs(keyLocalDate)) {
       return keys;
     }
     var fakeKeys =
         this.dataService.getSortedExposedForKeyDate(
-            keyDate, publishedafter, UTCInstant.today().plusDays(1));
+            keyDate, publishedafter, UTCInstant.today().plusDays(1), now);
 
     keys.addAll(fakeKeys);
     return keys;
