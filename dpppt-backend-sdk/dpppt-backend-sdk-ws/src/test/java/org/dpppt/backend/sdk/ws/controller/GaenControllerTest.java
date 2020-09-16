@@ -1391,11 +1391,12 @@ public class GaenControllerTest extends BaseControllerTest {
 
   @Test
   public void testUploadTodaysKeyWillBeReleasedTomorrow() throws Exception {
+    var now = UTCInstant.now();
     GaenRequest exposeeRequest = new GaenRequest();
     List<GaenKey> keys = new ArrayList<>();
     for (int i = 0; i < 30; i++) {
       var tmpKey = new GaenKey();
-      tmpKey.setRollingStartNumber((int) UTCInstant.today().minusDays(i).get10MinutesSince1970());
+      tmpKey.setRollingStartNumber((int) now.atStartOfDay().minusDays(i).get10MinutesSince1970());
       var keyData = String.format("testKey32Bytes%02d", i);
       tmpKey.setKeyData(Base64.getEncoder().encodeToString(keyData.getBytes("UTF-8")));
       tmpKey.setRollingPeriod(144);
@@ -1405,10 +1406,10 @@ public class GaenControllerTest extends BaseControllerTest {
     }
     exposeeRequest.setGaenKeys(keys);
 
-    var delayedKeyDateSent = (int) UTCInstant.today().get10MinutesSince1970();
+    var delayedKeyDateSent = (int) now.atStartOfDay().get10MinutesSince1970();
     exposeeRequest.setDelayedKeyDate(delayedKeyDateSent);
 
-    String token = createToken(UTCInstant.now().plusMinutes(5));
+    String token = createToken(now.plusMinutes(5));
     MvcResult responseAsync =
         mockMvc
             .perform(
@@ -1421,7 +1422,7 @@ public class GaenControllerTest extends BaseControllerTest {
             .andReturn();
     mockMvc.perform(asyncDispatch(responseAsync)).andExpect(status().isOk());
 
-    var tooEarlyInstant = UTCInstant.today();
+    var tooEarlyInstant = now.atStartOfDay();
     MockHttpServletResponse response =
         mockMvc
             .perform(
@@ -1432,9 +1433,9 @@ public class GaenControllerTest extends BaseControllerTest {
             .getResponse();
 
     Clock fourAMTomorrow =
-        Clock.fixed(UTCInstant.today().plusDays(1).plusHours(4).getInstant(), ZoneOffset.UTC);
+        Clock.fixed(now.atStartOfDay().plusDays(1).plusHours(4).getInstant(), ZoneOffset.UTC);
 
-    try (var lock = UTCInstant.setClock(fourAMTomorrow)) {
+    try (var timeLock = UTCInstant.setClock(fourAMTomorrow)) {
       response =
           mockMvc
               .perform(

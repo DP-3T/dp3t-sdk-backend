@@ -72,10 +72,13 @@ public class GaenDataServiceTest {
 
   @Test
   public void testNoEarlyRelease() throws Exception {
-    Clock twoOClock = Clock.fixed(UTCInstant.today().plusHours(2).getInstant(), ZoneOffset.UTC);
-    Clock elevenOClock = Clock.fixed(UTCInstant.today().plusHours(11).getInstant(), ZoneOffset.UTC);
+    var outerNow = UTCInstant.now();
+    Clock twoOClock =
+        Clock.fixed(outerNow.atStartOfDay().plusHours(2).getInstant(), ZoneOffset.UTC);
+    Clock elevenOClock =
+        Clock.fixed(outerNow.atStartOfDay().plusHours(11).getInstant(), ZoneOffset.UTC);
     Clock fourteenOClock =
-        Clock.fixed(UTCInstant.today().plusHours(14).getInstant(), ZoneOffset.UTC);
+        Clock.fixed(outerNow.atStartOfDay().plusHours(14).getInstant(), ZoneOffset.UTC);
 
     try (var now = UTCInstant.setClock(twoOClock)) {
       var tmpKey = new GaenKey();
@@ -96,7 +99,7 @@ public class GaenDataServiceTest {
     try (var now = UTCInstant.setClock(elevenOClock)) {
       UTCInstant publishedUntil = now.roundToNextBucket(BUCKET_LENGTH).plusMinutes(1);
       var returnedKeys =
-          gaenDataService.getSortedExposedForKeyDate(UTCInstant.today(), null, publishedUntil, now);
+          gaenDataService.getSortedExposedForKeyDate(now.atStartOfDay(), null, publishedUntil, now);
       assertEquals(0, returnedKeys.size());
     }
 
@@ -104,7 +107,7 @@ public class GaenDataServiceTest {
     try (var now = UTCInstant.setClock(fourteenOClock)) {
       UTCInstant publishedUntil = now.roundToNextBucket(BUCKET_LENGTH);
       var returnedKeys =
-          gaenDataService.getSortedExposedForKeyDate(UTCInstant.today(), null, publishedUntil, now);
+          gaenDataService.getSortedExposedForKeyDate(now.atStartOfDay(), null, publishedUntil, now);
       assertEquals(1, returnedKeys.size());
     }
   }
