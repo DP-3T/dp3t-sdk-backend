@@ -7,6 +7,14 @@ import javax.validation.constraints.Min;
 import javax.validation.constraints.Size;
 
 public class CountryShareConfiguration {
+  public static final CountryShareConfiguration SWITZERLAND =
+      new CountryShareConfiguration("CH", 1);
+  public static final CountryShareConfiguration ORIGIN_COUNRY = SWITZERLAND;
+
+  public CountryShareConfiguration(String countryCode, int shareKeyWithCountry) {
+    this.countryCode = countryCode;
+    this.shareKeyWithCountry = shareKeyWithCountry;
+  }
 
   @Valid
   @Size(max = 2, min = 2)

@@ -3,6 +3,7 @@ package org.dpppt.backend.sdk.ws.insertmanager;
 import java.util.ArrayList;
 import java.util.List;
 import org.dpppt.backend.sdk.data.gaen.GAENDataService;
+import org.dpppt.backend.sdk.model.gaen.CountryShareConfiguration;
 import org.dpppt.backend.sdk.model.gaen.GaenKey;
 import org.dpppt.backend.sdk.semver.Version;
 import org.dpppt.backend.sdk.utils.UTCInstant;
@@ -56,7 +57,29 @@ public class InsertManager {
    */
   public void insertIntoDatabase(
       List<GaenKey> keys, String header, Object principal, UTCInstant now) throws InsertException {
+    insertIntoDatabase(
+        keys, List.of(CountryShareConfiguration.ORIGIN_COUNRY), header, principal, now);
+  }
 
+  /**
+   * Inserts the keys into the database. The additional parameters are supplied to the configured
+   * modifiers and filters.
+   *
+   * @param keys the list of keys from the client
+   * @param countriesVisited the list of countries visiteds
+   * @param header request header from client
+   * @param principal key upload authorization, for example a JWT token.
+   * @param now current timestamp to work with.
+   * @throws InsertException filters are allowed to throw errors, for example to signal client
+   *     errors in the key upload
+   */
+  public void insertIntoDatabase(
+      List<GaenKey> keys,
+      List<CountryShareConfiguration> countriesVisited,
+      String header,
+      Object principal,
+      UTCInstant now)
+      throws InsertException {
     if (keys == null || keys.isEmpty()) {
       return;
     }
@@ -92,7 +115,6 @@ public class InsertManager {
       dataService.upsertExposees(internalKeys, now);
     }
   }
-
   /**
    * Extracts the {@link OSType} from the osString that is given by the client request.
    *
