@@ -28,8 +28,8 @@ import java.util.Base64;
 import java.util.List;
 import javax.sql.DataSource;
 import org.dpppt.backend.sdk.data.RedeemDataService;
-import org.dpppt.backend.sdk.data.config.DPPPTDataServiceConfig;
 import org.dpppt.backend.sdk.data.config.FlyWayConfig;
+import org.dpppt.backend.sdk.data.config.GaenDataServiceConfig;
 import org.dpppt.backend.sdk.data.config.PostgresDataConfig;
 import org.dpppt.backend.sdk.model.Exposee;
 import org.dpppt.backend.sdk.model.gaen.GaenKey;
@@ -49,7 +49,7 @@ import org.springframework.test.context.support.AnnotationConfigContextLoader;
 @RunWith(SpringJUnit4ClassRunner.class)
 @ContextConfiguration(
     loader = AnnotationConfigContextLoader.class,
-    classes = {PostgresDataConfig.class, FlyWayConfig.class, DPPPTDataServiceConfig.class})
+    classes = {PostgresDataConfig.class, FlyWayConfig.class, GaenDataServiceConfig.class})
 @ActiveProfiles("postgres")
 @TestPropertySource(properties = {"ws.gaen.randomkeysenabled=true"})
 public class PostgresGaenDataServiceTest {

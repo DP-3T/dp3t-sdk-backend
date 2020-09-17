@@ -24,14 +24,11 @@ import java.util.List;
 import java.util.Map;
 import java.util.TimeZone;
 import javax.sql.DataSource;
-import org.dpppt.backend.sdk.data.DPPPTDataService;
-import org.dpppt.backend.sdk.data.JDBCDPPPTDataServiceImpl;
 import org.dpppt.backend.sdk.data.JDBCRedeemDataServiceImpl;
 import org.dpppt.backend.sdk.data.RedeemDataService;
 import org.dpppt.backend.sdk.data.gaen.FakeKeyService;
 import org.dpppt.backend.sdk.data.gaen.GAENDataService;
 import org.dpppt.backend.sdk.data.gaen.JDBCGAENDataServiceImpl;
-import org.dpppt.backend.sdk.ws.controller.DPPPTController;
 import org.dpppt.backend.sdk.ws.controller.GaenController;
 import org.dpppt.backend.sdk.ws.filter.ResponseWrapperFilter;
 import org.dpppt.backend.sdk.ws.insertmanager.InsertManager;
@@ -273,27 +270,6 @@ public abstract class WSBaseConfig implements SchedulingConfigurer, WebMvcConfig
   }
 
   @Bean
-  public DPPPTController dppptSDKController() {
-    ValidateRequest theValidator = requestValidator;
-    if (theValidator == null) {
-      theValidator = new NoValidateRequest(dpptValidationUtils());
-    }
-    return new DPPPTController(
-        dppptSDKDataService(),
-        appSource,
-        exposedListCacheControl,
-        theValidator,
-        dpptValidationUtils(),
-        releaseBucketDuration,
-        requestTime);
-  }
-
-  @Bean
-  public ValidationUtils dpptValidationUtils() {
-    return new ValidationUtils(keySizeBytes, Duration.ofDays(retentionDays), releaseBucketDuration);
-  }
-
-  @Bean
   public ValidationUtils gaenValidationUtils() {
     return new ValidationUtils(
         gaenKeySizeBytes, Duration.ofDays(retentionDays), releaseBucketDuration);
@@ -322,11 +298,6 @@ public abstract class WSBaseConfig implements SchedulingConfigurer, WebMvcConfig
   @Bean
   ValidateRequest backupValidator() {
     return new NoValidateRequest(gaenValidationUtils());
-  }
-
-  @Bean
-  public DPPPTDataService dppptSDKDataService() {
-    return new JDBCDPPPTDataServiceImpl(getDbType(), dataSource());
   }
 
   @Bean
@@ -395,7 +366,6 @@ public abstract class WSBaseConfig implements SchedulingConfigurer, WebMvcConfig
         new IntervalTask(
             () -> {
               logger.info("Start DB cleanup");
-              dppptSDKDataService().cleanDB(Duration.ofDays(retentionDays));
               gaenDataService().cleanDB(Duration.ofDays(retentionDays));
               redeemDataService().cleanDB(Duration.ofDays(2));
               logger.info("DB cleanup up");

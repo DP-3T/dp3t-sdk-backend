@@ -7,8 +7,8 @@ import java.time.Duration;
 import java.time.ZoneOffset;
 import java.util.Base64;
 import java.util.List;
-import org.dpppt.backend.sdk.data.config.DPPPTDataServiceConfig;
 import org.dpppt.backend.sdk.data.config.FlyWayConfig;
+import org.dpppt.backend.sdk.data.config.GaenDataServiceConfig;
 import org.dpppt.backend.sdk.data.config.RedeemDataServiceConfig;
 import org.dpppt.backend.sdk.data.config.StandaloneDataConfig;
 import org.dpppt.backend.sdk.model.gaen.GaenKey;
@@ -28,7 +28,7 @@ import org.springframework.test.context.support.AnnotationConfigContextLoader;
     classes = {
       StandaloneDataConfig.class,
       FlyWayConfig.class,
-      DPPPTDataServiceConfig.class,
+      GaenDataServiceConfig.class,
       RedeemDataServiceConfig.class
     })
 @ActiveProfiles("hsqldb")
