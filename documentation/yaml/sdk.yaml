@@ -167,8 +167,7 @@ paths:
               schema:
                 type: string
         '400':
-          description: '- Invalid base64 encoding in GaenRequest- negative rolling
-            period- fake claim with non-fake keys'
+          description: Invalid base64 encoding in GaenRequest
         '403':
           description: Authentication failed
       requestBody:
@@ -203,7 +202,7 @@ paths:
                 type: string
         '400':
           description: '- Ivnalid base64 encoded Temporary Exposure Key- TEK-date
-            does not match delayedKeyDAte claim in Jwt- TEK has negative rolling period'
+            does not match delayedKeyDAte claim in Jwt'
         '403':
           description: No delayedKeyDate claim in authentication
       requestBody:
@@ -451,7 +450,6 @@ components:
           items:
             type: string
           description: Relative URLs for the available release buckets
-          example: '[''/exposed/1593043200000'', ''/exposed/1593046800000'''
     org.dpppt.backend.sdk.model.gaen.GaenKey:
       type: object
       required:
@@ -497,7 +495,6 @@ components:
           description: Between 14 and 30 Temporary Exposure Keys - zero or more of
             them might be fake keys. Starting with EN 1.5 it is possible that clients
             send more than 14 keys.
-          example: ''
         delayedKeyDate:
           type: integer
           description: Prior to version 1.5 Exposure Keys for the day of report weren't
@@ -528,14 +525,12 @@ components:
             $ref: '#/components/schemas/org.dpppt.backend.sdk.model.gaen.CountryShareConfiguration'
           description: List of all countries configured. For each country in the list,
             sharing must be explicitly set
-          example: ''
         gaenKeys:
           type: array
           items:
             $ref: '#/components/schemas/org.dpppt.backend.sdk.model.gaen.GaenKey'
           description: 30 Temporary Exposure Keys - zero or more of them might be
             fake keys.
-          example: ''
     org.dpppt.backend.sdk.model.proto.Exposed.ProtoExposedList:
       type: object
       properties:
