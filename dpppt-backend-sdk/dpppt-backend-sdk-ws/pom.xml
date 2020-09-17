@@ -155,7 +155,7 @@
 			<plugin>
                 <groupId>ch.ubique.openapi</groupId>
                 <artifactId>springboot-swagger-3</artifactId>
-                <version>1.2.10</version>
+                <version>1.2.11</version>
                 <configuration>
                     <apiVersion>1.0-gapple</apiVersion>
                     <basePackages>
