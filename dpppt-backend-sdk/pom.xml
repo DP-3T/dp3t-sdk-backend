@@ -9,8 +9,8 @@
   -->
 
 <project xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
-	xmlns="http://maven.apache.org/POM/4.0.0"
-	xsi:schemaLocation="http://maven.apache.org/POM/4.0.0
+         xmlns="http://maven.apache.org/POM/4.0.0"
+         xsi:schemaLocation="http://maven.apache.org/POM/4.0.0
                              http://maven.apache.org/maven-v4_0_0.xsd">
 	<modelVersion>4.0.0</modelVersion>
 
@@ -21,11 +21,33 @@
 	<name>DP3T Backend SDK</name>
 
 	<properties>
-		<java-version>11</java-version>
 		<project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
-		<spring-boot-version>2.2.6.RELEASE</spring-boot-version>
+		<project.reporting.outputEncoding>UTF-8</project.reporting.outputEncoding>
+
+		<java-version>11</java-version>
+		<maven.compiler.source>${java-version}</maven.compiler.source>
+		<maven.compiler.target>${java-version}</maven.compiler.target>
+
 		<itCoverageAgent></itCoverageAgent>
+
+		<!-- plugins -->
 		<build-helper-maven-plugin.version>1.9.1</build-helper-maven-plugin.version>
+
+		<!-- libraries -->
+		<aspectj-version>1.9.6</aspectj-version>
+		<jackson-version>2.11.1</jackson-version>
+		<jsonwebtoken-version>0.11.2</jsonwebtoken-version>
+		<postgresql-version>42.2.13</postgresql-version>
+		<protobuf-java-version>3.12.1</protobuf-java-version>
+		<snakeyaml-version>1.26</snakeyaml-version>
+		<springdoc-openapi-version>1.4.0</springdoc-openapi-version>
+		<tomcat-version>9.0.36</tomcat-version>
+		<org.testcontainers.version>1.14.2</org.testcontainers.version>
+		<spring-boot-version>2.2.9.RELEASE</spring-boot-version>
+		<spring-cloud-version>Hoxton.SR8</spring-cloud-version>
+		<spring-framework-version>5.2.9.RELEASE</spring-framework-version>
+
+		<!-- sonar -->
 		<sonar.host.url>https://sonarcloud.io</sonar.host.url>
 		<sonar.organization>${env.SONAR_ORGANIZATION}</sonar.organization>
 		<sonar.login>${env.SONAR_TOKEN}</sonar.login>
@@ -52,7 +74,6 @@
 			<scope>test</scope>
 		</dependency>
 
-
 		<!-- Apache Commons -->
 		<dependency>
 			<groupId>org.apache.commons</groupId>
@@ -61,7 +82,6 @@
 		<dependency>
 			<groupId>commons-io</groupId>
 			<artifactId>commons-io</artifactId>
-			<version>2.4</version>
 		</dependency>
 
 		<dependency>
@@ -72,32 +92,41 @@
 
 		<!-- Logging -->
 		<dependency>
-			<groupId>org.slf4j</groupId>
-			<artifactId>slf4j-api</artifactId>
+			<groupId>org.springframework.boot</groupId>
+			<artifactId>spring-boot-starter-logging</artifactId>
 		</dependency>
 		<dependency>
 			<groupId>org.slf4j</groupId>
 			<artifactId>jcl-over-slf4j</artifactId>
 		</dependency>
-		<!-- LogBack dependencies -->
-		<dependency>
-			<groupId>ch.qos.logback</groupId>
-			<artifactId>logback-core</artifactId>
-		</dependency>
-		<dependency>
-			<groupId>ch.qos.logback</groupId>
-			<artifactId>logback-classic</artifactId>
-		</dependency>
+
 		<dependency>
 			<groupId>com.google.protobuf</groupId>
 			<artifactId>protobuf-java</artifactId>
-			<version>3.11.4</version>
 		</dependency>
 
 	</dependencies>
 
 	<dependencyManagement>
 		<dependencies>
+
+			<!-- dp3t models -->
+			<dependency>
+				<groupId>${project.groupId}</groupId>
+				<artifactId>dpppt-backend-sdk-model</artifactId>
+				<version>${project.version}</version>
+			</dependency>
+			<dependency>
+				<groupId>${project.groupId}</groupId>
+				<artifactId>dpppt-backend-sdk-data</artifactId>
+				<version>${project.version}</version>
+			</dependency>
+			<dependency>
+				<groupId>${project.groupId}</groupId>
+				<artifactId>dpppt-backend-sdk-ws</artifactId>
+				<version>${project.version}</version>
+			</dependency>
+
 			<dependency>
 				<groupId>org.springframework.boot</groupId>
 				<artifactId>spring-boot-dependencies</artifactId>
@@ -105,6 +134,60 @@
 				<version>${spring-boot-version}</version>
 				<scope>import</scope>
 			</dependency>
+			<dependency>
+				<groupId>org.springframework</groupId>
+				<artifactId>spring-core</artifactId>
+				<version>${spring-framework-version}</version>
+				<exclusions>
+					<exclusion>
+						<groupId>commons-logging</groupId>
+						<artifactId>commons-logging</artifactId>
+					</exclusion>
+				</exclusions>
+			</dependency>
+
+			<dependency>
+				<groupId>org.testcontainers</groupId>
+				<artifactId>postgresql</artifactId>
+				<version>${org.testcontainers.version}</version>
+				<scope>test</scope>
+			</dependency>
+
+			<dependency>
+				<groupId>commons-io</groupId>
+				<artifactId>commons-io</artifactId>
+				<version>2.7</version>
+			</dependency>
+
+			<dependency>
+				<groupId>com.google.protobuf</groupId>
+				<artifactId>protobuf-java</artifactId>
+				<version>${protobuf-java-version}</version>
+			</dependency>
+
+			<dependency>
+				<groupId>org.postgresql</groupId>
+				<artifactId>postgresql</artifactId>
+				<version>${postgresql-version}</version>
+			</dependency>
+
+			<!-- tomcat -->
+			<dependency>
+				<groupId>org.apache.tomcat.embed</groupId>
+				<artifactId>tomcat-embed-core</artifactId>
+				<version>${tomcat-version}</version>
+			</dependency>
+			<dependency>
+				<groupId>org.apache.tomcat.embed</groupId>
+				<artifactId>tomcat-embed-el</artifactId>
+				<version>${tomcat-version}</version>
+			</dependency>
+			<dependency>
+				<groupId>org.apache.tomcat.embed</groupId>
+				<artifactId>tomcat-embed-websocket</artifactId>
+				<version>${tomcat-version}</version>
+			</dependency>
+
 		</dependencies>
 	</dependencyManagement>
 
@@ -133,7 +216,6 @@
 			<plugin>
 				<groupId>org.apache.maven.plugins</groupId>
 				<artifactId>maven-enforcer-plugin</artifactId>
-				<version>3.0.0-M3</version>
 				<executions>
 					<execution>
 						<id>enforce-versions</id>
@@ -145,7 +227,15 @@
 								<requireJavaVersion>
 									<version>${java-version}</version>
 								</requireJavaVersion>
+								<bannedDependencies>
+									<excludes>
+										<exclude>log4j:log4j</exclude>
+										<exclude>commons-logging:commons-logging</exclude>
+										<exclude>org.apache.logging.log4j:log4j-core</exclude>
+									</excludes>
+								</bannedDependencies>
 							</rules>
+							<fail>true</fail>
 						</configuration>
 					</execution>
 				</executions>
@@ -153,11 +243,10 @@
 			<plugin>
 				<groupId>org.jacoco</groupId>
 				<artifactId>jacoco-maven-plugin</artifactId>
-				<version>0.8.5</version>
 				<executions>
 					<!-- set arg line property for surefire -->
 					<execution>
-						<id>prepare-agent</id>
+						<id>prepare-agent-surefire</id>
 						<goals>
 							<goal>prepare-agent</goal>
 						</goals>
@@ -175,39 +264,6 @@
 							<propertyName>failsafeArgLine</propertyName>
 						</configuration>
 					</execution>
-				</executions>
-			</plugin>
-			<plugin>
-				<groupId>org.apache.maven.plugins</groupId>
-				<artifactId>maven-surefire-plugin</artifactId>
-				<version>2.19.1</version>
-				<configuration>
-					<forkCount>1</forkCount>
-				</configuration>
-			</plugin>
-
-			<plugin>
-				<groupId>org.apache.maven.plugins</groupId>
-				<artifactId>maven-failsafe-plugin</artifactId>
-				<version>2.18.1</version>
-				<executions>
-					<execution>
-						<id>integration-tests</id>
-						<goals>
-							<goal>integration-test</goal>
-							<goal>verify</goal>
-						</goals>
-						<configuration>
-							<argLine>${itCoverageAgent}</argLine>
-						</configuration>
-					</execution>
-				</executions>
-			</plugin>
-			<plugin>
-				<groupId>org.jacoco</groupId>
-				<artifactId>jacoco-maven-plugin</artifactId>
-				<version>0.8.5</version>
-				<executions>
 					<!-- METHOD 1 -->
 					<!--<execution>-->
 					<!--<id>prepare-agent</id>-->
@@ -230,7 +286,7 @@
 
 					<!-- prepare agent for measuring integration tests -->
 					<execution>
-						<id>prepare-agent</id>
+						<id>prepare-agent-integration-test</id>
 						<goals>
 							<goal>prepare-agent</goal>
 						</goals>
@@ -242,66 +298,88 @@
 					</execution>
 				</executions>
 			</plugin>
-
+			<plugin>
+				<groupId>org.apache.maven.plugins</groupId>
+				<artifactId>maven-surefire-plugin</artifactId>
+				<configuration>
+					<forkCount>1</forkCount>
+				</configuration>
+			</plugin>
+			<plugin>
+				<groupId>org.apache.maven.plugins</groupId>
+				<artifactId>maven-failsafe-plugin</artifactId>
+				<executions>
+					<execution>
+						<id>integration-tests</id>
+						<goals>
+							<goal>integration-test</goal>
+							<goal>verify</goal>
+						</goals>
+						<configuration>
+							<argLine>${itCoverageAgent}</argLine>
+						</configuration>
+					</execution>
+				</executions>
+			</plugin>
 			<plugin>
 				<groupId>pl.project13.maven</groupId>
 				<artifactId>git-commit-id-plugin</artifactId>
 				<executions>
-				  <execution>
-					<id>retrieve-git-info</id>
-					<phase>prepare-package</phase>
-					<goals>
-					  <goal>revision</goal>
-					</goals>
-				  </execution>
+					<execution>
+						<id>retrieve-git-info</id>
+						<phase>prepare-package</phase>
+						<goals>
+							<goal>revision</goal>
+						</goals>
+					</execution>
 				</executions>
 				<configuration>
-				  <injectAllReactorProjects>true</injectAllReactorProjects>
-				  <runOnlyOnce>true</runOnlyOnce>
-				  <skipPoms>false</skipPoms>
-				  <dateFormat>yyyyMMddHHmmss</dateFormat>
-				  <dateFormatTimeZone>UTC</dateFormatTimeZone>
+					<injectAllReactorProjects>true</injectAllReactorProjects>
+					<runOnlyOnce>true</runOnlyOnce>
+					<skipPoms>false</skipPoms>
+					<dateFormat>yyyyMMddHHmmss</dateFormat>
+					<dateFormatTimeZone>UTC</dateFormatTimeZone>
 				</configuration>
-			  </plugin>
-			  
-			  <plugin>
+			</plugin>
+
+			<plugin>
 				<groupId>org.apache.maven.plugins</groupId>
 				<artifactId>maven-jar-plugin</artifactId>
 				<configuration>
-				  <archive>
-					<manifestEntries>
-					  <Last-Commit-Id>${git.commit.id}</Last-Commit-Id>
-					  <Last-Commit-Time>${git.commit.time}</Last-Commit-Time>
-					  <Reproducible-Build>true</Reproducible-Build>
-					</manifestEntries>
-				  </archive>
+					<archive>
+						<manifestEntries>
+							<Last-Commit-Id>${git.commit.id}</Last-Commit-Id>
+							<Last-Commit-Time>${git.commit.time}</Last-Commit-Time>
+							<Reproducible-Build>true</Reproducible-Build>
+						</manifestEntries>
+					</archive>
 				</configuration>
-			  </plugin>
-			  
-			  <plugin>
+			</plugin>
+
+			<plugin>
 				<groupId>io.github.zlika</groupId>
 				<artifactId>reproducible-build-maven-plugin</artifactId>
 				<version>0.12</version>
 				<executions>
-				  <execution>
-					<id>strip-jaxb</id>
-					<goals>
-					  <goal>strip-jaxb</goal>
-					</goals>
-				  </execution>
-				  <execution>
-					<id>strip-jar</id>
-					<goals>
-					  <goal>strip-jar</goal>
-					</goals>
-					<configuration>
-					  <zipDateTime>${git.commit.time}</zipDateTime>
-					  <!-- Set custom date/time format pattern, "yyyyMMddHHmmss" by default -->
-					  <!-- <zipDateTimeFormatPattern>yyyyMMddHHmmss</zipDateTimeFormatPattern> -->
-					</configuration>
-				  </execution>
+					<execution>
+						<id>strip-jaxb</id>
+						<goals>
+							<goal>strip-jaxb</goal>
+						</goals>
+					</execution>
+					<execution>
+						<id>strip-jar</id>
+						<goals>
+							<goal>strip-jar</goal>
+						</goals>
+						<configuration>
+							<zipDateTime>${git.commit.time}</zipDateTime>
+							<!-- Set custom date/time format pattern, "yyyyMMddHHmmss" by default -->
+							<!-- <zipDateTimeFormatPattern>yyyyMMddHHmmss</zipDateTimeFormatPattern> -->
+						</configuration>
+					</execution>
 				</executions>
-			  </plugin>
+			</plugin>
 		</plugins>
 		<pluginManagement>
 			<plugins>
@@ -326,6 +404,31 @@
 					<groupId>org.sonarsource.scanner.maven</groupId>
 					<artifactId>sonar-maven-plugin</artifactId>
 					<version>3.7.0.1746</version>
+				</plugin>
+				<plugin>
+					<groupId>org.apache.maven.plugins</groupId>
+					<artifactId>maven-surefire-plugin</artifactId>
+					<version>2.22.2</version>
+				</plugin>
+				<plugin>
+					<groupId>org.apache.maven.plugins</groupId>
+					<artifactId>maven-jar-plugin</artifactId>
+					<version>3.2.0</version>
+				</plugin>
+				<plugin>
+					<groupId>org.apache.maven.plugins</groupId>
+					<artifactId>maven-failsafe-plugin</artifactId>
+					<version>2.18.1</version>
+				</plugin>
+				<plugin>
+					<groupId>org.apache.maven.plugins</groupId>
+					<artifactId>maven-enforcer-plugin</artifactId>
+					<version>3.0.0-M3</version>
+				</plugin>
+				<plugin>
+					<groupId>pl.project13.maven</groupId>
+					<artifactId>git-commit-id-plugin</artifactId>
+					<version>3.0.1</version>
 				</plugin>
 			</plugins>
 		</pluginManagement>
