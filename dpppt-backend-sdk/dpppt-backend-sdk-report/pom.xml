@@ -21,8 +21,8 @@
 	<name>DP3T Backend SDK Report</name>
 
 	<properties>
-		<code.coverage.project.folder>${basedir}/../</code.coverage.project.folder>
-		<code.coverage.overall.data.folder>${basedir}/../target/aggregate.exec</code.coverage.overall.data.folder>
+		<code.coverage.project.folder>${project.basedir}/../</code.coverage.project.folder>
+		<code.coverage.overall.data.folder>${project.basedir}/../target/aggregate.exec</code.coverage.overall.data.folder>
 		<sonar.projectKey>DP-3T_dp3t-sdk-report</sonar.projectKey>
 	</properties>
 
@@ -30,21 +30,18 @@
 
 		<!-- dp3t models -->
 		<dependency>
-			<groupId>org.dpppt</groupId>
+			<groupId>${project.groupId}</groupId>
 			<artifactId>dpppt-backend-sdk-model</artifactId>
-			<version>1.0.0-SNAPSHOT</version>
 		</dependency>
 
 		<dependency>
-			<groupId>org.dpppt</groupId>
+			<groupId>${project.groupId}</groupId>
 			<artifactId>dpppt-backend-sdk-data</artifactId>
-			<version>1.0.0-SNAPSHOT</version>
 		</dependency>
 
 		<dependency>
-			<groupId>org.dpppt</groupId>
+			<groupId>${project.groupId}</groupId>
 			<artifactId>dpppt-backend-sdk-ws</artifactId>
-			<version>1.0.0-SNAPSHOT</version>
 		</dependency>
 
 	</dependencies>
@@ -54,7 +51,6 @@
 				<plugin>
 					<groupId>org.apache.maven.plugins</groupId>
 					<artifactId>maven-surefire-plugin</artifactId>
-					<version>2.19.1</version>
 					<configuration>
 						<!-- Jacoco prepare-agent builds some command-line params without -->
 						<!-- which jacoco will not instrument. Hence it is important to add -->

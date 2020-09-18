@@ -85,15 +85,13 @@
 		</dependency>
 		<!-- dp3t models -->
 		<dependency>
-			<groupId>org.dpppt</groupId>
+			<groupId>${project.groupId}</groupId>
 			<artifactId>dpppt-backend-sdk-model</artifactId>
-			<version>1.0.0-SNAPSHOT</version>
 		</dependency>
 
 		<dependency>
-			<groupId>org.dpppt</groupId>
+			<groupId>${project.groupId}</groupId>
 			<artifactId>dpppt-backend-sdk-data</artifactId>
-			<version>1.0.0-SNAPSHOT</version>
 		</dependency>
 
 		<dependency>
@@ -133,14 +131,12 @@
 	</dependencyManagement>
 
 	<build>
-		<finalName>
-			dpppt-backend-sdk-ws
-		</finalName>
+		<finalName>dpppt-backend-sdk-ws</finalName>
 		<plugins>
 			<plugin>
 				<groupId>org.springframework.boot</groupId>
 				<artifactId>spring-boot-maven-plugin</artifactId>
-				<version>2.2.6.RELEASE</version>
+				<version>${spring-boot-version}</version>
 				<configuration>
 					<mainClass>org.dpppt.backend.sdk.ws.Application</mainClass>
 				</configuration>
