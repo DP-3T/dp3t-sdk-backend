@@ -74,7 +74,7 @@
 		</dependency>
 
 		<dependency>
-    		<groupId>org.bouncycastle</groupId>
+			<groupId>org.bouncycastle</groupId>
 			<artifactId>bcpkix-jdk15on</artifactId>
 			<version>1.65</version>
 		</dependency>
@@ -109,7 +109,7 @@
 		<dependency>
 			<groupId>io.micrometer</groupId>
 			<artifactId>micrometer-registry-prometheus</artifactId>
-		 </dependency>
+		</dependency>
 
 		<dependency>
 			<groupId>com.hubspot.jackson</groupId>
@@ -119,19 +119,6 @@
 
 	</dependencies>
 
-
-	<dependencyManagement>
-		<dependencies>
-			<dependency>
-				<groupId>org.springframework.boot</groupId>
-				<artifactId>spring-boot-dependencies</artifactId>
-				<type>pom</type>
-				<version>${spring-boot-version}</version>
-				<scope>import</scope>
-			</dependency>
-		</dependencies>
-	</dependencyManagement>
-
 	<build>
 		<finalName>
 			dpppt-backend-sdk-ws
@@ -140,9 +127,9 @@
 			<plugin>
 				<groupId>org.springframework.boot</groupId>
 				<artifactId>spring-boot-maven-plugin</artifactId>
-				<version>2.2.6.RELEASE</version>
+				<version>${spring-boot-version}</version>
 				<configuration>
-					<mainClass>org.dpppt.backend.sdk.ws.Application</mainClass>
+					<mainClass>${start-class}</mainClass>
 				</configuration>
 				<executions>
 					<execution>
@@ -158,9 +145,7 @@
                 <version>1.2.8</version>
                 <configuration>
                     <apiVersion>1.0-gapple</apiVersion>
-                    <basePackages>
-                       org.dpppt.backend.sdk.model
-                    </basePackages>
+                    <basePackages>org.dpppt.backend.sdk.model</basePackages>
 					<blackListedPackages>
 						<blackListedPackage>com.google.protobuf</blackListedPackage>
 					</blackListedPackages>
@@ -168,7 +153,7 @@
 						<ignoredType>byte</ignoredType>
 					</ignoredTypes>
                     <controllers>
-						<controller> org.dpppt.backend.sdk.ws.controller.GaenController</controller>
+						<controller>org.dpppt.backend.sdk.ws.controller.GaenController</controller>
                     </controllers>
                     <description>DP3T API</description>
                     <apiUrls>
