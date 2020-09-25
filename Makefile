@@ -53,4 +53,5 @@ docker:
 
 clean:
 	mvn -f $(DP3T_SDK)/pom.xml clean
+	@rm -f $(DP3T_SDK_WS)/dp3t-ws.log*
 	@rm -f documentation/*.log documentation/*.aux documentation/*.dvi documentation/*.ps documentation/*.blg documentation/*.bbl documentation/*.out documentation/*.bcf documentation/*.run.xml documentation/*.fdb_latexmk documentation/*.fls documentation/*.toc
