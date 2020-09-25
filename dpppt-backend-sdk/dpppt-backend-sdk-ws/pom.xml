@@ -1,12 +1,8 @@
-<!--
-  ~ Copyright (c) 2020 Ubique Innovation AG <https://www.ubique.ch>
-  ~
-  ~ This Source Code Form is subject to the terms of the Mozilla Public
-  ~ License, v. 2.0. If a copy of the MPL was not distributed with this
-  ~ file, You can obtain one at https://mozilla.org/MPL/2.0/.
-  ~
-  ~ SPDX-License-Identifier: MPL-2.0
-  -->
+<!-- ~ Copyright (c) 2020 Ubique Innovation AG <https://www.ubique.ch> ~ 
+	~ This Source Code Form is subject to the terms of the Mozilla Public ~ License, 
+	v. 2.0. If a copy of the MPL was not distributed with this ~ file, You can 
+	obtain one at https://mozilla.org/MPL/2.0/. ~ ~ SPDX-License-Identifier: 
+	MPL-2.0 -->
 
 <project xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
 	xmlns="http://maven.apache.org/POM/4.0.0"
@@ -71,6 +67,12 @@
 			<artifactId>spring-security-oauth2</artifactId>
 		</dependency>
 
+		<dependency>
+			<groupId>org.postgresql</groupId>
+			<artifactId>postgresql</artifactId>
+			<version>42.2.14</version>
+		</dependency>
+
 		<!-- dp3t models -->
 		<dependency>
 			<groupId>org.dpppt</groupId>
@@ -123,27 +125,27 @@
 				</executions>
 			</plugin>
 			<plugin>
-                <groupId>ch.ubique.openapi</groupId>
-                <artifactId>springboot-swagger-3</artifactId>
-                <configuration>
-                    <apiVersion>1.0-gapple</apiVersion>
-                    <basePackages>org.dpppt.backend.sdk.model</basePackages>
+				<groupId>ch.ubique.openapi</groupId>
+				<artifactId>springboot-swagger-3</artifactId>
+				<configuration>
+					<apiVersion>1.0-gapple</apiVersion>
+					<basePackages>org.dpppt.backend.sdk.model</basePackages>
 					<blackListedPackages>
 						<blackListedPackage>com.google.protobuf</blackListedPackage>
 					</blackListedPackages>
 					<ignoredTypes>
 						<ignoredType>byte</ignoredType>
 					</ignoredTypes>
-                    <controllers>
+					<controllers>
 						<controller>org.dpppt.backend.sdk.ws.controller.GaenController</controller>
-                    </controllers>
-                    <description>DP3T API</description>
-                    <apiUrls>
-                        <apiUrl>https://demo.dpppt.org</apiUrl>
-                    </apiUrls>
-                    <title>DP3T API</title>
-                </configuration>
-            </plugin>
+					</controllers>
+					<description>DP3T API</description>
+					<apiUrls>
+						<apiUrl>https://demo.dpppt.org</apiUrl>
+					</apiUrls>
+					<title>DP3T API</title>
+				</configuration>
+			</plugin>
 		</plugins>
 	</build>
 

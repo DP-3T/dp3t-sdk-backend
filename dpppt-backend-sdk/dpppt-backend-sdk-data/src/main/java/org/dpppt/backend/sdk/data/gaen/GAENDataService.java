@@ -56,4 +56,13 @@ public interface GAENDataService {
    * @param retentionPeriod in milliseconds
    */
   void cleanDB(Duration retentionPeriod);
+
+  /**
+   * Returns all exposed keys since keySince.
+   *
+   * @param keysSince
+   * @param now
+   * @return
+   */
+  List<GaenKey> getSortedExposedSince(UTCInstant keysSince, UTCInstant now);
 }
