@@ -168,7 +168,6 @@
 						<ignoredType>byte</ignoredType>
 					</ignoredTypes>
                     <controllers>
-                        <controller>org.dpppt.backend.sdk.ws.controller.DPPPTController</controller>
 						<controller> org.dpppt.backend.sdk.ws.controller.GaenController</controller>
                     </controllers>
                     <description>DP3T API</description>

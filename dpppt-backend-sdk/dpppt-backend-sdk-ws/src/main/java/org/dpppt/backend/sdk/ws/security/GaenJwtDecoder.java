@@ -19,11 +19,11 @@ import org.springframework.security.oauth2.jwt.Jwt;
 import org.springframework.security.oauth2.jwt.JwtDecoder;
 import org.springframework.security.oauth2.jwt.JwtException;
 
-public class DPPTJwtDecoder implements JwtDecoder {
+public class GaenJwtDecoder implements JwtDecoder {
   private final JwtParser parser;
   private OAuth2TokenValidator<Jwt> validator;
 
-  public DPPTJwtDecoder(PublicKey publicKey) {
+  public GaenJwtDecoder(PublicKey publicKey) {
     parser = Jwts.parserBuilder().setSigningKey(publicKey).build();
   }
 

@@ -118,6 +118,14 @@ public class GaenController {
     this.gaenSigner = gaenSigner;
   }
 
+  @GetMapping(value = "")
+  @Documentation(
+      description = "Hello return",
+      responses = {"200=>server live"})
+  public @ResponseBody ResponseEntity<String> hello() {
+    return ResponseEntity.ok().header("X-HELLO", "dp3t").body("Hello from DP3T WS");
+  }
+
   @PostMapping(value = "/exposed")
   @Documentation(
       description =

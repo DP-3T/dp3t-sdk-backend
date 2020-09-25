@@ -13,8 +13,6 @@ package org.dpppt.backend.sdk.data.config;
 import java.security.NoSuchAlgorithmException;
 import java.time.Duration;
 import javax.sql.DataSource;
-import org.dpppt.backend.sdk.data.DPPPTDataService;
-import org.dpppt.backend.sdk.data.JDBCDPPPTDataServiceImpl;
 import org.dpppt.backend.sdk.data.JDBCRedeemDataServiceImpl;
 import org.dpppt.backend.sdk.data.RedeemDataService;
 import org.dpppt.backend.sdk.data.gaen.FakeKeyService;
@@ -28,7 +26,7 @@ import org.springframework.jdbc.datasource.embedded.EmbeddedDatabaseBuilder;
 import org.springframework.jdbc.datasource.embedded.EmbeddedDatabaseType;
 
 @Configuration
-public class DPPPTDataServiceConfig {
+public class GaenDataServiceConfig {
 
   @Value("${ws.gaen.randomkeysenabled: true}")
   boolean randomkeysenabled;
@@ -50,11 +48,6 @@ public class DPPPTDataServiceConfig {
   }
 
   @Autowired String dbType;
-
-  @Bean
-  public DPPPTDataService DPPPTDataService() {
-    return new JDBCDPPPTDataServiceImpl(dbType, dataSource);
-  }
 
   @Bean
   public GAENDataService gaenDataService() {
