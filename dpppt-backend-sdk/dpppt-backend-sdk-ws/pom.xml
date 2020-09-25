@@ -147,25 +147,4 @@
 		</plugins>
 	</build>
 
-	<pluginRepositories>
-		<pluginRepository>
-			<snapshots>
-				<enabled>false</enabled>
-			</snapshots>
-			<id>ubique-oss-springboot-swagger3</id>
-			<name>bintray</name>
-			<url>https://dl.bintray.com/ubique-oss/springboot-swagger3</url>
-		</pluginRepository>
-    </pluginRepositories>
-
-    <repositories>
-        <repository>
-			<snapshots>
-				<enabled>false</enabled>
-			</snapshots>
-			<id>ubique-oss-springboot-swagger3</id>
-			<name>bintray</name>
-			<url>https://dl.bintray.com/ubique-oss/springboot-swagger3</url>
-		</repository>
-    </repositories>
 </project>
