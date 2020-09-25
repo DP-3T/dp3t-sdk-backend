@@ -24,7 +24,7 @@
 		<java-version>11</java-version>
 
 		<project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
-		<project.reporting.sourceEncoding>UTF-8</project.reporting.sourceEncoding>
+		<project.reporting.outputEncoding>UTF-8</project.reporting.outputEncoding>
 
 		<jackson-version>2.10.5</jackson-version>
 		<jsonwebtoken-version>0.11.2</jsonwebtoken-version>
@@ -264,7 +264,15 @@
 								<requireJavaVersion>
 									<version>${java-version}</version>
 								</requireJavaVersion>
+								<bannedDependencies>
+                                    <excludes>
+                                        <exclude>log4j:log4j</exclude>
+                                        <exclude>commons-logging:commons-logging</exclude>
+                                        <exclude>org.apache.logging.log4j:log4j-core</exclude>
+                                    </excludes>
+                                </bannedDependencies>
 							</rules>
+							<fail>true</fail>
 						</configuration>
 					</execution>
 				</executions>
@@ -416,6 +424,29 @@
 					</execution>
 				</executions>
 			</plugin>
+			<plugin>
+				<groupId>org.codehaus.mojo</groupId>
+				<artifactId>build-helper-maven-plugin</artifactId>
+				<executions>
+					<execution>
+						<id>add-classes</id>
+						<phase>generate-sources</phase>
+						<goals>
+							<goal>add-source</goal>
+						</goals>
+						<configuration>
+							<sources>
+								<source>${project.build.directory}/generated-sources</source>
+							</sources>
+						</configuration>
+					</execution>
+				</executions>
+			</plugin>
+			<plugin>
+                <groupId>com.github.os72</groupId>
+                <artifactId>protoc-jar-maven-plugin</artifactId>
+                <version>3.11.4</version>
+            </plugin>
 		</plugins>
 		<pluginManagement>
 			<plugins>
@@ -473,6 +504,16 @@
 					<groupId>org.springframework.boot</groupId>
 					<artifactId>spring-boot-maven-plugin</artifactId>
 					<version>${spring-boot-version}</version>
+				</plugin>
+				<plugin>
+					<groupId>org.codehaus.mojo</groupId>
+					<artifactId>build-helper-maven-plugin</artifactId>
+					<version>3.2.0</version>
+				</plugin>
+				<plugin>
+					<groupId>com.github.os72</groupId>
+					<artifactId>protoc-jar-maven-plugin</artifactId>
+					<version>3.11.4</version>
 				</plugin>
 			</plugins>
 		</pluginManagement>
