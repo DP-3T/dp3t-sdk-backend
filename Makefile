@@ -20,6 +20,9 @@ test: clean run-test
 run-test:
 	mvn -f $(DP3T_SDK)/pom.xml test
 
+package:
+	mvn -f $(DP3T_SDK)/pom.xml clean package
+
 updateproject:
 	mvn -f $(DP3T_SDK)/pom.xml package -DskipTests
 
