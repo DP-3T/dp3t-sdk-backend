@@ -24,7 +24,7 @@
 		<java-version>11</java-version>
 
 		<project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
-		<project.report.sourceEncoding>UTF-8</project.report.sourceEncoding>
+		<project.reporting.sourceEncoding>UTF-8</project.reporting.sourceEncoding>
 
 		<jackson-version>2.10.5</jackson-version>
 		<jsonwebtoken-version>0.11.2</jsonwebtoken-version>
