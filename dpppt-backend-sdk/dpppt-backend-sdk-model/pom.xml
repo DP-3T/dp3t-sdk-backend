@@ -27,7 +27,6 @@
 		<dependency>
 			<groupId>ch.ubique.openapi</groupId>
 			<artifactId>doc-annotations</artifactId>
-			<version>1.0.1</version>
 		</dependency>
 
 		<dependency>

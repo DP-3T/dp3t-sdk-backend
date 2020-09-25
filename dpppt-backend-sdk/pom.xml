@@ -24,9 +24,15 @@
 		<java-version>11</java-version>
 
 		<project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
+
+		<jsonwebtoken-version>0.11.1</jsonwebtoken-version>
 		<spring-boot-version>2.2.10.RELEASE</spring-boot-version>
+		<testcontainers-version>1.14.2</testcontainers-version>
+
 		<itCoverageAgent></itCoverageAgent>
+
 		<build-helper-maven-plugin.version>1.9.1</build-helper-maven-plugin.version>
+
 		<sonar.host.url>https://sonarcloud.io</sonar.host.url>
 		<sonar.organization>${env.SONAR_ORGANIZATION}</sonar.organization>
 		<sonar.login>${env.SONAR_TOKEN}</sonar.login>
@@ -97,6 +103,66 @@
 				<version>${spring-boot-version}</version>
 				<scope>import</scope>
 			</dependency>
+
+			<!-- dp3t models -->
+			<dependency>
+				<groupId>org.dpppt</groupId>
+				<artifactId>dpppt-backend-sdk-model</artifactId>
+				<version>${project.version}</version>
+			</dependency>
+
+			<dependency>
+				<groupId>org.dpppt</groupId>
+				<artifactId>dpppt-backend-sdk-data</artifactId>
+				<version>${project.version}</version>
+			</dependency>
+
+			<dependency>
+				<groupId>ch.ubique.openapi</groupId>
+				<artifactId>doc-annotations</artifactId>
+				<version>1.0.1</version>
+			</dependency>
+
+			<!-- JSON Web Token -->
+			<dependency>
+				<groupId>io.jsonwebtoken</groupId>
+				<artifactId>jjwt-api</artifactId>
+				<version>${jsonwebtoken-version}</version>
+			</dependency>
+			<dependency>
+				<groupId>io.jsonwebtoken</groupId>
+				<artifactId>jjwt-jackson</artifactId>
+				<version>${jsonwebtoken-version}</version>
+			</dependency>
+			<dependency>
+				<groupId>io.jsonwebtoken</groupId>
+				<artifactId>jjwt-impl</artifactId>
+				<version>${jsonwebtoken-version}</version>
+			</dependency>
+
+			<dependency>
+				<groupId>org.bouncycastle</groupId>
+				<artifactId>bcpkix-jdk15on</artifactId>
+				<version>1.65</version>
+			</dependency>
+
+			<dependency>
+				<groupId>org.springframework.security.oauth</groupId>
+				<artifactId>spring-security-oauth2</artifactId>
+				<version>2.4.0.RELEASE</version>
+			</dependency>
+
+			<dependency>
+				<groupId>com.hubspot.jackson</groupId>
+				<artifactId>jackson-datatype-protobuf</artifactId>
+				<version>0.9.11-jackson2.9</version>
+			</dependency>
+
+			<dependency>
+				<groupId>org.testcontainers</groupId>
+				<artifactId>postgresql</artifactId>
+				<version>${testcontainers-version}</version>
+			</dependency>
 		</dependencies>
 	</dependencyManagement>
 
@@ -120,12 +186,14 @@
 				<configuration>
 					<source>${java-version}</source>
 					<target>${java-version}</target>
+					<compilerArgs>
+						<arg>-parameters</arg>
+					</compilerArgs>
 				</configuration>
 			</plugin>
 			<plugin>
 				<groupId>org.apache.maven.plugins</groupId>
 				<artifactId>maven-enforcer-plugin</artifactId>
-				<version>3.0.0-M3</version>
 				<executions>
 					<execution>
 						<id>enforce-versions</id>
@@ -145,7 +213,6 @@
 			<plugin>
 				<groupId>org.jacoco</groupId>
 				<artifactId>jacoco-maven-plugin</artifactId>
-				<version>0.8.5</version>
 				<executions>
 					<!-- set arg line property for surefire -->
 					<execution>
@@ -172,7 +239,6 @@
 			<plugin>
 				<groupId>org.apache.maven.plugins</groupId>
 				<artifactId>maven-surefire-plugin</artifactId>
-				<version>2.19.1</version>
 				<configuration>
 					<forkCount>1</forkCount>
 				</configuration>
@@ -181,7 +247,6 @@
 			<plugin>
 				<groupId>org.apache.maven.plugins</groupId>
 				<artifactId>maven-failsafe-plugin</artifactId>
-				<version>2.18.1</version>
 				<executions>
 					<execution>
 						<id>integration-tests</id>
@@ -198,7 +263,6 @@
 			<plugin>
 				<groupId>org.jacoco</groupId>
 				<artifactId>jacoco-maven-plugin</artifactId>
-				<version>0.8.5</version>
 				<executions>
 					<!-- METHOD 1 -->
 					<!--<execution>-->
@@ -273,7 +337,6 @@
 			<plugin>
 				<groupId>io.github.zlika</groupId>
 				<artifactId>reproducible-build-maven-plugin</artifactId>
-				<version>0.12</version>
 				<executions>
 					<execution>
 						<id>strip-jaxb</id>
@@ -298,16 +361,14 @@
 		<pluginManagement>
 			<plugins>
 				<plugin>
+					<groupId>ch.ubique.openapi</groupId>
+					<artifactId>springboot-swagger-3</artifactId>
+					<version>1.2.8</version>
+				</plugin>
+				<plugin>
 					<groupId>org.apache.maven.plugins</groupId>
 					<artifactId>maven-compiler-plugin</artifactId>
 					<version>3.8.1</version>
-					<configuration>
-						<source>${java-version}</source>
-						<target>${java-version}</target>
-						<compilerArgs>
-							<arg>-parameters</arg>
-						</compilerArgs>
-					</configuration>
 				</plugin>
 				<plugin>
 					<groupId>org.jacoco</groupId>
@@ -318,6 +379,41 @@
 					<groupId>org.sonarsource.scanner.maven</groupId>
 					<artifactId>sonar-maven-plugin</artifactId>
 					<version>3.7.0.1746</version>
+				</plugin>
+				<plugin>
+					<groupId>org.apache.maven.plugins</groupId>
+					<artifactId>maven-enforcer-plugin</artifactId>
+					<version>3.0.0-M3</version>
+				</plugin>
+				<plugin>
+					<groupId>org.apache.maven.plugins</groupId>
+					<artifactId>maven-surefire-plugin</artifactId>
+					<version>3.0.0-M5</version>
+				</plugin>
+				<plugin>
+					<groupId>org.apache.maven.plugins</groupId>
+					<artifactId>maven-failsafe-plugin</artifactId>
+					<version>3.0.0-M5</version>
+				</plugin>
+				<plugin>
+					<groupId>pl.project13.maven</groupId>
+					<artifactId>git-commit-id-plugin</artifactId>
+					<version>4.0.2</version>
+				</plugin>
+				<plugin>
+					<groupId>org.apache.maven.plugins</groupId>
+					<artifactId>maven-jar-plugin</artifactId>
+					<version>3.2.0</version>
+				</plugin>
+				<plugin>
+					<groupId>io.github.zlika</groupId>
+					<artifactId>reproducible-build-maven-plugin</artifactId>
+					<version>0.12</version>
+				</plugin>
+				<plugin>
+					<groupId>org.springframework.boot</groupId>
+					<artifactId>spring-boot-maven-plugin</artifactId>
+					<version>${spring-boot-version}</version>
 				</plugin>
 			</plugins>
 		</pluginManagement>
