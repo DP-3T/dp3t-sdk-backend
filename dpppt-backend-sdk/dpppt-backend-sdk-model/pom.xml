@@ -74,7 +74,6 @@
                             <goal>run</goal>
                         </goals>
                         <configuration>
-                            <protocVersion>3.1.0</protocVersion>
                             <inputDirectories>
                                 <include>${project.basedir}/src/main/proto</include>
                             </inputDirectories>
