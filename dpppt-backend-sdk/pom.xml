@@ -26,14 +26,15 @@
 		<project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
 		<project.reporting.outputEncoding>UTF-8</project.reporting.outputEncoding>
 
-		<jackson-version>2.10.5</jackson-version>
+		<jackson-version>2.11.1</jackson-version>
 		<jsonwebtoken-version>0.11.2</jsonwebtoken-version>
+		<protobuf-java-version>3.12.1</protobuf-java-version>
 		<spring-boot-version>2.2.10.RELEASE</spring-boot-version>
 		<testcontainers-version>1.14.2</testcontainers-version>
 
 		<itCoverageAgent></itCoverageAgent>
 
-		<build-helper-maven-plugin.version>1.9.1</build-helper-maven-plugin.version>
+		<build-helper-maven-plugin.version>3.2.0</build-helper-maven-plugin.version>
 
 		<sonar.host.url>https://sonarcloud.io</sonar.host.url>
 		<sonar.organization>${env.SONAR_ORGANIZATION}</sonar.organization>
@@ -132,7 +133,7 @@
 			<dependency>
 				<groupId>com.google.protobuf</groupId>
 				<artifactId>protobuf-java</artifactId>
-				<version>3.13.0</version>
+				<version>${protobuf-java-version}</version>
 			</dependency>
 
 			<!-- JSON Web Token -->
@@ -301,36 +302,7 @@
 							<propertyName>failsafeArgLine</propertyName>
 						</configuration>
 					</execution>
-				</executions>
-			</plugin>
-			<plugin>
-				<groupId>org.apache.maven.plugins</groupId>
-				<artifactId>maven-surefire-plugin</artifactId>
-				<configuration>
-					<forkCount>1</forkCount>
-				</configuration>
-			</plugin>
 
-			<plugin>
-				<groupId>org.apache.maven.plugins</groupId>
-				<artifactId>maven-failsafe-plugin</artifactId>
-				<executions>
-					<execution>
-						<id>integration-tests</id>
-						<goals>
-							<goal>integration-test</goal>
-							<goal>verify</goal>
-						</goals>
-						<configuration>
-							<argLine>${itCoverageAgent}</argLine>
-						</configuration>
-					</execution>
-				</executions>
-			</plugin>
-			<plugin>
-				<groupId>org.jacoco</groupId>
-				<artifactId>jacoco-maven-plugin</artifactId>
-				<executions>
 					<!-- METHOD 1 -->
 					<!--<execution>-->
 					<!--<id>prepare-agent</id>-->
@@ -353,7 +325,7 @@
 
 					<!-- prepare agent for measuring integration tests -->
 					<execution>
-						<id>prepare-agent</id>
+						<id>prepare-agent-coverage</id>
 						<goals>
 							<goal>prepare-agent</goal>
 						</goals>
@@ -361,6 +333,30 @@
 						<configuration>
 							<!--<destFile>${sonar.jacoco.itReportPath}</destFile>-->
 							<propertyName>itCoverageAgent</propertyName>
+						</configuration>
+					</execution>
+				</executions>
+			</plugin>
+			<plugin>
+				<groupId>org.apache.maven.plugins</groupId>
+				<artifactId>maven-surefire-plugin</artifactId>
+				<configuration>
+					<forkCount>1</forkCount>
+				</configuration>
+			</plugin>
+
+			<plugin>
+				<groupId>org.apache.maven.plugins</groupId>
+				<artifactId>maven-failsafe-plugin</artifactId>
+				<executions>
+					<execution>
+						<id>integration-tests</id>
+						<goals>
+							<goal>integration-test</goal>
+							<goal>verify</goal>
+						</goals>
+						<configuration>
+							<argLine>${itCoverageAgent}</argLine>
 						</configuration>
 					</execution>
 				</executions>
@@ -442,11 +438,6 @@
 					</execution>
 				</executions>
 			</plugin>
-			<plugin>
-                <groupId>com.github.os72</groupId>
-                <artifactId>protoc-jar-maven-plugin</artifactId>
-                <version>3.11.4</version>
-            </plugin>
 		</plugins>
 		<pluginManagement>
 			<plugins>
