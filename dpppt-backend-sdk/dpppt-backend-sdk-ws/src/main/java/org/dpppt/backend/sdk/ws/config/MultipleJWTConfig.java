@@ -164,11 +164,6 @@ public class MultipleJWTConfig {
     }
 
     @Bean
-    public ValidateRequest requestValidator(ValidationUtils dpptValidationUtils) {
-      return new JWTValidateRequest(dpptValidationUtils);
-    }
-
-    @Bean
     public ValidateRequest gaenRequestValidator(ValidationUtils gaenValidationUtils) {
       return new org.dpppt.backend.sdk.ws.security.gaen.JWTValidateRequest(gaenValidationUtils);
     }

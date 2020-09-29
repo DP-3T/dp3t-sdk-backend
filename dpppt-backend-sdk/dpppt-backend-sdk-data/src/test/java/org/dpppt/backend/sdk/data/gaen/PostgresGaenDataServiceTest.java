@@ -16,7 +16,6 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
 
 import java.sql.Connection;
 import java.sql.PreparedStatement;
-import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Timestamp;
 import java.time.Clock;
@@ -31,11 +30,9 @@ import org.dpppt.backend.sdk.data.RedeemDataService;
 import org.dpppt.backend.sdk.data.config.FlyWayConfig;
 import org.dpppt.backend.sdk.data.config.GaenDataServiceConfig;
 import org.dpppt.backend.sdk.data.config.PostgresDataConfig;
-import org.dpppt.backend.sdk.model.Exposee;
 import org.dpppt.backend.sdk.model.gaen.GaenKey;
 import org.dpppt.backend.sdk.model.gaen.GaenUnit;
 import org.dpppt.backend.sdk.utils.UTCInstant;
-import org.jetbrains.annotations.NotNull;
 import org.junit.After;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -214,19 +211,6 @@ public class PostgresGaenDataServiceTest {
     assertEquals(0, returnedKeys.size());
   }
 
-  private void insertExposeeWithReceivedAt(Instant receivedAt, String key) throws SQLException {
-    Connection connection = dataSource.getConnection();
-    String sql =
-        "into t_gaen_exposed (pk_exposed_id, key, received_at, rolling_start_number,"
-            + " rolling_period, transmission_risk_level) values (100, ?, ?, ?, 144, 0)";
-    PreparedStatement preparedStatement = connection.prepareStatement("insert " + sql);
-    preparedStatement.setString(1, key);
-    preparedStatement.setTimestamp(2, new Timestamp(receivedAt.toEpochMilli()));
-    preparedStatement.setInt(
-        3, (int) Duration.ofMillis(receivedAt.toEpochMilli()).dividedBy(Duration.ofMinutes(10)));
-    preparedStatement.execute();
-  }
-
   private void insertExposeeWithReceivedAtAndKeyDate(
       Instant receivedAt, Instant keyDate, String key) throws SQLException {
     Connection connection = dataSource.getConnection();
@@ -239,24 +223,6 @@ public class PostgresGaenDataServiceTest {
     preparedStatement.setInt(
         3, (int) GaenUnit.TenMinutes.between(Instant.ofEpochMilli(0), keyDate));
     preparedStatement.execute();
-  }
-
-  @NotNull
-  private Exposee createExposee(String key, String keyDate) {
-    Exposee exposee = new Exposee();
-    exposee.setKey(key);
-    exposee.setKeyDate(UTCInstant.parseDate("2014-01-28").getTimestamp());
-    return exposee;
-  }
-
-  private long getExposeeCount() throws SQLException {
-    try (final Connection connection = dataSource.getConnection();
-        final PreparedStatement preparedStatement =
-            connection.prepareStatement("select count(*) from t_exposed");
-        final ResultSet resultSet = preparedStatement.executeQuery()) {
-      resultSet.next();
-      return resultSet.getLong(1);
-    }
   }
 
   protected void executeSQL(String sql) throws SQLException {
