@@ -39,7 +39,6 @@
 		<dependency>
 			<groupId>ch.ubique.openapi</groupId>
 			<artifactId>doc-annotations</artifactId>
-			<version>1.0.1</version>
 		</dependency>
 
 		<dependency>
@@ -47,53 +46,39 @@
 			<artifactId>spring-security-test</artifactId>
 			<scope>test</scope>
 		</dependency>
+
 		<dependency>
 			<groupId>io.jsonwebtoken</groupId>
 			<artifactId>jjwt-api</artifactId>
-			<version>0.11.1</version>
 		</dependency>
-		<dependency>
-			<groupId>io.jsonwebtoken</groupId>
-			<artifactId>jjwt-root</artifactId>
-			<version>0.11.1</version>
-			<type>pom</type>
-		</dependency>
-
 		<dependency>
 			<groupId>io.jsonwebtoken</groupId>
 			<artifactId>jjwt-jackson</artifactId>
-			<version>0.11.1</version>
 			<scope>runtime</scope>
 		</dependency>
-
 		<dependency>
 			<groupId>io.jsonwebtoken</groupId>
 			<artifactId>jjwt-impl</artifactId>
-			<version>0.11.1</version>
 			<scope>runtime</scope>
 		</dependency>
 
 		<dependency>
-    		<groupId>org.bouncycastle</groupId>
+			<groupId>org.bouncycastle</groupId>
 			<artifactId>bcpkix-jdk15on</artifactId>
-			<version>1.65</version>
 		</dependency>
 		<dependency>
 			<groupId>org.springframework.security.oauth</groupId>
 			<artifactId>spring-security-oauth2</artifactId>
-			<version>2.4.0.RELEASE</version>
 		</dependency>
+
 		<!-- dp3t models -->
 		<dependency>
 			<groupId>org.dpppt</groupId>
 			<artifactId>dpppt-backend-sdk-model</artifactId>
-			<version>1.0.0-SNAPSHOT</version>
 		</dependency>
-
 		<dependency>
 			<groupId>org.dpppt</groupId>
 			<artifactId>dpppt-backend-sdk-data</artifactId>
-			<version>1.0.0-SNAPSHOT</version>
 		</dependency>
 
 		<dependency>
@@ -109,28 +94,14 @@
 		<dependency>
 			<groupId>io.micrometer</groupId>
 			<artifactId>micrometer-registry-prometheus</artifactId>
-		 </dependency>
+		</dependency>
 
 		<dependency>
 			<groupId>com.hubspot.jackson</groupId>
 			<artifactId>jackson-datatype-protobuf</artifactId>
-			<version>0.9.11-jackson2.9</version>
 		</dependency>
 
 	</dependencies>
-
-
-	<dependencyManagement>
-		<dependencies>
-			<dependency>
-				<groupId>org.springframework.boot</groupId>
-				<artifactId>spring-boot-dependencies</artifactId>
-				<type>pom</type>
-				<version>${spring-boot-version}</version>
-				<scope>import</scope>
-			</dependency>
-		</dependencies>
-	</dependencyManagement>
 
 	<build>
 		<finalName>
@@ -140,9 +111,8 @@
 			<plugin>
 				<groupId>org.springframework.boot</groupId>
 				<artifactId>spring-boot-maven-plugin</artifactId>
-				<version>2.2.6.RELEASE</version>
 				<configuration>
-					<mainClass>org.dpppt.backend.sdk.ws.Application</mainClass>
+					<mainClass>${start-class}</mainClass>
 				</configuration>
 				<executions>
 					<execution>
@@ -155,12 +125,9 @@
 			<plugin>
                 <groupId>ch.ubique.openapi</groupId>
                 <artifactId>springboot-swagger-3</artifactId>
-                <version>1.2.8</version>
                 <configuration>
                     <apiVersion>1.0-gapple</apiVersion>
-                    <basePackages>
-                       org.dpppt.backend.sdk.model
-                    </basePackages>
+                    <basePackages>org.dpppt.backend.sdk.model</basePackages>
 					<blackListedPackages>
 						<blackListedPackage>com.google.protobuf</blackListedPackage>
 					</blackListedPackages>
@@ -168,7 +135,7 @@
 						<ignoredType>byte</ignoredType>
 					</ignoredTypes>
                     <controllers>
-						<controller> org.dpppt.backend.sdk.ws.controller.GaenController</controller>
+						<controller>org.dpppt.backend.sdk.ws.controller.GaenController</controller>
                     </controllers>
                     <description>DP3T API</description>
                     <apiUrls>
@@ -180,25 +147,4 @@
 		</plugins>
 	</build>
 
-	<pluginRepositories>
-		<pluginRepository>
-			<snapshots>
-				<enabled>false</enabled>
-			</snapshots>
-			<id>ubique-oss-springboot-swagger3</id>
-			<name>bintray</name>
-			<url>https://dl.bintray.com/ubique-oss/springboot-swagger3</url>
-		</pluginRepository>
-    </pluginRepositories>
-
-    <repositories>
-        <repository>
-			<snapshots>
-				<enabled>false</enabled>
-			</snapshots>
-			<id>ubique-oss-springboot-swagger3</id>
-			<name>bintray</name>
-			<url>https://dl.bintray.com/ubique-oss/springboot-swagger3</url>
-		</repository>
-    </repositories>
 </project>
