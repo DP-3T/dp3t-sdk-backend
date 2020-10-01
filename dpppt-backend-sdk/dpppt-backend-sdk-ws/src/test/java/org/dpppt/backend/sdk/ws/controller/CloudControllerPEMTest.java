@@ -51,8 +51,6 @@ public class CloudControllerPEMTest {
   protected ObjectMapper objectMapper;
 
   @Autowired private ResponseWrapperFilter filter;
-  // private String publicKey =
-  // "MFkwEwYHKoZIzj0CAQYIKoZIzj0DAQcDQgAEc6n1FNz6RnwNeNM9H+KxaPckrBxgKU799v+DTy8ivc1ZM3nDyXq5zU2AFXvgvLFzWxU9z9FCcDPGTcN7cvOyXw==";
   private PublicKey publicKey;
 
   @Before
