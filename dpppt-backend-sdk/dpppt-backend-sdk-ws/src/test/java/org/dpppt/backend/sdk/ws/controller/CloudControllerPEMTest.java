@@ -12,7 +12,6 @@ package org.dpppt.backend.sdk.ws.controller;
 
 import static org.junit.Assert.assertEquals;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
-import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
 import com.fasterxml.jackson.core.JsonFactory;
@@ -23,18 +22,12 @@ import io.jsonwebtoken.Jwt;
 import io.jsonwebtoken.Jwts;
 import java.io.IOException;
 import java.security.PublicKey;
-import java.time.LocalDate;
-import java.time.ZoneOffset;
-import java.util.Base64;
-import org.dpppt.backend.sdk.model.ExposeeAuthData;
-import org.dpppt.backend.sdk.model.ExposeeRequest;
 import org.dpppt.backend.sdk.ws.filter.ResponseWrapperFilter;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
-import org.springframework.http.MediaType;
 import org.springframework.mock.web.MockHttpServletResponse;
 import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.context.TestPropertySource;
@@ -52,7 +45,7 @@ import org.springframework.web.context.WebApplicationContext;
       "vcap.services.ecdsa_dev.credentials.publicKey=LS0tLS1CRUdJTiBDRVJUSUZJQ0FURS0tLS0tCk1JSUNTRENDQWU2Z0F3SUJBZ0lVS3pEQlJIZlZVN2djRGZxUTBGUDFLTkJULzVJd0NnWUlLb1pJemowRUF3SXcKZXpFTE1Ba0dBMVVFQmhNQ1EwZ3hEVEFMQmdOVkJBZ01CRUpsY200eERUQUxCZ05WQkFjTUJFSmxjbTR4RERBSwpCZ05WQkFvTUEwSkpWREVNTUFvR0ExVUVDd3dEUlZkS01RMHdDd1lEVlFRRERBUlVaWE4wTVNNd0lRWUpLb1pJCmh2Y05BUWtCRmhSemRYQndiM0owUUdKcGRDNWhaRzFwYmk1amFEQWVGdzB5TURBME1qZ3hNakUwTlRGYUZ3MHkKTVRBME1qZ3hNakUwTlRGYU1Ic3hDekFKQmdOVkJBWVRBa05JTVEwd0N3WURWUVFJREFSQ1pYSnVNUTB3Q3dZRApWUVFIREFSQ1pYSnVNUXd3Q2dZRFZRUUtEQU5DU1ZReEREQUtCZ05WQkFzTUEwVlhTakVOTUFzR0ExVUVBd3dFClZHVnpkREVqTUNFR0NTcUdTSWIzRFFFSkFSWVVjM1Z3Y0c5eWRFQmlhWFF1WVdSdGFXNHVZMmd3VmpBUUJnY3EKaGtqT1BRSUJCZ1VyZ1FRQUNnTkNBQVRhc0ZoMEdLZWs1WTRKdXdnaTVIOEFrL3FmamtKQ3d6N1BYb0lVZWJnaQpzeTdUVlFMckltQlBVN2lnMDM3azBkb1V4aytYZEJLWDQzdi9yZEdZVUtmMW8xTXdVVEFkQmdOVkhRNEVGZ1FVCnVTS2lWSUdsRnpQdDdXd3Z1VGNicDNrckQ0UXdId1lEVlIwakJCZ3dGb0FVdVNLaVZJR2xGelB0N1d3dnVUY2IKcDNrckQ0UXdEd1lEVlIwVEFRSC9CQVV3QXdFQi96QUtCZ2dxaGtqT1BRUURBZ05JQURCRkFpQkRteEJUQ3BZawphN0hFeUFEWnN4d3p3b2h0TjBwNTd5QllMYjZzQ3B3ODhBSWhBSXpTUDdCV0tGWmNDSmI5ZmhwcjZaTXpJd0tlCkhhSWpIK2E4elV2Nk1PaW8KLS0tLS1FTkQgQ0VSVElGSUNBVEUtLS0tLQo=",
       "vcap.services.ecdsa_dev.credentials.privateKey=LS0tLS1CRUdJTiBQUklWQVRFIEtFWS0tLS0tCk1JR0VBZ0VBTUJBR0J5cUdTTTQ5QWdFR0JTdUJCQUFLQkcwd2F3SUJBUVFnMkRsai9lNW5rRlBtTk1MVjd1NjQKenFuOHdSeVgrUTgyc045RDRSWXlvNjJoUkFOQ0FBVGFzRmgwR0tlazVZNEp1d2dpNUg4QWsvcWZqa0pDd3o3UApYb0lVZWJnaXN5N1RWUUxySW1CUFU3aWcwMzdrMGRvVXhrK1hkQktYNDN2L3JkR1lVS2YxCi0tLS0tRU5EIFBSSVZBVEUgS0VZLS0tLS0K"
     })
-public class CloudControllerTestPEM {
+public class CloudControllerPEMTest {
   protected MockMvc mockMvc;
   @Autowired private WebApplicationContext webApplicationContext;
   protected ObjectMapper objectMapper;
@@ -72,27 +65,10 @@ public class CloudControllerTestPEM {
   }
 
   @Test
-  public void testJWT() throws Exception {
-
-    ExposeeRequest exposeeRequest = new ExposeeRequest();
-    exposeeRequest.setAuthData(new ExposeeAuthData());
-    exposeeRequest.setKeyDate(
-        LocalDate.now().atStartOfDay().atOffset(ZoneOffset.UTC).toInstant().toEpochMilli());
-    exposeeRequest.setKey(
-        Base64.getEncoder().encodeToString("testKey32Bytes--testKey32Bytes--".getBytes("UTF-8")));
+  public void testHelloEnpointSignature() throws Exception {
     MockHttpServletResponse response =
         mockMvc
-            .perform(
-                post("/v1/exposed")
-                    .contentType(MediaType.APPLICATION_JSON)
-                    .header("User-Agent", "MockMVC")
-                    .content(json(exposeeRequest)))
-            .andExpect(status().is2xxSuccessful())
-            .andReturn()
-            .getResponse();
-    response =
-        mockMvc
-            .perform(get("/v1/"))
+            .perform(get("/v1/gaen"))
             .andExpect(status().is2xxSuccessful())
             .andReturn()
             .getResponse();
@@ -100,6 +76,7 @@ public class CloudControllerTestPEM {
     assertEquals("Hello from DP3T WS", content);
     assertEquals("dp3t", response.getHeader("X-HELLO"));
     String signature = response.getHeader("Signature");
+    @SuppressWarnings("rawtypes")
     Jwt jwt = Jwts.parserBuilder().setSigningKey(publicKey).build().parse(signature);
     Claims claims = (Claims) jwt.getBody();
     assertEquals("dp3t", claims.get("iss"));
