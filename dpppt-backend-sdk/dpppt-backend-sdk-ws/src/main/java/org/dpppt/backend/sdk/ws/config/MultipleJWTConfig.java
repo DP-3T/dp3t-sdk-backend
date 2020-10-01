@@ -77,7 +77,7 @@ public class MultipleJWTConfig {
     }
 
     private String readAsStringFromInputStreamAndClose(InputStream in) throws IOException {
-      String result = IOUtils.toString(in);
+      String result = IOUtils.toString(in, "UTF-8");
       in.close();
       return result;
     }
