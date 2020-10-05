@@ -91,7 +91,7 @@ In order to minimize the risk of timing attacks, to find out whether a request w
 Clients pad the number of keys with fake keys, if not enough keys are provided by the framework (e.g. the app is installed for less than 14 days). On fake keys the web-service should not validate any dates. The key payload though needs to be the exact same size!
 
 ## GAEN/DP3T
-We started with the project before Google and Apple announced the Exposure Notifications. Hence, there is a custom format and implementation provided. It is recommended to adopt the new Exposure Notification format, since support on clients is much better.
+We started with the project before Google and Apple announced the Exposure Notifications. For some time we supported both the old DP3T protocol and the new GAEN protocol, which is based on DP3T. Now that GAEN has become available on most of the versions, we removed DP3T support in the backend to lower the attack surface and make development easier.
 
 ### Legacy Notifications
 Since the Exposure Notifications format has been adopted, we drop support for legacy notifications. Currently no feature-requests are implemented for the old format, but if a PR is provided, it can still be merged.
