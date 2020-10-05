@@ -305,4 +305,9 @@ public class UTCInstant implements Closeable {
   public void close() throws IOException {
     UTCInstant.resetClock();
   }
+
+  /** @return the current instant as ISO-8601 string with millisecond precision */
+  public String toString() {
+    return this.getInstant().toString();
+  }
 }
