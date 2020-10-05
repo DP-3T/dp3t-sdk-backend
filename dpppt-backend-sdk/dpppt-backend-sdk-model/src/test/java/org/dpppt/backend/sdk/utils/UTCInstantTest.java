@@ -3,6 +3,7 @@ package org.dpppt.backend.sdk.utils;
 import static org.junit.jupiter.api.Assertions.*;
 
 import java.time.Duration;
+import java.time.Instant;
 import org.junit.jupiter.api.Test;
 
 class UTCInstantTest {
@@ -39,5 +40,12 @@ class UTCInstantTest {
     bucket = Duration.ofMillis(99);
     assertTrue(keyTime.roundToNextBucket(bucket).equals(new UTCInstant((198))));
     assertTrue(keyTime.roundToBucketStart(bucket).equals(new UTCInstant((99))));
+  }
+
+  @Test
+  void toStringFmt() {
+    // Need to round Instant to milliseconds for correct comparison with UTCInstant.
+    var now = Instant.ofEpochMilli(Instant.now().toEpochMilli());
+    assertEquals(now.toString(), UTCInstant.ofEpochMillis(now.toEpochMilli()).toString());
   }
 }
