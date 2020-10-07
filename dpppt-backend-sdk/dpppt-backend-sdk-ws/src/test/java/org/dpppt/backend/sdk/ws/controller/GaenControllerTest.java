@@ -1232,12 +1232,11 @@ public class GaenControllerTest extends BaseControllerTest {
   @Test
   @Transactional
   public void zipContainsFiles() throws Exception {
-    var outerNow = UTCInstant.now();
-    var clock =
-        Clock.offset(
-            Clock.systemUTC(), outerNow.getDuration(outerNow.atStartOfDay().plusHours(12)));
-    try (var now = UTCInstant.setClock(clock)) {
-      var midnight = now.atStartOfDay();
+    var noon = UTCInstant.now().atStartOfDay().plusHours(12);
+    // Set the clock to noon to avoid clock-wraparound during test and edge-case when time is < 2am.
+    var clock = Clock.offset(Clock.systemDefaultZone(), UTCInstant.now().getDuration(noon));
+    try (var noonClock = UTCInstant.setClock(clock)) {
+      var midnight = noonClock.atStartOfDay();
 
       // Insert two times 5 keys per day for the last 14 days. the second batch has a
       // different 'received at' timestamp. (+12 hours compared to the first)
@@ -1255,7 +1254,7 @@ public class GaenControllerTest extends BaseControllerTest {
               .getResponse();
 
       Long publishedUntil = Long.parseLong(response.getHeader("X-PUBLISHED-UNTIL"));
-      assertTrue(publishedUntil < now.getTimestamp(), "Published until must be in the past");
+      assertTrue(publishedUntil < noonClock.getTimestamp(), "Published until must be in the past");
 
       // must contain 20 keys: 5 from the first insert, 5 from the second insert and
       // 10 random keys
