@@ -1232,53 +1232,48 @@ public class GaenControllerTest extends BaseControllerTest {
   @Test
   @Transactional
   public void zipContainsFiles() throws Exception {
-    var outerNow = UTCInstant.now();
-    var clock =
-        Clock.offset(
-            Clock.systemUTC(), outerNow.getDuration(outerNow.atStartOfDay().plusHours(12)));
-    try (var now = UTCInstant.setClock(clock)) {
-      var midnight = now.atStartOfDay();
+    var midnight = UTCInstant.today();
 
-      // Insert two times 5 keys per day for the last 14 days. the second batch has a
-      // different 'received at' timestamp. (+12 hours compared to the first)
-      insertNKeysPerDay(midnight, 14, 5, midnight.minusDays(1), false);
-      insertNKeysPerDay(midnight, 14, 5, midnight.minusHours(12), false);
+    // Insert two times 5 keys per day for the last 14 days. the second batch has a
+    // different 'received at' timestamp. (+12 hours compared to the first)
+    insertNKeysPerDay(midnight, 14, 5, midnight.minusDays(1), false);
+    insertNKeysPerDay(midnight, 14, 5, midnight.minusHours(12), false);
 
-      // request the keys with key date 8 days ago. no publish until.
-      MockHttpServletResponse response =
-          mockMvc
-              .perform(
-                  get("/v1/gaen/exposed/" + midnight.minusDays(8).getTimestamp())
-                      .header("User-Agent", "MockMVC"))
-              .andExpect(status().is2xxSuccessful())
-              .andReturn()
-              .getResponse();
+    // request the keys with key date 8 days ago. no publish until.
+    MockHttpServletResponse response =
+        mockMvc
+            .perform(
+                get("/v1/gaen/exposed/" + midnight.minusDays(8).getTimestamp())
+                    .header("User-Agent", "MockMVC"))
+            .andExpect(status().is2xxSuccessful())
+            .andReturn()
+            .getResponse();
 
-      Long publishedUntil = Long.parseLong(response.getHeader("X-PUBLISHED-UNTIL"));
-      assertTrue(publishedUntil < now.getTimestamp(), "Published until must be in the past");
+    Long publishedUntil = Long.parseLong(response.getHeader("X-PUBLISHED-UNTIL"));
+    assertTrue(
+        publishedUntil <= UTCInstant.now().getTimestamp(), "Published until must be in the past");
 
-      // must contain 20 keys: 5 from the first insert, 5 from the second insert and
-      // 10 random keys
-      verifyZipResponse(response, 20, 144);
+    // must contain 20 keys: 5 from the first insert, 5 from the second insert and
+    // 10 random keys
+    verifyZipResponse(response, 20, 144);
 
-      // request again the keys with date date 8 days ago. with publish until, so that
-      // we only get the second batch.
-      var bucketAfterSecondRelease = midnight.minusHours(12);
+    // request again the keys with date date 8 days ago. with publish until, so that
+    // we only get the second batch.
+    var bucketAfterSecondRelease = midnight.minusHours(12);
 
-      MockHttpServletResponse responseWithPublishedAfter =
-          mockMvc
-              .perform(
-                  get("/v1/gaen/exposed/" + midnight.minusDays(8).getTimestamp())
-                      .header("User-Agent", "MockMVC")
-                      .param(
-                          "publishedafter", Long.toString(bucketAfterSecondRelease.getTimestamp())))
-              .andExpect(status().is2xxSuccessful())
-              .andReturn()
-              .getResponse();
+    MockHttpServletResponse responseWithPublishedAfter =
+        mockMvc
+            .perform(
+                get("/v1/gaen/exposed/" + midnight.minusDays(8).getTimestamp())
+                    .header("User-Agent", "MockMVC")
+                    .param(
+                        "publishedafter", Long.toString(bucketAfterSecondRelease.getTimestamp())))
+            .andExpect(status().is2xxSuccessful())
+            .andReturn()
+            .getResponse();
 
-      // must contain 15 keys: 5 from the second insert and 10 random keys
-      verifyZipResponse(responseWithPublishedAfter, 15, 144);
-    }
+    // must contain 15 keys: 5 from the second insert and 10 random keys
+    verifyZipResponse(responseWithPublishedAfter, 15, 144);
   }
 
   @Test
