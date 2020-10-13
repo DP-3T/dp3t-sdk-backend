@@ -46,15 +46,10 @@ import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.ResponseBody;
 import org.springframework.web.bind.annotation.ResponseStatus;
 
-/**
- * This is a new controller to simplify the sending and receiving of keys. It will be used by the
- * new SwissCovid client and allows for ENV2 usage.
- */
+/** This is a new controller to simplify the sending and receiving of keys using ENv1.5/ENv2. */
 @Controller
 @RequestMapping("/v2/gaen")
-@Documentation(
-    description =
-        "The GAEN V2 endpoint for the mobile clients supporting international key sharing")
+@Documentation(description = "The GAEN V2 endpoint for the mobile clients supporting ENv1.5/ENv2")
 public class GaenV2Controller {
 
   private static final Logger logger = LoggerFactory.getLogger(GaenV2Controller.class);
@@ -122,7 +117,7 @@ public class GaenV2Controller {
               description =
                   "App Identifier (PackageName/BundleIdentifier) + App-Version + OS (Android/iOS)"
                       + " + OS-Version",
-              example = "ch.ubique.android.starsdk;1.0;iOS;13.3")
+              example = "ch.ubique.android.dp3t;1.0;iOS;13.3")
           String userAgent,
       @AuthenticationPrincipal
           @Documentation(description = "JWT token that can be verified by the backend server")
