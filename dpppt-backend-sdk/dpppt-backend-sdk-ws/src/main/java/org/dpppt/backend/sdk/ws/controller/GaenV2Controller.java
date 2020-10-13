@@ -67,6 +67,8 @@ public class GaenV2Controller {
   private final Duration exposedListCacheControl;
   private final Duration retentionPeriod;
 
+  private static final String HEADER_X_KEY_BUNDLE_TAG = "x-key-bundle-tag";
+
   public GaenV2Controller(
       InsertManager insertManager,
       ValidateRequest validateRequest,
@@ -183,14 +185,14 @@ public class GaenV2Controller {
     if (exposedKeys.isEmpty()) {
       return ResponseEntity.noContent()
           .cacheControl(CacheControl.maxAge(exposedListCacheControl))
-          .header("X-KeyBundleTag", Long.toString(keyBundleTag.getTimestamp()))
+          .header(HEADER_X_KEY_BUNDLE_TAG, Long.toString(keyBundleTag.getTimestamp()))
           .build();
     }
     ProtoSignatureWrapper payload = gaenSigner.getPayloadV2(exposedKeys);
 
     return ResponseEntity.ok()
         .cacheControl(CacheControl.maxAge(exposedListCacheControl))
-        .header("X-KeyBundleTag", Long.toString(keyBundleTag.getTimestamp()))
+        .header(HEADER_X_KEY_BUNDLE_TAG, Long.toString(keyBundleTag.getTimestamp()))
         .body(payload.getZip());
   }
 
