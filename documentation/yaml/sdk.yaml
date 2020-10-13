@@ -7,40 +7,7 @@ info:
   description: DP3T API
   title: DP3T API
 paths:
-  /v1/exposed:
-    post:
-      summary: addExposee
-      description: Send exposed key to server
-      responses:
-        '200':
-          description: The exposed keys have been stored in the database
-          content:
-            application/json:
-              schema:
-                type: string
-        '400':
-          description: Invalid base64 encoding in expose request
-        '403':
-          description: Authentication failed
-      requestBody:
-        required: true
-        content:
-          application/json:
-            schema:
-              $ref: '#/components/schemas/org.dpppt.backend.sdk.model.ExposeeRequest'
-        description: The ExposeeRequest contains the SecretKey from the guessed infection
-          date, the infection date itself, and some authentication data to verify
-          the test result
-      parameters:
-      - name: User-Agent
-        in: header
-        description: App Identifier (PackageName/BundleIdentifier) + App-Version +
-          OS (Android/iOS) + OS-Version
-        example: ch.ubique.android.starsdk;1.0;iOS;13.3
-        required: true
-        schema:
-          type: string
-  /v1/:
+  /v1/gaen/:
     get:
       summary: hello
       description: Hello return
@@ -51,109 +18,6 @@ paths:
             application/json:
               schema:
                 type: string
-  /v1/exposedlist:
-    post:
-      summary: addExposee
-      description: Send a list of exposed keys to server
-      responses:
-        '200':
-          description: The exposed keys have been stored in the database
-          content:
-            application/json:
-              schema:
-                type: string
-        '400':
-          description: Invalid base64 encoding in exposee request
-        '403':
-          description: Authentication failed
-      requestBody:
-        required: true
-        content:
-          application/json:
-            schema:
-              $ref: '#/components/schemas/org.dpppt.backend.sdk.model.ExposeeRequestList'
-        description: The ExposeeRequest contains the SecretKey from the guessed infection
-          date, the infection date itself, and some authentication data to verify
-          the test result
-      parameters:
-      - name: User-Agent
-        in: header
-        description: App Identifier (PackageName/BundleIdentifier) + App-Version +
-          OS (Android/iOS) + OS-Version
-        example: ch.ubique.android.starsdk;1.0;iOS;13.3
-        required: true
-        schema:
-          type: string
-  /v1/exposedjson/{batchReleaseTime}:
-    get:
-      summary: getExposedByDayDate
-      description: Query list of exposed keys from a specific batch release time
-      responses:
-        '200':
-          description: Returns ExposedOverview in json format, which includes all
-            exposed keys which were published on _batchReleaseTime_
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/org.dpppt.backend.sdk.model.ExposedOverview'
-        '404':
-          description: Couldn't find _batchReleaseTime_
-      parameters:
-      - name: batchReleaseTime
-        in: path
-        description: The batch release date of the exposed keys in milliseconds since
-          Unix Epoch (1970-01-01), must be a multiple of 2 * 60 * 60 * 1000
-        example: '1593043200000'
-        required: true
-        schema:
-          type: integer
-          format: long
-  /v1/exposed/{batchReleaseTime}:
-    get:
-      summary: getExposedByBatch
-      description: Query list of exposed keys from a specific batch release time
-      responses:
-        '200':
-          description: Returns ExposedOverview in protobuf format, which includes
-            all exposed keys which were published on _batchReleaseTime_
-          content:
-            application/x-protobuf:
-              schema:
-                $ref: '#/components/schemas/org.dpppt.backend.sdk.model.proto.Exposed.ProtoExposedList'
-        '404':
-          description: Couldn't find _batchReleaseTime_
-      parameters:
-      - name: batchReleaseTime
-        in: path
-        description: The batch release date of the exposed keys in milliseconds since
-          Unix Epoch (1970-01-01), must be a multiple of 2 * 60 * 60 * 1000
-        example: '1593043200000'
-        required: true
-        schema:
-          type: integer
-          format: long
-  /v1/buckets/{dayDateStr}:
-    get:
-      summary: getListOfBuckets
-      description: Query number of available buckets in a given day, starting from
-        midnight UTC
-      responses:
-        '200':
-          description: Returns BucketList in json format, indicating all available
-            buckets since _dayDateStr_
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/org.dpppt.backend.sdk.model.BucketList'
-      parameters:
-      - name: dayDateStr
-        in: path
-        description: The date starting when to return the available buckets, in ISO8601
-          date format
-        example: '2019-01-31'
-        required: true
-        schema:
-          type: string
   /v1/gaen/exposed:
     post:
       summary: addExposed
@@ -167,8 +31,7 @@ paths:
               schema:
                 type: string
         '400':
-          description: '- Invalid base64 encoding in GaenRequest- negative rolling
-            period- fake claim with non-fake keys'
+          description: Invalid base64 encoding in GaenRequest
         '403':
           description: Authentication failed
       requestBody:
@@ -203,7 +66,7 @@ paths:
                 type: string
         '400':
           description: '- Ivnalid base64 encoded Temporary Exposure Key- TEK-date
-            does not match delayedKeyDAte claim in Jwt- TEK has negative rolling period'
+            does not match delayedKeyDAte claim in Jwt'
         '403':
           description: No delayedKeyDate claim in authentication
       requestBody:
@@ -282,76 +145,6 @@ paths:
           type: string
 components:
   schemas:
-    org.dpppt.backend.sdk.model.BucketList:
-      type: object
-      properties:
-        buckets:
-          type: array
-          items:
-            type: integer
-    org.dpppt.backend.sdk.model.ExposedKey:
-      type: object
-      required:
-      - key
-      - keyDate
-      properties:
-        key:
-          type: string
-        keyDate:
-          type: integer
-          format: long
-    org.dpppt.backend.sdk.model.ExposedOverview:
-      type: object
-      properties:
-        batchReleaseTime:
-          type: integer
-          format: long
-        exposed:
-          type: array
-          items:
-            $ref: '#/components/schemas/org.dpppt.backend.sdk.model.Exposee'
-    org.dpppt.backend.sdk.model.Exposee:
-      type: object
-      required:
-      - key
-      - keyDate
-      properties:
-        key:
-          type: string
-        keyDate:
-          type: integer
-          format: long
-    org.dpppt.backend.sdk.model.ExposeeAuthData:
-      type: object
-      properties:
-        value:
-          type: string
-    org.dpppt.backend.sdk.model.ExposeeRequest:
-      type: object
-      required:
-      - key
-      - keyDate
-      properties:
-        fake:
-          type: integer
-        key:
-          type: string
-        keyDate:
-          type: integer
-          format: long
-        authData:
-          $ref: '#/components/schemas/org.dpppt.backend.sdk.model.ExposeeAuthData'
-    org.dpppt.backend.sdk.model.ExposeeRequestList:
-      type: object
-      required:
-      - exposedKeys
-      properties:
-        exposedKeys:
-          type: array
-          items:
-            $ref: '#/components/schemas/org.dpppt.backend.sdk.model.ExposedKey'
-        fake:
-          type: integer
     org.dpppt.backend.sdk.model.gaen.DayBuckets:
       type: object
       properties:
@@ -413,13 +206,20 @@ components:
           type: array
           items:
             $ref: '#/components/schemas/org.dpppt.backend.sdk.model.gaen.GaenKey'
-          description: 14 Temporary Exposure keys - zero or more of them might be
-            fake keys
+          description: Between 14 and 30 Temporary Exposure Keys - zero or more of
+            them might be fake keys. Starting with EN 1.5 it is possible that clients
+            send more than 14 keys.
           example: ''
         delayedKeyDate:
           type: integer
-          description: Unknown - has something to do with GAEN not exposing the current
-            day's key and that the current day's key will be delivered with 24h delay
+          description: Prior to version 1.5 Exposure Keys for the day of report weren't
+            available (since they were still used throughout this day RPI=144), so
+            the submission of the last key had to be delayed. This Unix timestamp
+            in milliseconds specifies, which key date the last key (which will be
+            submitted on the next day) will have. The backend then issues a JWT to
+            allow the submission of this last key with specified key date. This should
+            not be necessary after the Exposure Framework is able to send and handle
+            keys with RollingPeriod < 144 (e.g. only valid until submission).
           example: ''
     org.dpppt.backend.sdk.model.gaen.GaenSecondDay:
       type: object
@@ -428,29 +228,3 @@ components:
       properties:
         delayedKey:
           $ref: '#/components/schemas/org.dpppt.backend.sdk.model.gaen.GaenKey'
-    org.dpppt.backend.sdk.model.proto.Exposed.ProtoExposedList:
-      type: object
-      properties:
-        bitField0_:
-          type: integer
-        batchReleaseTime_:
-          type: integer
-          format: long
-        exposed_:
-          type: array
-          items:
-            $ref: '#/components/schemas/org.dpppt.backend.sdk.model.proto.Exposed.ProtoExposee'
-        memoizedSize:
-          type: integer
-        memoizedHashCode:
-          type: integer
-    org.dpppt.backend.sdk.model.proto.Exposed.ProtoExposee:
-      type: object
-      properties:
-        keyDate_:
-          type: integer
-          format: long
-        memoizedSize:
-          type: integer
-        memoizedHashCode:
-          type: integer
