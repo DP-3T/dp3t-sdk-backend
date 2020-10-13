@@ -115,8 +115,8 @@ public class GaenV2Controller {
       @RequestHeader(value = "User-Agent")
           @Documentation(
               description =
-                  "App Identifier (PackageName/BundleIdentifier) + App-Version + OS (Android/iOS)"
-                      + " + OS-Version",
+                  "App Identifier (PackageName/BundleIdentifier) + App-Version +"
+                      + " OS (Android/iOS) + OS-Version",
               example = "ch.ubique.android.dp3t;1.0;iOS;13.3")
           String userAgent,
       @AuthenticationPrincipal
@@ -147,49 +147,50 @@ public class GaenV2Controller {
   // GET for Key Download
   @GetMapping(value = "/exposed")
   @Documentation(
-      description =
-          "Requests the exposed keys published _since_ originating from list of _country_",
+      description = "Requests keys published _after_ lastKeyBundleTag.",
       responses = {
         "200 => zipped export.bin and export.sig of all keys in that interval",
-        "404 => Invalid _since_ (too far in the past/future, not at bucket" + " boundaries)"
+        "404 => Invalid _lastKeyBundleTag_"
       })
   public @ResponseBody ResponseEntity<byte[]> getExposedKeys(
       @Documentation(
               description =
-                  "Timestamp to retrieve exposed keys since, in milliseconds since Unix epoch"
-                      + " (1970-01-01). It must indicate the beginning of a bucket. Optional, if"
-                      + " no since set, all keys for the retention period are returned",
+                  "Only retrieve keys published after the specified key-bundle"
+                      + " tag. Optional, if no tag set, all keys for the"
+                      + " retention period are returned",
               example = "1593043200000")
           @RequestParam(required = false)
-          Long since)
+          Long lastKeyBundleTag)
       throws BadBatchReleaseTimeException, InvalidKeyException, SignatureException,
           NoSuchAlgorithmException, IOException {
     var now = UTCInstant.now();
 
-    if (since == null) {
-      // if no since given, go back to the start of the retention period and select next bucket.
-      since = now.minus(retentionPeriod).roundToNextBucket(releaseBucketDuration).getTimestamp();
+    if (lastKeyBundleTag == null) {
+      // if no lastKeyBundleTag given, go back to the start of the retention period and
+      // select next bucket.
+      lastKeyBundleTag =
+          now.minus(retentionPeriod).roundToNextBucket(releaseBucketDuration).getTimestamp();
     }
-    var keysSince = UTCInstant.ofEpochMillis(since);
+    var keysSince = UTCInstant.ofEpochMillis(lastKeyBundleTag);
 
     if (!validationUtils.isValidBatchReleaseTime(keysSince, now)) {
       return ResponseEntity.notFound().build();
     }
-    UTCInstant publishedUntil = now.roundToBucketStart(releaseBucketDuration);
+    UTCInstant keyBundleTag = now.roundToBucketStart(releaseBucketDuration);
 
     List<GaenKey> exposedKeys = dataService.getSortedExposedSince(keysSince, now);
 
     if (exposedKeys.isEmpty()) {
       return ResponseEntity.noContent()
           .cacheControl(CacheControl.maxAge(exposedListCacheControl))
-          .header("X-PUBLISHED-UNTIL", Long.toString(publishedUntil.getTimestamp()))
+          .header("X-KeyBundleTag", Long.toString(keyBundleTag.getTimestamp()))
           .build();
     }
     ProtoSignatureWrapper payload = gaenSigner.getPayloadV2(exposedKeys);
 
     return ResponseEntity.ok()
         .cacheControl(CacheControl.maxAge(exposedListCacheControl))
-        .header("X-PUBLISHED-UNTIL", Long.toString(publishedUntil.getTimestamp()))
+        .header("X-KeyBundleTag", Long.toString(keyBundleTag.getTimestamp()))
         .body(payload.getZip());
   }
 
