@@ -144,6 +144,9 @@ public abstract class WSBaseConfig implements SchedulingConfigurer, WebMvcConfig
   @Value("${ws.app.gaen.timeskew:PT2h}")
   Duration timeSkew;
 
+  @Value("${ws.origin.country}")
+  String originCountry;
+
   @Autowired(required = false)
   ValidateRequest requestValidator;
 
@@ -186,7 +189,11 @@ public abstract class WSBaseConfig implements SchedulingConfigurer, WebMvcConfig
       flyWay.migrate();
       GAENDataService fakeGaenService =
           new JDBCGAENDataServiceImpl(
-              "hsql", fakeDataSource, Duration.ofMillis(releaseBucketDuration), timeSkew);
+              "hsql",
+              fakeDataSource,
+              Duration.ofMillis(releaseBucketDuration),
+              timeSkew,
+              originCountry);
       return new FakeKeyService(
           fakeGaenService,
           Integer.valueOf(randomkeyamount),
@@ -318,7 +325,11 @@ public abstract class WSBaseConfig implements SchedulingConfigurer, WebMvcConfig
   @Bean
   public GAENDataService gaenDataService() {
     return new JDBCGAENDataServiceImpl(
-        getDbType(), dataSource(), Duration.ofMillis(releaseBucketDuration), timeSkew);
+        getDbType(),
+        dataSource(),
+        Duration.ofMillis(releaseBucketDuration),
+        timeSkew,
+        originCountry);
   }
 
   @Bean

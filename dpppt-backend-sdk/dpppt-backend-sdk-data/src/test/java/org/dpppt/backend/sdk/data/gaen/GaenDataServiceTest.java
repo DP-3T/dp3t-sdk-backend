@@ -21,6 +21,7 @@ import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.junit4.SpringJUnit4ClassRunner;
 import org.springframework.test.context.support.AnnotationConfigContextLoader;
+import org.springframework.transaction.annotation.Transactional;
 
 @RunWith(SpringJUnit4ClassRunner.class)
 @ContextConfiguration(
@@ -39,6 +40,7 @@ public class GaenDataServiceTest {
   @Autowired private GAENDataService gaenDataService;
 
   @Test
+  @Transactional
   public void upsert() throws Exception {
     var tmpKey = new GaenKey();
     tmpKey.setRollingStartNumber(
@@ -71,6 +73,7 @@ public class GaenDataServiceTest {
   }
 
   @Test
+  @Transactional
   public void testNoEarlyRelease() throws Exception {
     var outerNow = UTCInstant.now();
     Clock twoOClock =
@@ -110,5 +113,38 @@ public class GaenDataServiceTest {
           gaenDataService.getSortedExposedForKeyDate(now.atStartOfDay(), null, publishedUntil, now);
       assertEquals(1, returnedKeys.size());
     }
+  }
+
+  @Test
+  @Transactional
+  public void upsertMultipleTimes() throws Exception {
+    var tmpKey = new GaenKey();
+    tmpKey.setRollingStartNumber(
+        (int) UTCInstant.today().minus(Duration.ofDays(1)).get10MinutesSince1970());
+    tmpKey.setKeyData(Base64.getEncoder().encodeToString("testKey32Bytes05".getBytes("UTF-8")));
+    tmpKey.setRollingPeriod(144);
+    tmpKey.setFake(0);
+    tmpKey.setTransmissionRiskLevel(0);
+    var tmpKey2 = new GaenKey();
+    tmpKey2.setRollingStartNumber(
+        (int) UTCInstant.today().minus(Duration.ofDays(1)).get10MinutesSince1970());
+    tmpKey2.setKeyData(Base64.getEncoder().encodeToString("testKey32Bytes05".getBytes("UTF-8")));
+    tmpKey2.setRollingPeriod(144);
+    tmpKey2.setFake(0);
+    tmpKey2.setTransmissionRiskLevel(0);
+    List<GaenKey> keys = List.of(tmpKey, tmpKey2);
+    var now = UTCInstant.now();
+    gaenDataService.upsertExposees(keys, now);
+
+    // calculate exposed until bucket, but get bucket in the future, as keys have
+    // been inserted with timestamp now.
+    UTCInstant publishedUntil = now.roundToNextBucket(BUCKET_LENGTH);
+
+    var returnedKeys =
+        gaenDataService.getSortedExposedForKeyDate(
+            UTCInstant.today().minusDays(1), null, publishedUntil, now);
+
+    assertEquals(1, returnedKeys.size());
+    assertEquals(keys.get(1).getKeyData(), returnedKeys.get(0).getKeyData());
   }
 }

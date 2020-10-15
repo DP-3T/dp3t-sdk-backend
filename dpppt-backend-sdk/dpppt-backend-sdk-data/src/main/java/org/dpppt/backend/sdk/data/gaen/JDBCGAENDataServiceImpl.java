@@ -20,6 +20,8 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.jdbc.core.namedparam.MapSqlParameterSource;
 import org.springframework.jdbc.core.namedparam.NamedParameterJdbcTemplate;
+import org.springframework.jdbc.support.GeneratedKeyHolder;
+import org.springframework.jdbc.support.KeyHolder;
 import org.springframework.transaction.annotation.Transactional;
 
 public class JDBCGAENDataServiceImpl implements GAENDataService {
@@ -35,12 +37,21 @@ public class JDBCGAENDataServiceImpl implements GAENDataService {
   // https://developer.apple.com/documentation/exposurenotification/setting_up_a_key_server?language=objc)
   private final Duration timeSkew;
 
+  // the origin country is used for the "default" visited country for all insertions that do not
+  // provide the visited countries for the key, so all v1 and non-international v2 inserted keys.
+  private final String originCountry;
+
   public JDBCGAENDataServiceImpl(
-      String dbType, DataSource dataSource, Duration releaseBucketDuration, Duration timeSkew) {
+      String dbType,
+      DataSource dataSource,
+      Duration releaseBucketDuration,
+      Duration timeSkew,
+      String originCountry) {
     this.dbType = dbType;
     this.jt = new NamedParameterJdbcTemplate(dataSource);
     this.releaseBucketDuration = releaseBucketDuration;
     this.timeSkew = timeSkew;
+    this.originCountry = originCountry;
   }
 
   @Override
@@ -50,43 +61,71 @@ public class JDBCGAENDataServiceImpl implements GAENDataService {
   }
 
   @Override
+  @Transactional(readOnly = false)
   public void upsertExposeesDelayed(
       List<GaenKey> gaenKeys, UTCInstant delayedReceivedAt, UTCInstant now) {
-
-    String sql = null;
+    String sqlKey = null;
+    String sqlVisited = null;
     if (dbType.equals(PGSQL)) {
-      sql =
+      sqlKey =
           "insert into t_gaen_exposed (key, rolling_start_number, rolling_period,"
-              + " transmission_risk_level, received_at) values (:key, :rolling_start_number,"
-              + " :rolling_period, :transmission_risk_level, :received_at) on conflict on"
+              + " received_at) values (:key, :rolling_start_number,"
+              + " :rolling_period, :received_at) on conflict on"
               + " constraint gaen_exposed_key do nothing";
+      sqlVisited =
+          "insert into t_visited (pfk_exposed_id, country) values (:keyId, :country) on conflict on"
+              + " constraint PK_t_visited do nothing";
     } else {
-      sql =
+      sqlKey =
           "merge into t_gaen_exposed using (values(cast(:key as varchar(24)),"
-              + " :rolling_start_number, :rolling_period, :transmission_risk_level, :received_at))"
-              + " as vals(key, rolling_start_number, rolling_period, transmission_risk_level,"
+              + " :rolling_start_number, :rolling_period, :received_at))"
+              + " as vals(key, rolling_start_number, rolling_period,"
               + " received_at) on t_gaen_exposed.key = vals.key when not matched then insert (key,"
-              + " rolling_start_number, rolling_period, transmission_risk_level, received_at)"
+              + " rolling_start_number, rolling_period, received_at)"
               + " values (vals.key, vals.rolling_start_number, vals.rolling_period,"
-              + " transmission_risk_level, vals.received_at)";
+              + " vals.received_at)";
+      sqlVisited =
+          "merge into t_visited using (values(:keyId, :country)) as vals(keyId, country) on"
+              + " t_visited.pfk_exposed_id = vals.keyId and t_visited.country = vals.country when"
+              + " not matched then insert (pfk_exposed_id, country) values (vals.keyId,"
+              + " vals.country)";
     }
-    var parameterList = new ArrayList<MapSqlParameterSource>();
+
     // Calculate the `receivedAt` just at the end of the current releaseBucket.
     var receivedAt =
         delayedReceivedAt == null
             ? now.roundToNextBucket(releaseBucketDuration).minus(Duration.ofMillis(1))
             : delayedReceivedAt;
+
+    List<MapSqlParameterSource> visitedBatch = new ArrayList<>();
+
     for (var gaenKey : gaenKeys) {
       MapSqlParameterSource params = new MapSqlParameterSource();
       params.addValue("key", gaenKey.getKeyData());
       params.addValue("rolling_start_number", gaenKey.getRollingStartNumber());
       params.addValue("rolling_period", gaenKey.getRollingPeriod());
-      params.addValue("transmission_risk_level", gaenKey.getTransmissionRiskLevel());
       params.addValue("received_at", receivedAt.getDate());
+      KeyHolder keyHolder = new GeneratedKeyHolder();
+      jt.update(sqlKey, params, keyHolder);
 
-      parameterList.add(params);
+      // if the key already exists, no ids are returned. in this case we assume that we do not need
+      // to modify the visited countries also
+      if (keyHolder.getKeys() != null && !keyHolder.getKeys().isEmpty()) {
+        Object keyObject = keyHolder.getKeys().get("pk_exposed_id");
+        if (keyObject != null) {
+          int gaenKeyId = ((Integer) keyObject).intValue();
+          MapSqlParameterSource visitedParams = new MapSqlParameterSource();
+          visitedParams.addValue("keyId", gaenKeyId);
+          visitedParams.addValue("country", originCountry);
+          visitedBatch.add(visitedParams);
+        }
+      }
     }
-    jt.batchUpdate(sql, parameterList.toArray(new MapSqlParameterSource[0]));
+
+    if (!visitedBatch.isEmpty()) {
+      jt.batchUpdate(
+          sqlVisited, visitedBatch.toArray(new MapSqlParameterSource[visitedBatch.size()]));
+    }
   }
 
   @Override
@@ -99,7 +138,7 @@ public class JDBCGAENDataServiceImpl implements GAENDataService {
     params.addValue("publishedUntil", publishedUntil.getDate());
 
     String sql =
-        "select pk_exposed_id, key, rolling_start_number, rolling_period, transmission_risk_level"
+        "select pk_exposed_id, key, rolling_start_number, rolling_period"
             + " from t_gaen_exposed where rolling_start_number >= :rollingPeriodStartNumberStart"
             + " and rolling_start_number < :rollingPeriodStartNumberEnd and received_at <"
             + " :publishedUntil";

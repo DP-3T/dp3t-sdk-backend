@@ -47,7 +47,7 @@ import org.springframework.web.context.WebApplicationContext;
 @RunWith(SpringRunner.class)
 @SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT)
 @ActiveProfiles({"dev", "jwt", "debug", "test-config"})
-@TestPropertySource(properties = {"ws.app.source=org.dpppt.demo"})
+@TestPropertySource(properties = {"ws.app.source=org.dpppt.demo", "ws.origin.country=CH"})
 public abstract class BaseControllerTest {
 
   protected MockMvc mockMvc;

@@ -63,18 +63,18 @@ public class TestJDBCGaen {
     if (dbType.equals(PGSQL)) {
       sql =
           "insert into t_gaen_exposed (key, rolling_start_number, rolling_period,"
-              + " transmission_risk_level, received_at) values (:key, :rolling_start_number,"
-              + " :rolling_period, :transmission_risk_level, :received_at) on conflict on"
+              + " received_at) values (:key, :rolling_start_number,"
+              + " :rolling_period, :received_at) on conflict on"
               + " constraint gaen_exposed_key do nothing";
     } else {
       sql =
           "merge into t_gaen_exposed using (values(cast(:key as varchar(24)),"
-              + " :rolling_start_number, :rolling_period, :transmission_risk_level, :received_at))"
-              + " as vals(key, rolling_start_number, rolling_period, transmission_risk_level,"
+              + " :rolling_start_number, :rolling_period, :received_at))"
+              + " as vals(key, rolling_start_number, rolling_period,"
               + " received_at) on t_gaen_exposed.key = vals.key when not matched then insert (key,"
-              + " rolling_start_number, rolling_period, transmission_risk_level, received_at)"
+              + " rolling_start_number, rolling_period, received_at)"
               + " values (vals.key, vals.rolling_start_number, vals.rolling_period,"
-              + " vals.transmission_risk_level, vals.received_at)";
+              + " vals.received_at)";
     }
     var parameterList = new ArrayList<MapSqlParameterSource>();
     for (var gaenKey : gaenKeys) {
@@ -82,7 +82,6 @@ public class TestJDBCGaen {
       params.addValue("key", gaenKey.getKeyData());
       params.addValue("rolling_start_number", gaenKey.getRollingStartNumber());
       params.addValue("rolling_period", gaenKey.getRollingPeriod());
-      params.addValue("transmission_risk_level", gaenKey.getTransmissionRiskLevel());
       params.addValue("received_at", receivedAt.getDate());
       parameterList.add(params);
     }
@@ -95,7 +94,7 @@ public class TestJDBCGaen {
     if (dbType.equals(PGSQL)) {
       sql =
           "insert into t_debug_gaen_exposed (key, rolling_start_number, rolling_period,"
-              + " transmission_risk_level, received_at, device_name) values (:key,"
+              + " received_at, device_name) values (:key,"
               + " :rolling_start_number, :rolling_period, :transmission_risk_level, :received_at,"
               + " 'test') on conflict on constraint debug_gaen_exposed_key do nothing";
     } else {

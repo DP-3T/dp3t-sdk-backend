@@ -49,7 +49,7 @@ public class FakeKeyService {
         byte[] keyData = new byte[keySize];
         random.nextBytes(keyData);
         var keyGAENTime = (int) tmpDate.get10MinutesSince1970();
-        var key = new GaenKey(Base64.getEncoder().encodeToString(keyData), keyGAENTime, 144, 0);
+        var key = new GaenKey(Base64.getEncoder().encodeToString(keyData), keyGAENTime, 144);
         keys.add(key);
       }
       // TODO: Check if currentKeyDate is indeed intended here

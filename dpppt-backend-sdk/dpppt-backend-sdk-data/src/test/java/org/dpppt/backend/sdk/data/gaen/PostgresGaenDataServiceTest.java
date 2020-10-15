@@ -61,6 +61,10 @@ public class PostgresGaenDataServiceTest {
 
   @Autowired private DataSource dataSource;
 
+  static {
+    System.setProperty("ws.origin.country", "CH");
+  }
+
   @After
   public void tearDown() throws SQLException {
     executeSQL("truncate table t_exposed");
@@ -169,7 +173,6 @@ public class PostgresGaenDataServiceTest {
     tmpKey.setKeyData(Base64.getEncoder().encodeToString("testKey32Bytes--".getBytes("UTF-8")));
     tmpKey.setRollingPeriod(144);
     tmpKey.setFake(0);
-    tmpKey.setTransmissionRiskLevel(0);
     List<GaenKey> keys = List.of(tmpKey);
 
     gaenDataService.upsertExposees(keys, UTCInstant.now());
@@ -216,7 +219,7 @@ public class PostgresGaenDataServiceTest {
     Connection connection = dataSource.getConnection();
     String sql =
         "into t_gaen_exposed (pk_exposed_id, key, received_at, rolling_start_number,"
-            + " rolling_period, transmission_risk_level) values (100, ?, ?, ?, 144, 0)";
+            + " rolling_period) values (100, ?, ?, ?, 144)";
     PreparedStatement preparedStatement = connection.prepareStatement("insert " + sql);
     preparedStatement.setString(1, key);
     preparedStatement.setTimestamp(2, new Timestamp(receivedAt.toEpochMilli()));

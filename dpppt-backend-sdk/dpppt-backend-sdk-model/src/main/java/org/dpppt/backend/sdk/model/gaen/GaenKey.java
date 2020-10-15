@@ -34,7 +34,8 @@ public class GaenKey {
       description =
           "According to the Google API description a value between 0 and 4096, with higher values"
               + " indicating a higher risk")
-  private Integer transmissionRiskLevel;
+  @Deprecated
+  private Integer transmissionRiskLevel = 0;
 
   @Documentation(
       description = "If fake = 0, the key is a valid key. If fake = 1, the key will be discarded.")
@@ -42,15 +43,10 @@ public class GaenKey {
 
   public GaenKey() {}
 
-  public GaenKey(
-      String keyData,
-      Integer rollingStartNumber,
-      Integer rollingPeriod,
-      Integer transmissionRiskLevel) {
+  public GaenKey(String keyData, Integer rollingStartNumber, Integer rollingPeriod) {
     this.keyData = keyData;
     this.rollingStartNumber = rollingStartNumber;
     this.rollingPeriod = rollingPeriod;
-    this.transmissionRiskLevel = transmissionRiskLevel;
   }
 
   public String getKeyData() {
