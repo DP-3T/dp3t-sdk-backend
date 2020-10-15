@@ -47,6 +47,7 @@
 		<module>dpppt-backend-sdk-data</module>
 		<module>dpppt-backend-sdk-ws</module>
 		<module>dpppt-backend-sdk-report</module>
+		<module>dpppt-backend-sdk-interops</module>
 	</modules>
 
 	<dependencies>
