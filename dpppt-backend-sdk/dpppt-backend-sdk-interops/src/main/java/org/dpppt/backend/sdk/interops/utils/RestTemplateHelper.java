@@ -28,7 +28,10 @@ public class RestTemplateHelper {
     PoolingHttpClientConnectionManager manager = new PoolingHttpClientConnectionManager();
     manager.setDefaultMaxPerRoute(20);
     manager.setMaxTotal(30);
-    HttpClientBuilder builder = HttpClients.custom().setUserAgent("dp3t-interops");
+
+    // Create HttpClientBuilder using system properties including proxy settings
+    HttpClientBuilder builder =
+        HttpClients.custom().useSystemProperties().setUserAgent("dp3t-interops");
     builder
         .setConnectionManager(manager)
         .disableCookieManagement()
