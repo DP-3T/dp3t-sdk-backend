@@ -3,11 +3,22 @@ package org.dpppt.backend.sdk.model.gaen;
 import ch.ubique.openapi.docannotations.Documentation;
 import java.util.List;
 import javax.validation.Valid;
+import javax.validation.constraints.Max;
+import javax.validation.constraints.Min;
 import javax.validation.constraints.NotEmpty;
 import javax.validation.constraints.NotNull;
 import javax.validation.constraints.Size;
 
 public class GaenV2UploadKeysRequest {
+
+  @Valid
+  @Min(value = 0)
+  @Max(value = 1)
+  @Documentation(
+      description =
+          "If internationl = 0 key is only for the origin country. If international = 1 key is"
+              + " distributed to other countries")
+  private int international = 0;
 
   @NotNull
   @NotEmpty
@@ -23,5 +34,13 @@ public class GaenV2UploadKeysRequest {
 
   public void setGaenKeys(List<GaenKey> gaenKeys) {
     this.gaenKeys = gaenKeys;
+  }
+
+  public int getInternational() {
+    return international;
+  }
+
+  public void setInternational(int international) {
+    this.international = international;
   }
 }

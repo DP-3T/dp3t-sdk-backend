@@ -1,6 +1,8 @@
 package org.dpppt.backend.sdk.model.gaen;
 
 import ch.ubique.openapi.docannotations.Documentation;
+import javax.validation.constraints.Max;
+import javax.validation.constraints.Min;
 import javax.validation.constraints.NotNull;
 import javax.validation.constraints.Size;
 
@@ -39,6 +41,8 @@ public class GaenKey {
 
   @Documentation(
       description = "If fake = 0, the key is a valid key. If fake = 1, the key will be discarded.")
+  @Min(value = 0)
+  @Max(value = 1)
   private Integer fake = 0;
 
   public GaenKey() {}

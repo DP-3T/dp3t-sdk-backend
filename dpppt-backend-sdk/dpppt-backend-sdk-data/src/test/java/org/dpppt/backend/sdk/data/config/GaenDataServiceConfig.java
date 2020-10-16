@@ -12,6 +12,7 @@ package org.dpppt.backend.sdk.data.config;
 
 import java.security.NoSuchAlgorithmException;
 import java.time.Duration;
+import java.util.List;
 import javax.sql.DataSource;
 import org.dpppt.backend.sdk.data.JDBCRedeemDataServiceImpl;
 import org.dpppt.backend.sdk.data.RedeemDataService;
@@ -56,7 +57,12 @@ public class GaenDataServiceConfig {
   @Bean
   public GAENDataService gaenDataService() {
     return new JDBCGAENDataServiceImpl(
-        dbType, dataSource, Duration.ofMillis(releaseBucketDuration), timeSkew, "CH");
+        dbType,
+        dataSource,
+        Duration.ofMillis(releaseBucketDuration),
+        timeSkew,
+        "CH",
+        List.of("DE", "IT"));
   }
 
   @Bean
@@ -72,7 +78,12 @@ public class GaenDataServiceConfig {
   @Bean
   public GAENDataService fakeService() {
     return new JDBCGAENDataServiceImpl(
-        "hsql", fakeDataSource(), Duration.ofMillis(releaseBucketDuration), timeSkew, "CH");
+        "hsql",
+        fakeDataSource(),
+        Duration.ofMillis(releaseBucketDuration),
+        timeSkew,
+        "CH",
+        List.of("DE", "IT"));
   }
 
   @Bean

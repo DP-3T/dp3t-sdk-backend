@@ -70,7 +70,8 @@ public class InsertManager {
    *     errors in the key upload
    */
   public void insertIntoDatabase(
-      List<GaenKey> keys, String header, Object principal, UTCInstant now) throws InsertException {
+      List<GaenKey> keys, String header, Object principal, UTCInstant now, boolean international)
+      throws InsertException {
 
     if (keys == null || keys.isEmpty()) {
       return;
@@ -79,7 +80,7 @@ public class InsertManager {
     // if no keys remain or this is a fake request, just return. Else, insert the
     // remaining keys.
     if (!internalKeys.isEmpty() && !validationUtils.jwtIsFake(principal)) {
-      dataService.upsertExposees(internalKeys, now);
+      dataService.upsertExposees(internalKeys, now, international);
     }
   }
 

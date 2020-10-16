@@ -147,6 +147,9 @@ public abstract class WSBaseConfig implements SchedulingConfigurer, WebMvcConfig
   @Value("${ws.origin.country}")
   String originCountry;
 
+  @Value("${ws.international.countries:}")
+  List<String> otherCountries;
+
   @Autowired(required = false)
   ValidateRequest requestValidator;
 
@@ -193,7 +196,8 @@ public abstract class WSBaseConfig implements SchedulingConfigurer, WebMvcConfig
               fakeDataSource,
               Duration.ofMillis(releaseBucketDuration),
               timeSkew,
-              originCountry);
+              originCountry,
+              otherCountries);
       return new FakeKeyService(
           fakeGaenService,
           Integer.valueOf(randomkeyamount),
@@ -329,7 +333,8 @@ public abstract class WSBaseConfig implements SchedulingConfigurer, WebMvcConfig
         dataSource(),
         Duration.ofMillis(releaseBucketDuration),
         timeSkew,
-        originCountry);
+        originCountry,
+        otherCountries);
   }
 
   @Bean

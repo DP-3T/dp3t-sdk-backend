@@ -175,7 +175,7 @@ public class PostgresGaenDataServiceTest {
     tmpKey.setFake(0);
     List<GaenKey> keys = List.of(tmpKey);
 
-    gaenDataService.upsertExposees(keys, UTCInstant.now());
+    gaenDataService.upsertExposees(keys, UTCInstant.now(), false);
 
     var now = UTCInstant.now();
     // calculate exposed until bucket, but get bucket in the future, as keys have
@@ -219,7 +219,7 @@ public class PostgresGaenDataServiceTest {
     Connection connection = dataSource.getConnection();
     String sql =
         "into t_gaen_exposed (pk_exposed_id, key, received_at, rolling_start_number,"
-            + " rolling_period) values (100, ?, ?, ?, 144)";
+            + " rolling_period, origin) values (100, ?, ?, ?, 144, 'CH')";
     PreparedStatement preparedStatement = connection.prepareStatement("insert " + sql);
     preparedStatement.setString(1, key);
     preparedStatement.setTimestamp(2, new Timestamp(receivedAt.toEpochMilli()));

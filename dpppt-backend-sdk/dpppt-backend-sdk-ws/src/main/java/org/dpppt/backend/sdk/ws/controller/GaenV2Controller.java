@@ -132,7 +132,12 @@ public class GaenV2Controller {
     // Filter out non valid keys and insert them into the database (c.f.
     // InsertManager and
     // configured Filters in the WSBaseConfig)
-    insertManager.insertIntoDatabase(gaenV2Request.getGaenKeys(), userAgent, principal, now);
+    insertManager.insertIntoDatabase(
+        gaenV2Request.getGaenKeys(),
+        userAgent,
+        principal,
+        now,
+        gaenV2Request.getInternational() == 1);
     var responseBuilder = ResponseEntity.ok();
     Callable<ResponseEntity<String>> cb =
         () -> {
@@ -149,7 +154,10 @@ public class GaenV2Controller {
   // GET for Key Download
   @GetMapping(value = "/exposed")
   @Documentation(
-      description = "Requests keys published _after_ lastKeyBundleTag.",
+      description =
+          "Requests keys published _after_ lastKeyBundleTag. The response includes also"
+              + " international keys if includeAllInternationalKeys is set to true. (default is"
+              + " false)",
       responses = {
         "200 => zipped export.bin and export.sig of all keys in that interval",
         "404 => Invalid _lastKeyBundleTag_"
@@ -162,7 +170,8 @@ public class GaenV2Controller {
                       + " retention period are returned",
               example = "1593043200000")
           @RequestParam(required = false)
-          Long lastKeyBundleTag)
+          Long lastKeyBundleTag,
+      @RequestParam(required = false, defaultValue = "false") boolean includeAllInternationalKeys)
       throws BadBatchReleaseTimeException, InvalidKeyException, SignatureException,
           NoSuchAlgorithmException, IOException {
     var now = UTCInstant.now();
@@ -180,7 +189,8 @@ public class GaenV2Controller {
     }
     UTCInstant keyBundleTag = now.roundToBucketStart(releaseBucketDuration);
 
-    List<GaenKey> exposedKeys = dataService.getSortedExposedSince(keysSince, now);
+    List<GaenKey> exposedKeys =
+        dataService.getSortedExposedSince(keysSince, now, includeAllInternationalKeys);
 
     if (exposedKeys.isEmpty()) {
       return ResponseEntity.noContent()

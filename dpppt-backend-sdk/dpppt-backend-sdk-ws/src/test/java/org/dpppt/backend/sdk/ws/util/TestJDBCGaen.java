@@ -42,7 +42,7 @@ public class TestJDBCGaen {
     params.addValue("publishedUntil", new Date(publishedUntil));
 
     String sql =
-        "select pk_exposed_id, key, rolling_start_number, rolling_period, transmission_risk_level"
+        "select pk_exposed_id, key, rolling_start_number, rolling_period"
             + " from t_gaen_exposed where rolling_start_number >= :rollingPeriodStartNumberStart"
             + " and rolling_start_number < :rollingPeriodStartNumberEnd and received_at <"
             + " :publishedUntil";
@@ -63,18 +63,17 @@ public class TestJDBCGaen {
     if (dbType.equals(PGSQL)) {
       sql =
           "insert into t_gaen_exposed (key, rolling_start_number, rolling_period,"
-              + " received_at) values (:key, :rolling_start_number,"
-              + " :rolling_period, :received_at) on conflict on"
+              + " received_at, origin) values (:key, :rolling_start_number,"
+              + " :rolling_period, :received_at, :origin) on conflict on"
               + " constraint gaen_exposed_key do nothing";
     } else {
       sql =
           "merge into t_gaen_exposed using (values(cast(:key as varchar(24)),"
-              + " :rolling_start_number, :rolling_period, :received_at))"
-              + " as vals(key, rolling_start_number, rolling_period,"
-              + " received_at) on t_gaen_exposed.key = vals.key when not matched then insert (key,"
-              + " rolling_start_number, rolling_period, received_at)"
-              + " values (vals.key, vals.rolling_start_number, vals.rolling_period,"
-              + " vals.received_at)";
+              + " :rolling_start_number, :rolling_period, :received_at, cast(:origin as"
+              + " varchar(10)))) as vals(key, rolling_start_number, rolling_period, received_at,"
+              + " origin) on t_gaen_exposed.key = vals.key when not matched then insert (key,"
+              + " rolling_start_number, rolling_period, received_at, origin) values (vals.key,"
+              + " vals.rolling_start_number, vals.rolling_period, vals.received_at, vals.origin)";
     }
     var parameterList = new ArrayList<MapSqlParameterSource>();
     for (var gaenKey : gaenKeys) {
@@ -83,6 +82,7 @@ public class TestJDBCGaen {
       params.addValue("rolling_start_number", gaenKey.getRollingStartNumber());
       params.addValue("rolling_period", gaenKey.getRollingPeriod());
       params.addValue("received_at", receivedAt.getDate());
+      params.addValue("origin", "CH");
       parameterList.add(params);
     }
     jt.batchUpdate(sql, parameterList.toArray(new MapSqlParameterSource[0]));

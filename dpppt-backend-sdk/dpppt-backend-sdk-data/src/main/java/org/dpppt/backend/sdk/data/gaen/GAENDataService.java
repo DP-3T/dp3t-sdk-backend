@@ -22,8 +22,10 @@ public interface GAENDataService {
    *
    * @param keys the list of exposed keys to upsert
    * @param now time of the request
+   * @param international if set to true, the given keys are stored such that they have visited all
+   *     configured countries.
    */
-  void upsertExposees(List<GaenKey> keys, UTCInstant now);
+  void upsertExposees(List<GaenKey> keys, UTCInstant now, boolean international);
 
   /**
    * Upserts (Update or Inserts) the given list of exposed keys, with delayed release of same day
@@ -33,8 +35,11 @@ public interface GAENDataService {
    * @param delayedReceivedAt the timestamp to use for the delayed release (if null use now rounded
    *     to next bucket)
    * @param now time of the request
+   * @param international if set to true, the given keys are stored such that they have visited all
+   *     configured countries.
    */
-  void upsertExposeesDelayed(List<GaenKey> keys, UTCInstant delayedReceivedAt, UTCInstant now);
+  void upsertExposeesDelayed(
+      List<GaenKey> keys, UTCInstant delayedReceivedAt, UTCInstant now, boolean international);
 
   /**
    * Returns all exposeed keys for the given batch, where a batch is parametrized with keyDate (for
@@ -62,7 +67,10 @@ public interface GAENDataService {
    *
    * @param keysSince
    * @param now
+   * @param includeAllInternationalKeys If set to true, all international keys are returned in the
+   *     result. Otherwise only keys from the origin country.
    * @return
    */
-  List<GaenKey> getSortedExposedSince(UTCInstant keysSince, UTCInstant now);
+  List<GaenKey> getSortedExposedSince(
+      UTCInstant keysSince, UTCInstant now, boolean includeAllInternationalKeys);
 }

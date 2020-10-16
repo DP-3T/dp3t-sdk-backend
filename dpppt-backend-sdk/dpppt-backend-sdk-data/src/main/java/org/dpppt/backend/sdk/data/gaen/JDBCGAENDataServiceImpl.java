@@ -39,38 +39,45 @@ public class JDBCGAENDataServiceImpl implements GAENDataService {
 
   // the origin country is used for the "default" visited country for all insertions that do not
   // provide the visited countries for the key, so all v1 and non-international v2 inserted keys.
+  // the origin country is also the default for returning keys.
   private final String originCountry;
+
+  // these are all other countries that are connected to the system. if requests must include all
+  // international keys, then this list is added to the origin country.
+  private final List<String> allOtherCountries;
 
   public JDBCGAENDataServiceImpl(
       String dbType,
       DataSource dataSource,
       Duration releaseBucketDuration,
       Duration timeSkew,
-      String originCountry) {
+      String originCountry,
+      List<String> allOtherCountries) {
     this.dbType = dbType;
     this.jt = new NamedParameterJdbcTemplate(dataSource);
     this.releaseBucketDuration = releaseBucketDuration;
     this.timeSkew = timeSkew;
     this.originCountry = originCountry;
+    this.allOtherCountries = allOtherCountries;
   }
 
   @Override
   @Transactional(readOnly = false)
-  public void upsertExposees(List<GaenKey> gaenKeys, UTCInstant now) {
-    upsertExposeesDelayed(gaenKeys, null, now);
+  public void upsertExposees(List<GaenKey> gaenKeys, UTCInstant now, boolean international) {
+    upsertExposeesDelayed(gaenKeys, null, now, international);
   }
 
   @Override
   @Transactional(readOnly = false)
   public void upsertExposeesDelayed(
-      List<GaenKey> gaenKeys, UTCInstant delayedReceivedAt, UTCInstant now) {
+      List<GaenKey> gaenKeys, UTCInstant delayedReceivedAt, UTCInstant now, boolean international) {
     String sqlKey = null;
     String sqlVisited = null;
     if (dbType.equals(PGSQL)) {
       sqlKey =
           "insert into t_gaen_exposed (key, rolling_start_number, rolling_period,"
-              + " received_at) values (:key, :rolling_start_number,"
-              + " :rolling_period, :received_at) on conflict on"
+              + " received_at, origin) values (:key, :rolling_start_number,"
+              + " :rolling_period, :received_at, :origin) on conflict on"
               + " constraint gaen_exposed_key do nothing";
       sqlVisited =
           "insert into t_visited (pfk_exposed_id, country) values (:keyId, :country) on conflict on"
@@ -78,12 +85,11 @@ public class JDBCGAENDataServiceImpl implements GAENDataService {
     } else {
       sqlKey =
           "merge into t_gaen_exposed using (values(cast(:key as varchar(24)),"
-              + " :rolling_start_number, :rolling_period, :received_at))"
-              + " as vals(key, rolling_start_number, rolling_period,"
-              + " received_at) on t_gaen_exposed.key = vals.key when not matched then insert (key,"
-              + " rolling_start_number, rolling_period, received_at)"
-              + " values (vals.key, vals.rolling_start_number, vals.rolling_period,"
-              + " vals.received_at)";
+              + " :rolling_start_number, :rolling_period, :received_at, cast(:origin as"
+              + " varchar(10)))) as vals(key, rolling_start_number, rolling_period, received_at,"
+              + " origin) on t_gaen_exposed.key = vals.key when not matched then insert (key,"
+              + " rolling_start_number, rolling_period, received_at, origin) values (vals.key,"
+              + " vals.rolling_start_number, vals.rolling_period, vals.received_at, vals.origin)";
       sqlVisited =
           "merge into t_visited using (values(:keyId, :country)) as vals(keyId, country) on"
               + " t_visited.pfk_exposed_id = vals.keyId and t_visited.country = vals.country when"
@@ -105,6 +111,7 @@ public class JDBCGAENDataServiceImpl implements GAENDataService {
       params.addValue("rolling_start_number", gaenKey.getRollingStartNumber());
       params.addValue("rolling_period", gaenKey.getRollingPeriod());
       params.addValue("received_at", receivedAt.getDate());
+      params.addValue("origin", originCountry);
       KeyHolder keyHolder = new GeneratedKeyHolder();
       jt.update(sqlKey, params, keyHolder);
 
@@ -114,10 +121,18 @@ public class JDBCGAENDataServiceImpl implements GAENDataService {
         Object keyObject = keyHolder.getKeys().get("pk_exposed_id");
         if (keyObject != null) {
           int gaenKeyId = ((Integer) keyObject).intValue();
-          MapSqlParameterSource visitedParams = new MapSqlParameterSource();
-          visitedParams.addValue("keyId", gaenKeyId);
-          visitedParams.addValue("country", originCountry);
-          visitedBatch.add(visitedParams);
+          // origin country is always included
+          List<String> visitedCountries = new ArrayList<String>();
+          visitedCountries.add(originCountry);
+          if (international) {
+            visitedCountries.addAll(allOtherCountries);
+          }
+          for (String country : visitedCountries) {
+            MapSqlParameterSource visitedParams = new MapSqlParameterSource();
+            visitedParams.addValue("keyId", gaenKeyId);
+            visitedParams.addValue("country", country);
+            visitedBatch.add(visitedParams);
+          }
         }
       }
     }
@@ -166,11 +181,20 @@ public class JDBCGAENDataServiceImpl implements GAENDataService {
 
   @Override
   @Transactional(readOnly = true)
-  public List<GaenKey> getSortedExposedSince(UTCInstant keysSince, UTCInstant now) {
+  public List<GaenKey> getSortedExposedSince(
+      UTCInstant keysSince, UTCInstant now, boolean includeAllInternationalKeys) {
     MapSqlParameterSource params = new MapSqlParameterSource();
     params.addValue("since", keysSince.getDate());
     params.addValue("maxBucket", now.roundToBucketStart(releaseBucketDuration).getDate());
     params.addValue("timeSkewSeconds", timeSkew.toSeconds());
+
+    // origin country is always included
+    List<String> forCountries = new ArrayList<>();
+    forCountries.add(originCountry);
+    if (includeAllInternationalKeys) {
+      forCountries.addAll(allOtherCountries);
+    }
+    params.addValue("countries", forCountries);
 
     // Select keys since the given date. We need to make sure, only keys are returned
     // that are allowed to be published.
@@ -187,12 +211,13 @@ public class JDBCGAENDataServiceImpl implements GAENDataService {
     // TO_TIMESTAMP((rolling_start_number + rolling_period) * 10 * 60 + :timeSkewSeconds
 
     String sql =
-        "select keys.pk_exposed_id, keys.key, keys.rolling_start_number, keys.rolling_period,"
-            + " keys.transmission_risk_level from (select pk_exposed_id, key,"
-            + " rolling_start_number, rolling_period, transmission_risk_level, received_at,  "
+        "select distinct keys.pk_exposed_id, keys.key, keys.rolling_start_number,"
+            + " keys.rolling_period from (select pk_exposed_id, key, rolling_start_number,"
+            + " rolling_period, received_at,  "
             + getSQLExpressionForExpiry()
             + " as expiry from t_gaen_exposed)"
-            + " as keys where ((keys.received_at >= :since AND"
+            + " as keys inner join t_visited v on keys.pk_exposed_id = v.pfk_exposed_id"
+            + " where v.country in (:countries) and ((keys.received_at >= :since AND"
             + " keys.received_at < :maxBucket AND keys.expiry <= keys.received_at) OR (keys.expiry"
             + " >= :since AND keys.expiry < :maxBucket AND keys.expiry > keys.received_at))";
 
