@@ -153,9 +153,9 @@ public class JDBCGAENDataServiceImpl implements GAENDataService {
             + " rolling_start_number, rolling_period, transmission_risk_level, received_at,  "
             + getSQLExpressionForExpiry()
             + " as expiry from t_gaen_exposed)"
-            + " as keys where ((keys.received_at >= :since AND"
-            + " keys.received_at < :maxBucket AND keys.expiry <= keys.received_at) OR (keys.expiry"
-            + " >= :since AND keys.expiry < :maxBucket AND keys.expiry > keys.received_at))";
+            + " as keys where ( (keys.expiry <= keys.received_at AND"
+            + " keys.received_at >= :since AND keys.received_at < :maxBucket) OR"
+            + " (keys.expiry > keys.received_at AND keys.expiry >= :since AND keys.expiry < :maxBucket) )";
 
     sql += " order by keys.pk_exposed_id desc";
 
