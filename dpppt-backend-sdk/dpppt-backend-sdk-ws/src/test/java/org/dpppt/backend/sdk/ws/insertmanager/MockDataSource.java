@@ -36,4 +36,12 @@ public class MockDataSource implements GAENDataService {
       boolean includeAllInternationalKeys) { // TODO Auto-generated method stub
     return null;
   }
+
+  @Override
+  public void upsertExposeeFromInterops(
+      GaenKey key,
+      UTCInstant now,
+      String origin,
+      List<String> visitedCountries) { // TODO Auto-generated method stub
+  }
 }

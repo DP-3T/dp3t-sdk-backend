@@ -62,6 +62,12 @@ public class JDBCGAENDataServiceImpl implements GAENDataService {
   }
 
   @Override
+  public void upsertExposeeFromInterops(
+      GaenKey gaenKey, UTCInstant now, String origin, List<String> visitedCountries) {
+    internalUpsertKey(gaenKey, now, origin, visitedCountries);
+  }
+
+  @Override
   @Transactional(readOnly = false)
   public void upsertExposees(List<GaenKey> gaenKeys, UTCInstant now, boolean international) {
     upsertExposeesDelayed(gaenKeys, null, now, international);
@@ -71,75 +77,20 @@ public class JDBCGAENDataServiceImpl implements GAENDataService {
   @Transactional(readOnly = false)
   public void upsertExposeesDelayed(
       List<GaenKey> gaenKeys, UTCInstant delayedReceivedAt, UTCInstant now, boolean international) {
-    String sqlKey = null;
-    String sqlVisited = null;
-    if (dbType.equals(PGSQL)) {
-      sqlKey =
-          "insert into t_gaen_exposed (key, rolling_start_number, rolling_period,"
-              + " received_at, origin) values (:key, :rolling_start_number,"
-              + " :rolling_period, :received_at, :origin) on conflict on"
-              + " constraint gaen_exposed_key do nothing";
-      sqlVisited =
-          "insert into t_visited (pfk_exposed_id, country) values (:keyId, :country) on conflict on"
-              + " constraint PK_t_visited do nothing";
-    } else {
-      sqlKey =
-          "merge into t_gaen_exposed using (values(cast(:key as varchar(24)),"
-              + " :rolling_start_number, :rolling_period, :received_at, cast(:origin as"
-              + " varchar(10)))) as vals(key, rolling_start_number, rolling_period, received_at,"
-              + " origin) on t_gaen_exposed.key = vals.key when not matched then insert (key,"
-              + " rolling_start_number, rolling_period, received_at, origin) values (vals.key,"
-              + " vals.rolling_start_number, vals.rolling_period, vals.received_at, vals.origin)";
-      sqlVisited =
-          "merge into t_visited using (values(:keyId, :country)) as vals(keyId, country) on"
-              + " t_visited.pfk_exposed_id = vals.keyId and t_visited.country = vals.country when"
-              + " not matched then insert (pfk_exposed_id, country) values (vals.keyId,"
-              + " vals.country)";
-    }
-
     // Calculate the `receivedAt` just at the end of the current releaseBucket.
     var receivedAt =
         delayedReceivedAt == null
             ? now.roundToNextBucket(releaseBucketDuration).minus(Duration.ofMillis(1))
             : delayedReceivedAt;
 
-    List<MapSqlParameterSource> visitedBatch = new ArrayList<>();
-
-    for (var gaenKey : gaenKeys) {
-      MapSqlParameterSource params = new MapSqlParameterSource();
-      params.addValue("key", gaenKey.getKeyData());
-      params.addValue("rolling_start_number", gaenKey.getRollingStartNumber());
-      params.addValue("rolling_period", gaenKey.getRollingPeriod());
-      params.addValue("received_at", receivedAt.getDate());
-      params.addValue("origin", originCountry);
-      KeyHolder keyHolder = new GeneratedKeyHolder();
-      jt.update(sqlKey, params, keyHolder);
-
-      // if the key already exists, no ids are returned. in this case we assume that we do not need
-      // to modify the visited countries also
-      if (keyHolder.getKeys() != null && !keyHolder.getKeys().isEmpty()) {
-        Object keyObject = keyHolder.getKeys().get("pk_exposed_id");
-        if (keyObject != null) {
-          int gaenKeyId = ((Integer) keyObject).intValue();
-          // origin country is always included
-          List<String> visitedCountries = new ArrayList<String>();
-          visitedCountries.add(originCountry);
-          if (international) {
-            visitedCountries.addAll(allOtherCountries);
-          }
-          for (String country : visitedCountries) {
-            MapSqlParameterSource visitedParams = new MapSqlParameterSource();
-            visitedParams.addValue("keyId", gaenKeyId);
-            visitedParams.addValue("country", country);
-            visitedBatch.add(visitedParams);
-          }
-        }
-      }
+    // origin country is always included
+    List<String> visitedCountries = new ArrayList<String>();
+    visitedCountries.add(this.originCountry);
+    if (international) {
+      visitedCountries.addAll(this.allOtherCountries);
     }
-
-    if (!visitedBatch.isEmpty()) {
-      jt.batchUpdate(
-          sqlVisited, visitedBatch.toArray(new MapSqlParameterSource[visitedBatch.size()]));
+    for (var gaenKey : gaenKeys) {
+      internalUpsertKey(gaenKey, receivedAt, this.originCountry, visitedCountries);
     }
   }
 
@@ -245,5 +196,64 @@ public class JDBCGAENDataServiceImpl implements GAENDataService {
         new MapSqlParameterSource("retention_time", retentionTime.getDate());
     String sqlExposed = "delete from t_gaen_exposed where received_at < :retention_time";
     jt.update(sqlExposed, params);
+  }
+
+  private void internalUpsertKey(
+      GaenKey gaenKey, UTCInstant receivedAt, String origin, List<String> visitedCountries) {
+    String sqlKey = null;
+    String sqlVisited = null;
+    if (dbType.equals(PGSQL)) {
+      sqlKey =
+          "insert into t_gaen_exposed (key, rolling_start_number, rolling_period,"
+              + " received_at, origin) values (:key, :rolling_start_number,"
+              + " :rolling_period, :received_at, :origin) on conflict on"
+              + " constraint gaen_exposed_key do nothing";
+      sqlVisited =
+          "insert into t_visited (pfk_exposed_id, country) values (:keyId, :country) on conflict on"
+              + " constraint PK_t_visited do nothing";
+    } else {
+      sqlKey =
+          "merge into t_gaen_exposed using (values(cast(:key as varchar(24)),"
+              + " :rolling_start_number, :rolling_period, :received_at, cast(:origin as"
+              + " varchar(10)))) as vals(key, rolling_start_number, rolling_period, received_at,"
+              + " origin) on t_gaen_exposed.key = vals.key when not matched then insert (key,"
+              + " rolling_start_number, rolling_period, received_at, origin) values (vals.key,"
+              + " vals.rolling_start_number, vals.rolling_period, vals.received_at, vals.origin)";
+      sqlVisited =
+          "merge into t_visited using (values(:keyId, :country)) as vals(keyId, country) on"
+              + " t_visited.pfk_exposed_id = vals.keyId and t_visited.country = vals.country when"
+              + " not matched then insert (pfk_exposed_id, country) values (vals.keyId,"
+              + " vals.country)";
+    }
+
+    List<MapSqlParameterSource> visitedBatch = new ArrayList<>();
+
+    MapSqlParameterSource params = new MapSqlParameterSource();
+    params.addValue("key", gaenKey.getKeyData());
+    params.addValue("rolling_start_number", gaenKey.getRollingStartNumber());
+    params.addValue("rolling_period", gaenKey.getRollingPeriod());
+    params.addValue("received_at", receivedAt.getDate());
+    params.addValue("origin", origin);
+    KeyHolder keyHolder = new GeneratedKeyHolder();
+    jt.update(sqlKey, params, keyHolder);
+
+    // if the key already exists, no ids are returned. in this case we assume that we do not need
+    // to modify the visited countries also
+    if (keyHolder.getKeys() != null && !keyHolder.getKeys().isEmpty()) {
+      Object keyObject = keyHolder.getKeys().get("pk_exposed_id");
+      if (keyObject != null) {
+        int gaenKeyId = ((Integer) keyObject).intValue();
+        for (String country : visitedCountries) {
+          MapSqlParameterSource visitedParams = new MapSqlParameterSource();
+          visitedParams.addValue("keyId", gaenKeyId);
+          visitedParams.addValue("country", country);
+          visitedBatch.add(visitedParams);
+        }
+      }
+    }
+    if (!visitedBatch.isEmpty()) {
+      jt.batchUpdate(
+          sqlVisited, visitedBatch.toArray(new MapSqlParameterSource[visitedBatch.size()]));
+    }
   }
 }
