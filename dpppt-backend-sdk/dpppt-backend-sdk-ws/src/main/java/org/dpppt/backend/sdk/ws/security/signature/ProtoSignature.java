@@ -199,7 +199,6 @@ public class ProtoSignature {
       tekSignatureV2() {
     var tekSignature = TemporaryExposureKeyFormatV2.SignatureInfo.newBuilder();
     tekSignature
-        .setAppBundleId(appBundleId)
         .setVerificationKeyVersion(keyVersion)
         .setVerificationKeyId(keyVerificationId)
         .setSignatureAlgorithm(algorithm);
