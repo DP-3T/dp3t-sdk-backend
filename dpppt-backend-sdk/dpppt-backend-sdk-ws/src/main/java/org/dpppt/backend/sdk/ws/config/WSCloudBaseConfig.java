@@ -33,10 +33,10 @@ public abstract class WSCloudBaseConfig extends WSBaseConfig {
   @Value("${ws.cloud.base.config.publicKey.fromCertificate:true}")
   private boolean publicKeyFromCertificate;
 
-  @Value("${datasource.maximumPoolSize}")
+  @Value("${datasource.maximumPoolSize:5}")
   int dataSourceMaximumPoolSize;
 
-  @Value("${datasource.connectionTimeout}")
+  @Value("${datasource.connectionTimeout:30000}")
   int dataSourceConnectionTimeout;
 
   @Value("${datasource.leakDetectionThreshold:0}")
