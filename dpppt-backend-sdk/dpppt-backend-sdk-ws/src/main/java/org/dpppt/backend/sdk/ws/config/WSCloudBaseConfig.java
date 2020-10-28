@@ -11,7 +11,6 @@
 package org.dpppt.backend.sdk.ws.config;
 
 import java.util.Map;
-
 import javax.sql.DataSource;
 import org.dpppt.backend.sdk.ws.security.KeyVault;
 import org.dpppt.backend.sdk.ws.security.KeyVault.PrivateKeyNoSuitableEncodingFoundException;
