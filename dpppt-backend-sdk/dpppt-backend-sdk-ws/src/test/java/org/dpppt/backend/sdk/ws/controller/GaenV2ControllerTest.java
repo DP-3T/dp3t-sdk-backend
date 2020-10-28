@@ -100,9 +100,17 @@ public class GaenV2ControllerTest extends BaseControllerTest {
   }
 
   @Test
-  public void testUploadTodaysKeyWillBeReleasedTomorrow() throws Exception {
+  public void testUploadTodaysKeyWillBeReleasedTomorrowWithV1Upload() throws Exception {
+    testUploadTodaysKeyWillBeReleasedTomorrow(false);
+  }
+
+  @Test
+  public void testUploadTodaysKeyWillBeReleasedTomorrowWithV2Upload() throws Exception {
+    testUploadTodaysKeyWillBeReleasedTomorrow(true);
+  }
+
+  private void testUploadTodaysKeyWillBeReleasedTomorrow(boolean useV2Upload) throws Exception{
     var now = UTCInstant.now();
-    GaenV2UploadKeysRequest exposeeRequest = new GaenV2UploadKeysRequest();
     List<GaenKey> keys = new ArrayList<>();
     for (int i = 0; i < 30; i++) {
       var tmpKey = new GaenKey();
@@ -114,17 +122,28 @@ public class GaenV2ControllerTest extends BaseControllerTest {
       tmpKey.setTransmissionRiskLevel(0);
       keys.add(tmpKey);
     }
-    exposeeRequest.setGaenKeys(keys);
+
+    Object uploadPayload;
+    if(useV2Upload){
+      GaenV2UploadKeysRequest exposeeRequest = new GaenV2UploadKeysRequest();
+      exposeeRequest.setGaenKeys(keys);
+      uploadPayload = exposeeRequest;
+    }else {
+      GaenRequest exposeeRequest = new GaenRequest();
+      exposeeRequest.setGaenKeys(keys);
+      exposeeRequest.setDelayedKeyDate((int) now.atStartOfDay().get10MinutesSince1970());
+      uploadPayload = exposeeRequest;
+    }
 
     String token = createToken(now.plusMinutes(5));
     MvcResult responseAsync =
         mockMvc
             .perform(
-                post("/v2/gaen/exposed")
+                post(useV2Upload ? "/v2/gaen/exposed" : "/v1/gaen/exposed")
                     .contentType(MediaType.APPLICATION_JSON)
                     .header("Authorization", "Bearer " + token)
                     .header("User-Agent", androidUserAgent)
-                    .content(json(exposeeRequest)))
+                    .content(json(uploadPayload)))
             .andExpect(request().asyncStarted())
             .andReturn();
     mockMvc.perform(asyncDispatch(responseAsync)).andExpect(status().isOk());
@@ -136,17 +155,57 @@ public class GaenV2ControllerTest extends BaseControllerTest {
             .andReturn()
             .getResponse();
 
-    Clock fourAMTomorrow =
-        Clock.fixed(now.atStartOfDay().plusDays(1).plusHours(4).getInstant(), ZoneOffset.UTC);
+    String keyBundleTag = response.getHeader("x-key-bundle-tag");
 
-    try (var timeLock = UTCInstant.setClock(fourAMTomorrow)) {
+    //at 01:00 UTC we expect all the keys but the one from yesterday, because this one might still be accepted by client apps
+    Clock oneAMTomorrow =
+        Clock.fixed(now.atStartOfDay().plusDays(1).plusHours(1).plusSeconds(0).getInstant(), ZoneOffset.UTC);
+
+    try (var timeLock = UTCInstant.setClock(oneAMTomorrow)) {
       response =
           mockMvc
-              .perform(get("/v2/gaen/exposed").header("User-Agent", androidUserAgent))
+              .perform(get("/v2/gaen/exposed?lastKeyBundleTag="+keyBundleTag).header("User-Agent", androidUserAgent))
               .andExpect(status().isOk())
               .andReturn()
               .getResponse();
-      verifyZipResponse(response, 15, 144);
+      verifyZipResponse(response, 14, 144);
+
     }
+    keyBundleTag = response.getHeader("x-key-bundle-tag");
+
+
+    //at 04:00 UTC we expect to get the 1 key of yesterday
+    Clock fourAMTomorrow =
+            Clock.fixed(now.atStartOfDay().plusDays(1).plusHours(4).plusSeconds(0).getInstant(), ZoneOffset.UTC);
+
+    try (var timeLock = UTCInstant.setClock(fourAMTomorrow)) {
+      response =
+              mockMvc
+                      .perform(get("/v2/gaen/exposed?lastKeyBundleTag=" + keyBundleTag).header("User-Agent", androidUserAgent))
+                      .andExpect(status().isOk())
+                      .andReturn()
+                      .getResponse();
+
+      verifyZipResponse(response, 1, 144);
+    }
+    keyBundleTag = response.getHeader("x-key-bundle-tag");
+
+
+    //at 08:00 UTC we do not expect any further keys and thus expect a 204 status
+    Clock eightAMTomorrow =
+            Clock.fixed(now.atStartOfDay().plusDays(1).plusHours(8).plusSeconds(0).getInstant(), ZoneOffset.UTC);
+
+    try (var timeLock = UTCInstant.setClock(eightAMTomorrow)) {
+      response =
+              mockMvc
+                      .perform(get("/v2/gaen/exposed?lastKeyBundleTag=" + keyBundleTag).header("User-Agent", androidUserAgent))
+                      .andExpect(status().is(204))
+                      .andReturn()
+                      .getResponse();
+    }
+
   }
+
+
+
 }
