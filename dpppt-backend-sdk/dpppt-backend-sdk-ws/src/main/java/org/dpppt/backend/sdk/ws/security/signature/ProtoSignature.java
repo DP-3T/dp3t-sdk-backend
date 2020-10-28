@@ -23,6 +23,7 @@ import java.time.Duration;
 import java.util.ArrayList;
 import java.util.Base64;
 import java.util.Collection;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -137,6 +138,10 @@ public class ProtoSignature {
     if (keys.isEmpty()) {
       throw new IOException("Keys should not be empty");
     }
+    // Apple likes to have keys shuffled. See
+    // https://developer.apple.com/documentation/exposurenotification/setting_up_a_key_server
+    Collections.shuffle(keys);
+
     ByteArrayOutputStream byteOut = new ByteArrayOutputStream();
     ZipOutputStream zip = new ZipOutputStream(byteOut);
     ByteArrayOutputStream hashOut = new ByteArrayOutputStream();
