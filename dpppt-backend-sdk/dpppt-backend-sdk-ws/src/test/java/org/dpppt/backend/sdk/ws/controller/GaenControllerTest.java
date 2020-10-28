@@ -10,7 +10,9 @@
 
 package org.dpppt.backend.sdk.ws.controller;
 
-import static org.junit.Assert.*;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertNotEquals;
+import static org.junit.Assert.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.asyncDispatch;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
@@ -21,12 +23,7 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 
 import io.jsonwebtoken.Jwt;
 import io.jsonwebtoken.Jwts;
-import java.io.ByteArrayInputStream;
-import java.io.IOException;
-import java.security.InvalidKeyException;
-import java.security.NoSuchAlgorithmException;
 import java.security.SecureRandom;
-import java.security.SignatureException;
 import java.time.Clock;
 import java.time.Duration;
 import java.time.Instant;
@@ -36,22 +33,13 @@ import java.util.ArrayList;
 import java.util.Base64;
 import java.util.List;
 import java.util.Map;
-import java.util.zip.ZipEntry;
-import java.util.zip.ZipInputStream;
-import org.dpppt.backend.sdk.data.gaen.GAENDataService;
 import org.dpppt.backend.sdk.model.gaen.GaenKey;
 import org.dpppt.backend.sdk.model.gaen.GaenRequest;
 import org.dpppt.backend.sdk.model.gaen.GaenSecondDay;
-import org.dpppt.backend.sdk.model.gaen.proto.TemporaryExposureKeyFormat;
-import org.dpppt.backend.sdk.model.gaen.proto.TemporaryExposureKeyFormat.TEKSignatureList;
-import org.dpppt.backend.sdk.model.gaen.proto.TemporaryExposureKeyFormat.TemporaryExposureKeyExport;
 import org.dpppt.backend.sdk.utils.UTCInstant;
-import org.dpppt.backend.sdk.ws.security.KeyVault;
-import org.dpppt.backend.sdk.ws.security.signature.ProtoSignature;
 import org.junit.Test;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.http.MediaType;
 import org.springframework.mock.web.MockHttpServletResponse;
@@ -73,12 +61,6 @@ import org.springframework.transaction.annotation.Transactional;
     })
 @Transactional
 public class GaenControllerTest extends BaseControllerTest {
-  @Autowired ProtoSignature signer;
-  @Autowired KeyVault keyVault;
-  @Autowired GAENDataService gaenDataService;
-  private static final String androidUserAgent =
-      "ch.admin.bag.dp3t.dev;1.0.7;1595591959493;Android;29";
-  Duration releaseBucketDuration = Duration.ofMillis(7200000L);
 
   private static final Logger logger = LoggerFactory.getLogger(GaenControllerTest.class);
 
@@ -131,113 +113,6 @@ public class GaenControllerTest extends BaseControllerTest {
             .andExpect(status().isOk())
             .andReturn()
             .getResponse();
-  }
-
-  private void testNKeys(UTCInstant now, int n, boolean shouldSucceed) throws Exception {
-    var requestList = new GaenRequest();
-    var gaenKey1 = new GaenKey();
-    gaenKey1.setRollingStartNumber((int) now.atStartOfDay().minusDays(1).get10MinutesSince1970());
-    gaenKey1.setKeyData(Base64.getEncoder().encodeToString("testKey32Bytesa1".getBytes("UTF-8")));
-    gaenKey1.setRollingPeriod(144);
-    gaenKey1.setFake(0);
-    gaenKey1.setTransmissionRiskLevel(0);
-    var gaenKey2 = new GaenKey();
-    gaenKey2.setRollingStartNumber((int) now.atStartOfDay().minusDays(1).get10MinutesSince1970());
-    gaenKey2.setKeyData(Base64.getEncoder().encodeToString("testKey32Bytesb2".getBytes("UTF-8")));
-    gaenKey2.setRollingPeriod(144);
-    gaenKey2.setFake(0);
-    gaenKey2.setTransmissionRiskLevel(0);
-    var gaenKey3 = new GaenKey();
-    gaenKey3.setRollingStartNumber((int) now.atStartOfDay().get10MinutesSince1970());
-    gaenKey3.setKeyData(Base64.getEncoder().encodeToString("testKey32Bytesc3".getBytes("UTF-8")));
-    gaenKey3.setRollingPeriod(144);
-    gaenKey3.setFake(0);
-    gaenKey3.setTransmissionRiskLevel(0);
-    List<GaenKey> exposedKeys = new ArrayList<>();
-    exposedKeys.add(gaenKey1);
-    exposedKeys.add(gaenKey2);
-    exposedKeys.add(gaenKey3);
-    for (int i = 0; i < n - 3; i++) {
-      var tmpKey = new GaenKey();
-      tmpKey.setRollingStartNumber((int) now.atStartOfDay().get10MinutesSince1970());
-      tmpKey.setKeyData(Base64.getEncoder().encodeToString("testKey32Bytesaa".getBytes("UTF-8")));
-      tmpKey.setRollingPeriod(144);
-      tmpKey.setFake(1);
-      tmpKey.setTransmissionRiskLevel(0);
-      exposedKeys.add(tmpKey);
-    }
-    requestList.setGaenKeys(exposedKeys);
-    var duration = now.atStartOfDay().plusDays(1).get10MinutesSince1970();
-    requestList.setDelayedKeyDate((int) duration);
-    gaenKey1.setFake(0);
-    String token = createToken(now.plusMinutes(5));
-    var requestBuilder =
-        mockMvc.perform(
-            post("/v1/gaen/exposed")
-                .contentType(MediaType.APPLICATION_JSON)
-                .header("Authorization", "Bearer " + token)
-                .header("User-Agent", androidUserAgent)
-                .content(json(requestList)));
-    MvcResult response;
-
-    if (shouldSucceed) {
-      response = requestBuilder.andExpect(request().asyncStarted()).andReturn();
-      mockMvc.perform(asyncDispatch(response)).andExpect(status().is2xxSuccessful());
-    } else {
-      response = requestBuilder.andExpect(status().is(400)).andReturn();
-      return;
-    }
-    response =
-        mockMvc
-            .perform(
-                post("/v1/gaen/exposed")
-                    .contentType(MediaType.APPLICATION_JSON)
-                    .header("Authorization", "Bearer " + jwtToken)
-                    .header("User-Agent", androidUserAgent)
-                    .content(json(requestList)))
-            .andExpect(status().is(401))
-            .andExpect(request().asyncNotStarted())
-            .andExpect(content().string(""))
-            .andReturn();
-
-    var result =
-        gaenDataService.getSortedExposedForKeyDate(
-            now.atStartOfDay().minusDays(1),
-            null,
-            now.roundToNextBucket(releaseBucketDuration),
-            now);
-    assertEquals(2, result.size());
-    for (var key : result) {
-      assertEquals(Integer.valueOf(144), key.getRollingPeriod());
-    }
-
-    result =
-        gaenDataService.getSortedExposedForKeyDate(
-            now.atStartOfDay().minusDays(1),
-            null,
-            now.roundToBucketStart(releaseBucketDuration),
-            now);
-    assertEquals(0, result.size());
-
-    // third key should be released tomorrow (at four)
-    var tomorrow2AM = now.atStartOfDay().plusDays(1).plusHours(4).plusSeconds(1);
-    result =
-        gaenDataService.getSortedExposedForKeyDate(
-            now.atStartOfDay(),
-            null,
-            tomorrow2AM.roundToNextBucket(releaseBucketDuration),
-            tomorrow2AM);
-    assertEquals(1, result.size());
-
-    result =
-        gaenDataService.getSortedExposedForKeyDate(
-            now.atStartOfDay(), null, now.roundToNextBucket(releaseBucketDuration), now);
-    assertEquals(0, result.size());
-
-    result =
-        gaenDataService.getSortedExposedForKeyDate(
-            now.atStartOfDay(), null, now.atStartOfDay().plusDays(1), now);
-    assertEquals(0, result.size());
   }
 
   @Test
@@ -1436,76 +1311,6 @@ public class GaenControllerTest extends BaseControllerTest {
               .getResponse();
       verifyZipResponse(response, 1, 144);
     }
-  }
-
-  /** Verifies a zip in zip response, that each inner zip is again valid. */
-  private void verifyZipInZipResponse(
-      MockHttpServletResponse response, int expectKeyCount, int expectedRollingPeriod)
-      throws Exception {
-    ByteArrayInputStream baisOuter = new ByteArrayInputStream(response.getContentAsByteArray());
-    ZipInputStream zipOuter = new ZipInputStream(baisOuter);
-    ZipEntry entry = zipOuter.getNextEntry();
-    while (entry != null) {
-      ZipInputStream zipInner =
-          new ZipInputStream(new ByteArrayInputStream(zipOuter.readAllBytes()));
-      verifyKeyZip(zipInner, expectKeyCount, expectedRollingPeriod);
-      entry = zipOuter.getNextEntry();
-    }
-  }
-
-  /** Verifies a zip response, checks if keys and signature is correct. */
-  private void verifyZipResponse(
-      MockHttpServletResponse response, int expectKeyCount, int expectedRollingPeriod)
-      throws IOException, NoSuchAlgorithmException, InvalidKeyException, SignatureException {
-    ByteArrayInputStream baisZip = new ByteArrayInputStream(response.getContentAsByteArray());
-    ZipInputStream keyZipInputstream = new ZipInputStream(baisZip);
-    verifyKeyZip(keyZipInputstream, expectKeyCount, expectedRollingPeriod);
-  }
-
-  private void verifyKeyZip(
-      ZipInputStream keyZipInputstream, int expectKeyCount, int expectedRollingPeriod)
-      throws IOException, NoSuchAlgorithmException, InvalidKeyException, SignatureException {
-    ZipEntry entry = keyZipInputstream.getNextEntry();
-    boolean foundData = false;
-    boolean foundSignature = false;
-
-    byte[] signatureProto = null;
-    byte[] exportBin = null;
-    byte[] keyProto = null;
-
-    while (entry != null) {
-      if (entry.getName().equals("export.bin")) {
-        foundData = true;
-        exportBin = keyZipInputstream.readAllBytes();
-        keyProto = new byte[exportBin.length - 16];
-        System.arraycopy(exportBin, 16, keyProto, 0, keyProto.length);
-      }
-      if (entry.getName().equals("export.sig")) {
-        foundSignature = true;
-        signatureProto = keyZipInputstream.readAllBytes();
-      }
-      entry = keyZipInputstream.getNextEntry();
-    }
-
-    assertTrue(foundData, "export.bin not found in zip");
-    assertTrue(foundSignature, "export.sig not found in zip");
-
-    TEKSignatureList list = TemporaryExposureKeyFormat.TEKSignatureList.parseFrom(signatureProto);
-    TemporaryExposureKeyExport export =
-        TemporaryExposureKeyFormat.TemporaryExposureKeyExport.parseFrom(keyProto);
-    for (var key : export.getKeysList()) {
-      assertEquals(expectedRollingPeriod, key.getRollingPeriod());
-    }
-    var sig = list.getSignatures(0);
-    java.security.Signature signatureVerifier =
-        java.security.Signature.getInstance(sig.getSignatureInfo().getSignatureAlgorithm().trim());
-    signatureVerifier.initVerify(signer.getPublicKey());
-
-    signatureVerifier.update(exportBin);
-    assertTrue(
-        signatureVerifier.verify(sig.getSignature().toByteArray()),
-        "Could not verify signature in zip file");
-    assertEquals(expectKeyCount, export.getKeysCount());
   }
 
   /**
