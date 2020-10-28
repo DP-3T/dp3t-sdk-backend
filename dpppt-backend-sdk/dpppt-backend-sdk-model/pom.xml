@@ -27,7 +27,6 @@
 		<dependency>
 			<groupId>ch.ubique.openapi</groupId>
 			<artifactId>doc-annotations</artifactId>
-			<version>1.0.1</version>
 		</dependency>
 
 		<dependency>
@@ -63,14 +62,26 @@
 		</dependency>
 	</dependencies>
 
-	<repositories>
-		<repository>
-			<snapshots>
-				<enabled>false</enabled>
-			</snapshots>
-			<id>ubique-oss-springboot-swagger3</id>
-			<name>bintray</name>
-			<url>https://dl.bintray.com/ubique-oss/springboot-swagger3</url>
-		</repository>
-	</repositories>
+    <build>
+        <plugins>
+            <plugin>
+                <groupId>com.github.os72</groupId>
+                <artifactId>protoc-jar-maven-plugin</artifactId>
+                <executions>
+                    <execution>
+                        <phase>generate-sources</phase>
+                        <goals>
+                            <goal>run</goal>
+                        </goals>
+                        <configuration>
+                            <inputDirectories>
+                                <include>${project.basedir}/src/main/proto</include>
+                            </inputDirectories>
+                        </configuration>
+                    </execution>
+                </executions>
+            </plugin>
+        </plugins>
+    </build>
+
 </project>

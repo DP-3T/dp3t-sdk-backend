@@ -10,58 +10,38 @@
 
 package org.dpppt.backend.sdk.ws.security;
 
-import java.time.Duration;
-import java.time.OffsetDateTime;
-import java.time.ZoneOffset;
-
-import org.dpppt.backend.sdk.model.ExposeeRequest;
 import org.dpppt.backend.sdk.model.gaen.GaenKey;
 import org.dpppt.backend.sdk.model.gaen.GaenUnit;
+import org.dpppt.backend.sdk.utils.UTCInstant;
 
 public class NoValidateRequest implements ValidateRequest {
 
-	@Override
-	public boolean isValid(Object authObject) {
-		return true;
-	}
+  @Override
+  public boolean isValid(Object authObject) throws WrongScopeException {
+    return true;
+  }
 
-	@Override
-	public long getKeyDate(Object authObject, Object others) throws InvalidDateException {
-		if (others instanceof ExposeeRequest) {
-			ExposeeRequest request = ((ExposeeRequest) others);
-			if (request.getKeyDate() < OffsetDateTime.now().minusDays(21).toInstant().toEpochMilli()) {
-				throw new InvalidDateException();
-			} else if (request.getKeyDate() > OffsetDateTime.now().withOffsetSameInstant(ZoneOffset.UTC).toInstant()
-					.toEpochMilli()) {
-				throw new InvalidDateException();
-			}
-			return request.getKeyDate();
-		}
-		if (others instanceof GaenKey) {
-			GaenKey key = ((GaenKey) others);
-			var requestDate = Duration.of(key.getRollingStartNumber(), GaenUnit.TenMinutes);
-			if (requestDate.toMillis() < OffsetDateTime.now().minusDays(21).toInstant().toEpochMilli()) {
-				throw new InvalidDateException();
-			} else if (requestDate.toMillis() > OffsetDateTime.now().withOffsetSameInstant(ZoneOffset.UTC).toInstant()
-					.toEpochMilli()) {
-				throw new InvalidDateException();
-			}
-			return requestDate.toMillis();
-		}
-		throw new IllegalArgumentException();
-	}
+  @Override
+  public long validateKeyDate(UTCInstant now, Object authObject, Object others)
+      throws ClaimIsBeforeOnsetException {
+    if (others instanceof GaenKey) {
+      GaenKey request = (GaenKey) others;
+      var keyDate = UTCInstant.of(request.getRollingStartNumber(), GaenUnit.TenMinutes);
+      return keyDate.getTimestamp();
+    }
+    throw new IllegalArgumentException();
+  }
 
-	@Override
-	public boolean isFakeRequest(Object authObject, Object others) {
-		if (others instanceof ExposeeRequest) {
-			ExposeeRequest request = ((ExposeeRequest) others);
-			return request.isFake() == 1;
-		}
-		if (others instanceof GaenKey) {
-			GaenKey request = ((GaenKey) others);
-			return request.getFake() == 1;
-		}
-		throw new IllegalArgumentException();
-	}
-
+  @Override
+  public boolean isFakeRequest(Object authObject, Object others) {
+    if (others instanceof GaenKey) {
+      GaenKey request = (GaenKey) others;
+      boolean fake = false;
+      if (request.getFake() == 1) {
+        fake = true;
+      }
+      return fake;
+    }
+    throw new IllegalArgumentException();
+  }
 }
