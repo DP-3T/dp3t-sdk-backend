@@ -109,7 +109,7 @@ public class GaenV2ControllerTest extends BaseControllerTest {
     testUploadTodaysKeyWillBeReleasedTomorrow(true);
   }
 
-  private void testUploadTodaysKeyWillBeReleasedTomorrow(boolean useV2Upload) throws Exception{
+  private void testUploadTodaysKeyWillBeReleasedTomorrow(boolean useV2Upload) throws Exception {
     var now = UTCInstant.now();
     List<GaenKey> keys = new ArrayList<>();
     for (int i = 0; i < 30; i++) {
@@ -124,11 +124,11 @@ public class GaenV2ControllerTest extends BaseControllerTest {
     }
 
     Object uploadPayload;
-    if(useV2Upload){
+    if (useV2Upload) {
       GaenV2UploadKeysRequest exposeeRequest = new GaenV2UploadKeysRequest();
       exposeeRequest.setGaenKeys(keys);
       uploadPayload = exposeeRequest;
-    }else {
+    } else {
       GaenRequest exposeeRequest = new GaenRequest();
       exposeeRequest.setGaenKeys(keys);
       exposeeRequest.setDelayedKeyDate((int) now.atStartOfDay().get10MinutesSince1970());
@@ -157,55 +157,61 @@ public class GaenV2ControllerTest extends BaseControllerTest {
 
     String keyBundleTag = response.getHeader("x-key-bundle-tag");
 
-    //at 01:00 UTC we expect all the keys but the one from yesterday, because this one might still be accepted by client apps
+    // at 01:00 UTC we expect all the keys but the one from yesterday, because this one might still
+    // be accepted by client apps
     Clock oneAMTomorrow =
-        Clock.fixed(now.atStartOfDay().plusDays(1).plusHours(1).plusSeconds(0).getInstant(), ZoneOffset.UTC);
+        Clock.fixed(
+            now.atStartOfDay().plusDays(1).plusHours(1).plusSeconds(0).getInstant(),
+            ZoneOffset.UTC);
 
     try (var timeLock = UTCInstant.setClock(oneAMTomorrow)) {
       response =
           mockMvc
-              .perform(get("/v2/gaen/exposed?lastKeyBundleTag="+keyBundleTag).header("User-Agent", androidUserAgent))
+              .perform(
+                  get("/v2/gaen/exposed?lastKeyBundleTag=" + keyBundleTag)
+                      .header("User-Agent", androidUserAgent))
               .andExpect(status().isOk())
               .andReturn()
               .getResponse();
       verifyZipResponse(response, 14, 144);
-
     }
     keyBundleTag = response.getHeader("x-key-bundle-tag");
 
-
-    //at 04:00 UTC we expect to get the 1 key of yesterday
+    // at 04:00 UTC we expect to get the 1 key of yesterday
     Clock fourAMTomorrow =
-            Clock.fixed(now.atStartOfDay().plusDays(1).plusHours(4).plusSeconds(0).getInstant(), ZoneOffset.UTC);
+        Clock.fixed(
+            now.atStartOfDay().plusDays(1).plusHours(4).plusSeconds(0).getInstant(),
+            ZoneOffset.UTC);
 
     try (var timeLock = UTCInstant.setClock(fourAMTomorrow)) {
       response =
-              mockMvc
-                      .perform(get("/v2/gaen/exposed?lastKeyBundleTag=" + keyBundleTag).header("User-Agent", androidUserAgent))
-                      .andExpect(status().isOk())
-                      .andReturn()
-                      .getResponse();
+          mockMvc
+              .perform(
+                  get("/v2/gaen/exposed?lastKeyBundleTag=" + keyBundleTag)
+                      .header("User-Agent", androidUserAgent))
+              .andExpect(status().isOk())
+              .andReturn()
+              .getResponse();
 
       verifyZipResponse(response, 1, 144);
     }
     keyBundleTag = response.getHeader("x-key-bundle-tag");
 
-
-    //at 08:00 UTC we do not expect any further keys and thus expect a 204 status
+    // at 08:00 UTC we do not expect any further keys and thus expect a 204 status
     Clock eightAMTomorrow =
-            Clock.fixed(now.atStartOfDay().plusDays(1).plusHours(8).plusSeconds(0).getInstant(), ZoneOffset.UTC);
+        Clock.fixed(
+            now.atStartOfDay().plusDays(1).plusHours(8).plusSeconds(0).getInstant(),
+            ZoneOffset.UTC);
 
     try (var timeLock = UTCInstant.setClock(eightAMTomorrow)) {
       response =
-              mockMvc
-                      .perform(get("/v2/gaen/exposed?lastKeyBundleTag=" + keyBundleTag).header("User-Agent", androidUserAgent))
-                      .andExpect(status().is(204))
-                      .andReturn()
-                      .getResponse();
+          mockMvc
+              .perform(
+                  get("/v2/gaen/exposed?lastKeyBundleTag=" + keyBundleTag)
+                      .header("User-Agent", androidUserAgent))
+              .andExpect(status().is(204))
+              .andReturn()
+              .getResponse();
     }
-
   }
-
-
-
 }
