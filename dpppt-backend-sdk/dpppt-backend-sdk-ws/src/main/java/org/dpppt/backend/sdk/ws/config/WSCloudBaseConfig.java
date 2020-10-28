@@ -36,24 +36,28 @@ public abstract class WSCloudBaseConfig extends WSBaseConfig {
   @Value("${ws.cloud.base.config.publicKey.fromCertificate:true}")
   private boolean publicKeyFromCertificate;
 
-	@Value("${datasource.maximumPoolSize}")
-	int dataSourceMaximumPoolSize;
+  @Value("${datasource.maximumPoolSize}")
+  int dataSourceMaximumPoolSize;
 
-	@Value("${datasource.connectionTimeout}")
-	int dataSourceConnectionTimeout;
+  @Value("${datasource.connectionTimeout}")
+  int dataSourceConnectionTimeout;
 
-	@Value("${datasource.leakDetectionThreshold:0}")
-	int dataSourceLeakDetectionThreshold;
+  @Value("${datasource.leakDetectionThreshold:0}")
+  int dataSourceLeakDetectionThreshold;
 
-	@Bean
-	@Override
-	public DataSource dataSource() {
-		PoolConfig poolConfig = new PoolConfig(dataSourceMaximumPoolSize, dataSourceConnectionTimeout);
-		DataSourceConfig dbConfig = new DataSourceConfig(poolConfig, null, null,
-				Map.of("leakDetectionThreshold", dataSourceLeakDetectionThreshold));
-		CloudFactory factory = new CloudFactory();
-		return factory.getCloud().getSingletonServiceConnector(DataSource.class, dbConfig);
-	}
+  @Bean
+  @Override
+  public DataSource dataSource() {
+    PoolConfig poolConfig = new PoolConfig(dataSourceMaximumPoolSize, dataSourceConnectionTimeout);
+    DataSourceConfig dbConfig =
+        new DataSourceConfig(
+            poolConfig,
+            null,
+            null,
+            Map.of("leakDetectionThreshold", dataSourceLeakDetectionThreshold));
+    CloudFactory factory = new CloudFactory();
+    return factory.getCloud().getSingletonServiceConnector(DataSource.class, dbConfig);
+  }
 
   @Bean
   @Override
