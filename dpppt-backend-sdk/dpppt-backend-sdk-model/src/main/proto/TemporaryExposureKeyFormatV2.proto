@@ -1,0 +1,98 @@
+syntax = "proto2";
+package org.dpppt.backend.sdk.model.gaen.proto.v2;
+option java_package = "org.dpppt.backend.sdk.model.gaen.proto.v2";
+
+message TemporaryExposureKeyExport {
+    // Time window of keys in the file, based on arrival
+    // at the server, in UTC seconds.
+    optional fixed64 start_timestamp = 1;
+    optional fixed64 end_timestamp = 2;
+
+    // The region from which these keys came
+    optional string region = 3;
+
+    // Reserved for future use. Both batch_num and batch_size
+    // must be set to a value of 1.
+    optional int32 batch_num = 4;
+    optional int32 batch_size = 5;
+
+    // Information about associated signatures
+    repeated SignatureInfo signature_infos = 6;
+
+    // Exposure keys that are new.
+    repeated TemporaryExposureKey keys = 7;
+
+    // Keys that have changed status from previous key archives,
+    // including keys that are being revoked.
+    repeated TemporaryExposureKey revised_keys = 8;
+}
+message SignatureInfo {
+    // The first two fields have been deprecated.
+    reserved 1, 2;
+    reserved "app_bundle_id", "android_package";
+
+    // Key version in case the key server signing key is rotated. (e.g. "v1")
+    // A PHA can only have one active public key at a time, so they must rotate
+    // keys on all devices and servers at the same time to avoid problems.
+    optional string verification_key_version = 3;
+
+    // Implementation-specific string that can be used in key verification.
+    // Valid character in this string are all alphanumeric characters,
+    // underscores, and periods.
+    optional string verification_key_id = 4;
+
+    // All keys must be signed using the SHA-256 with ECDSA algorithm.
+    // This field must contain the string "1.2.840.10045.4.3.2".
+    optional string signature_algorithm = 5;
+}
+message TemporaryExposureKey {
+    // Temporary exposure key for an infected user.
+    optional bytes key_data = 1;
+
+    // Varying risk associated with a key depending on diagnosis method.
+    // Deprecated and no longer used.
+    optional int32 transmission_risk_level = 2 [deprecated = true];
+
+    // The interval number since epoch for which a key starts
+    optional int32 rolling_start_interval_number = 3;
+
+    // How long this key is valid, specified in increments of 10 minutes
+    optional int32 rolling_period = 4
+    [default = 144]; // defaults to 24 hours
+
+    // Data type that represents why this key was published.
+    enum ReportType {
+        UNKNOWN = 0;  // Never returned by the client API.
+        CONFIRMED_TEST = 1;
+        CONFIRMED_CLINICAL_DIAGNOSIS = 2;
+        SELF_REPORT = 3;
+        RECURSIVE = 4;  // Reserved for future use.
+        REVOKED = 5;  // Used to revoke a key, never returned by client API.
+    }
+
+    // Type of diagnosis associated with a key.
+    optional ReportType report_type = 5;
+
+    // Number of days elapsed between symptom onset and the TEK being used.
+    // E.g. 2 means TEK is from 2 days after onset of symptoms.
+    // Valid values range is from -14 to 14.
+    optional sint32 days_since_onset_of_symptoms = 6;
+}
+message TEKSignatureList {
+    // Information about associated signatures
+    repeated TEKSignature signatures = 1;
+}
+
+message TEKSignature {
+    // Information to uniquely identify the public key associated
+    // with the key server's signing key.
+    optional SignatureInfo signature_info = 1;
+
+    // Reserved for future use. Both batch_num and batch_size
+    // must be set to a value of 1.
+    optional int32 batch_num = 2;
+    optional int32 batch_size = 3;
+
+    // Signature in X9.62 format (ASN.1 SEQUENCE of two INTEGER fields).
+    optional bytes signature = 4;
+}

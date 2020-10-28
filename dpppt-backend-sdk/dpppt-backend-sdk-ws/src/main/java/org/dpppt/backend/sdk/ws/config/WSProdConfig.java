@@ -20,6 +20,12 @@ import javax.sql.DataSource;
 import org.dpppt.backend.sdk.data.gaen.DebugGAENDataService;
 import org.dpppt.backend.sdk.data.gaen.DebugJDBCGAENDataServiceImpl;
 import org.dpppt.backend.sdk.ws.controller.DebugController;
+import org.dpppt.backend.sdk.ws.insertmanager.InsertManager;
+import org.dpppt.backend.sdk.ws.insertmanager.insertionfilters.AssertKeyFormat;
+import org.dpppt.backend.sdk.ws.insertmanager.insertionfilters.EnforceRetentionPeriod;
+import org.dpppt.backend.sdk.ws.insertmanager.insertionfilters.EnforceValidRollingPeriod;
+import org.dpppt.backend.sdk.ws.insertmanager.insertionfilters.RemoveFakeKeys;
+import org.dpppt.backend.sdk.ws.insertmanager.insertionfilters.RemoveKeysFromFuture;
 import org.dpppt.backend.sdk.ws.security.KeyVault;
 import org.dpppt.backend.sdk.ws.security.KeyVault.PrivateKeyNoSuitableEncodingFoundException;
 import org.dpppt.backend.sdk.ws.security.KeyVault.PublicKeyNoSuitableEncodingFoundException;
@@ -176,12 +182,23 @@ public class WSProdConfig extends WSBaseConfig {
     }
 
     @Bean
+    public InsertManager insertManagerDebug() {
+      var manager = InsertManager.getDebugInsertManager(dataService(), gaenValidationUtils);
+      manager.addFilter(new AssertKeyFormat(gaenValidationUtils));
+      manager.addFilter(new RemoveKeysFromFuture());
+      manager.addFilter(new EnforceRetentionPeriod(gaenValidationUtils));
+      manager.addFilter(new RemoveFakeKeys());
+      manager.addFilter(new EnforceValidRollingPeriod());
+      return manager;
+    }
+
+    @Bean
     DebugController debugController() {
       return new DebugController(
           dataService(),
           gaenSigner,
           backupValidator,
-          gaenValidationUtils,
+          insertManagerDebug(),
           Duration.ofMillis(releaseBucketDuration),
           Duration.ofMillis(requestTime));
     }

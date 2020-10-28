@@ -22,10 +22,14 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.jdbc.datasource.DataSourceTransactionManager;
 import org.springframework.jdbc.datasource.embedded.EmbeddedDatabaseBuilder;
 import org.springframework.jdbc.datasource.embedded.EmbeddedDatabaseType;
+import org.springframework.transaction.PlatformTransactionManager;
+import org.springframework.transaction.annotation.EnableTransactionManagement;
 
 @Configuration
+@EnableTransactionManagement
 public class GaenDataServiceConfig {
 
   @Value("${ws.gaen.randomkeysenabled: true}")
@@ -69,5 +73,10 @@ public class GaenDataServiceConfig {
   @Bean
   public FakeKeyService fakeKeyService() throws NoSuchAlgorithmException {
     return new FakeKeyService(fakeService(), 10, 16, Duration.ofDays(21), randomkeysenabled);
+  }
+
+  @Bean
+  public PlatformTransactionManager transactionManger() {
+    return new DataSourceTransactionManager(dataSource);
   }
 }
