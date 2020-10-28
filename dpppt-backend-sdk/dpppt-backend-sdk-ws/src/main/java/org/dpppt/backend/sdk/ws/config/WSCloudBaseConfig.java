@@ -27,8 +27,6 @@ import org.springframework.context.annotation.Configuration;
 @Configuration
 public abstract class WSCloudBaseConfig extends WSBaseConfig {
 
-  @Autowired @Lazy private DataSource dataSource;
-
   abstract String getPublicKey();
 
   abstract String getPrivateKey();
