@@ -12,55 +12,58 @@ package org.dpppt.backend.sdk.model.keycloak;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
 
-
 public class KeyCloakPublicKey {
-    private String realm;
-    @JsonProperty("public_key")
-    private String publicKey;
-    @JsonProperty("token-service")
-    private String tokenService;
-    @JsonProperty("account-service")
-    private String accountService;
-    @JsonProperty("tokens-not-before")
-    private String tokensNotBefore;
+  private String realm;
 
-    public String getRealm() {
-        return realm;
-    }
+  @JsonProperty("public_key")
+  private String publicKey;
 
-    public void setRealm(String realm) {
-        this.realm = realm;
-    }
+  @JsonProperty("token-service")
+  private String tokenService;
 
-    public String getPublicKey() {
-        return publicKey;
-    }
+  @JsonProperty("account-service")
+  private String accountService;
 
-    public void setPublicKey(String publicKey) {
-        this.publicKey = publicKey;
-    }
+  @JsonProperty("tokens-not-before")
+  private String tokensNotBefore;
 
-    public String getTokenService() {
-        return tokenService;
-    }
+  public String getRealm() {
+    return realm;
+  }
 
-    public void setTokenService(String tokenService) {
-        this.tokenService = tokenService;
-    }
+  public void setRealm(String realm) {
+    this.realm = realm;
+  }
 
-    public String getAccountService() {
-        return accountService;
-    }
+  public String getPublicKey() {
+    return publicKey;
+  }
 
-    public void setAccountService(String accountService) {
-        this.accountService = accountService;
-    }
+  public void setPublicKey(String publicKey) {
+    this.publicKey = publicKey;
+  }
 
-    public String getTokensNotBefore() {
-        return tokensNotBefore;
-    }
+  public String getTokenService() {
+    return tokenService;
+  }
 
-    public void setTokensNotBefore(String tokensNotBefore) {
-        this.tokensNotBefore = tokensNotBefore;
-    }
+  public void setTokenService(String tokenService) {
+    this.tokenService = tokenService;
+  }
+
+  public String getAccountService() {
+    return accountService;
+  }
+
+  public void setAccountService(String accountService) {
+    this.accountService = accountService;
+  }
+
+  public String getTokensNotBefore() {
+    return tokensNotBefore;
+  }
+
+  public void setTokensNotBefore(String tokensNotBefore) {
+    this.tokensNotBefore = tokensNotBefore;
+  }
 }

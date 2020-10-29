@@ -1,0 +1,48 @@
+name: close-issues
+
+# (c) 2020 by Linus Gasser for C4DT.org
+# This action closes issues referenced in the PR in the case the merge
+# does not happen on the 'default' branch.
+# It searches for the same tags as the original github closers.
+
+on:
+  pull_request:
+    types: [closed]
+    branches: [develop]
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - name: script
+        uses: actions/github-script@v3
+        with:
+          github-token: ${{ secrets.GITHUB_TOKEN }}
+          script: |
+            const pr = context.payload.pull_request;
+            if (!pr.merged){
+              console.log("Don't close issues when PR is not merged");
+              return;
+            }
+
+            const body = pr.body;
+            const lines = body.split('\n').map((l)=>l.trim());
+            const closers = new RegExp(
+              /(close|closes|closed|fix|fixes|fixed|resolve|resolves|resolved)/i);
+            const issues = lines.filter((l)=>l.match(closers));
+            const issue_nbrs = issues.map((i) => i.replace(/.*#/, ''));
+            issue_nbrs.forEach((i) => {
+              console.log("Closing issue " + i);
+              github.issues.createComment({
+                owner: context.repo.owner,
+                repo: context.repo.repo,
+                issue_number: i,
+                body: `Closed by PR #${pr.number} ${pr.title}`
+              });
+              github.issues.update({
+                owner: context.repo.owner,
+                repo: context.repo.repo,
+                issue_number: i,
+                state: 'closed'
+              });
+            });

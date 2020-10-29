@@ -32,7 +32,7 @@ This documentation describes the backend used for the SwissCovid application. It
 In order to have reproducible builds the [io.github.zlika](https://github.com/zlika/reproducible-build-maven-plugin) maven plugin is used. It replaces all timestamp with the timestamp of the last commit, and orders the entries in the JAR alphabetically. The github action then computes the sha256sum of the resulting JAR and adds the output as an build artifact.
 
 ## Dependencies
-* Spring Boot 2.2.6
+* Spring Boot 2.2.10
 * Java 11 (or higher)
 * Logback
 * [Springboot-Swagger-3](https://github.com/Ubique-OSS/springboot-swagger3)
@@ -91,7 +91,7 @@ In order to minimize the risk of timing attacks, to find out whether a request w
 Clients pad the number of keys with fake keys, if not enough keys are provided by the framework (e.g. the app is installed for less than 14 days). On fake keys the web-service should not validate any dates. The key payload though needs to be the exact same size!
 
 ## GAEN/DP3T
-We started with the project before Google and Apple announced the Exposure Notifications. Hence, there is a custom format and implementation provided. It is recommended to adopt the new Exposure Notification format, since support on clients is much better.
+We started with the project before Google and Apple announced the Exposure Notifications. For some time we supported both the old DP3T protocol and the new GAEN protocol, which is based on DP3T. Now that GAEN has become available on most of the versions, we removed DP3T support in the backend to lower the attack surface and make development easier.
 
 ### Legacy Notifications
 Since the Exposure Notifications format has been adopted, we drop support for legacy notifications. Currently no feature-requests are implemented for the old format, but if a PR is provided, it can still be merged.
@@ -218,3 +218,13 @@ To build the docker image run
 
 ```bash
 make docker-build
+```
+
+This will build the jar and copy it into the `ws-sdk/ws/bin` folder, from where it is then added to the container image.
+The image will be tagged as `dp3t-docker`. 
+
+An example `logback.xml` is found in the `resources` folder for the `dpppt-backend-sdk-ws` Java module.
+
+An example `application.properties` file is found at the same location. 
+Just make sure the configuration matches with your deployment (c.f. `WSBaseConfig` for possible properties
+and `WSCloudBaseConfig` for some `CloudFoundry` specific properties) 

@@ -10,9 +10,7 @@
 
 package org.dpppt.backend.sdk.data.config;
 
-
 import javax.sql.DataSource;
-
 import org.dpppt.backend.sdk.data.JDBCRedeemDataServiceImpl;
 import org.dpppt.backend.sdk.data.RedeemDataService;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -22,15 +20,12 @@ import org.springframework.context.annotation.Configuration;
 @Configuration
 public class RedeemDataServiceConfig {
 
-    @Autowired
-    DataSource dataSource;
+  @Autowired DataSource dataSource;
 
-    @Autowired
-    String dbType;
+  @Autowired String dbType;
 
-    @Bean
-    public RedeemDataService redeemDataService() {
-        return new JDBCRedeemDataServiceImpl(dataSource);
-    }
-
+  @Bean
+  public RedeemDataService redeemDataService() {
+    return new JDBCRedeemDataServiceImpl(dataSource);
+  }
 }
