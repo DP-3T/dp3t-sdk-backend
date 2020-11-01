@@ -23,6 +23,7 @@ import java.time.Duration;
 import java.util.ArrayList;
 import java.util.Base64;
 import java.util.Collection;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -32,6 +33,7 @@ import org.dpppt.backend.sdk.model.gaen.GaenKey;
 import org.dpppt.backend.sdk.model.gaen.GaenUnit;
 import org.dpppt.backend.sdk.model.gaen.proto.TemporaryExposureKeyFormat;
 import org.dpppt.backend.sdk.model.gaen.proto.TemporaryExposureKeyFormat.SignatureInfo;
+import org.dpppt.backend.sdk.model.gaen.proto.v2.TemporaryExposureKeyFormatV2;
 import org.dpppt.backend.sdk.utils.UTCInstant;
 
 public class ProtoSignature {
@@ -120,12 +122,92 @@ public class ProtoSignature {
     return new ProtoSignatureWrapper(hashOut.toByteArray(), byteOut.toByteArray());
   }
 
+  /**
+   * Creates a ZIP file containing the given keys and the corresponding signature. The keys are
+   * returned in the new v2 protobuf format.
+   *
+   * @param keys
+   * @return
+   * @throws IOException
+   * @throws InvalidKeyException
+   * @throws SignatureException
+   * @throws NoSuchAlgorithmException
+   */
+  public ProtoSignatureWrapper getPayloadV2(List<GaenKey> keys)
+      throws IOException, InvalidKeyException, SignatureException, NoSuchAlgorithmException {
+    if (keys.isEmpty()) {
+      throw new IOException("Keys should not be empty");
+    }
+    // Apple likes to have keys shuffled. See
+    // https://developer.apple.com/documentation/exposurenotification/setting_up_a_key_server
+    Collections.shuffle(keys);
+
+    ByteArrayOutputStream byteOut = new ByteArrayOutputStream();
+    ZipOutputStream zip = new ZipOutputStream(byteOut);
+    ByteArrayOutputStream hashOut = new ByteArrayOutputStream();
+    var digest = MessageDigest.getInstance("SHA256");
+    var keyDate = Duration.of(keys.get(0).getRollingStartNumber(), GaenUnit.TenMinutes);
+    var protoFile = getProtoKeyV2(keys, keyDate);
+
+    zip.putNextEntry(new ZipEntry("export.bin"));
+    byte[] protoFileBytes = protoFile.toByteArray();
+    byte[] exportBin = new byte[EXPORT_MAGIC.length + protoFileBytes.length];
+    System.arraycopy(EXPORT_MAGIC, 0, exportBin, 0, EXPORT_MAGIC.length);
+    System.arraycopy(protoFileBytes, 0, exportBin, EXPORT_MAGIC.length, protoFileBytes.length);
+    zip.write(exportBin);
+    zip.closeEntry();
+
+    var signatureList = getSignatureObjectV2(exportBin);
+    digest.update(exportBin);
+    digest.update(keyPair.getPublic().getEncoded());
+    hashOut.write(digest.digest());
+
+    byte[] exportSig = signatureList.toByteArray();
+    zip.putNextEntry(new ZipEntry("export.sig"));
+    zip.write(exportSig);
+    zip.closeEntry();
+
+    zip.flush();
+    zip.close();
+    byteOut.flush();
+    byteOut.close();
+    hashOut.flush();
+    hashOut.close();
+
+    return new ProtoSignatureWrapper(hashOut.toByteArray(), byteOut.toByteArray());
+  }
+
   private byte[] sign(byte[] data)
       throws SignatureException, InvalidKeyException, NoSuchAlgorithmException {
     Signature signature = Signature.getInstance(oidToJavaSignature.get(algorithm));
     signature.initSign(keyPair.getPrivate());
     signature.update(data);
     return signature.sign();
+  }
+
+  private org.dpppt.backend.sdk.model.gaen.proto.v2.TemporaryExposureKeyFormatV2.TEKSignatureList
+      getSignatureObjectV2(byte[] keyExport)
+          throws InvalidKeyException, SignatureException, NoSuchAlgorithmException {
+    byte[] exportSignature = sign(keyExport);
+    var signatureList = TemporaryExposureKeyFormatV2.TEKSignatureList.newBuilder();
+    var theSignature = TemporaryExposureKeyFormatV2.TEKSignature.newBuilder();
+    theSignature
+        .setSignatureInfo(tekSignatureV2())
+        .setSignature(ByteString.copyFrom(exportSignature))
+        .setBatchNum(1)
+        .setBatchSize(1);
+    signatureList.addSignatures(theSignature);
+    return signatureList.build();
+  }
+
+  private org.dpppt.backend.sdk.model.gaen.proto.v2.TemporaryExposureKeyFormatV2.SignatureInfo
+      tekSignatureV2() {
+    var tekSignature = TemporaryExposureKeyFormatV2.SignatureInfo.newBuilder();
+    tekSignature
+        .setVerificationKeyVersion(keyVersion)
+        .setVerificationKeyId(keyVerificationId)
+        .setSignatureAlgorithm(algorithm);
+    return tekSignature.build();
   }
 
   private TemporaryExposureKeyFormat.TEKSignatureList getSignatureObject(byte[] keyExport)
@@ -169,7 +251,7 @@ public class ProtoSignature {
       }
 
       var keyDate = Duration.of(keys.get(0).getRollingStartNumber(), GaenUnit.TenMinutes);
-      var protoFile = getProtoKey(keys, keyDate);
+      var protoFile = getProtoKeyV2(keys, keyDate);
       var zipFileName = new StringBuilder();
 
       zipFileName.append("key_export_").append(group);
@@ -186,7 +268,7 @@ public class ProtoSignature {
       zip.write(exportBin);
       zip.closeEntry();
 
-      var signatureList = getSignatureObject(exportBin);
+      var signatureList = getSignatureObjectV2(exportBin);
 
       byte[] exportSig = signatureList.toByteArray();
       zip.putNextEntry(new ZipEntry("export.sig"));
@@ -245,6 +327,35 @@ public class ProtoSignature {
         .setEndTimestamp(batchReleaseTimeDuration.toSeconds() + releaseBucketDuration.toSeconds());
 
     file.addSignatureInfos(tekSignature());
+
+    return file.build();
+  }
+
+  private TemporaryExposureKeyFormatV2.TemporaryExposureKeyExport getProtoKeyV2(
+      List<GaenKey> exposedKeys, Duration batchReleaseTimeDuration) {
+    var file = TemporaryExposureKeyFormatV2.TemporaryExposureKeyExport.newBuilder();
+
+    var tekList = new ArrayList<TemporaryExposureKeyFormatV2.TemporaryExposureKey>();
+    for (var key : exposedKeys) {
+      var protoKey =
+          TemporaryExposureKeyFormatV2.TemporaryExposureKey.newBuilder()
+              .setKeyData(ByteString.copyFrom(Base64.getDecoder().decode(key.getKeyData())))
+              .setRollingPeriod(key.getRollingPeriod())
+              .setRollingStartIntervalNumber(key.getRollingStartNumber())
+              .setDaysSinceOnsetOfSymptoms(0) // hardcode to zero
+              .build();
+      tekList.add(protoKey);
+    }
+
+    file.addAllKeys(tekList);
+
+    file.setRegion(gaenRegion)
+        .setBatchNum(1)
+        .setBatchSize(1)
+        .setStartTimestamp(batchReleaseTimeDuration.toSeconds())
+        .setEndTimestamp(batchReleaseTimeDuration.toSeconds() + releaseBucketDuration.toSeconds());
+
+    file.addSignatureInfos(tekSignatureV2());
 
     return file.build();
   }

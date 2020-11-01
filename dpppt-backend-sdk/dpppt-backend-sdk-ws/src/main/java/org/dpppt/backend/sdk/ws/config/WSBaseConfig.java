@@ -26,6 +26,7 @@ import org.dpppt.backend.sdk.data.gaen.FakeKeyService;
 import org.dpppt.backend.sdk.data.gaen.GAENDataService;
 import org.dpppt.backend.sdk.data.gaen.JDBCGAENDataServiceImpl;
 import org.dpppt.backend.sdk.ws.controller.GaenController;
+import org.dpppt.backend.sdk.ws.controller.GaenV2Controller;
 import org.dpppt.backend.sdk.ws.filter.ResponseWrapperFilter;
 import org.dpppt.backend.sdk.ws.insertmanager.InsertManager;
 import org.dpppt.backend.sdk.ws.insertmanager.insertionfilters.*;
@@ -33,6 +34,7 @@ import org.dpppt.backend.sdk.ws.insertmanager.insertionmodifier.IOSLegacyProblem
 import org.dpppt.backend.sdk.ws.insertmanager.insertionmodifier.OldAndroid0RPModifier;
 import org.dpppt.backend.sdk.ws.interceptor.HeaderInjector;
 import org.dpppt.backend.sdk.ws.security.KeyVault;
+import org.dpppt.backend.sdk.ws.security.NoValidateRequest;
 import org.dpppt.backend.sdk.ws.security.ValidateRequest;
 import org.dpppt.backend.sdk.ws.security.signature.ProtoSignature;
 import org.dpppt.backend.sdk.ws.util.ValidationUtils;
@@ -276,6 +278,9 @@ public abstract class WSBaseConfig implements WebMvcConfigurer {
   @Bean
   public GaenController gaenController() {
     ValidateRequest theValidator = gaenRequestValidator;
+    if (theValidator == null) {
+      theValidator = backupValidator();
+    }
     return new GaenController(
         insertManagerExposed(),
         insertManagerExposedNextDay(),
@@ -291,6 +296,25 @@ public abstract class WSBaseConfig implements WebMvcConfigurer {
   }
 
   @Bean
+  public GaenV2Controller gaenV2Controller() {
+    ValidateRequest theValidator = gaenRequestValidator;
+    if (theValidator == null) {
+      theValidator = backupValidator();
+    }
+    return new GaenV2Controller(
+        insertManagerExposed(),
+        theValidator,
+        gaenValidationUtils(),
+        fakeKeyService(),
+        gaenSigner(),
+        gaenDataService(),
+        Duration.ofMillis(releaseBucketDuration),
+        Duration.ofMillis(requestTime),
+        Duration.ofMillis(exposedListCacheControl),
+        Duration.ofDays(retentionDays));
+  }
+
+  @Bean
   public GAENDataService gaenDataService() {
     return new JDBCGAENDataServiceImpl(
         getDbType(), dataSource(), Duration.ofMillis(releaseBucketDuration), timeSkew);
@@ -299,6 +323,11 @@ public abstract class WSBaseConfig implements WebMvcConfigurer {
   @Bean
   public RedeemDataService redeemDataService() {
     return new JDBCRedeemDataServiceImpl(dataSource());
+  }
+
+  @Bean
+  ValidateRequest backupValidator() {
+    return new NoValidateRequest();
   }
 
   @Bean

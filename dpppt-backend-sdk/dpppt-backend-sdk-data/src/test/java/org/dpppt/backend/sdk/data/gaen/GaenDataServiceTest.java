@@ -21,6 +21,7 @@ import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.junit4.SpringJUnit4ClassRunner;
 import org.springframework.test.context.support.AnnotationConfigContextLoader;
+import org.springframework.transaction.annotation.Transactional;
 
 @RunWith(SpringJUnit4ClassRunner.class)
 @ContextConfiguration(
@@ -39,6 +40,7 @@ public class GaenDataServiceTest {
   @Autowired private GAENDataService gaenDataService;
 
   @Test
+  @Transactional
   public void upsert() throws Exception {
     var tmpKey = new GaenKey();
     tmpKey.setRollingStartNumber(
@@ -71,6 +73,46 @@ public class GaenDataServiceTest {
   }
 
   @Test
+  @Transactional
+  public void testNoEarlyReleaseSince() throws Exception {
+    var outerNow = UTCInstant.now();
+    Clock twoOClock =
+        Clock.fixed(outerNow.atStartOfDay().plusHours(2).getInstant(), ZoneOffset.UTC);
+    Clock elevenOClock =
+        Clock.fixed(outerNow.atStartOfDay().plusHours(11).getInstant(), ZoneOffset.UTC);
+    Clock fourteenOClock =
+        Clock.fixed(outerNow.atStartOfDay().plusHours(14).getInstant(), ZoneOffset.UTC);
+
+    try (var now = UTCInstant.setClock(twoOClock)) {
+      var tmpKey = new GaenKey();
+      tmpKey.setRollingStartNumber((int) now.atStartOfDay().get10MinutesSince1970());
+      tmpKey.setKeyData(Base64.getEncoder().encodeToString("testKey32Bytes--".getBytes("UTF-8")));
+      tmpKey.setRollingPeriod(
+          (int) Duration.ofHours(10).dividedBy(GaenUnit.TenMinutes.getDuration()));
+      tmpKey.setFake(0);
+      tmpKey.setTransmissionRiskLevel(0);
+
+      gaenDataService.upsertExposees(List.of(tmpKey), now);
+    }
+    // key was inserted with a rolling period of 10 hours, which means the key is not allowed to be
+    // released before 12, but since 12 already is in the 14 O'Clock bucket, it is not released
+    // before 14:00
+
+    // eleven O'clock no key
+    try (var now = UTCInstant.setClock(elevenOClock)) {
+      var returnedKeys = gaenDataService.getSortedExposedSince(now.minusDays(10), now);
+      assertEquals(0, returnedKeys.size());
+    }
+
+    // twelve O'clock release the key
+    try (var now = UTCInstant.setClock(fourteenOClock)) {
+      var returnedKeys = gaenDataService.getSortedExposedSince(now.minusDays(10), now);
+      assertEquals(1, returnedKeys.size());
+    }
+  }
+
+  @Test
+  @Transactional
   public void testNoEarlyRelease() throws Exception {
     var outerNow = UTCInstant.now();
     Clock twoOClock =

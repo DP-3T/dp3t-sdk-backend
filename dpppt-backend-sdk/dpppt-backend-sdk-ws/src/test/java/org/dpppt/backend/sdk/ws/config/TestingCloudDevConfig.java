@@ -40,7 +40,8 @@ public class TestingCloudDevConfig extends WSCloudBaseConfig {
   }
 
   @Bean
-  DataSource hsqlSource() {
+  @Override
+  public DataSource dataSource() {
     return new EmbeddedDatabaseBuilder().setType(EmbeddedDatabaseType.HSQL).build();
   }
 

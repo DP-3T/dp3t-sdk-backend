@@ -28,4 +28,10 @@ public class MockDataSource implements GAENDataService {
 
   @Override
   public void cleanDB(Duration retentionPeriod) {}
+
+  @Override
+  public List<GaenKey> getSortedExposedSince(
+      UTCInstant keysSince, UTCInstant now) { // TODO Auto-generated method stub
+    return null;
+  }
 }
