@@ -11,6 +11,7 @@
 package org.dpppt.backend.sdk.ws.controller;
 
 import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.asyncDispatch;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
@@ -49,7 +50,6 @@ import org.apache.commons.io.IOUtils;
 import org.dpppt.backend.sdk.data.gaen.GAENDataService;
 import org.dpppt.backend.sdk.model.gaen.GaenKey;
 import org.dpppt.backend.sdk.model.gaen.GaenRequest;
-import org.dpppt.backend.sdk.model.gaen.proto.TemporaryExposureKeyFormat;
 import org.dpppt.backend.sdk.model.gaen.proto.TemporaryExposureKeyFormat.TEKSignatureList;
 import org.dpppt.backend.sdk.model.gaen.proto.TemporaryExposureKeyFormat.TemporaryExposureKeyExport;
 import org.dpppt.backend.sdk.utils.UTCInstant;
@@ -344,6 +344,35 @@ public abstract class BaseControllerTest {
     }
   }
 
+  /**
+   * Fetches the keys in a zip file returned from a `/v1/gaen/exposed` response.
+   *
+   * @param response holding a zip file with the keys
+   * @return the keys in the zip file
+   * @throws IOException
+   */
+  protected TemporaryExposureKeyExport getZipKeys(MockHttpServletResponse response)
+      throws IOException {
+    ByteArrayInputStream baisZip = new ByteArrayInputStream(response.getContentAsByteArray());
+    ZipInputStream keyZipInputstream = new ZipInputStream(baisZip);
+    ZipEntry entry = keyZipInputstream.getNextEntry();
+
+    byte[] exportBin;
+    byte[] keyProto = null;
+
+    while (entry != null) {
+      if (entry.getName().equals("export.bin")) {
+        exportBin = keyZipInputstream.readAllBytes();
+        keyProto = new byte[exportBin.length - 16];
+        System.arraycopy(exportBin, 16, keyProto, 0, keyProto.length);
+      }
+      entry = keyZipInputstream.getNextEntry();
+    }
+
+    assertNotNull(keyProto);
+    return TemporaryExposureKeyExport.parseFrom(keyProto);
+  }
+
   /** Verifies a zip response, checks if keys and signature is correct. */
   protected void verifyZipResponse(
       MockHttpServletResponse response, int expectKeyCount, int expectedRollingPeriod)
@@ -381,9 +410,8 @@ public abstract class BaseControllerTest {
     assertTrue(foundData, "export.bin not found in zip");
     assertTrue(foundSignature, "export.sig not found in zip");
 
-    TEKSignatureList list = TemporaryExposureKeyFormat.TEKSignatureList.parseFrom(signatureProto);
-    TemporaryExposureKeyExport export =
-        TemporaryExposureKeyFormat.TemporaryExposureKeyExport.parseFrom(keyProto);
+    TEKSignatureList list = TEKSignatureList.parseFrom(signatureProto);
+    TemporaryExposureKeyExport export = TemporaryExposureKeyExport.parseFrom(keyProto);
     for (var key : export.getKeysList()) {
       assertEquals(expectedRollingPeriod, key.getRollingPeriod());
     }
