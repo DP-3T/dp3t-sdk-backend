@@ -87,6 +87,10 @@ public class ProtoSignature {
     if (keys.isEmpty()) {
       throw new IOException("Keys should not be empty");
     }
+
+    // Shuffle the keys so that the clients don't know the order of arrival of the keys.
+    Collections.shuffle(keys);
+
     ByteArrayOutputStream byteOut = new ByteArrayOutputStream();
     ZipOutputStream zip = new ZipOutputStream(byteOut);
     ByteArrayOutputStream hashOut = new ByteArrayOutputStream();
@@ -140,6 +144,7 @@ public class ProtoSignature {
     }
     // Apple likes to have keys shuffled. See
     // https://developer.apple.com/documentation/exposurenotification/setting_up_a_key_server
+    // This prevents the clients to know the order of arrival of the keys.
     Collections.shuffle(keys);
 
     ByteArrayOutputStream byteOut = new ByteArrayOutputStream();
