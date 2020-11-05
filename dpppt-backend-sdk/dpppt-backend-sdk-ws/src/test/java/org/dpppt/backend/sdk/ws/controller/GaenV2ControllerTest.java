@@ -96,7 +96,7 @@ public class GaenV2ControllerTest extends BaseControllerTest {
             .andExpect(status().is(401))
             .andReturn();
     String authenticateError = response.getResponse().getHeader("www-authenticate");
-    assertTrue(authenticateError.contains("Unsigned Claims JWTs are not supported."));
+    assertTrue(authenticateError.contains("Bearer"));
   }
 
   @Test
