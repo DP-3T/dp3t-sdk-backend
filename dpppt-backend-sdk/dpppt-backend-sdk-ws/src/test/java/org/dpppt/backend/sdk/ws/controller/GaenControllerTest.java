@@ -36,6 +36,7 @@ import java.util.Map;
 import org.dpppt.backend.sdk.model.gaen.GaenKey;
 import org.dpppt.backend.sdk.model.gaen.GaenRequest;
 import org.dpppt.backend.sdk.model.gaen.GaenSecondDay;
+import org.dpppt.backend.sdk.model.gaen.proto.TemporaryExposureKeyFormat;
 import org.dpppt.backend.sdk.utils.UTCInstant;
 import org.junit.Test;
 import org.slf4j.Logger;
@@ -1105,6 +1106,46 @@ public class GaenControllerTest extends BaseControllerTest {
   }
 
   @Test
+  // Makes sure that two calls to /v1/gaen/exposed don't return the same set of keys.
+  public void testShuffle() throws Exception {
+    var now = UTCInstant.now();
+    var midnight = now.atStartOfDay().minusDays(1);
+    var nbrKeys = 100;
+
+    // Insert `nbrKeys - randomKeysPerDay` keys yesterday
+    insertNKeysPerDay(midnight, 1, nbrKeys - 10, midnight.minusDays(1), false);
+
+    // Request twice all keys and verify it's not the same order.
+    List<List<TemporaryExposureKeyFormat.TemporaryExposureKey>> responses = new ArrayList<>();
+    for (var i = 0; i < 2; i++) {
+      var keys =
+          getZipKeys(
+              mockMvc
+                  .perform(
+                      get("/v1/gaen/exposed/" + midnight.getTimestamp())
+                          .header("User-Agent", androidUserAgent))
+                  .andExpect(status().is2xxSuccessful())
+                  .andReturn()
+                  .getResponse());
+      responses.add(keys.getKeysList());
+    }
+    assertEquals(2, responses.size());
+    var keys0 = responses.get(0);
+    var keys1 = responses.get(1);
+    assertEquals(nbrKeys, keys0.size());
+    assertTrue(keys0.containsAll(keys1));
+
+    var same = 0;
+    for (var i = 0; i < keys0.size(); i++) {
+      // `startsWith` is used here to compare two keys, as `equals` always returns false.
+      if (keys0.get(i).getKeyData().startsWith(keys1.get(i).getKeyData())) {
+        same++;
+      }
+    }
+    assertNotEquals(nbrKeys, same);
+  }
+
+  @Test
   @Transactional
   public void zipContainsFiles() throws Exception {
     var midnight = UTCInstant.today();
@@ -1251,7 +1292,7 @@ public class GaenControllerTest extends BaseControllerTest {
             .andExpect(status().is(401))
             .andReturn();
     String authenticateError = response.getResponse().getHeader("www-authenticate");
-    assertTrue(authenticateError.contains("Unsigned Claims JWTs are not supported."));
+    assertTrue(authenticateError.contains("Bearer"));
   }
 
   @Test
