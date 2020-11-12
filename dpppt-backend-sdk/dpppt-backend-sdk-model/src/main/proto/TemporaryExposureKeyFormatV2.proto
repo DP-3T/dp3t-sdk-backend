@@ -28,10 +28,8 @@ message TemporaryExposureKeyExport {
 }
 message SignatureInfo {
     // The first two fields have been deprecated.
-//    reserved 1, 2;
-//    reserved "app_bundle_id", "android_package";
-    optional string app_bundle_id = 1;
-    optional string android_package = 2;
+    reserved 1, 2;
+    reserved "app_bundle_id", "android_package";
 
     // Key version in case the key server signing key is rotated. (e.g. "v1")
     // A PHA can only have one active public key at a time, so they must rotate

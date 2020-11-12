@@ -90,4 +90,9 @@ public class GaenDataServiceConfig {
   public FakeKeyService fakeKeyService() throws NoSuchAlgorithmException {
     return new FakeKeyService(fakeService(), 10, 16, Duration.ofDays(21), randomkeysenabled);
   }
+
+  @Bean
+  public PlatformTransactionManager transactionManger() {
+    return new DataSourceTransactionManager(dataSource);
+  }
 }
