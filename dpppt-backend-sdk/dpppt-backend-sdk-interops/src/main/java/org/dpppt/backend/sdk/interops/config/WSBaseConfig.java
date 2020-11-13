@@ -53,6 +53,9 @@ public abstract class WSBaseConfig implements SchedulingConfigurer, WebMvcConfig
   @Value("${ws.interops.irishauthorizationtoken}")
   String irishAuthorizationToken;
 
+  @Value("${ws.interops.pemEncodedRSAPrivateKey}")
+  String pemEncodedRSAPrivateKey;
+
   protected final Logger logger = LoggerFactory.getLogger(getClass());
 
   public abstract DataSource dataSource();
@@ -74,7 +77,13 @@ public abstract class WSBaseConfig implements SchedulingConfigurer, WebMvcConfig
 
   public IrishHubSyncer irishHubSyncer() {
     return new IrishHubSyncer(
-        irishBaseUrl, irishAuthorizationToken, retentionDays, gaenDataService());
+        irishBaseUrl,
+        irishAuthorizationToken,
+        pemEncodedRSAPrivateKey,
+        Duration.ofDays(retentionDays),
+        Duration.ofMillis(releaseBucketDuration),
+        gaenDataService(),
+        originCountry);
   }
 
   @Override

@@ -1,7 +1,9 @@
 package org.dpppt.backend.sdk.data.gaen;
 
+import static org.junit.Assert.assertTrue;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
+import java.io.UnsupportedEncodingException;
 import java.time.Clock;
 import java.time.Duration;
 import java.time.ZoneOffset;
@@ -120,7 +122,7 @@ public class GaenDataServiceTest {
       tmpKey.setFake(0);
       tmpKey.setTransmissionRiskLevel(0);
 
-      gaenDataService.upsertExposees(List.of(tmpKey), now);
+      gaenDataService.upsertExposees(List.of(tmpKey), now, false);
     }
     // key was inserted with a rolling period of 10 hours, which means the key is not allowed to be
     // released before 12, but since 12 already is in the 14 O'Clock bucket, it is not released
@@ -128,13 +130,13 @@ public class GaenDataServiceTest {
 
     // eleven O'clock no key
     try (var now = UTCInstant.setClock(elevenOClock)) {
-      var returnedKeys = gaenDataService.getSortedExposedSince(now.minusDays(10), now);
+      var returnedKeys = gaenDataService.getSortedExposedSince(now.minusDays(10), now, false);
       assertEquals(0, returnedKeys.size());
     }
 
     // twelve O'clock release the key
     try (var now = UTCInstant.setClock(fourteenOClock)) {
-      var returnedKeys = gaenDataService.getSortedExposedSince(now.minusDays(10), now);
+      var returnedKeys = gaenDataService.getSortedExposedSince(now.minusDays(10), now, false);
       assertEquals(1, returnedKeys.size());
     }
   }
@@ -213,5 +215,40 @@ public class GaenDataServiceTest {
 
     assertEquals(1, returnedKeys.size());
     assertEquals(keys.get(1).getKeyData(), returnedKeys.get(0).getKeyData());
+  }
+
+  @Test
+  @Transactional
+  public void getKeysWithCountries() throws UnsupportedEncodingException {
+    var tmpKey = new GaenKey();
+    tmpKey.setRollingStartNumber(
+        (int) UTCInstant.today().minus(Duration.ofDays(1)).get10MinutesSince1970());
+    tmpKey.setKeyData(Base64.getEncoder().encodeToString("testKey32Bytes01".getBytes("UTF-8")));
+    tmpKey.setRollingPeriod(144);
+    tmpKey.setFake(0);
+    tmpKey.setTransmissionRiskLevel(0);
+    var tmpKey2 = new GaenKey();
+    tmpKey2.setRollingStartNumber(
+        (int) UTCInstant.today().minus(Duration.ofDays(1)).get10MinutesSince1970());
+    tmpKey2.setKeyData(Base64.getEncoder().encodeToString("testKey32Bytes02".getBytes("UTF-8")));
+    tmpKey2.setRollingPeriod(144);
+    tmpKey2.setFake(0);
+    tmpKey2.setTransmissionRiskLevel(0);
+    List<GaenKey> keys = List.of(tmpKey, tmpKey2);
+    var now = UTCInstant.now();
+    gaenDataService.upsertExposees(keys, now, true);
+
+    var returnedKeys =
+        gaenDataService.getSortedExposedSinceWithCountriesFromOrigin(
+            now.minusDays(10), now.plusDays(1));
+
+    assertEquals(keys.size(), returnedKeys.size());
+    assertEquals(keys.get(1).getKeyData(), returnedKeys.get(0).getKeyData());
+    for (GaenKeyWithCountries k : returnedKeys) {
+      assertTrue(k.getCountries().contains("DE"));
+      assertTrue(k.getCountries().contains("IT"));
+      assertTrue(k.getCountries().contains("CH"));
+      assertEquals("CH", k.getOrigin());
+    }
   }
 }
