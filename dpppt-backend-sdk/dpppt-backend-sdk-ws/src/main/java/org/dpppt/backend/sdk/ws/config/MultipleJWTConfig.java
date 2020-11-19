@@ -148,7 +148,7 @@ public class MultipleJWTConfig {
           .cors()
           .and()
           .authorizeRequests()
-          .antMatchers(HttpMethod.POST, "/v1/exposed", "/v1/exposedlist", "/v1/gaen/exposed")
+          .antMatchers(HttpMethod.POST, "/v1/gaen/exposed", "/v2/gaen/exposed")
           .authenticated()
           .anyRequest()
           .permitAll()
