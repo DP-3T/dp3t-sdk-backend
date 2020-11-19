@@ -79,6 +79,25 @@ public class GaenV2ControllerTest extends BaseControllerTest {
   }
 
   @Test
+  public void testNoTokenFails() throws Exception {
+    var requestList = new GaenRequest();
+    List<GaenKey> exposedKeys = new ArrayList<GaenKey>();
+    requestList.setGaenKeys(exposedKeys);
+    MvcResult response =
+        mockMvc
+            .perform(
+                post("/v2/gaen/exposed")
+                    .contentType(MediaType.APPLICATION_JSON)
+                    .header("User-Agent", "MockMVC")
+                    .content(json(requestList)))
+            .andExpect(request().asyncNotStarted())
+            .andExpect(status().is(401))
+            .andReturn();
+    String authenticateError = response.getResponse().getHeader("www-authenticate");
+    assertTrue(authenticateError.contains("Bearer"));
+  }
+
+  @Test
   public void testMalciousTokenFails() throws Exception {
     var requestList = new GaenRequest();
     List<GaenKey> exposedKeys = new ArrayList<GaenKey>();
