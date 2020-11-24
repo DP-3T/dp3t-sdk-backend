@@ -11,6 +11,7 @@ package org.dpppt.backend.sdk.ws.util;
 
 import java.util.ArrayList;
 import java.util.Date;
+import java.util.HashMap;
 import java.util.List;
 import javax.sql.DataSource;
 import org.dpppt.backend.sdk.data.gaen.GaenKeyRowMapper;
@@ -120,5 +121,10 @@ public class TestJDBCGaen {
       parameterList.add(params);
     }
     jt.batchUpdate(sql, parameterList.toArray(new MapSqlParameterSource[0]));
+  }
+
+  public void clear(){
+    jt.update("DELETE FROM t_gaen_exposed;", new HashMap<>());
+    jt.update("DELETE FROM t_debug_gaen_exposed;", new HashMap<>());
   }
 }

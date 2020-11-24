@@ -101,7 +101,7 @@ public class JDBCGAENDataServiceImpl implements GAENDataService {
     String sql =
         "select pk_exposed_id, key, rolling_start_number, rolling_period, transmission_risk_level"
             + " from t_gaen_exposed where rolling_start_number >= :rollingPeriodStartNumberStart"
-            + " and rolling_start_number < :rollingPeriodStartNumberEnd and received_at <"
+            + " and rolling_start_number < :rollingPeriodStartNumberEnd and max(received_at, rolling_start_number + rolling_period + timeSkew) <"
             + " :publishedUntil";
     // we need to subtract the time skew since we want to release it iff rolling_start_number +
     // rolling_period + timeSkew < NOW
@@ -112,7 +112,7 @@ public class JDBCGAENDataServiceImpl implements GAENDataService {
     params.addValue(
         "maxAllowedStartNumber",
         now.roundToBucketStart(releaseBucketDuration).minus(timeSkew).get10MinutesSince1970());
-    sql += " and rolling_start_number + rolling_period < :maxAllowedStartNumber";
+    sql += " and rolling_start_number + rolling_period + timeSkew < :maxAllowedStartNumber";
 
     // note that received_at is always rounded to `next_bucket` - 1ms to difuse actual upload time
     if (publishedAfter != null) {
