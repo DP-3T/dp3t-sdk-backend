@@ -292,7 +292,7 @@ public abstract class BaseControllerTest {
     var result =
         gaenDataService.getSortedExposedForKeyDate(
             now.atStartOfDay().minusDays(1),
-            null,
+            UTCInstant.midnight1970(),
             now.roundToNextBucket(releaseBucketDuration),
             now);
     assertEquals(2, result.size());
@@ -303,7 +303,7 @@ public abstract class BaseControllerTest {
     result =
         gaenDataService.getSortedExposedForKeyDate(
             now.atStartOfDay().minusDays(1),
-            null,
+            UTCInstant.midnight1970(),
             now.roundToBucketStart(releaseBucketDuration),
             now);
     assertEquals(0, result.size());
@@ -313,19 +313,22 @@ public abstract class BaseControllerTest {
     result =
         gaenDataService.getSortedExposedForKeyDate(
             now.atStartOfDay(),
-            null,
+            UTCInstant.midnight1970(),
             tomorrow2AM.roundToNextBucket(releaseBucketDuration),
             tomorrow2AM);
     assertEquals(1, result.size());
 
     result =
         gaenDataService.getSortedExposedForKeyDate(
-            now.atStartOfDay(), null, now.roundToNextBucket(releaseBucketDuration), now);
+            now.atStartOfDay(),
+            UTCInstant.midnight1970(),
+            now.roundToNextBucket(releaseBucketDuration),
+            now);
     assertEquals(0, result.size());
 
     result =
         gaenDataService.getSortedExposedForKeyDate(
-            now.atStartOfDay(), null, now.atStartOfDay().plusDays(1), now);
+            now.atStartOfDay(), UTCInstant.midnight1970(), now.atStartOfDay().plusDays(1), now);
     assertEquals(0, result.size());
   }
 

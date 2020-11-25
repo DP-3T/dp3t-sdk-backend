@@ -178,11 +178,15 @@ public class GaenControllerTest extends BaseControllerTest {
 
     var result =
         gaenDataService.getSortedExposedForKeyDate(
-            midnight.minusDays(1), null, now.roundToNextBucket(releaseBucketDuration), now);
+            midnight.minusDays(1),
+            UTCInstant.midnight1970(),
+            now.roundToNextBucket(releaseBucketDuration),
+            now);
     // all keys are invalid
     assertEquals(0, result.size());
   }
 
+  @Test
   @Transactional
   public void testMultipleKeyUpload() throws Exception {
     testNKeys(UTCInstant.now(), 14, true);
@@ -278,12 +282,15 @@ public class GaenControllerTest extends BaseControllerTest {
 
     var result =
         gaenDataService.getSortedExposedForKeyDate(
-            midnight.minusDays(1), null, now.roundToNextBucket(releaseBucketDuration), now);
+            midnight.minusDays(1),
+            UTCInstant.midnight1970(),
+            now.roundToNextBucket(releaseBucketDuration),
+            now);
     // all keys are invalid
     assertEquals(0, result.size());
     result =
         gaenDataService.getSortedExposedForKeyDate(
-            midnight, null, now.roundToNextBucket(releaseBucketDuration), now);
+            midnight, UTCInstant.midnight1970(), now.roundToNextBucket(releaseBucketDuration), now);
     // all keys are invalid
     assertEquals(0, result.size());
   }
@@ -645,7 +652,10 @@ public class GaenControllerTest extends BaseControllerTest {
             .andReturn();
     var result =
         gaenDataService.getSortedExposedForKeyDate(
-            midnight.minusDays(2), null, now.roundToNextBucket(releaseBucketDuration), now);
+            midnight.minusDays(2),
+            UTCInstant.midnight1970(),
+            now.roundToNextBucket(releaseBucketDuration),
+            now);
 
     assertEquals(0, result.size());
   }
@@ -736,7 +746,10 @@ public class GaenControllerTest extends BaseControllerTest {
             .andReturn();
     var result =
         gaenDataService.getSortedExposedForKeyDate(
-            midnight.plusDays(2), null, now.roundToNextBucket(releaseBucketDuration), now);
+            midnight.plusDays(2),
+            UTCInstant.midnight1970(),
+            now.roundToNextBucket(releaseBucketDuration),
+            now);
 
     assertEquals(0, result.size());
   }
@@ -784,7 +797,10 @@ public class GaenControllerTest extends BaseControllerTest {
             .andReturn();
     var result =
         gaenDataService.getSortedExposedForKeyDate(
-            midnight.minusDays(22), null, now.roundToNextBucket(releaseBucketDuration), now);
+            midnight.minusDays(22),
+            UTCInstant.midnight1970(),
+            now.roundToNextBucket(releaseBucketDuration),
+            now);
     assertEquals(0, result.size());
   }
 
@@ -1367,7 +1383,11 @@ public class GaenControllerTest extends BaseControllerTest {
       publishedUntil = response.getHeader("x-published-until");
     }
 
-    logger.debug("Critical publishedUntil is "+publishedUntil+" at request time "+fourHoursLater.toString());
+    logger.debug(
+        "Critical publishedUntil is "
+            + publishedUntil
+            + " at request time "
+            + fourHoursLater.toString());
 
     Clock eightHoursLater = Clock.fixed(now.plusHours(8).getInstant(), ZoneOffset.UTC);
 
