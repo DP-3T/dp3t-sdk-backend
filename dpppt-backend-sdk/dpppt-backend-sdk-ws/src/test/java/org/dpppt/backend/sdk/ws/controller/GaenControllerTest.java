@@ -1312,7 +1312,7 @@ public class GaenControllerTest extends BaseControllerTest {
   }
 
   @Test
-  public void testUploadTodaysKeyWillBeReleasedTomorrow() throws Exception {
+  public void testUploadWithShortenedRollingPeriod() throws Exception {
 
     int rollingPeriod = 84;
     var now = UTCInstant.now().atStartOfDay().plusHours(13).plusMinutes(55);

@@ -93,19 +93,20 @@ public class JDBCGAENDataServiceImpl implements GAENDataService {
   @Transactional(readOnly = true)
   public List<GaenKey> getSortedExposedForKeyDate(
       UTCInstant keyDate, UTCInstant publishedAfter, UTCInstant publishedUntil, UTCInstant now) {
-    return getKeys(publishedAfter, now, keyDate);
+    return getKeys(publishedAfter, now, keyDate, publishedUntil);
   }
 
   @Override
   @Transactional(readOnly = true)
   public List<GaenKey> getSortedExposedSince(UTCInstant keysSince, UTCInstant now) {
-    return getKeys(keysSince, now, null);
+    return getKeys(keysSince, now, null, now.roundToBucketStart(releaseBucketDuration));
   }
 
-  private List<GaenKey> getKeys(UTCInstant keysSince, UTCInstant now, UTCInstant keyDate) {
+  private List<GaenKey> getKeys(
+      UTCInstant keysSince, UTCInstant now, UTCInstant keyDate, UTCInstant maxBucket) {
     MapSqlParameterSource params = new MapSqlParameterSource();
     params.addValue("since", keysSince.getDate());
-    params.addValue("maxBucket", now.roundToBucketStart(releaseBucketDuration).getDate());
+    params.addValue("maxBucket", maxBucket.getDate());
     params.addValue("timeSkewSeconds", timeSkew.toSeconds());
 
     // Select keys since the given date. We need to make sure, only keys are returned
