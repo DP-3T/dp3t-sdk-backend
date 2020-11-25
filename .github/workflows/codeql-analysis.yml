@@ -59,9 +59,24 @@ jobs:
     #    and modify them (or add more) to build your code if your project
     #    uses a compiled language
 
-    - name: "Build"
-    - run: |
+    - name: Set up JDK 11
+      uses: actions/setup-java@v1
+      with:
+        java-version: 11.0.7
+        server-id: github # Value of the distributionManagement/repository/id field of the pom.xml
+        settings-path: ${{ github.workspace }} # location for the settings.xml file: :  
+    - name: 'Create settings.xml'
+      uses: whelk-io/maven-settings-xml-action@v4
+      with:
+        servers: '[{"id": "github", "username": "${{ github.actor }}", "password": "${{ github.token}}"}, {"id": "github-annotation", "username": "${{ github.actor }}", "password": "${{ github.token }}"}]'
+        repositories: '[{"id" : "github", "url" : "https://maven.pkg.github.com/Ubique-OSS/springboot-swagger3"}, {"id" : "github-annotation", "url" : "https://maven.pkg.github.com/Ubique-OSS/springboot-swagger3-annotations"}]'
+    - name: Build with Maven
+      run: |
         mvn install --file dpppt-backend-sdk/pom.xml; 
+        mvn springboot-swagger-3:springboot-swagger-3 -f dpppt-backend-sdk/dpppt-backend-sdk-ws/pom.xml
+      env:
+        GITHUB_TOKEN: ${{ github.token }}
+        TESTCONTAINERS_RYUK_DISABLED: true
 
     - name: Perform CodeQL Analysis
       uses: github/codeql-action/analyze@v1
