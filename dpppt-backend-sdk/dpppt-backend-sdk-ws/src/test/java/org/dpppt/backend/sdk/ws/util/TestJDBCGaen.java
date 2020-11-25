@@ -123,7 +123,7 @@ public class TestJDBCGaen {
     jt.batchUpdate(sql, parameterList.toArray(new MapSqlParameterSource[0]));
   }
 
-  public void clear(){
+  public void clear() {
     jt.update("DELETE FROM t_gaen_exposed;", new HashMap<>());
     jt.update("DELETE FROM t_debug_gaen_exposed;", new HashMap<>());
   }
