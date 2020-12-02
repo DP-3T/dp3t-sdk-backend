@@ -95,7 +95,7 @@ public class ValidationUtils {
     if (batchReleaseTime.getTimestamp() % releaseBucketDuration != 0) {
       throw new BadBatchReleaseTimeException();
     }
-    return true;
+    return batchReleaseTime.isBeforeEpochMillisOf(now);
   }
 
   public void assertDelayedKeyDate(UTCInstant now, UTCInstant delayedKeyDate)
