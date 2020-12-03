@@ -293,7 +293,8 @@ public abstract class WSBaseConfig implements SchedulingConfigurer, WebMvcConfig
         Duration.ofMillis(releaseBucketDuration),
         Duration.ofMillis(requestTime),
         Duration.ofMillis(exposedListCacheControl),
-        keyVault.get("nextDayJWT").getPrivate());
+        keyVault.get("nextDayJWT").getPrivate(),
+        Duration.ofDays(retentionDays));
   }
 
   @Bean
