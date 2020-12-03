@@ -32,16 +32,19 @@
 		<dependency>
 			<groupId>org.dpppt</groupId>
 			<artifactId>dpppt-backend-sdk-model</artifactId>
+			<version>2.0.2</version>
 		</dependency>
 
 		<dependency>
 			<groupId>org.dpppt</groupId>
 			<artifactId>dpppt-backend-sdk-data</artifactId>
+			<version>2.0.2</version>			
 		</dependency>
 
 		<dependency>
 			<groupId>org.dpppt</groupId>
 			<artifactId>dpppt-backend-sdk-ws</artifactId>
+			<version>2.0.2</version>
 		</dependency>
 
 	</dependencies>
