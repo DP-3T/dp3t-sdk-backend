@@ -13,8 +13,6 @@ jobs:
     - uses: actions/checkout@v2
     - run: |
         git fetch --no-tags --prune --depth=1 origin +refs/heads/*:refs/remotes/origin/*
-    - run: echo ::set-env name=PULL_NUMBER::$(echo "$GITHUB_REF" | awk -F / '{print $3}')
-      shell: bash
     - name: Set up JDK 11
       uses: actions/setup-java@v1
       with:
