@@ -16,13 +16,11 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.asyncDispatch;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
-import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.content;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.request;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
 import java.time.Clock;
 import java.time.Duration;
-import java.time.Instant;
 import java.time.ZoneOffset;
 import java.util.ArrayList;
 import java.util.Base64;
@@ -141,9 +139,7 @@ public class GaenV2ControllerTest extends BaseControllerTest {
     // Check that no keys were inserted
     var result =
         gaenDataService.getSortedExposedSince(
-            now.minusDays(14),
-            now.roundToNextBucket(releaseBucketDuration)
-        );
+            now.minusDays(14), now.roundToNextBucket(releaseBucketDuration));
 
     assertEquals(0, result.size());
   }
