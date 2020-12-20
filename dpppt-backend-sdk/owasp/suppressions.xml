@@ -1,0 +1,6 @@
+<suppressions xmlns="https://jeremylong.github.io/DependencyCheck/dependency-suppression.1.3.xsd">
+	<suppress>
+		<notes>see https://github.com/jeremylong/DependencyCheck/issues/1827></notes>
+		<cve>CVE-2018-1258</cve>
+	</suppress>
+</suppressions>

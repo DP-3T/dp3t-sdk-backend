@@ -17,13 +17,9 @@ import com.fasterxml.jackson.datatype.jdk8.Jdk8Module;
 import com.hubspot.jackson.datatype.protobuf.ProtobufModule;
 import io.jsonwebtoken.SignatureAlgorithm;
 import io.jsonwebtoken.security.Keys;
-import java.security.KeyPair;
-import java.time.Duration;
-import java.time.ZoneOffset;
-import java.util.List;
-import java.util.Map;
-import java.util.TimeZone;
-import javax.sql.DataSource;
+import net.javacrumbs.shedlock.core.LockProvider;
+import net.javacrumbs.shedlock.provider.jdbctemplate.JdbcTemplateLockProvider;
+import net.javacrumbs.shedlock.spring.annotation.SchedulerLock;
 import org.dpppt.backend.sdk.data.JDBCRedeemDataServiceImpl;
 import org.dpppt.backend.sdk.data.RedeemDataService;
 import org.dpppt.backend.sdk.data.gaen.FakeKeyService;
@@ -33,13 +29,7 @@ import org.dpppt.backend.sdk.ws.controller.GaenController;
 import org.dpppt.backend.sdk.ws.controller.GaenV2Controller;
 import org.dpppt.backend.sdk.ws.filter.ResponseWrapperFilter;
 import org.dpppt.backend.sdk.ws.insertmanager.InsertManager;
-import org.dpppt.backend.sdk.ws.insertmanager.insertionfilters.AssertKeyFormat;
-import org.dpppt.backend.sdk.ws.insertmanager.insertionfilters.EnforceMatchingJWTClaimsForExposed;
-import org.dpppt.backend.sdk.ws.insertmanager.insertionfilters.EnforceMatchingJWTClaimsForExposedNextDay;
-import org.dpppt.backend.sdk.ws.insertmanager.insertionfilters.EnforceRetentionPeriod;
-import org.dpppt.backend.sdk.ws.insertmanager.insertionfilters.EnforceValidRollingPeriod;
-import org.dpppt.backend.sdk.ws.insertmanager.insertionfilters.RemoveFakeKeys;
-import org.dpppt.backend.sdk.ws.insertmanager.insertionfilters.RemoveKeysFromFuture;
+import org.dpppt.backend.sdk.ws.insertmanager.insertionfilters.*;
 import org.dpppt.backend.sdk.ws.insertmanager.insertionmodifier.IOSLegacyProblemRPLT144Modifier;
 import org.dpppt.backend.sdk.ws.insertmanager.insertionmodifier.OldAndroid0RPModifier;
 import org.dpppt.backend.sdk.ws.interceptor.HeaderInjector;
@@ -60,22 +50,28 @@ import org.springframework.context.annotation.Lazy;
 import org.springframework.http.converter.HttpMessageConverter;
 import org.springframework.http.converter.json.MappingJackson2HttpMessageConverter;
 import org.springframework.http.converter.protobuf.ProtobufHttpMessageConverter;
+import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.jdbc.datasource.embedded.EmbeddedDatabaseBuilder;
 import org.springframework.jdbc.datasource.embedded.EmbeddedDatabaseType;
 import org.springframework.scheduling.annotation.EnableScheduling;
-import org.springframework.scheduling.annotation.SchedulingConfigurer;
+import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.scheduling.concurrent.ThreadPoolTaskExecutor;
-import org.springframework.scheduling.config.CronTask;
-import org.springframework.scheduling.config.IntervalTask;
-import org.springframework.scheduling.config.ScheduledTaskRegistrar;
-import org.springframework.scheduling.support.CronTrigger;
+import org.springframework.util.StringUtils;
 import org.springframework.web.servlet.config.annotation.AsyncSupportConfigurer;
 import org.springframework.web.servlet.config.annotation.InterceptorRegistry;
 import org.springframework.web.servlet.config.annotation.WebMvcConfigurer;
 
+import javax.sql.DataSource;
+import java.security.KeyPair;
+import java.time.Duration;
+import java.util.List;
+import java.util.Map;
+
+import static net.javacrumbs.shedlock.provider.jdbctemplate.JdbcTemplateLockProvider.Configuration.builder;
+
 @Configuration
 @EnableScheduling
-public abstract class WSBaseConfig implements SchedulingConfigurer, WebMvcConfigurer {
+public abstract class WSBaseConfig implements WebMvcConfigurer {
 
   protected final Logger logger = LoggerFactory.getLogger(getClass());
 
@@ -143,6 +139,9 @@ public abstract class WSBaseConfig implements SchedulingConfigurer, WebMvcConfig
 
   @Value("${ws.app.gaen.timeskew:PT2h}")
   Duration timeSkew;
+
+  @Value("${datasource.schema:}")
+  String dataSourceSchema;
 
   @Autowired(required = false)
   ValidateRequest requestValidator;
@@ -381,20 +380,36 @@ public abstract class WSBaseConfig implements SchedulingConfigurer, WebMvcConfig
     return taskExecutor;
   }
 
-  @Override
-  public void configureTasks(ScheduledTaskRegistrar taskRegistrar) {
-    taskRegistrar.addFixedRateTask(
-        new IntervalTask(
-            () -> {
-              logger.info("Start DB cleanup");
-              gaenDataService().cleanDB(Duration.ofDays(retentionDays));
-              redeemDataService().cleanDB(Duration.ofDays(2));
-              logger.info("DB cleanup up");
-            },
-            60 * 60 * 1000L));
+  /**
+   * Creates a LockProvider for ShedLock.
+   *
+   * @param dataSource JPA datasource
+   * @return LockProvider
+   */
+  @Bean
+  public LockProvider lockProvider(DataSource dataSource) {
+    String schema = StringUtils.isEmpty(dataSourceSchema) ? "t_shedlock" : dataSourceSchema + ".t_shedlock";
+    return new JdbcTemplateLockProvider(builder()
+            .withTableName(schema)
+            .withJdbcTemplate(new JdbcTemplate(dataSource))
+            .usingDbTime()
+            .build()
+    );
+  }
 
-    var trigger = new CronTrigger("0 0 2 * * *", TimeZone.getTimeZone(ZoneOffset.UTC));
-    taskRegistrar.addCronTask(new CronTask(() -> fakeKeyService().updateFakeKeys(), trigger));
+  @Scheduled(fixedRate = 60 * 60 * 1000L, initialDelay = 60 * 1000L)
+  @SchedulerLock(name = "cleanData", lockAtLeastFor = "PT0S", lockAtMostFor = "1800000")
+  public void scheduleCleanData() {
+    logger.info("Start DB cleanup");
+    gaenDataService().cleanDB(Duration.ofDays(retentionDays));
+    redeemDataService().cleanDB(Duration.ofDays(2));
+    logger.info("DB cleanup up");
+  }
+
+  @Scheduled(cron = "0 0 2 * * *")
+  @SchedulerLock(name = "updateFakeKeys", lockAtLeastFor = "PT0S", lockAtMostFor = "1800000")
+  public void scheduleUpdateFakeKeys() {
+    fakeKeyService().updateFakeKeys();
   }
 
   @Override

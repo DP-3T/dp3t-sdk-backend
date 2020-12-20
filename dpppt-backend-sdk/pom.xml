@@ -28,6 +28,7 @@
 
 		<jackson-version>2.11.1</jackson-version>
 		<jsonwebtoken-version>0.11.2</jsonwebtoken-version>
+		<log4j-version>2.13.3</log4j-version>
 		<protobuf-java-version>3.12.1</protobuf-java-version>
 		<spring-boot-version>2.3.6.RELEASE</spring-boot-version>
 		<testcontainers-version>1.15.0-rc2</testcontainers-version>
@@ -35,6 +36,7 @@
 		<itCoverageAgent></itCoverageAgent>
 
 		<build-helper-maven-plugin.version>3.2.0</build-helper-maven-plugin.version>
+		<owasp.version>6.0.2</owasp.version>
 
 		<sonar.host.url>https://sonarcloud.io</sonar.host.url>
 		<sonar.organization>${env.SONAR_ORGANIZATION}</sonar.organization>
@@ -175,6 +177,18 @@
 				<version>${jackson-version}</version>
 			</dependency>
 
+			<!-- ShedLock  -->
+			<dependency>
+				<groupId>net.javacrumbs.shedlock</groupId>
+				<artifactId>shedlock-provider-jdbc-template</artifactId>
+				<version>${shedlock.version}</version>
+			</dependency>
+			<dependency>
+				<groupId>net.javacrumbs.shedlock</groupId>
+				<artifactId>shedlock-spring</artifactId>
+				<version>${shedlock.version}</version>
+			</dependency>
+
 			<dependency>
 				<groupId>org.bouncycastle</groupId>
 				<artifactId>bcpkix-jdk15on</artifactId>
@@ -204,6 +218,30 @@
 				<artifactId>snakeyaml</artifactId>
 				<version>1.27</version>
 			</dependency>
+
+			<dependency>
+				<groupId>org.apache.logging.log4j</groupId>
+				<artifactId>log4j-api</artifactId>
+				<version>${log4j-version}</version>
+			</dependency>
+			<dependency>
+				<groupId>org.apache.logging.log4j</groupId>
+				<artifactId>log4j-to-slf4j</artifactId>
+				<version>${log4j-version}</version>
+			</dependency>
+
+			<dependency>
+				<groupId>com.google.guava</groupId>
+				<artifactId>guava</artifactId>
+				<version>29.0-jre</version>
+			</dependency>
+
+			<dependency>
+				<groupId>com.nimbusds</groupId>
+				<artifactId>nimbus-jose-jwt</artifactId>
+				<version>9.0.1</version>
+			</dependency>
+
 		</dependencies>
 	</dependencyManagement>
 
@@ -438,6 +476,23 @@
 					</execution>
 				</executions>
 			</plugin>
+			<plugin>
+				<groupId>org.owasp</groupId>
+				<artifactId>dependency-check-maven</artifactId>
+				<configuration>
+					<suppressionFile>./owasp/suppressions.xml</suppressionFile>
+					<failBuildOnAnyVulnerability>true</failBuildOnAnyVulnerability>
+				</configuration>
+				<executions>
+					<execution>
+						<id>validate</id>
+						<phase>validate</phase>
+						<goals>
+							<goal>check</goal>
+						</goals>
+					</execution>
+				</executions>
+			</plugin>
 		</plugins>
 		<pluginManagement>
 			<plugins>
@@ -505,6 +560,11 @@
 					<groupId>com.github.os72</groupId>
 					<artifactId>protoc-jar-maven-plugin</artifactId>
 					<version>3.11.4</version>
+				</plugin>
+				<plugin>
+					<groupId>org.owasp</groupId>
+					<artifactId>dependency-check-maven</artifactId>
+					<version>${owasp.version}</version>
 				</plugin>
 			</plugins>
 		</pluginManagement>
