@@ -15,6 +15,7 @@ import java.util.List;
 import javax.sql.DataSource;
 import org.dpppt.backend.sdk.data.gaen.GAENDataService;
 import org.dpppt.backend.sdk.data.gaen.JDBCGAENDataServiceImpl;
+import org.dpppt.backend.sdk.interops.model.HubConfigs;
 import org.dpppt.backend.sdk.interops.syncer.IrishHubSyncer;
 import org.flywaydb.core.Flyway;
 import org.slf4j.Logger;
@@ -93,5 +94,10 @@ public abstract class WSBaseConfig implements SchedulingConfigurer, WebMvcConfig
               irishHubSyncer().sync();
             },
             Long.MAX_VALUE));
+  }
+
+  @Bean
+  public HubConfigs configTest(HubConfigs hubConfigs) { // TODO remove. for debug purposes only
+    return hubConfigs;
   }
 }
