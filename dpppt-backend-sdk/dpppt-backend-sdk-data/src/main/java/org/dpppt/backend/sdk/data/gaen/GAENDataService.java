@@ -13,6 +13,7 @@ package org.dpppt.backend.sdk.data.gaen;
 import java.time.Duration;
 import java.util.List;
 import org.dpppt.backend.sdk.model.gaen.GaenKey;
+import org.dpppt.backend.sdk.model.gaen.GaenKeyWithOrigin;
 import org.dpppt.backend.sdk.utils.UTCInstant;
 
 public interface GAENDataService {
@@ -23,20 +24,18 @@ public interface GAENDataService {
    * @param key the exposed key to upsert
    * @param now time of the sync
    * @param origin the origin or the key
-   * @param visitedCountries the countries the key visited
    */
-  void upsertExposeeFromInterops(
-      GaenKey key, UTCInstant now, String origin, List<String> visitedCountries);
+  void upsertExposeeFromInterops(GaenKey key, UTCInstant now, String origin);
 
   /**
    * Upserts (Update or Inserts) the given list of exposed keys
    *
    * @param keys the list of exposed keys to upsert
    * @param now time of the request
-   * @param international if set to true, the given keys are stored such that they have visited all
-   *     configured countries.
+   * @param withFederationGateway if set to true, the given keys are stored such that they can be
+   *     shared with other federation gateways.
    */
-  void upsertExposees(List<GaenKey> keys, UTCInstant now, boolean international);
+  void upsertExposees(List<GaenKey> keys, UTCInstant now, boolean withFederationGateway);
 
   /**
    * Upserts (Update or Inserts) the given list of exposed keys, with delayed release of same day
@@ -46,11 +45,14 @@ public interface GAENDataService {
    * @param delayedReceivedAt the timestamp to use for the delayed release (if null use now rounded
    *     to next bucket)
    * @param now time of the request
-   * @param international if set to true, the given keys are stored such that they have visited all
-   *     configured countries.
+   * @param withFederationGateway if set to true, the given keys are stored such that they can be
+   *     shared with other federation gateways.
    */
   void upsertExposeesDelayed(
-      List<GaenKey> keys, UTCInstant delayedReceivedAt, UTCInstant now, boolean international);
+      List<GaenKey> keys,
+      UTCInstant delayedReceivedAt,
+      UTCInstant now,
+      boolean withFederationGateway);
 
   /**
    * Returns all exposeed keys for the given batch, where a batch is parametrized with keyDate (for
@@ -78,22 +80,20 @@ public interface GAENDataService {
    *
    * @param keysSince
    * @param now
-   * @param includeAllInternationalKeys If set to true, all international keys are returned in the
-   *     result. Otherwise only keys from the origin country.
+   * @param withFederationGateway If set to true, all keys from federation gateways are returned in
+   *     the result. Otherwise only keys from the origin country.
    * @return
    */
   List<GaenKey> getSortedExposedSince(
-      UTCInstant keysSince, UTCInstant now, boolean includeAllInternationalKeys);
+      UTCInstant keysSince, UTCInstant now, boolean withFederationGateway);
 
   /**
-   * Returns all exposed keys since keySince, with countries but only from our own origin.
+   * Returns all exposed keys since keySince, with origin but only from our own origin.
    *
    * @param keysSince
    * @param now
-   * @param includeAllInternationalKeys If set to true, all international keys are returned in the
-   *     result. Otherwise only keys from the origin country.
    * @return
    */
-  List<GaenKeyWithCountries> getSortedExposedSinceWithCountriesFromOrigin(
+  List<GaenKeyWithOrigin> getSortedExposedSinceWithOriginFromOrigin(
       UTCInstant keysSince, UTCInstant now);
 }

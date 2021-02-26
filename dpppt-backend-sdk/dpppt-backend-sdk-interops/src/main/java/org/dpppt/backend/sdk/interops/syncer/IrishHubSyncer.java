@@ -1,3 +1,12 @@
+/*
+ * Copyright (c) 2020 Ubique Innovation AG <https://www.ubique.ch>
+ *
+ * This Source Code Form is subject to the terms of the Mozilla Public
+ * License, v. 2.0. If a copy of the MPL was not distributed with this
+ * file, You can obtain one at https://mozilla.org/MPL/2.0/.
+ *
+ * SPDX-License-Identifier: MPL-2.0
+ */
 package org.dpppt.backend.sdk.interops.syncer;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
@@ -21,12 +30,12 @@ import java.util.List;
 import java.util.Map;
 import org.apache.commons.codec.digest.DigestUtils;
 import org.dpppt.backend.sdk.data.gaen.GAENDataService;
-import org.dpppt.backend.sdk.data.gaen.GaenKeyWithCountries;
 import org.dpppt.backend.sdk.interops.model.IrishHubDownloadResponse;
 import org.dpppt.backend.sdk.interops.model.IrishHubKey;
 import org.dpppt.backend.sdk.interops.model.IrishHubUploadResponse;
 import org.dpppt.backend.sdk.interops.utils.RestTemplateHelper;
 import org.dpppt.backend.sdk.model.gaen.GaenKey;
+import org.dpppt.backend.sdk.model.gaen.GaenKeyWithOrigin;
 import org.dpppt.backend.sdk.utils.UTCInstant;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -114,12 +123,12 @@ public class IrishHubSyncer {
   private void upload(UTCInstant now) throws JOSEException, JsonProcessingException {
     logger.info("Start upload keys since: " + lastUploadTill);
     UTCInstant uploadTill = now.roundToBucketStart(releaseBucketDuration);
-    List<GaenKeyWithCountries> keysToUpload =
-        gaenDataService.getSortedExposedSinceWithCountriesFromOrigin(lastUploadTill, now);
+    List<GaenKeyWithOrigin> keysToUpload =
+        gaenDataService.getSortedExposedSinceWithOriginFromOrigin(lastUploadTill, now);
     logger.info("Found " + keysToUpload.size() + " keys to upload");
 
     List<IrishHubKey> irishKeysToUpload = new ArrayList<>();
-    for (GaenKeyWithCountries gaenKey : keysToUpload) {
+    for (GaenKeyWithOrigin gaenKey : keysToUpload) {
       irishKeysToUpload.add(mapToIrishKey(gaenKey));
     }
 
@@ -220,8 +229,7 @@ public class IrishHubSyncer {
       if (irishKey.getOrigin() != null
           && !irishKey.getOrigin().isBlank()
           && !irishKey.getRegions().isEmpty()) {
-        gaenDataService.upsertExposeeFromInterops(
-            gaenKey, now, irishKey.getOrigin(), irishKey.getRegions());
+        gaenDataService.upsertExposeeFromInterops(gaenKey, now, irishKey.getOrigin());
       }
     }
   }
@@ -234,11 +242,10 @@ public class IrishHubSyncer {
     return gaenKey;
   }
 
-  private IrishHubKey mapToIrishKey(GaenKeyWithCountries gaenKey) {
+  private IrishHubKey mapToIrishKey(GaenKeyWithOrigin gaenKey) {
     IrishHubKey irishHubKey = new IrishHubKey();
     irishHubKey.setKeyData(gaenKey.getKeyData());
     irishHubKey.setOrigin(gaenKey.getOrigin());
-    irishHubKey.setRegions(gaenKey.getCountries());
     irishHubKey.setRollingPeriod(gaenKey.getRollingPeriod());
     irishHubKey.setRollingStartNumber(gaenKey.getRollingPeriod());
     irishHubKey.setTransmissionRiskLevel(0); // must be set, otherwise fail on upload

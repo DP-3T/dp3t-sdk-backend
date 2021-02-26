@@ -71,8 +71,7 @@ public abstract class WSBaseConfig implements SchedulingConfigurer, WebMvcConfig
         dataSource(),
         Duration.ofMillis(releaseBucketDuration),
         timeSkew,
-        originCountry,
-        otherCountries);
+        originCountry);
   }
 
   public IrishHubSyncer irishHubSyncer() {

@@ -62,18 +62,21 @@ public class TestJDBCGaen {
     String sql = null;
     if (dbType.equals(PGSQL)) {
       sql =
-          "insert into t_gaen_exposed (key, rolling_start_number, rolling_period,"
-              + " received_at, origin) values (:key, :rolling_start_number,"
-              + " :rolling_period, :received_at, :origin) on conflict on"
-              + " constraint gaen_exposed_key do nothing";
+          "insert into t_gaen_exposed (key, rolling_start_number, rolling_period, received_at,"
+              + " origin, share_with_federation_gateway) values (:key, :rolling_start_number,"
+              + " :rolling_period, :received_at, :origin, :share_with_federation_gateway) on"
+              + " conflict on constraint gaen_exposed_key do nothing";
     } else {
       sql =
           "merge into t_gaen_exposed using (values(cast(:key as varchar(24)),"
               + " :rolling_start_number, :rolling_period, :received_at, cast(:origin as"
-              + " varchar(10)))) as vals(key, rolling_start_number, rolling_period, received_at,"
-              + " origin) on t_gaen_exposed.key = vals.key when not matched then insert (key,"
-              + " rolling_start_number, rolling_period, received_at, origin) values (vals.key,"
-              + " vals.rolling_start_number, vals.rolling_period, vals.received_at, vals.origin)";
+              + " varchar(10)), :share_with_federation_gateway)) as vals(key,"
+              + " rolling_start_number, rolling_period, received_at, origin,"
+              + " share_with_federation_gateway) on t_gaen_exposed.key = vals.key when not matched"
+              + " then insert (key, rolling_start_number, rolling_period, received_at, origin,"
+              + " share_with_federation_gateway) values (vals.key, vals.rolling_start_number,"
+              + " vals.rolling_period, vals.received_at, vals.origin,"
+              + " vals.share_with_federation_gateway)";
     }
     var parameterList = new ArrayList<MapSqlParameterSource>();
     for (var gaenKey : gaenKeys) {
@@ -83,6 +86,7 @@ public class TestJDBCGaen {
       params.addValue("rolling_period", gaenKey.getRollingPeriod());
       params.addValue("received_at", receivedAt.getDate());
       params.addValue("origin", "CH");
+      params.addValue("share_with_federation_gateway", false);
       parameterList.add(params);
     }
     jt.batchUpdate(sql, parameterList.toArray(new MapSqlParameterSource[0]));

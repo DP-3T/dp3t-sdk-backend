@@ -1,6 +1,5 @@
 package org.dpppt.backend.sdk.data.gaen;
 
-import static org.junit.Assert.assertTrue;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
 import java.io.UnsupportedEncodingException;
@@ -14,6 +13,7 @@ import org.dpppt.backend.sdk.data.config.GaenDataServiceConfig;
 import org.dpppt.backend.sdk.data.config.RedeemDataServiceConfig;
 import org.dpppt.backend.sdk.data.config.StandaloneDataConfig;
 import org.dpppt.backend.sdk.model.gaen.GaenKey;
+import org.dpppt.backend.sdk.model.gaen.GaenKeyWithOrigin;
 import org.dpppt.backend.sdk.model.gaen.GaenUnit;
 import org.dpppt.backend.sdk.utils.UTCInstant;
 import org.junit.Test;
@@ -239,15 +239,12 @@ public class GaenDataServiceTest {
     gaenDataService.upsertExposees(keys, now, true);
 
     var returnedKeys =
-        gaenDataService.getSortedExposedSinceWithCountriesFromOrigin(
+        gaenDataService.getSortedExposedSinceWithOriginFromOrigin(
             now.minusDays(10), now.plusDays(1));
 
     assertEquals(keys.size(), returnedKeys.size());
     assertEquals(keys.get(1).getKeyData(), returnedKeys.get(0).getKeyData());
-    for (GaenKeyWithCountries k : returnedKeys) {
-      assertTrue(k.getCountries().contains("DE"));
-      assertTrue(k.getCountries().contains("IT"));
-      assertTrue(k.getCountries().contains("CH"));
+    for (GaenKeyWithOrigin k : returnedKeys) {
       assertEquals("CH", k.getOrigin());
     }
   }

@@ -14,7 +14,7 @@ import java.sql.PreparedStatement;
 import org.flywaydb.core.api.migration.BaseJavaMigration;
 import org.flywaydb.core.api.migration.Context;
 
-public class V2_0_3__SetOriginForExistingKeys extends BaseJavaMigration {
+public class V2_0_1__SetOriginForExistingKeys extends BaseJavaMigration {
 
   @Override
   public void migrate(Context context) throws Exception {

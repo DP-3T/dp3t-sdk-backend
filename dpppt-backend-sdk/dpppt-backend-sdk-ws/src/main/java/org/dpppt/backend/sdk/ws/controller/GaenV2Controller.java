@@ -11,7 +11,6 @@ import java.time.format.DateTimeParseException;
 import java.util.List;
 import java.util.concurrent.Callable;
 import javax.validation.Valid;
-import org.dpppt.backend.sdk.data.gaen.FakeKeyService;
 import org.dpppt.backend.sdk.data.gaen.GAENDataService;
 import org.dpppt.backend.sdk.model.gaen.GaenKey;
 import org.dpppt.backend.sdk.model.gaen.GaenV2UploadKeysRequest;
@@ -59,13 +58,14 @@ public class GaenV2Controller {
   private final ValidateRequest validateRequest;
 
   private final ValidationUtils validationUtils;
-  private final FakeKeyService fakeKeyService;
   private final ProtoSignature gaenSigner;
   private final GAENDataService dataService;
   private final Duration releaseBucketDuration;
   private final Duration requestTime;
   private final Duration exposedListCacheControl;
   private final Duration retentionPeriod;
+  private final boolean withFederationGatewayDownloadDefaultValue;
+  private final boolean withFederationGatewayUploadDefaultValue;
 
   private static final String HEADER_X_KEY_BUNDLE_TAG = "x-key-bundle-tag";
 
@@ -73,23 +73,25 @@ public class GaenV2Controller {
       InsertManager insertManager,
       ValidateRequest validateRequest,
       ValidationUtils validationUtils,
-      FakeKeyService fakeKeyService,
       ProtoSignature gaenSigner,
       GAENDataService dataService,
       Duration releaseBucketDuration,
       Duration requestTime,
       Duration exposedListCacheControl,
-      Duration retentionPeriod) {
+      Duration retentionPeriod,
+      boolean withFederationGatewayDownloadDefaultValue,
+      boolean withFederationGatewayUploadDefaultValue) {
     this.insertManager = insertManager;
     this.validateRequest = validateRequest;
     this.validationUtils = validationUtils;
-    this.fakeKeyService = fakeKeyService;
     this.gaenSigner = gaenSigner;
     this.dataService = dataService;
     this.releaseBucketDuration = releaseBucketDuration;
     this.requestTime = requestTime;
     this.exposedListCacheControl = exposedListCacheControl;
     this.retentionPeriod = retentionPeriod;
+    this.withFederationGatewayDownloadDefaultValue = withFederationGatewayDownloadDefaultValue;
+    this.withFederationGatewayUploadDefaultValue = withFederationGatewayUploadDefaultValue;
   }
 
   @GetMapping(value = "")
@@ -127,6 +129,10 @@ public class GaenV2Controller {
       throws WrongScopeException, InsertException {
     var now = UTCInstant.now();
 
+    if (gaenV2Request.getWithFederationGateway() == null) {
+      gaenV2Request.setWithFederationGateway(withFederationGatewayUploadDefaultValue);
+    }
+
     this.validateRequest.isValid(principal);
 
     // Filter out non valid keys and insert them into the database (c.f.
@@ -137,7 +143,7 @@ public class GaenV2Controller {
         userAgent,
         principal,
         now,
-        gaenV2Request.getInternational() == 1);
+        gaenV2Request.getWithFederationGateway());
     var responseBuilder = ResponseEntity.ok();
     Callable<ResponseEntity<String>> cb =
         () -> {
@@ -156,8 +162,7 @@ public class GaenV2Controller {
   @Documentation(
       description =
           "Requests keys published _after_ lastKeyBundleTag. The response includes also"
-              + " international keys if includeAllInternationalKeys is set to true. (default is"
-              + " false)",
+              + " international keys if includeAllInternationalKeys is set to true.",
       responses = {
         "200 => zipped export.bin and export.sig of all keys in that interval",
         "404 => Invalid _lastKeyBundleTag_"
@@ -171,10 +176,14 @@ public class GaenV2Controller {
               example = "1593043200000")
           @RequestParam(required = false)
           Long lastKeyBundleTag,
-      @RequestParam(required = false, defaultValue = "false") boolean includeAllInternationalKeys)
+      @RequestParam(required = false) Boolean withFederationGateway)
       throws BadBatchReleaseTimeException, InvalidKeyException, SignatureException,
           NoSuchAlgorithmException, IOException {
     var now = UTCInstant.now();
+
+    if (withFederationGateway == null) {
+      withFederationGateway = withFederationGatewayDownloadDefaultValue;
+    }
 
     if (lastKeyBundleTag == null) {
       // if no lastKeyBundleTag given, go back to the start of the retention period and
@@ -190,7 +199,7 @@ public class GaenV2Controller {
     UTCInstant keyBundleTag = now.roundToBucketStart(releaseBucketDuration);
 
     List<GaenKey> exposedKeys =
-        dataService.getSortedExposedSince(keysSince, now, includeAllInternationalKeys);
+        dataService.getSortedExposedSince(keysSince, now, withFederationGateway);
 
     if (exposedKeys.isEmpty()) {
       return ResponseEntity.noContent()

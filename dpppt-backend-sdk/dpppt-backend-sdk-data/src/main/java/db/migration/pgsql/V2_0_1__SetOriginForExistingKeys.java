@@ -8,24 +8,20 @@
  * SPDX-License-Identifier: MPL-2.0
  */
 
-package db.migration.pgsql_cluster;
+package db.migration.pgsql;
 
 import java.sql.PreparedStatement;
-import java.sql.ResultSet;
-import java.sql.Statement;
-import java.util.ArrayList;
-import java.util.List;
 import org.flywaydb.core.api.migration.BaseJavaMigration;
 import org.flywaydb.core.api.migration.Context;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-public class V2_0_1__SetVisitedForExistingKeys extends BaseJavaMigration {
+public class V2_0_1__SetOriginForExistingKeys extends BaseJavaMigration {
 
   private static final String ORIGIN_COUNTRY_SYS_VAR = "ws.origin.country";
 
   private static final Logger logger =
-      LoggerFactory.getLogger(V2_0_1__SetVisitedForExistingKeys.class);
+      LoggerFactory.getLogger(V2_0_1__SetOriginForExistingKeys.class);
 
   @Override
   public void migrate(Context context) throws Exception {
@@ -39,29 +35,15 @@ public class V2_0_1__SetVisitedForExistingKeys extends BaseJavaMigration {
               + " (for example: java -jar dp3t-sdk.jar -Dws.origin.country=CH ... )");
     }
 
-    // Get all key ids
-    List<Integer> keyIds = new ArrayList<>();
-    try (Statement select = context.getConnection().createStatement()) {
-      try (ResultSet rows = select.executeQuery("select pk_exposed_id from t_gaen_exposed")) {
-        while (rows.next()) {
-          int id = rows.getInt(1);
-          keyIds.add(id);
-        }
-      }
-    }
-    logger.info("Found " + keyIds.size() + " keys for migration");
+    logger.info("Migrate all existing keys to origin country: " + originCountry);
 
-    // For each key, insert origin country as visited country
-    try (PreparedStatement insertVisitedCountries =
+    // Update all existing keys with no origin to the given origin country
+    try (PreparedStatement update =
         context
             .getConnection()
-            .prepareStatement("insert into t_visited(pfk_exposed_id, country) values(?, ?)")) {
-      for (Integer keyId : keyIds) {
-        insertVisitedCountries.setInt(1, keyId);
-        insertVisitedCountries.setString(2, originCountry);
-        insertVisitedCountries.addBatch();
-      }
-      insertVisitedCountries.executeBatch();
+            .prepareStatement("update t_gaen_exposed set origin = ? where origin is null")) {
+      update.setString(1, originCountry);
+      update.execute();
     }
   }
 }

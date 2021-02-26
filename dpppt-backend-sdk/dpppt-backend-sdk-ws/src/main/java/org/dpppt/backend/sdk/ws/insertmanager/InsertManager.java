@@ -66,11 +66,16 @@ public class InsertManager {
    * @param header request header from client
    * @param principal key upload authorization, for example a JWT token.
    * @param now current timestamp to work with.
+   * @param withFederationGateway wether key can be shared with federation gateways
    * @throws InsertException filters are allowed to throw errors, for example to signal client
    *     errors in the key upload
    */
   public void insertIntoDatabase(
-      List<GaenKey> keys, String header, Object principal, UTCInstant now, boolean international)
+      List<GaenKey> keys,
+      String header,
+      Object principal,
+      UTCInstant now,
+      boolean withFederationGateway)
       throws InsertException {
 
     if (keys == null || keys.isEmpty()) {
@@ -80,7 +85,7 @@ public class InsertManager {
     // if no keys remain or this is a fake request, just return. Else, insert the
     // remaining keys.
     if (!internalKeys.isEmpty() && !validationUtils.jwtIsFake(principal)) {
-      dataService.upsertExposees(internalKeys, now, international);
+      dataService.upsertExposees(internalKeys, now, withFederationGateway);
     }
   }
 

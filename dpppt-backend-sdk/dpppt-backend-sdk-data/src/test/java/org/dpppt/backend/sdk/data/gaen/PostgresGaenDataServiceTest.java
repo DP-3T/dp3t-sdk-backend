@@ -219,7 +219,8 @@ public class PostgresGaenDataServiceTest {
     Connection connection = dataSource.getConnection();
     String sql =
         "into t_gaen_exposed (pk_exposed_id, key, received_at, rolling_start_number,"
-            + " rolling_period, origin) values (100, ?, ?, ?, 144, 'CH')";
+            + " rolling_period, origin, share_with_federation_gateway) values (100, ?, ?, ?, 144,"
+            + " 'CH', 'true')";
     PreparedStatement preparedStatement = connection.prepareStatement("insert " + sql);
     preparedStatement.setString(1, key);
     preparedStatement.setTimestamp(2, new Timestamp(receivedAt.toEpochMilli()));

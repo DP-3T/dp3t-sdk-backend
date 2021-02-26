@@ -147,8 +147,11 @@ public abstract class WSBaseConfig implements SchedulingConfigurer, WebMvcConfig
   @Value("${ws.origin.country}")
   String originCountry;
 
-  @Value("${ws.international.countries:}")
-  List<String> otherCountries;
+  @Value("${ws.federation.download.defaultvalue:true}")
+  boolean withFederationGatewayDownloadDefaultValue;
+
+  @Value("${ws.federation.upload.defaultvalue:true}")
+  boolean withFederationGatewayUploadDefaultValue;
 
   @Autowired(required = false)
   ValidateRequest requestValidator;
@@ -196,8 +199,7 @@ public abstract class WSBaseConfig implements SchedulingConfigurer, WebMvcConfig
               fakeDataSource,
               Duration.ofMillis(releaseBucketDuration),
               timeSkew,
-              originCountry,
-              otherCountries);
+              originCountry);
       return new FakeKeyService(
           fakeGaenService,
           Integer.valueOf(randomkeyamount),
@@ -317,13 +319,14 @@ public abstract class WSBaseConfig implements SchedulingConfigurer, WebMvcConfig
         insertManagerExposed(),
         theValidator,
         gaenValidationUtils(),
-        fakeKeyService(),
         gaenSigner(),
         gaenDataService(),
         Duration.ofMillis(releaseBucketDuration),
         Duration.ofMillis(requestTime),
         Duration.ofMillis(exposedListCacheControl),
-        Duration.ofDays(retentionDays));
+        Duration.ofDays(retentionDays),
+        withFederationGatewayDownloadDefaultValue,
+        withFederationGatewayUploadDefaultValue);
   }
 
   @Bean
@@ -333,8 +336,7 @@ public abstract class WSBaseConfig implements SchedulingConfigurer, WebMvcConfig
         dataSource(),
         Duration.ofMillis(releaseBucketDuration),
         timeSkew,
-        originCountry,
-        otherCountries);
+        originCountry);
   }
 
   @Bean

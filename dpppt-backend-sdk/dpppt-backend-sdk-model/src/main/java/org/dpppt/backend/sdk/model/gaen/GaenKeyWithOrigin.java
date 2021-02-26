@@ -1,22 +1,15 @@
-package org.dpppt.backend.sdk.data.gaen;
+package org.dpppt.backend.sdk.model.gaen;
 
 import ch.ubique.openapi.docannotations.Documentation;
-import java.util.ArrayList;
-import java.util.List;
 import javax.validation.constraints.NotNull;
-import org.dpppt.backend.sdk.model.gaen.GaenKey;
 
 /**
- * Same as {@link GaenKey} but adds the additional information for international interoperartions,
- * this is the origin country and the list of countries the key is user for.
+ * Same as {@link GaenKey} but adds the additional information for international interoperations,
+ * this is the origin country.
  */
-public class GaenKeyWithCountries {
+public class GaenKeyWithOrigin {
 
   private GaenKey gaenKey;
-
-  @NotNull
-  @Documentation(description = "the list of countries the key is used for.")
-  private List<String> countries = new ArrayList<>();
 
   @NotNull
   @Documentation(description = "the country of origin")
@@ -28,14 +21,6 @@ public class GaenKeyWithCountries {
 
   public void setGaenKey(GaenKey gaenKey) {
     this.gaenKey = gaenKey;
-  }
-
-  public List<String> getCountries() {
-    return countries;
-  }
-
-  public void setCountries(List<String> countries) {
-    this.countries = countries;
   }
 
   public String getOrigin() {
