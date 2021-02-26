@@ -79,13 +79,23 @@ public class EFGSHubSyncer {
 
   private void upload(UTCInstant now) throws JOSEException, JsonProcessingException {
     logger.info("Start upload keys since: " + lastUploadTill);
-
+    // TODO:
+    // Get Keys with noch batchtag
+    // generate new batchtag
+    // upload with client
+    // set batch tag on keys that have been uploaded
+    // insert log with batchtag
     logger.info("Upload done");
   }
 
   private void download(LocalDate today) throws URISyntaxException {
     logger.info("Start download keys");
-
+    // TODO:
+    // init map <keydate, lastBatchTag> with empty batchtags
+    // Get latest batchtags for each keydate and insert into map
+    // download logic for each keydate and loop until nothing left, download with client
+    // store keys
+    // insert log, per keydate and batchtag
     logger.info("Download done");
   }
 }
