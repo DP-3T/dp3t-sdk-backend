@@ -9,7 +9,7 @@ import java.time.Duration;
 import java.time.format.DateTimeParseException;
 import java.util.ArrayList;
 import javax.validation.Valid;
-import org.dpppt.backend.sdk.data.gaen.DebugGAENDataService;
+import org.dpppt.backend.sdk.data.gaen.DebugGaenDataService;
 import org.dpppt.backend.sdk.model.gaen.DayBuckets;
 import org.dpppt.backend.sdk.model.gaen.GaenRequest;
 import org.dpppt.backend.sdk.utils.UTCInstant;
@@ -46,10 +46,10 @@ public class DebugController {
   private final Duration releaseBucketDuration;
   private final Duration requestTime;
   private final ProtoSignature gaenSigner;
-  private final DebugGAENDataService dataService;
+  private final DebugGaenDataService dataService;
 
   public DebugController(
-      DebugGAENDataService dataService,
+      DebugGaenDataService dataService,
       ProtoSignature gaenSigner,
       ValidateRequest validateRequest,
       InsertManager insertManager,

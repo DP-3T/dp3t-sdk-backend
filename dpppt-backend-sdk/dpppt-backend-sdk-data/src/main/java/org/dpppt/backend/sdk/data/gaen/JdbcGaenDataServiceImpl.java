@@ -24,9 +24,9 @@ import org.springframework.jdbc.support.GeneratedKeyHolder;
 import org.springframework.jdbc.support.KeyHolder;
 import org.springframework.transaction.annotation.Transactional;
 
-public class JDBCGAENDataServiceImpl implements GAENDataService {
+public class JdbcGaenDataServiceImpl implements GaenDataService {
 
-  private static final Logger logger = LoggerFactory.getLogger(JDBCGAENDataServiceImpl.class);
+  private static final Logger logger = LoggerFactory.getLogger(JdbcGaenDataServiceImpl.class);
 
   private static final String PGSQL = "pgsql";
   private final String dbType;
@@ -42,7 +42,7 @@ public class JDBCGAENDataServiceImpl implements GAENDataService {
   // the origin country is also the default for returning keys.
   private final String originCountry;
 
-  public JDBCGAENDataServiceImpl(
+  public JdbcGaenDataServiceImpl(
       String dbType,
       DataSource dataSource,
       Duration releaseBucketDuration,

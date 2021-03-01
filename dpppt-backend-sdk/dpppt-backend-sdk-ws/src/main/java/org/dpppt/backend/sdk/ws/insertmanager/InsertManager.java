@@ -2,8 +2,8 @@ package org.dpppt.backend.sdk.ws.insertmanager;
 
 import java.util.ArrayList;
 import java.util.List;
-import org.dpppt.backend.sdk.data.gaen.DebugGAENDataService;
-import org.dpppt.backend.sdk.data.gaen.GAENDataService;
+import org.dpppt.backend.sdk.data.gaen.DebugGaenDataService;
+import org.dpppt.backend.sdk.data.gaen.GaenDataService;
 import org.dpppt.backend.sdk.model.gaen.GaenKey;
 import org.dpppt.backend.sdk.semver.Version;
 import org.dpppt.backend.sdk.utils.UTCInstant;
@@ -26,27 +26,27 @@ public class InsertManager {
   private final List<KeyInsertionFilter> filterList = new ArrayList<>();
   private final List<KeyInsertionModifier> modifierList = new ArrayList<>();
 
-  private final GAENDataService dataService;
+  private final GaenDataService dataService;
   private final ValidationUtils validationUtils;
 
-  private DebugGAENDataService debugDataService;
+  private DebugGaenDataService debugDataService;
 
   private static final Logger logger = LoggerFactory.getLogger(InsertManager.class);
 
-  public InsertManager(GAENDataService dataService, ValidationUtils validationUtils) {
+  public InsertManager(GaenDataService dataService, ValidationUtils validationUtils) {
     this.dataService = dataService;
     this.validationUtils = validationUtils;
     this.debugDataService = null;
   }
 
-  private InsertManager(DebugGAENDataService debugDataService, ValidationUtils validationUtils) {
+  private InsertManager(DebugGaenDataService debugDataService, ValidationUtils validationUtils) {
     this.debugDataService = debugDataService;
     this.validationUtils = validationUtils;
     this.dataService = null;
   }
 
   public static InsertManager getDebugInsertManager(
-      DebugGAENDataService debugDataService, ValidationUtils validationUtils) {
+      DebugGaenDataService debugDataService, ValidationUtils validationUtils) {
     return new InsertManager(debugDataService, validationUtils);
   }
 

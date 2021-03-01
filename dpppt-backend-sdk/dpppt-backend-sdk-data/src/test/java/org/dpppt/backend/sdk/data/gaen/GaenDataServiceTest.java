@@ -39,7 +39,7 @@ public class GaenDataServiceTest {
 
   private static final Duration BUCKET_LENGTH = Duration.ofHours(2);
 
-  @Autowired private GAENDataService gaenDataService;
+  @Autowired private GaenDataService gaenDataService;
 
   @Test
   @Transactional

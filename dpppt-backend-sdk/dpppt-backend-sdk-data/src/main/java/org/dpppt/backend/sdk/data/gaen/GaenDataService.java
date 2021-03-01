@@ -16,7 +16,7 @@ import org.dpppt.backend.sdk.model.gaen.GaenKey;
 import org.dpppt.backend.sdk.model.gaen.GaenKeyWithOrigin;
 import org.dpppt.backend.sdk.utils.UTCInstant;
 
-public interface GAENDataService {
+public interface GaenDataService {
 
   /**
    * Upserts (Update or Inserts) the given key received from interops synchronization.

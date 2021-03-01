@@ -24,11 +24,11 @@ import java.util.List;
 import java.util.Map;
 import java.util.TimeZone;
 import javax.sql.DataSource;
-import org.dpppt.backend.sdk.data.JDBCRedeemDataServiceImpl;
+import org.dpppt.backend.sdk.data.JdbcRedeemDataServiceImpl;
 import org.dpppt.backend.sdk.data.RedeemDataService;
 import org.dpppt.backend.sdk.data.gaen.FakeKeyService;
-import org.dpppt.backend.sdk.data.gaen.GAENDataService;
-import org.dpppt.backend.sdk.data.gaen.JDBCGAENDataServiceImpl;
+import org.dpppt.backend.sdk.data.gaen.GaenDataService;
+import org.dpppt.backend.sdk.data.gaen.JdbcGaenDataServiceImpl;
 import org.dpppt.backend.sdk.ws.controller.GaenController;
 import org.dpppt.backend.sdk.ws.controller.GaenV2Controller;
 import org.dpppt.backend.sdk.ws.filter.ResponseWrapperFilter;
@@ -193,8 +193,8 @@ public abstract class WSBaseConfig implements SchedulingConfigurer, WebMvcConfig
               .locations("classpath:/db/migration/hsqldb")
               .load();
       flyWay.migrate();
-      GAENDataService fakeGaenService =
-          new JDBCGAENDataServiceImpl(
+      GaenDataService fakeGaenService =
+          new JdbcGaenDataServiceImpl(
               "hsql",
               fakeDataSource,
               Duration.ofMillis(releaseBucketDuration),
@@ -331,8 +331,8 @@ public abstract class WSBaseConfig implements SchedulingConfigurer, WebMvcConfig
   }
 
   @Bean
-  public GAENDataService gaenDataService() {
-    return new JDBCGAENDataServiceImpl(
+  public GaenDataService gaenDataService() {
+    return new JdbcGaenDataServiceImpl(
         getDbType(),
         dataSource(),
         Duration.ofMillis(releaseBucketDuration),
@@ -342,7 +342,7 @@ public abstract class WSBaseConfig implements SchedulingConfigurer, WebMvcConfig
 
   @Bean
   public RedeemDataService redeemDataService() {
-    return new JDBCRedeemDataServiceImpl(dataSource());
+    return new JdbcRedeemDataServiceImpl(dataSource());
   }
 
   @Bean

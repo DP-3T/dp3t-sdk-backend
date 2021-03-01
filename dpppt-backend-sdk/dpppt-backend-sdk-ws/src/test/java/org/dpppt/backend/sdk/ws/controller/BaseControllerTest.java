@@ -47,7 +47,7 @@ import java.util.zip.ZipInputStream;
 import javax.servlet.Filter;
 import javax.sql.DataSource;
 import org.apache.commons.io.IOUtils;
-import org.dpppt.backend.sdk.data.gaen.GAENDataService;
+import org.dpppt.backend.sdk.data.gaen.GaenDataService;
 import org.dpppt.backend.sdk.model.gaen.GaenKey;
 import org.dpppt.backend.sdk.model.gaen.GaenRequest;
 import org.dpppt.backend.sdk.model.gaen.proto.TemporaryExposureKeyFormat.TEKSignatureList;
@@ -56,7 +56,7 @@ import org.dpppt.backend.sdk.utils.UTCInstant;
 import org.dpppt.backend.sdk.ws.filter.ResponseWrapperFilter;
 import org.dpppt.backend.sdk.ws.security.KeyVault;
 import org.dpppt.backend.sdk.ws.security.signature.ProtoSignature;
-import org.dpppt.backend.sdk.ws.util.TestJDBCGaen;
+import org.dpppt.backend.sdk.ws.util.TestJdbcGaen;
 import org.junit.Before;
 import org.junit.runner.RunWith;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -94,9 +94,10 @@ public abstract class BaseControllerTest {
 
   @Autowired ProtoSignature signer;
   @Autowired KeyVault keyVault;
-  @Autowired GAENDataService gaenDataService;
+  @Autowired
+  GaenDataService gaenDataService;
 
-  protected TestJDBCGaen testGaenDataService;
+  protected TestJdbcGaen testGaenDataService;
 
   protected static final String androidUserAgent =
       "ch.admin.bag.dp3t.dev;1.0.7;1595591959493;Android;29";
@@ -113,7 +114,7 @@ public abstract class BaseControllerTest {
             .build();
     this.objectMapper = new ObjectMapper(new JsonFactory());
     this.objectMapper.registerModule(new JavaTimeModule());
-    this.testGaenDataService = new TestJDBCGaen("hsqldb", dataSource);
+    this.testGaenDataService = new TestJdbcGaen("hsqldb", dataSource);
   }
 
   private void loadPrivateKey() throws Exception {

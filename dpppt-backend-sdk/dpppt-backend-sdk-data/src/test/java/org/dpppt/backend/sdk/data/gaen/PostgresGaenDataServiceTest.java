@@ -54,7 +54,7 @@ public class PostgresGaenDataServiceTest {
   private static final String APP_SOURCE = "test-app";
   private static final Duration BATCH_LENGTH = Duration.ofHours(2);
 
-  @Autowired private GAENDataService gaenDataService;
+  @Autowired private GaenDataService gaenDataService;
   @Autowired private FakeKeyService fakeKeyService;
 
   @Autowired private RedeemDataService redeemDataService;

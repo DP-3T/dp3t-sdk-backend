@@ -13,8 +13,8 @@ package org.dpppt.backend.sdk.interops.config;
 import java.time.Duration;
 import java.util.List;
 import javax.sql.DataSource;
-import org.dpppt.backend.sdk.data.gaen.GAENDataService;
-import org.dpppt.backend.sdk.data.gaen.JDBCGAENDataServiceImpl;
+import org.dpppt.backend.sdk.data.gaen.GaenDataService;
+import org.dpppt.backend.sdk.data.gaen.JdbcGaenDataServiceImpl;
 import org.dpppt.backend.sdk.interops.model.HubConfigs;
 import org.dpppt.backend.sdk.interops.syncer.IrishHubSyncer;
 import org.flywaydb.core.Flyway;
@@ -66,8 +66,8 @@ public abstract class WSBaseConfig implements SchedulingConfigurer, WebMvcConfig
   public abstract String getDbType();
 
   @Bean
-  public GAENDataService gaenDataService() {
-    return new JDBCGAENDataServiceImpl(
+  public GaenDataService gaenDataService() {
+    return new JdbcGaenDataServiceImpl(
         getDbType(),
         dataSource(),
         Duration.ofMillis(releaseBucketDuration),

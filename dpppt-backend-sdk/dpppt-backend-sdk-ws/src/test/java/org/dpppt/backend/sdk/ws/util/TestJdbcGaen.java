@@ -21,12 +21,12 @@ import org.springframework.jdbc.core.namedparam.MapSqlParameterSource;
 import org.springframework.jdbc.core.namedparam.NamedParameterJdbcTemplate;
 import org.springframework.transaction.annotation.Transactional;
 
-public class TestJDBCGaen {
+public class TestJdbcGaen {
   private static final String PGSQL = "pgsql";
   private final String dbType;
   private final NamedParameterJdbcTemplate jt;
 
-  public TestJDBCGaen(String dbType, DataSource dataSource) {
+  public TestJdbcGaen(String dbType, DataSource dataSource) {
     this.dbType = dbType;
     this.jt = new NamedParameterJdbcTemplate(dataSource);
   }

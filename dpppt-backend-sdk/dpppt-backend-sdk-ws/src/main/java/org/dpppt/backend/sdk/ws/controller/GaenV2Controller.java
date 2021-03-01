@@ -11,7 +11,7 @@ import java.time.format.DateTimeParseException;
 import java.util.List;
 import java.util.concurrent.Callable;
 import javax.validation.Valid;
-import org.dpppt.backend.sdk.data.gaen.GAENDataService;
+import org.dpppt.backend.sdk.data.gaen.GaenDataService;
 import org.dpppt.backend.sdk.model.gaen.GaenKey;
 import org.dpppt.backend.sdk.model.gaen.GaenV2UploadKeysRequest;
 import org.dpppt.backend.sdk.utils.DurationExpiredException;
@@ -59,7 +59,7 @@ public class GaenV2Controller {
 
   private final ValidationUtils validationUtils;
   private final ProtoSignature gaenSigner;
-  private final GAENDataService dataService;
+  private final GaenDataService dataService;
   private final Duration releaseBucketDuration;
   private final Duration requestTime;
   private final Duration exposedListCacheControl;
@@ -74,7 +74,7 @@ public class GaenV2Controller {
       ValidateRequest validateRequest,
       ValidationUtils validationUtils,
       ProtoSignature gaenSigner,
-      GAENDataService dataService,
+      GaenDataService dataService,
       Duration releaseBucketDuration,
       Duration requestTime,
       Duration exposedListCacheControl,

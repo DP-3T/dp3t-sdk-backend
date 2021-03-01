@@ -29,7 +29,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import org.apache.commons.codec.digest.DigestUtils;
-import org.dpppt.backend.sdk.data.gaen.GAENDataService;
+import org.dpppt.backend.sdk.data.gaen.GaenDataService;
 import org.dpppt.backend.sdk.interops.model.IrishHubDownloadResponse;
 import org.dpppt.backend.sdk.interops.model.IrishHubKey;
 import org.dpppt.backend.sdk.interops.model.IrishHubUploadResponse;
@@ -63,7 +63,7 @@ public class IrishHubSyncer {
   private final Duration retentionPeriod;
   private final Duration releaseBucketDuration;
 
-  private final GAENDataService gaenDataService;
+  private final GaenDataService gaenDataService;
   private final String origin;
 
   // keep batch tags per day.
@@ -89,7 +89,7 @@ public class IrishHubSyncer {
       String privateKeyPem,
       Duration retentionPeriod,
       Duration releaseBucketDuration,
-      GAENDataService gaenDataService,
+      GaenDataService gaenDataService,
       String origin) {
     this.baseUrl = baseUrl;
     this.authorizationToken = authorizationToken;

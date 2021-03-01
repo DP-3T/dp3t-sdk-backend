@@ -25,7 +25,7 @@ import java.util.UUID;
 import java.util.concurrent.Callable;
 import javax.validation.Valid;
 import org.dpppt.backend.sdk.data.gaen.FakeKeyService;
-import org.dpppt.backend.sdk.data.gaen.GAENDataService;
+import org.dpppt.backend.sdk.data.gaen.GaenDataService;
 import org.dpppt.backend.sdk.model.gaen.DayBuckets;
 import org.dpppt.backend.sdk.model.gaen.GaenRequest;
 import org.dpppt.backend.sdk.model.gaen.GaenSecondDay;
@@ -89,7 +89,7 @@ public class GaenController {
   private final ValidationUtils validationUtils;
   private final InsertManager insertManagerExposed;
   private final InsertManager insertManagerExposedNextDay;
-  private final GAENDataService dataService;
+  private final GaenDataService dataService;
   private final FakeKeyService fakeKeyService;
   private final Duration exposedListCacheControl;
   private final PrivateKey secondDayKey;
@@ -98,7 +98,7 @@ public class GaenController {
   public GaenController(
       InsertManager insertManagerExposed,
       InsertManager insertManagerExposedNextDay,
-      GAENDataService dataService,
+      GaenDataService dataService,
       FakeKeyService fakeKeyService,
       ValidateRequest validateRequest,
       ProtoSignature gaenSigner,

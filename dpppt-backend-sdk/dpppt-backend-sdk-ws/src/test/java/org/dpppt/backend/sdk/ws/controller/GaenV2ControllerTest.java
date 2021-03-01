@@ -25,7 +25,7 @@ import java.time.ZoneOffset;
 import java.util.ArrayList;
 import java.util.Base64;
 import java.util.List;
-import org.dpppt.backend.sdk.data.gaen.GAENDataService;
+import org.dpppt.backend.sdk.data.gaen.GaenDataService;
 import org.dpppt.backend.sdk.model.gaen.GaenKey;
 import org.dpppt.backend.sdk.model.gaen.GaenRequest;
 import org.dpppt.backend.sdk.model.gaen.GaenV2UploadKeysRequest;
@@ -59,7 +59,8 @@ import org.springframework.transaction.annotation.Transactional;
 public class GaenV2ControllerTest extends BaseControllerTest {
   @Autowired ProtoSignature signer;
   @Autowired KeyVault keyVault;
-  @Autowired GAENDataService gaenDataService;
+  @Autowired
+  GaenDataService gaenDataService;
 
   Duration releaseBucketDuration = Duration.ofMillis(7200000L);
 
