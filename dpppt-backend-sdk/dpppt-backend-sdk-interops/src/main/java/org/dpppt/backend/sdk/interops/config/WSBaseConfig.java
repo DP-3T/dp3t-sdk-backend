@@ -10,13 +10,16 @@
 
 package org.dpppt.backend.sdk.interops.config;
 
+import java.security.cert.CertificateException;
 import java.time.Duration;
-import java.util.List;
 import javax.sql.DataSource;
 import org.dpppt.backend.sdk.data.gaen.GaenDataService;
 import org.dpppt.backend.sdk.data.gaen.JdbcGaenDataServiceImpl;
+import org.dpppt.backend.sdk.data.interops.JdbcSyncLogDataServiceImpl;
+import org.dpppt.backend.sdk.data.interops.SyncLogDataService;
 import org.dpppt.backend.sdk.interops.model.HubConfigs;
-import org.dpppt.backend.sdk.interops.syncer.IrishHubSyncer;
+import org.dpppt.backend.sdk.interops.syncer.EfgsHubSyncer;
+import org.dpppt.backend.sdk.interops.syncer.efgs.EfgsClient;
 import org.flywaydb.core.Flyway;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -24,14 +27,11 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.scheduling.annotation.EnableScheduling;
-import org.springframework.scheduling.annotation.SchedulingConfigurer;
-import org.springframework.scheduling.config.IntervalTask;
-import org.springframework.scheduling.config.ScheduledTaskRegistrar;
+import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.web.servlet.config.annotation.WebMvcConfigurer;
 
 @Configuration
-@EnableScheduling
-public abstract class WSBaseConfig implements SchedulingConfigurer, WebMvcConfigurer {
+public abstract class WSBaseConfig implements WebMvcConfigurer {
 
   @Value("${ws.retentiondays: 14}")
   int retentionDays;
@@ -45,18 +45,6 @@ public abstract class WSBaseConfig implements SchedulingConfigurer, WebMvcConfig
   @Value("${ws.origin.country}")
   String originCountry;
 
-  @Value("${ws.international.countries:}")
-  List<String> otherCountries;
-
-  @Value("${ws.interops.irishbaseurl}")
-  String irishBaseUrl;
-
-  @Value("${ws.interops.irishauthorizationtoken}")
-  String irishAuthorizationToken;
-
-  @Value("${ws.interops.pemEncodedRSAPrivateKey}")
-  String pemEncodedRSAPrivateKey;
-
   protected final Logger logger = LoggerFactory.getLogger(getClass());
 
   public abstract DataSource dataSource();
@@ -66,38 +54,27 @@ public abstract class WSBaseConfig implements SchedulingConfigurer, WebMvcConfig
   public abstract String getDbType();
 
   @Bean
-  public GaenDataService gaenDataService() {
+  public GaenDataService gaenDataService(DataSource dataSource) {
     return new JdbcGaenDataServiceImpl(
-        getDbType(),
-        dataSource(),
-        Duration.ofMillis(releaseBucketDuration),
-        timeSkew,
-        originCountry);
-  }
-
-  public IrishHubSyncer irishHubSyncer() {
-    return new IrishHubSyncer(
-        irishBaseUrl,
-        irishAuthorizationToken,
-        pemEncodedRSAPrivateKey,
-        Duration.ofDays(retentionDays),
-        Duration.ofMillis(releaseBucketDuration),
-        gaenDataService(),
-        originCountry);
-  }
-
-  @Override
-  public void configureTasks(ScheduledTaskRegistrar taskRegistrar) {
-    taskRegistrar.addFixedRateTask(
-        new IntervalTask(
-            () -> {
-              irishHubSyncer().sync();
-            },
-            Long.MAX_VALUE));
+        getDbType(), dataSource, Duration.ofMillis(releaseBucketDuration), timeSkew, originCountry);
   }
 
   @Bean
-  public HubConfigs configTest(HubConfigs hubConfigs) { // TODO remove. for debug purposes only
-    return hubConfigs;
+  public SyncLogDataService syncLogDataService(DataSource dataSource) {
+    return new JdbcSyncLogDataServiceImpl(getDbType(), dataSource);
+  }
+
+  @Bean
+  public EfgsClient efgsClient(HubConfigs hubConfigs) throws CertificateException {
+    return new EfgsClient(hubConfigs.getEfgsGateways().get(0));
+  }
+
+  @Bean
+  public EfgsHubSyncer efgsHubSyncer(
+      EfgsClient efgsClient,
+      GaenDataService gaenDataService,
+      SyncLogDataService syncLogDataService) {
+    return new EfgsHubSyncer(
+        efgsClient, Duration.ofDays(retentionDays), gaenDataService, syncLogDataService);
   }
 }

@@ -15,6 +15,10 @@ public class GaenKeyWithOrigin {
   @Documentation(description = "the country of origin")
   private String origin;
 
+  @NotNull
+  @Documentation(description = "unique identifier (auto-generated from db)")
+  private String id;
+
   public GaenKey getGaenKey() {
     return gaenKey;
   }
@@ -29,6 +33,14 @@ public class GaenKeyWithOrigin {
 
   public void setOrigin(String origin) {
     this.origin = origin;
+  }
+
+  public String getId() {
+    return id;
+  }
+
+  public void setId(String id) {
+    this.id = id;
   }
 
   public String getKeyData() {

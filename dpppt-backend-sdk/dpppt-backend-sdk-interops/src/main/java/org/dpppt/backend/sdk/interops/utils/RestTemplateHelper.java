@@ -13,14 +13,23 @@ import java.security.NoSuchAlgorithmException;
 import java.security.UnrecoverableKeyException;
 import java.security.cert.CertificateException;
 import java.util.ArrayList;
+import java.util.Base64;
 import java.util.List;
+import javax.net.ssl.HostnameVerifier;
 import javax.net.ssl.SSLContext;
+import javax.net.ssl.SSLSession;
 import org.apache.http.client.config.RequestConfig;
+import org.apache.http.config.Registry;
+import org.apache.http.config.RegistryBuilder;
+import org.apache.http.conn.socket.ConnectionSocketFactory;
+import org.apache.http.conn.socket.PlainConnectionSocketFactory;
+import org.apache.http.conn.ssl.SSLConnectionSocketFactory;
 import org.apache.http.impl.client.CloseableHttpClient;
 import org.apache.http.impl.client.HttpClientBuilder;
 import org.apache.http.impl.client.HttpClients;
 import org.apache.http.impl.conn.PoolingHttpClientConnectionManager;
 import org.apache.http.ssl.SSLContexts;
+import org.apache.http.ssl.TrustStrategy;
 import org.springframework.core.io.ClassPathResource;
 import org.springframework.http.client.ClientHttpRequestInterceptor;
 import org.springframework.http.client.HttpComponentsClientHttpRequestFactory;
@@ -33,21 +42,21 @@ public class RestTemplateHelper {
   private static final int SOCKET_TIMEOUT = 20000;
 
   public static RestTemplate getRestTemplate() {
-    return buildRestTemplate(null, null);
+    return buildRestTemplate(null, null, null);
   }
 
   public static RestTemplate getRestTemplateWithClientCerts(
-      String authClientCert, String authClientCertPassword) {
-    return buildRestTemplate(authClientCert, authClientCertPassword);
+      String authClientCert, String authClientCertPassword, List<String> allowedHostnames) {
+    return buildRestTemplate(authClientCert, authClientCertPassword, allowedHostnames);
   }
 
   private static RestTemplate buildRestTemplate(
-      String authClientCert, String authClientCertPassword) {
+      String authClientCert, String authClientCertPassword, List<String> allowedHostnames) {
     try {
       RestTemplate rt =
           new RestTemplate(
               new HttpComponentsClientHttpRequestFactory(
-                  httpClient(authClientCert, authClientCertPassword)));
+                  httpClient(authClientCert, authClientCertPassword, allowedHostnames)));
       List<ClientHttpRequestInterceptor> interceptors = new ArrayList<>();
       interceptors.add(new LoggingRequestInterceptor());
       rt.setInterceptors(interceptors);
@@ -57,12 +66,11 @@ public class RestTemplateHelper {
     }
   }
 
-  private static CloseableHttpClient httpClient(String clientCert, String clientCertPassword)
+  private static CloseableHttpClient httpClient(
+      String clientCert, String clientCertPassword, List<String> allowedHostnames)
       throws IOException, KeyManagementException, UnrecoverableKeyException,
           NoSuchAlgorithmException, KeyStoreException, CertificateException {
     PoolingHttpClientConnectionManager manager = new PoolingHttpClientConnectionManager();
-    manager.setDefaultMaxPerRoute(20);
-    manager.setMaxTotal(30);
 
     HttpClientBuilder builder = HttpClients.custom();
     builder
@@ -84,10 +92,39 @@ public class RestTemplateHelper {
                   clientCertFile.toFile(),
                   clientCertPassword.toCharArray(),
                   clientCertPassword.toCharArray(),
-                  (aliases, socket) -> aliases.keySet().iterator().next())
+                  (aliases, socket) ->
+                      !aliases.keySet().isEmpty() ? aliases.keySet().iterator().next() : null)
+              .loadTrustMaterial(
+                  null,
+                  new TrustStrategy() {
+                    @Override
+                    public boolean isTrusted(
+                        java.security.cert.X509Certificate[] chain, String authType)
+                        throws CertificateException {
+                      return true;
+                    }
+                  })
               .build();
       builder.setSSLContext(sslContext);
+
+      SSLConnectionSocketFactory sslsf =
+          new SSLConnectionSocketFactory(
+              sslContext,
+              new HostnameVerifier() {
+                @Override
+                public boolean verify(String hostname, SSLSession session) {
+                  return allowedHostnames == null || allowedHostnames.contains(hostname);
+                }
+              });
+      Registry<ConnectionSocketFactory> socketFactoryRegistry =
+          RegistryBuilder.<ConnectionSocketFactory>create()
+              .register("https", sslsf)
+              .register("http", PlainConnectionSocketFactory.INSTANCE)
+              .build();
+      manager = new PoolingHttpClientConnectionManager(socketFactoryRegistry);
     }
+    manager.setDefaultMaxPerRoute(20);
+    manager.setMaxTotal(30);
 
     builder
         .setConnectionManager(manager)
@@ -102,12 +139,16 @@ public class RestTemplateHelper {
 
   public static Path getFile(String path) throws IOException {
     Path file = null;
-    if (path.startsWith("classpath:/")) {
+    final String base64Protocol = "base64:/";
+    if (path.startsWith(base64Protocol)) {
+      byte[] decodedBytes = Base64.getDecoder().decode(path.replace(base64Protocol, ""));
+      file = Files.createTempFile(null, null);
+      Files.write(file.toAbsolutePath(), decodedBytes);
+    } else if (path.startsWith("classpath:/")) {
       InputStream in = createInputStream(path);
       file = Files.createTempFile(null, null);
       Files.copy(in, file, StandardCopyOption.REPLACE_EXISTING);
       in.close();
-      return file;
     } else {
       file = Paths.get(path);
     }

@@ -52,4 +52,14 @@ public class MockDataSource implements GaenDataService {
       UTCInstant keysSince, UTCInstant now) { // TODO Auto-generated method stub
     return null;
   }
+
+  @Override
+  public List<GaenKeyWithOrigin> getExposedForEfgsUpload() { // TODO Auto-generated method stub
+    return null;
+  } // TODO Auto-generated method stub
+
+  @Override
+  public void setBatchTagForKeys(
+      List<GaenKeyWithOrigin> uploadedKeys, String batchTag) { // TODO Auto-generated method stub
+  }
 }

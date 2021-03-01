@@ -18,7 +18,7 @@ CREATE TABLE t_federation_sync_log
  gateway                   varchar(50) NOT NULL,
  action                    varchar(20) NOT NULL,
  batch_tag                 varchar(50) NOT NULL,
- key_date                  date NULL,
+ upload_date                  date NULL,
  start_time                timestamp with time zone NOT NULL,
  end_time                  timestamp with time zone NULL,
  state                     varchar(20) NOT NULL,

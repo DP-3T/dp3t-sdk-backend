@@ -11,6 +11,7 @@
 package org.dpppt.backend.sdk.data.gaen;
 
 import java.time.Duration;
+import java.time.LocalDate;
 import java.util.List;
 import org.dpppt.backend.sdk.model.gaen.GaenKey;
 import org.dpppt.backend.sdk.model.gaen.GaenKeyWithOrigin;
@@ -102,4 +103,19 @@ public interface GaenDataService {
    */
   List<GaenKeyWithOrigin> getSortedExposedSinceWithOriginFromOrigin(
       UTCInstant keysSince, UTCInstant now);
+
+  /**
+   * Returns all exposed keys with our own origin that are to be uploaded to the federation gateway,
+   * and haven't been uploaded yet.
+   *
+   * @return
+   */
+  List<GaenKeyWithOrigin> getExposedForEfgsUpload();
+
+  /**
+   * sets the batch tag for the given keys
+   * @param uploadedKeys
+   * @param batchTag
+   */
+  void setBatchTagForKeys(List<GaenKeyWithOrigin> uploadedKeys, String batchTag);
 }

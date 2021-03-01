@@ -11,7 +11,9 @@
 package org.dpppt.backend.sdk.data.gaen;
 
 import java.time.Duration;
+import java.util.ArrayList;
 import java.util.List;
+import java.util.stream.Collectors;
 import javax.sql.DataSource;
 import org.dpppt.backend.sdk.model.gaen.GaenKey;
 import org.dpppt.backend.sdk.model.gaen.GaenKeyWithOrigin;
@@ -187,25 +189,64 @@ public class JdbcGaenDataServiceImpl implements GaenDataService {
 
   private String getSQLExpressionForKeyDateFilterAndOrigin(
       UTCInstant keyDate, boolean withFederationGateway, MapSqlParameterSource params) {
-    String sql = "";
-    if (keyDate != null || !withFederationGateway) {
-      sql += " where";
-    }
+    List<String> conditions = new ArrayList<>();
     if (!withFederationGateway) {
       params.addValue("origin", originCountry);
-      sql += " origin = :origin";
+      conditions.add("origin = :origin");
     }
     if (keyDate != null) {
-      if (!withFederationGateway) {
-        sql += " and";
-      }
       params.addValue("rollingPeriodStartNumberStart", keyDate.get10MinutesSince1970());
       params.addValue("rollingPeriodStartNumberEnd", keyDate.plusDays(1).get10MinutesSince1970());
-      sql +=
-          " rolling_start_number >= :rollingPeriodStartNumberStart and"
-              + " rolling_start_number < :rollingPeriodStartNumberEnd";
+      conditions.add("rolling_start_number >= :rollingPeriodStartNumberStart");
+      conditions.add("rolling_start_number < :rollingPeriodStartNumberEnd");
     }
-    return sql;
+    return !conditions.isEmpty() ? ("where " + String.join(" and ", conditions)) : "";
+  }
+
+  @Override
+  @Transactional(readOnly = true)
+  public List<GaenKeyWithOrigin> getExposedForEfgsUpload() {
+    MapSqlParameterSource params = new MapSqlParameterSource();
+    params.addValue(
+        "maxBucket", UTCInstant.now().roundToBucketStart(releaseBucketDuration).getDate());
+    params.addValue("timeSkewSeconds", timeSkew.toSeconds());
+    params.addValue("origin", originCountry);
+
+    // Make sure, only keys are returned that are allowed to be published and from our own origin
+    // country.
+    // For this, we calculate the expiry for each key in a sub query. The expiry is then used for
+    // the where clause:
+    // expiry < maxBucket: the key is expired and therefore allowed to be published
+
+    // we need to add the time skew to calculate the expiry timestamp of a key:
+    // TO_TIMESTAMP((rolling_start_number + rolling_period) * 10 * 60 + :timeSkewSeconds
+
+    String subqueryWithExpiry =
+        "select pk_exposed_id,"
+            + " key,"
+            + " rolling_start_number,"
+            + " origin, "
+            + " rolling_period,"
+            + " batch_tag,"
+            + " share_with_federation_gateway,"
+            + getSQLExpressionForExpiry()
+            + " as expiry from t_gaen_exposed";
+    String sql =
+        "select keys.pk_exposed_id,"
+            + " keys.key,"
+            + " keys.rolling_start_number,"
+            + " keys.origin, "
+            + " keys.rolling_period from ("
+            + subqueryWithExpiry
+            + ") as keys"
+            + " where keys.origin = :origin"
+            + " and keys.expiry < :maxBucket"
+            + " and keys.batch_tag is null"
+            + " and keys.share_with_federation_gateway = true";
+
+    sql += " order by keys.pk_exposed_id desc";
+
+    return jt.query(sql, params, new GaenKeyWithOriginRowMapper());
   }
 
   private String getSQLExpressionForExpiry() {
@@ -215,6 +256,22 @@ public class JdbcGaenDataServiceImpl implements GaenDataService {
     } else {
       return "TIMESTAMP_WITH_ZONE((rolling_start_number + rolling_period) * 10 * 60 +"
           + " :timeSkewSeconds)";
+    }
+  }
+
+  @Override
+  public void setBatchTagForKeys(List<GaenKeyWithOrigin> uploadedKeys, String batchTag) {
+    if (uploadedKeys != null && !uploadedKeys.isEmpty()) {
+      String sql =
+          "update t_gaen_exposed"
+              + " set batch_tag = :batch_tag"
+              + " where pk_exposed_id in (:pk_exposed_id)";
+      MapSqlParameterSource params = new MapSqlParameterSource();
+      params.addValue("batch_tag", batchTag);
+      params.addValue(
+          "pk_exposed_id",
+          uploadedKeys.stream().map(GaenKeyWithOrigin::getId).collect(Collectors.toList()));
+      jt.update(sql, params);
     }
   }
 
