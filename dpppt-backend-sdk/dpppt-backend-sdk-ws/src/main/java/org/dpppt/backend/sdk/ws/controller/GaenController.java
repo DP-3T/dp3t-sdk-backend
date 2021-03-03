@@ -83,6 +83,8 @@ public class GaenController {
   private final Duration releaseBucketDuration;
 
   private final Duration requestTime;
+  private final Duration retentionPeriod;
+
   private final ValidateRequest validateRequest;
   private final ValidationUtils validationUtils;
   private final InsertManager insertManagerExposed;
@@ -104,7 +106,8 @@ public class GaenController {
       Duration releaseBucketDuration,
       Duration requestTime,
       Duration exposedListCacheControl,
-      PrivateKey secondDayKey) {
+      PrivateKey secondDayKey,
+      Duration retentionPeriod) {
     this.insertManagerExposed = insertManagerExposed;
     this.insertManagerExposedNextDay = insertManagerExposedNextDay;
     this.dataService = dataService;
@@ -116,6 +119,7 @@ public class GaenController {
     this.exposedListCacheControl = exposedListCacheControl;
     this.secondDayKey = secondDayKey;
     this.gaenSigner = gaenSigner;
+    this.retentionPeriod = retentionPeriod;
   }
 
   @GetMapping(value = "")
@@ -276,8 +280,15 @@ public class GaenController {
       throws BadBatchReleaseTimeException, IOException, InvalidKeyException, SignatureException,
           NoSuchAlgorithmException {
     var now = UTCInstant.now();
-    var publishedAfterInstant = UTCInstant.ofEpochMillis(publishedafter);
     var keyDateInstant = UTCInstant.ofEpochMillis(keyDate);
+
+    if (publishedafter == null) {
+      // if no lastKeyBundleTag given, go back to the start of the retention period and
+      // select next bucket.
+      publishedafter =
+          now.minus(retentionPeriod).roundToNextBucket(releaseBucketDuration).getTimestamp();
+    }
+    var publishedAfterInstant = UTCInstant.ofEpochMillis(publishedafter);
 
     if (!validationUtils.isValidKeyDate(UTCInstant.ofEpochMillis(keyDate))) {
       return ResponseEntity.notFound().build();
@@ -292,7 +303,7 @@ public class GaenController {
 
     var exposedKeys =
         dataService.getSortedExposedForKeyDate(
-            keyDateInstant, publishedAfterInstant, publishedUntil, now);
+            keyDateInstant, publishedAfterInstant, publishedUntil, now, false);
     exposedKeys =
         fakeKeyService.fillUpKeys(exposedKeys, publishedAfterInstant, keyDateInstant, now);
     if (exposedKeys.isEmpty()) {

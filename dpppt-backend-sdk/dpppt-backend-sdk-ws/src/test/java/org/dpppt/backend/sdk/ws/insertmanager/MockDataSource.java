@@ -22,7 +22,11 @@ public class MockDataSource implements GAENDataService {
 
   @Override
   public List<GaenKey> getSortedExposedForKeyDate(
-      UTCInstant keyDate, UTCInstant publishedAfter, UTCInstant publishedUntil, UTCInstant now) {
+      UTCInstant keyDate,
+      UTCInstant publishedAfter,
+      UTCInstant publishedUntil,
+      UTCInstant now,
+      boolean withFederationGateway) {
     // TODO Auto-generated method stub
     return null;
   }

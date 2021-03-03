@@ -89,54 +89,32 @@ public class JDBCGAENDataServiceImpl implements GAENDataService {
   @Override
   @Transactional(readOnly = true)
   public List<GaenKey> getSortedExposedForKeyDate(
-      UTCInstant keyDate, UTCInstant publishedAfter, UTCInstant publishedUntil, UTCInstant now) {
-    MapSqlParameterSource params = new MapSqlParameterSource();
-    params.addValue("rollingPeriodStartNumberStart", keyDate.get10MinutesSince1970());
-    params.addValue("rollingPeriodStartNumberEnd", keyDate.plusDays(1).get10MinutesSince1970());
-    params.addValue("publishedUntil", publishedUntil.getDate());
-
-    String sql =
-        "select pk_exposed_id, key, rolling_start_number, rolling_period"
-            + " from t_gaen_exposed where rolling_start_number >= :rollingPeriodStartNumberStart"
-            + " and rolling_start_number < :rollingPeriodStartNumberEnd and received_at <"
-            + " :publishedUntil";
-    // we need to subtract the time skew since we want to release it iff rolling_start_number +
-    // rolling_period + timeSkew < NOW
-    // note though that since we use `<` instead of `<=` a key which is valid until 24:00 will be
-    // accepted until 02:00 (by the clients, so we MUST NOT release it before 02:00), but 02:00 lies
-    // in the bucket of 04:00. So the key will be released
-    // earliest 04:00.
-    params.addValue(
-        "maxAllowedStartNumber",
-        now.roundToBucketStart(releaseBucketDuration).minus(timeSkew).get10MinutesSince1970());
-    sql += " and rolling_start_number + rolling_period < :maxAllowedStartNumber";
-
-    // note that received_at is always rounded to `next_bucket` - 1ms to difuse actual upload time
-    if (publishedAfter != null) {
-      params.addValue("publishedAfter", publishedAfter.getDate());
-      sql += " and received_at >= :publishedAfter";
-    }
-
-    sql += " order by pk_exposed_id desc";
-
-    return jt.query(sql, params, new GaenKeyRowMapper());
+      UTCInstant keyDate,
+      UTCInstant publishedAfter,
+      UTCInstant publishedUntil,
+      UTCInstant now,
+      boolean withFederationGateway) {
+    return getKeys(publishedAfter, now, keyDate, publishedUntil, withFederationGateway);
   }
 
   @Override
   @Transactional(readOnly = true)
   public List<GaenKey> getSortedExposedSince(
       UTCInstant keysSince, UTCInstant now, boolean withFederationGateway) {
+    return getKeys(
+        keysSince, now, null, now.roundToBucketStart(releaseBucketDuration), withFederationGateway);
+  }
+
+  private List<GaenKey> getKeys(
+      UTCInstant keysSince,
+      UTCInstant now,
+      UTCInstant keyDate,
+      UTCInstant maxBucket,
+      boolean withFederationGateway) {
     MapSqlParameterSource params = new MapSqlParameterSource();
     params.addValue("since", keysSince.getDate());
-    params.addValue("maxBucket", now.roundToBucketStart(releaseBucketDuration).getDate());
+    params.addValue("maxBucket", maxBucket.getDate());
     params.addValue("timeSkewSeconds", timeSkew.toSeconds());
-
-    // if with federation, do not check origin.
-    String originCondition = "";
-    if (!withFederationGateway) {
-      params.addValue("origin", originCountry);
-      originCondition = " keys.origin = :origin and ";
-    }
 
     // Select keys since the given date. We need to make sure, only keys are returned
     // that are allowed to be published.
@@ -153,16 +131,15 @@ public class JDBCGAENDataServiceImpl implements GAENDataService {
     // TO_TIMESTAMP((rolling_start_number + rolling_period) * 10 * 60 + :timeSkewSeconds
 
     String sql =
-        "select distinct keys.pk_exposed_id, keys.key, keys.rolling_start_number,"
+        "select keys.pk_exposed_id, keys.key, keys.rolling_start_number,"
             + " keys.rolling_period from (select pk_exposed_id, key, rolling_start_number,"
-            + " rolling_period, received_at, origin, "
+            + " rolling_period, received_at, "
             + getSQLExpressionForExpiry()
-            + " as expiry from t_gaen_exposed)"
-            + " as keys where"
-            + originCondition
-            + "((keys.received_at >= :since AND"
-            + " keys.received_at < :maxBucket AND keys.expiry <= keys.received_at) OR (keys.expiry"
-            + " >= :since AND keys.expiry < :maxBucket AND keys.expiry > keys.received_at))";
+            + " as expiry from t_gaen_exposed "
+            + getSQLExpressionForKeyDateFilterAndOrigin(keyDate, withFederationGateway, params)
+            + ") as keys where( (keys.expiry <= keys.received_at"
+            + " AND keys.received_at >= :since AND keys.received_at < :maxBucket) OR (keys.expiry"
+            + " > keys.received_at AND keys.expiry >= :since AND keys.expiry < :maxBucket) )";
 
     sql += " order by keys.pk_exposed_id desc";
 
@@ -206,6 +183,29 @@ public class JDBCGAENDataServiceImpl implements GAENDataService {
     sql += " order by keys.pk_exposed_id desc";
 
     return jt.query(sql, params, new GaenKeyWithOriginRowMapper());
+  }
+
+  private String getSQLExpressionForKeyDateFilterAndOrigin(
+      UTCInstant keyDate, boolean withFederationGateway, MapSqlParameterSource params) {
+    String sql = "";
+    if (keyDate != null || !withFederationGateway) {
+      sql += " where";
+    }
+    if (!withFederationGateway) {
+      params.addValue("origin", originCountry);
+      sql += " origin = :origin";
+    }
+    if (keyDate != null) {
+      if (!withFederationGateway) {
+        sql += " and";
+      }
+      params.addValue("rollingPeriodStartNumberStart", keyDate.get10MinutesSince1970());
+      params.addValue("rollingPeriodStartNumberEnd", keyDate.plusDays(1).get10MinutesSince1970());
+      sql +=
+          " rolling_start_number >= :rollingPeriodStartNumberStart and"
+              + " rolling_start_number < :rollingPeriodStartNumberEnd";
+    }
+    return sql;
   }
 
   private String getSQLExpressionForExpiry() {

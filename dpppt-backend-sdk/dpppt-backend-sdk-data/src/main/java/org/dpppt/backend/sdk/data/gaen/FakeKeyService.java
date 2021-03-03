@@ -75,7 +75,7 @@ public class FakeKeyService {
     }
     var fakeKeys =
         this.dataService.getSortedExposedForKeyDate(
-            keyDate, publishedafter, UTCInstant.today().plusDays(1), now);
+            keyDate, publishedafter, UTCInstant.today().plusDays(1), now, true);
 
     keys.addAll(fakeKeys);
     return keys;

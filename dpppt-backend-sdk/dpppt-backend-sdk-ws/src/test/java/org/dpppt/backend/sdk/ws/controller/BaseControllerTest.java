@@ -292,9 +292,10 @@ public abstract class BaseControllerTest {
     var result =
         gaenDataService.getSortedExposedForKeyDate(
             now.atStartOfDay().minusDays(1),
-            null,
+            UTCInstant.midnight1970(),
             now.roundToNextBucket(releaseBucketDuration),
-            now);
+            now,
+            true);
     assertEquals(2, result.size());
     for (var key : result) {
       assertEquals(Integer.valueOf(144), key.getRollingPeriod());
@@ -303,9 +304,10 @@ public abstract class BaseControllerTest {
     result =
         gaenDataService.getSortedExposedForKeyDate(
             now.atStartOfDay().minusDays(1),
-            null,
+            UTCInstant.midnight1970(),
             now.roundToBucketStart(releaseBucketDuration),
-            now);
+            now,
+            true);
     assertEquals(0, result.size());
 
     // third key should be released tomorrow (at four)
@@ -313,19 +315,28 @@ public abstract class BaseControllerTest {
     result =
         gaenDataService.getSortedExposedForKeyDate(
             now.atStartOfDay(),
-            null,
+            UTCInstant.midnight1970(),
             tomorrow2AM.roundToNextBucket(releaseBucketDuration),
-            tomorrow2AM);
+            tomorrow2AM,
+            true);
     assertEquals(1, result.size());
 
     result =
         gaenDataService.getSortedExposedForKeyDate(
-            now.atStartOfDay(), null, now.roundToNextBucket(releaseBucketDuration), now);
+            now.atStartOfDay(),
+            UTCInstant.midnight1970(),
+            now.roundToNextBucket(releaseBucketDuration),
+            now,
+            true);
     assertEquals(0, result.size());
 
     result =
         gaenDataService.getSortedExposedForKeyDate(
-            now.atStartOfDay(), null, now.atStartOfDay().plusDays(1), now);
+            now.atStartOfDay(),
+            UTCInstant.midnight1970(),
+            now.atStartOfDay().plusDays(1),
+            now,
+            true);
     assertEquals(0, result.size());
   }
 

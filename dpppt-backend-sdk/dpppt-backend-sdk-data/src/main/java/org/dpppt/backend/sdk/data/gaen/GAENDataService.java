@@ -63,10 +63,16 @@ public interface GAENDataService {
    * @param publishedAfter when publication should start
    * @param publishedUntil last publication
    * @param now the start of the query
+   * @param withFederationGateway if set to true, the given keys are stored such that they can be
+   *     shared with other federation gateways.
    * @return all exposeed keys for the given batch
    */
   List<GaenKey> getSortedExposedForKeyDate(
-      UTCInstant keyDate, UTCInstant publishedAfter, UTCInstant publishedUntil, UTCInstant now);
+      UTCInstant keyDate,
+      UTCInstant publishedAfter,
+      UTCInstant publishedUntil,
+      UTCInstant now,
+      boolean withFederationGateway);
 
   /**
    * deletes entries older than retentionperiod
