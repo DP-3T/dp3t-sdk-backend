@@ -219,7 +219,7 @@ public class GaenDataServiceTest {
 
     var returnedKeys =
         gaenDataService.getSortedExposedForKeyDate(
-            UTCInstant.today().minusDays(1), null, publishedUntil, now, true);
+            UTCInstant.today().minusDays(1), UTCInstant.midnight1970(), publishedUntil, now, true);
 
     assertEquals(1, returnedKeys.size());
     assertEquals(keys.get(1).getKeyData(), returnedKeys.get(0).getKeyData());
