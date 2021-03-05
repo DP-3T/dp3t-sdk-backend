@@ -163,6 +163,7 @@ public class EfgsHubSyncer {
     logEntry.setAction(SyncAction.UPLOAD);
     logEntry.setBatchTag(batchTag);
     logEntry.setStartTime(start);
+    logEntry.setUploadDate(start.getLocalDate());
     logEntry.setEndTime(UTCInstant.now());
     logEntry.setState(success ? SyncState.DONE : SyncState.ERROR);
     syncLogDataService.insertLogEntry(logEntry);
