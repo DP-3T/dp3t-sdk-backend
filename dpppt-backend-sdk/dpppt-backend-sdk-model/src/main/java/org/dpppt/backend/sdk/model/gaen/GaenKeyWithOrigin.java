@@ -17,7 +17,7 @@ public class GaenKeyWithOrigin {
 
   @NotNull
   @Documentation(description = "unique identifier (auto-generated from db)")
-  private String id;
+  private Integer id;
 
   public GaenKey getGaenKey() {
     return gaenKey;
@@ -35,11 +35,11 @@ public class GaenKeyWithOrigin {
     this.origin = origin;
   }
 
-  public String getId() {
+  public Integer getId() {
     return id;
   }
 
-  public void setId(String id) {
+  public void setId(Integer id) {
     this.id = id;
   }
 

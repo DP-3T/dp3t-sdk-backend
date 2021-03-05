@@ -15,7 +15,7 @@ public class GaenKeyWithOriginRowMapper implements RowMapper<GaenKeyWithOrigin> 
     var gaenKeyWithOrigin = new GaenKeyWithOrigin();
     gaenKeyWithOrigin.setGaenKey(gaenKey);
     gaenKeyWithOrigin.setOrigin(rs.getString("origin"));
-    gaenKeyWithOrigin.setId(rs.getString("pk_exposed_id"));
+    gaenKeyWithOrigin.setId(rs.getInt("pk_exposed_id"));
     return gaenKeyWithOrigin;
   }
 }
