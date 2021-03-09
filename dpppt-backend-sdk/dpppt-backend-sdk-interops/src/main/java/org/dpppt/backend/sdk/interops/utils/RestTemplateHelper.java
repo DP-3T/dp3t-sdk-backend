@@ -15,9 +15,7 @@ import java.security.cert.CertificateException;
 import java.util.ArrayList;
 import java.util.Base64;
 import java.util.List;
-import javax.net.ssl.HostnameVerifier;
 import javax.net.ssl.SSLContext;
-import javax.net.ssl.SSLSession;
 import org.apache.http.client.config.RequestConfig;
 import org.apache.http.config.Registry;
 import org.apache.http.config.RegistryBuilder;
@@ -29,7 +27,6 @@ import org.apache.http.impl.client.HttpClientBuilder;
 import org.apache.http.impl.client.HttpClients;
 import org.apache.http.impl.conn.PoolingHttpClientConnectionManager;
 import org.apache.http.ssl.SSLContexts;
-import org.apache.http.ssl.TrustStrategy;
 import org.springframework.core.io.ClassPathResource;
 import org.springframework.http.client.ClientHttpRequestInterceptor;
 import org.springframework.http.client.HttpComponentsClientHttpRequestFactory;
@@ -97,15 +94,7 @@ public class RestTemplateHelper {
               .build();
       builder.setSSLContext(sslContext);
 
-      SSLConnectionSocketFactory sslsf =
-          new SSLConnectionSocketFactory(
-              sslContext,
-              new HostnameVerifier() {
-                @Override
-                public boolean verify(String hostname, SSLSession session) {
-                  return allowedHostnames == null || allowedHostnames.contains(hostname);
-                }
-              });
+      SSLConnectionSocketFactory sslsf = new SSLConnectionSocketFactory(sslContext);
       Registry<ConnectionSocketFactory> socketFactoryRegistry =
           RegistryBuilder.<ConnectionSocketFactory>create()
               .register("https", sslsf)
