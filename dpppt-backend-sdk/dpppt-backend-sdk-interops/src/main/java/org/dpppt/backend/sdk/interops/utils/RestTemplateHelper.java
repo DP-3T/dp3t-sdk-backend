@@ -94,16 +94,6 @@ public class RestTemplateHelper {
                   clientCertPassword.toCharArray(),
                   (aliases, socket) ->
                       !aliases.keySet().isEmpty() ? aliases.keySet().iterator().next() : null)
-              .loadTrustMaterial(
-                  null,
-                  new TrustStrategy() {
-                    @Override
-                    public boolean isTrusted(
-                        java.security.cert.X509Certificate[] chain, String authType)
-                        throws CertificateException {
-                      return true;
-                    }
-                  })
               .build();
       builder.setSSLContext(sslContext);
 
