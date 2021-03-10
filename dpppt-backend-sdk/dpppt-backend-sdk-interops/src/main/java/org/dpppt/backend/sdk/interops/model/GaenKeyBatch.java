@@ -3,10 +3,10 @@ package org.dpppt.backend.sdk.interops.model;
 import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.List;
-import org.dpppt.backend.sdk.model.gaen.GaenKeyWithOrigin;
+import org.dpppt.backend.sdk.model.gaen.GaenKeyForInterops;
 
 public class GaenKeyBatch {
-  private List<GaenKeyWithOrigin> keys = new ArrayList<>();
+  private List<GaenKeyForInterops> keys = new ArrayList<>();
   private String batchTag;
   private String nextBatchTag;
   private LocalDate date;
@@ -15,11 +15,11 @@ public class GaenKeyBatch {
     this.date = date;
   }
 
-  public List<GaenKeyWithOrigin> getKeys() {
+  public List<GaenKeyForInterops> getKeys() {
     return keys;
   }
 
-  public void setKeys(List<GaenKeyWithOrigin> keys) {
+  public void setKeys(List<GaenKeyForInterops> keys) {
     this.keys = keys;
   }
 

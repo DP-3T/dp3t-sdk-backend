@@ -13,7 +13,7 @@ import org.dpppt.backend.sdk.data.config.GaenDataServiceConfig;
 import org.dpppt.backend.sdk.data.config.RedeemDataServiceConfig;
 import org.dpppt.backend.sdk.data.config.StandaloneDataConfig;
 import org.dpppt.backend.sdk.model.gaen.GaenKey;
-import org.dpppt.backend.sdk.model.gaen.GaenKeyWithOrigin;
+import org.dpppt.backend.sdk.model.gaen.GaenKeyForInterops;
 import org.dpppt.backend.sdk.model.gaen.GaenUnit;
 import org.dpppt.backend.sdk.utils.UTCInstant;
 import org.junit.Test;
@@ -247,12 +247,12 @@ public class GaenDataServiceTest {
     gaenDataService.upsertExposees(keys, now, true);
 
     var returnedKeys =
-        gaenDataService.getSortedExposedSinceWithOriginFromOrigin(
+        gaenDataService.getSortedExposedSinceForInteropsFromOrigin(
             now.minusDays(10), now.plusDays(1));
 
     assertEquals(keys.size(), returnedKeys.size());
     assertEquals(keys.get(1).getKeyData(), returnedKeys.get(0).getKeyData());
-    for (GaenKeyWithOrigin k : returnedKeys) {
+    for (GaenKeyForInterops k : returnedKeys) {
       assertEquals("CH", k.getOrigin());
     }
   }

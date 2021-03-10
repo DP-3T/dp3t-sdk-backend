@@ -11,10 +11,9 @@
 package org.dpppt.backend.sdk.data.gaen;
 
 import java.time.Duration;
-import java.time.LocalDate;
 import java.util.List;
 import org.dpppt.backend.sdk.model.gaen.GaenKey;
-import org.dpppt.backend.sdk.model.gaen.GaenKeyWithOrigin;
+import org.dpppt.backend.sdk.model.gaen.GaenKeyForInterops;
 import org.dpppt.backend.sdk.utils.UTCInstant;
 
 public interface GaenDataService {
@@ -101,7 +100,7 @@ public interface GaenDataService {
    * @param now
    * @return
    */
-  List<GaenKeyWithOrigin> getSortedExposedSinceWithOriginFromOrigin(
+  List<GaenKeyForInterops> getSortedExposedSinceForInteropsFromOrigin(
       UTCInstant keysSince, UTCInstant now);
 
   /**
@@ -110,12 +109,13 @@ public interface GaenDataService {
    *
    * @return
    */
-  List<GaenKeyWithOrigin> getExposedForEfgsUpload();
+  List<GaenKeyForInterops> getExposedForEfgsUpload();
 
   /**
    * sets the batch tag for the given keys
+   *
    * @param uploadedKeys
    * @param batchTag
    */
-  void setBatchTagForKeys(List<GaenKeyWithOrigin> uploadedKeys, String batchTag);
+  void setBatchTagForKeys(List<GaenKeyForInterops> uploadedKeys, String batchTag);
 }

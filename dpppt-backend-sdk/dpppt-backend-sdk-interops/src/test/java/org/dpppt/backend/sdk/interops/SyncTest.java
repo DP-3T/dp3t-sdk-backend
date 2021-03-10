@@ -21,7 +21,7 @@ import org.dpppt.backend.sdk.interops.model.EfgsGatewayConfig;
 import org.dpppt.backend.sdk.interops.syncer.EfgsHubSyncer;
 import org.dpppt.backend.sdk.interops.syncer.efgs.EfgsClient;
 import org.dpppt.backend.sdk.model.gaen.GaenKey;
-import org.dpppt.backend.sdk.model.gaen.GaenKeyWithOrigin;
+import org.dpppt.backend.sdk.model.gaen.GaenKeyForInterops;
 import org.dpppt.backend.sdk.utils.UTCInstant;
 import org.junit.Assert;
 import org.junit.Ignore;
@@ -55,13 +55,13 @@ public class SyncTest {
       throws GeneralSecurityException, OperatorCreationException, CMSException, IOException {
     EfgsClient efgsClient = new EfgsClient(getEfgsGatewayConfig());
     String batchTag = getBatchTag();
-    List<GaenKeyWithOrigin> keysToUpload = createMockedKeys(10);
-    List<GaenKeyWithOrigin> uploadedKeys = efgsClient.upload(keysToUpload, batchTag);
+    List<GaenKeyForInterops> keysToUpload = createMockedKeys(10);
+    List<GaenKeyForInterops> uploadedKeys = efgsClient.upload(keysToUpload, batchTag);
     Assert.assertEquals(keysToUpload.size(), uploadedKeys.size());
   }
 
   @Test
-  //    @Ignore("for local testing")
+  @Ignore("for local testing")
   public void testEfgsClientDownload() throws GeneralSecurityException {
     EfgsHubSyncer syncer =
         new EfgsHubSyncer(
@@ -76,8 +76,7 @@ public class SyncTest {
     EfgsGatewayConfig efgsGatewayConfig = new EfgsGatewayConfig();
     efgsGatewayConfig.setId("efgs-gateway");
     efgsGatewayConfig.setBaseUrl("https://api.ch-hub-r.bit.admin.ch");
-    efgsGatewayConfig.setAuthClientCert(
-        "base64:/*");
+    efgsGatewayConfig.setAuthClientCert("base64:/*");
     efgsGatewayConfig.setAuthClientCertPassword("*");
     efgsGatewayConfig.setSignClientCert(
         "-----BEGIN CERTIFICATE-----\n*\n-----END CERTIFICATE-----\n");
@@ -88,12 +87,12 @@ public class SyncTest {
     return efgsGatewayConfig;
   }
 
-  private List<GaenKeyWithOrigin> createMockedKeys(int numOfKeysToCreate) {
-    List<GaenKeyWithOrigin> keys = new ArrayList<>();
+  private List<GaenKeyForInterops> createMockedKeys(int numOfKeysToCreate) {
+    List<GaenKeyForInterops> keys = new ArrayList<>();
     for (int i = 0; i < numOfKeysToCreate; i++) {
       byte[] bytes = new byte[16];
       SECURE_RANDOM.nextBytes(bytes);
-      GaenKeyWithOrigin keyWithOrigin = new GaenKeyWithOrigin();
+      GaenKeyForInterops keyWithOrigin = new GaenKeyForInterops();
       keyWithOrigin.setGaenKey(new GaenKey());
       keyWithOrigin.setKeyData(java.util.Base64.getEncoder().encodeToString(bytes));
       keyWithOrigin.setRollingStartNumber(

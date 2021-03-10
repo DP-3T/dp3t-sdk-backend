@@ -35,7 +35,7 @@ import org.dpppt.backend.sdk.interops.model.IrishHubKey;
 import org.dpppt.backend.sdk.interops.model.IrishHubUploadResponse;
 import org.dpppt.backend.sdk.interops.utils.RestTemplateHelper;
 import org.dpppt.backend.sdk.model.gaen.GaenKey;
-import org.dpppt.backend.sdk.model.gaen.GaenKeyWithOrigin;
+import org.dpppt.backend.sdk.model.gaen.GaenKeyForInterops;
 import org.dpppt.backend.sdk.utils.UTCInstant;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -123,12 +123,12 @@ public class IrishHubSyncer {
   private void upload(UTCInstant now) throws JOSEException, JsonProcessingException {
     logger.info("Start upload keys since: " + lastUploadTill);
     UTCInstant uploadTill = now.roundToBucketStart(releaseBucketDuration);
-    List<GaenKeyWithOrigin> keysToUpload =
-        gaenDataService.getSortedExposedSinceWithOriginFromOrigin(lastUploadTill, now);
+    List<GaenKeyForInterops> keysToUpload =
+        gaenDataService.getSortedExposedSinceForInteropsFromOrigin(lastUploadTill, now);
     logger.info("Found " + keysToUpload.size() + " keys to upload");
 
     List<IrishHubKey> irishKeysToUpload = new ArrayList<>();
-    for (GaenKeyWithOrigin gaenKey : keysToUpload) {
+    for (GaenKeyForInterops gaenKey : keysToUpload) {
       irishKeysToUpload.add(mapToIrishKey(gaenKey));
     }
 
@@ -242,7 +242,7 @@ public class IrishHubSyncer {
     return gaenKey;
   }
 
-  private IrishHubKey mapToIrishKey(GaenKeyWithOrigin gaenKey) {
+  private IrishHubKey mapToIrishKey(GaenKeyForInterops gaenKey) {
     IrishHubKey irishHubKey = new IrishHubKey();
     irishHubKey.setKeyData(gaenKey.getKeyData());
     irishHubKey.setOrigin(gaenKey.getOrigin());

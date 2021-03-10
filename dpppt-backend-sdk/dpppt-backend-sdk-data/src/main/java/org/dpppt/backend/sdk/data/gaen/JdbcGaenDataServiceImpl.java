@@ -16,7 +16,7 @@ import java.util.List;
 import java.util.stream.Collectors;
 import javax.sql.DataSource;
 import org.dpppt.backend.sdk.model.gaen.GaenKey;
-import org.dpppt.backend.sdk.model.gaen.GaenKeyWithOrigin;
+import org.dpppt.backend.sdk.model.gaen.GaenKeyForInterops;
 import org.dpppt.backend.sdk.utils.UTCInstant;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -150,7 +150,7 @@ public class JdbcGaenDataServiceImpl implements GaenDataService {
 
   @Override
   @Transactional(readOnly = true)
-  public List<GaenKeyWithOrigin> getSortedExposedSinceWithOriginFromOrigin(
+  public List<GaenKeyForInterops> getSortedExposedSinceForInteropsFromOrigin(
       UTCInstant keysSince, UTCInstant now) {
     MapSqlParameterSource params = new MapSqlParameterSource();
     params.addValue("since", keysSince.getDate());
@@ -174,8 +174,9 @@ public class JdbcGaenDataServiceImpl implements GaenDataService {
 
     String sql =
         "select keys.pk_exposed_id, keys.key, keys.rolling_start_number, keys.origin, "
-            + " keys.rolling_period from (select pk_exposed_id, key, rolling_start_number,"
-            + " rolling_period, received_at, origin, "
+            + " keys.rolling_period, received_at, report_type, days_since_onset_of_symptoms "
+            + " from (select pk_exposed_id, key, rolling_start_number,"
+            + " rolling_period, received_at, origin, report_type, days_since_onset_of_symptoms,"
             + getSQLExpressionForExpiry()
             + " as expiry from t_gaen_exposed)"
             + " as keys where keys.origin = :origin and ((keys.received_at >= :since AND"
@@ -184,7 +185,7 @@ public class JdbcGaenDataServiceImpl implements GaenDataService {
 
     sql += " order by keys.pk_exposed_id desc";
 
-    return jt.query(sql, params, new GaenKeyWithOriginRowMapper());
+    return jt.query(sql, params, new GaenKeyForInteropsRowMapper());
   }
 
   private String getSQLExpressionForKeyDateFilterAndOrigin(
@@ -205,7 +206,7 @@ public class JdbcGaenDataServiceImpl implements GaenDataService {
 
   @Override
   @Transactional(readOnly = true)
-  public List<GaenKeyWithOrigin> getExposedForEfgsUpload() {
+  public List<GaenKeyForInterops> getExposedForEfgsUpload() {
     MapSqlParameterSource params = new MapSqlParameterSource();
     params.addValue(
         "maxBucket", UTCInstant.now().roundToBucketStart(releaseBucketDuration).getDate());
@@ -227,6 +228,9 @@ public class JdbcGaenDataServiceImpl implements GaenDataService {
             + " rolling_start_number,"
             + " origin, "
             + " rolling_period,"
+            + " received_at, "
+            + " report_type,"
+            + " days_since_onset_of_symptoms,"
             + " batch_tag,"
             + " share_with_federation_gateway,"
             + getSQLExpressionForExpiry()
@@ -236,6 +240,9 @@ public class JdbcGaenDataServiceImpl implements GaenDataService {
             + " keys.key,"
             + " keys.rolling_start_number,"
             + " keys.origin, "
+            + " keys.received_at, "
+            + " keys.report_type,"
+            + " keys.days_since_onset_of_symptoms,"
             + " keys.rolling_period from ("
             + subqueryWithExpiry
             + ") as keys"
@@ -246,7 +253,7 @@ public class JdbcGaenDataServiceImpl implements GaenDataService {
 
     sql += " order by keys.pk_exposed_id desc";
 
-    return jt.query(sql, params, new GaenKeyWithOriginRowMapper());
+    return jt.query(sql, params, new GaenKeyForInteropsRowMapper());
   }
 
   private String getSQLExpressionForExpiry() {
@@ -260,7 +267,7 @@ public class JdbcGaenDataServiceImpl implements GaenDataService {
   }
 
   @Override
-  public void setBatchTagForKeys(List<GaenKeyWithOrigin> uploadedKeys, String batchTag) {
+  public void setBatchTagForKeys(List<GaenKeyForInterops> uploadedKeys, String batchTag) {
     if (uploadedKeys != null && !uploadedKeys.isEmpty()) {
       String sql =
           "update t_gaen_exposed"
@@ -270,7 +277,7 @@ public class JdbcGaenDataServiceImpl implements GaenDataService {
       params.addValue("batch_tag", batchTag);
       params.addValue(
           "pk_exposed_id",
-          uploadedKeys.stream().map(GaenKeyWithOrigin::getId).collect(Collectors.toList()));
+          uploadedKeys.stream().map(GaenKeyForInterops::getId).collect(Collectors.toList()));
       jt.update(sql, params);
     }
   }

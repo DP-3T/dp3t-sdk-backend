@@ -20,7 +20,7 @@ import org.dpppt.backend.sdk.interops.syncer.efgs.signing.BatchSigner;
 import org.dpppt.backend.sdk.interops.syncer.efgs.signing.CryptoProvider;
 import org.dpppt.backend.sdk.interops.utils.RestTemplateHelper;
 import org.dpppt.backend.sdk.model.gaen.GaenKey;
-import org.dpppt.backend.sdk.model.gaen.GaenKeyWithOrigin;
+import org.dpppt.backend.sdk.model.gaen.GaenKeyForInterops;
 import org.dpppt.backend.sdk.model.interops.proto.EfgsProto;
 import org.dpppt.backend.sdk.model.interops.proto.EfgsProto.DiagnosisKey;
 import org.dpppt.backend.sdk.model.interops.proto.EfgsProto.DiagnosisKeyBatch;
@@ -123,7 +123,7 @@ public class EfgsClient {
    * @throws IOException
    * @return uploaded keys
    */
-  public List<GaenKeyWithOrigin> upload(List<GaenKeyWithOrigin> batchToUpload, String batchTag)
+  public List<GaenKeyForInterops> upload(List<GaenKeyForInterops> batchToUpload, String batchTag)
       throws OperatorCreationException, GeneralSecurityException, CMSException, IOException {
     DiagnosisKeyBatch efgsBatch = mapToEfgsBatch(batchToUpload);
 
@@ -161,9 +161,9 @@ public class EfgsClient {
     return rt.exchange(request, EfgsBatchUploadResponse.class);
   }
 
-  private List<GaenKeyWithOrigin> getUploadedKeys(
-      List<GaenKeyWithOrigin> batchToUpload, List<Integer> failedIndexes) {
-    List<GaenKeyWithOrigin> uploadedKeys = new ArrayList<>();
+  private List<GaenKeyForInterops> getUploadedKeys(
+      List<GaenKeyForInterops> batchToUpload, List<Integer> failedIndexes) {
+    List<GaenKeyForInterops> uploadedKeys = new ArrayList<>();
     for (int i = 0; i < batchToUpload.size(); i++) {
       if (!failedIndexes.contains(i)) {
         uploadedKeys.add(batchToUpload.get(i));
@@ -189,13 +189,13 @@ public class EfgsClient {
     return headers;
   }
 
-  private DiagnosisKeyBatch mapToEfgsBatch(List<GaenKeyWithOrigin> batchToUpload) {
+  private DiagnosisKeyBatch mapToEfgsBatch(List<GaenKeyForInterops> batchToUpload) {
     return DiagnosisKeyBatch.newBuilder()
         .addAllKeys(batchToUpload.stream().map(k -> mapToEfgsKey(k)).collect(Collectors.toList()))
         .build();
   }
 
-  private DiagnosisKey mapToEfgsKey(GaenKeyWithOrigin gaenKey) {
+  private DiagnosisKey mapToEfgsKey(GaenKeyForInterops gaenKey) {
     return EfgsProto.DiagnosisKey.newBuilder()
         .setKeyData(ByteString.copyFrom(Base64.getDecoder().decode(gaenKey.getKeyData())))
         .setRollingStartIntervalNumber(gaenKey.getRollingStartNumber())
@@ -208,14 +208,14 @@ public class EfgsClient {
         .build();
   }
 
-  private List<GaenKeyWithOrigin> mapToGaenKeyWithOriginList(DiagnosisKeyBatch diagnosisKeyBatch) {
+  private List<GaenKeyForInterops> mapToGaenKeyWithOriginList(DiagnosisKeyBatch diagnosisKeyBatch) {
     return diagnosisKeyBatch.getKeysList().stream()
         .map(k -> mapToGaenKeyWithOrigin(k))
         .collect(Collectors.toList());
   }
 
-  private GaenKeyWithOrigin mapToGaenKeyWithOrigin(DiagnosisKey diagnosisKey) {
-    GaenKeyWithOrigin keyWithOrigin = new GaenKeyWithOrigin();
+  private GaenKeyForInterops mapToGaenKeyWithOrigin(DiagnosisKey diagnosisKey) {
+    GaenKeyForInterops keyWithOrigin = new GaenKeyForInterops();
     keyWithOrigin.setGaenKey(new GaenKey());
     keyWithOrigin.setKeyData(
         java.util.Base64.getEncoder().encodeToString(diagnosisKey.getKeyData().toByteArray()));

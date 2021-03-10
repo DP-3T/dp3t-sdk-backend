@@ -2,12 +2,13 @@ package org.dpppt.backend.sdk.model.gaen;
 
 import ch.ubique.openapi.docannotations.Documentation;
 import javax.validation.constraints.NotNull;
+import org.dpppt.backend.sdk.utils.UTCInstant;
 
 /**
  * Same as {@link GaenKey} but adds the additional information for international interoperations,
  * this is the origin country.
  */
-public class GaenKeyWithOrigin {
+public class GaenKeyForInterops {
 
   private GaenKey gaenKey;
 
@@ -15,9 +16,18 @@ public class GaenKeyWithOrigin {
   @Documentation(description = "the country of origin")
   private String origin;
 
+  @Documentation(description = "the report type of the key")
+  private ReportType reportType;
+
+  @Documentation(description = "day since onset of symptoms")
+  private Integer daysSinceOnsetOfSymptoms;
+
   @NotNull
   @Documentation(description = "unique identifier (auto-generated from db)")
   private Integer id;
+
+  @Documentation(description = "timestamp the key was received at the server")
+  private UTCInstant receivedAt;
 
   public GaenKey getGaenKey() {
     return gaenKey;
@@ -41,6 +51,30 @@ public class GaenKeyWithOrigin {
 
   public void setId(Integer id) {
     this.id = id;
+  }
+
+  public ReportType getReportType() {
+    return reportType;
+  }
+
+  public void setReportType(ReportType reportType) {
+    this.reportType = reportType;
+  }
+
+  public Integer getDaysSinceOnsetOfSymptoms() {
+    return daysSinceOnsetOfSymptoms;
+  }
+
+  public void setDaysSinceOnsetOfSymptoms(Integer daysSinceOnsetOfSymptoms) {
+    this.daysSinceOnsetOfSymptoms = daysSinceOnsetOfSymptoms;
+  }
+
+  public UTCInstant getReceivedAt() {
+    return receivedAt;
+  }
+
+  public void setReceivedAt(UTCInstant receivedAt) {
+    this.receivedAt = receivedAt;
   }
 
   public String getKeyData() {

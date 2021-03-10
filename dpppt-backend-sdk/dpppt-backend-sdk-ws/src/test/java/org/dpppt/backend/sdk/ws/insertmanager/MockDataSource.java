@@ -4,7 +4,7 @@ import java.time.Duration;
 import java.util.List;
 import org.dpppt.backend.sdk.data.gaen.GaenDataService;
 import org.dpppt.backend.sdk.model.gaen.GaenKey;
-import org.dpppt.backend.sdk.model.gaen.GaenKeyWithOrigin;
+import org.dpppt.backend.sdk.model.gaen.GaenKeyForInterops;
 import org.dpppt.backend.sdk.utils.UTCInstant;
 
 public class MockDataSource implements GaenDataService {
@@ -48,18 +48,18 @@ public class MockDataSource implements GaenDataService {
   }
 
   @Override
-  public List<GaenKeyWithOrigin> getSortedExposedSinceWithOriginFromOrigin(
+  public List<GaenKeyForInterops> getSortedExposedSinceForInteropsFromOrigin(
       UTCInstant keysSince, UTCInstant now) { // TODO Auto-generated method stub
     return null;
   }
 
   @Override
-  public List<GaenKeyWithOrigin> getExposedForEfgsUpload() { // TODO Auto-generated method stub
+  public List<GaenKeyForInterops> getExposedForEfgsUpload() { // TODO Auto-generated method stub
     return null;
   } // TODO Auto-generated method stub
 
   @Override
   public void setBatchTagForKeys(
-      List<GaenKeyWithOrigin> uploadedKeys, String batchTag) { // TODO Auto-generated method stub
+      List<GaenKeyForInterops> uploadedKeys, String batchTag) { // TODO Auto-generated method stub
   }
 }

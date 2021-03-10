@@ -22,7 +22,7 @@ import org.dpppt.backend.sdk.data.gaen.GaenDataService;
 import org.dpppt.backend.sdk.data.interops.SyncLogDataService;
 import org.dpppt.backend.sdk.interops.model.GaenKeyBatch;
 import org.dpppt.backend.sdk.interops.syncer.efgs.EfgsClient;
-import org.dpppt.backend.sdk.model.gaen.GaenKeyWithOrigin;
+import org.dpppt.backend.sdk.model.gaen.GaenKeyForInterops;
 import org.dpppt.backend.sdk.model.interops.FederationSyncLogEntry;
 import org.dpppt.backend.sdk.model.interops.SyncAction;
 import org.dpppt.backend.sdk.model.interops.SyncState;
@@ -81,13 +81,13 @@ public class EfgsHubSyncer {
   private void upload() {
     logger.info("Start upload");
 
-    List<GaenKeyWithOrigin> keysToUpload = gaenDataService.getExposedForEfgsUpload();
+    List<GaenKeyForInterops> keysToUpload = gaenDataService.getExposedForEfgsUpload();
     logger.info("Found " + keysToUpload.size() + " keys to upload");
 
     byte[] hash = new byte[4];
     SECURE_RANDOM.nextBytes(hash);
     AtomicInteger batchCounter = new AtomicInteger(0);
-    for (List<GaenKeyWithOrigin> batchToUpload :
+    for (List<GaenKeyForInterops> batchToUpload :
         Lists.partition(keysToUpload, MAX_UPLOAD_BATCH_SIZE)) {
       UTCInstant start = UTCInstant.now();
       String batchTag = generateBatchTag(batchCounter.getAndIncrement(), hash);
@@ -95,7 +95,7 @@ public class EfgsHubSyncer {
       boolean success = true;
       try {
         logger.info("uploading batch (size: {}) with batchTag: {}", batchToUpload.size(), batchTag);
-        List<GaenKeyWithOrigin> uploadedKeys = efgsClient.upload(batchToUpload, batchTag);
+        List<GaenKeyForInterops> uploadedKeys = efgsClient.upload(batchToUpload, batchTag);
         gaenDataService.setBatchTagForKeys(uploadedKeys, batchTag);
       } catch (Exception e) {
         logger.error("Exception uploading keys:", e);
@@ -139,9 +139,9 @@ public class EfgsHubSyncer {
     logger.info("Download done");
   }
 
-  private void upsertKeys(List<GaenKeyWithOrigin> keys) { // TODO insert manager
+  private void upsertKeys(List<GaenKeyForInterops> keys) { // TODO insert manager
     UTCInstant now = UTCInstant.now();
-    for (GaenKeyWithOrigin key : keys) {
+    for (GaenKeyForInterops key : keys) {
       gaenDataService.upsertExposeeFromInterops(key.getGaenKey(), now, key.getOrigin());
     }
   }
