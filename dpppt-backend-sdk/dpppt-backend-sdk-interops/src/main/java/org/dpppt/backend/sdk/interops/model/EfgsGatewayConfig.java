@@ -1,6 +1,7 @@
 package org.dpppt.backend.sdk.interops.model;
 
 import java.util.List;
+import org.dpppt.backend.sdk.model.gaen.ReportType;
 
 public class EfgsGatewayConfig {
   private String id;
@@ -11,6 +12,8 @@ public class EfgsGatewayConfig {
   private String signClientCertPrivateKey; // PEM
   private String signAlgorithmName;
   private List<String> visitedCountries;
+  private Integer defaultTransmissionRiskLevel = Integer.MAX_VALUE;
+  private ReportType defaultReportType = ReportType.CONFIRMED_TEST;
 
   public String getId() {
     return id;
@@ -74,5 +77,21 @@ public class EfgsGatewayConfig {
 
   public void setVisitedCountries(List<String> visitedCountries) {
     this.visitedCountries = visitedCountries;
+  }
+
+  public Integer getDefaultTransmissionRiskLevel() {
+    return defaultTransmissionRiskLevel;
+  }
+
+  public void setDefaultTransmissionRiskLevel(Integer defaultTransmissionRiskLevel) {
+    this.defaultTransmissionRiskLevel = defaultTransmissionRiskLevel;
+  }
+
+  public ReportType getDefaultReportType() {
+    return defaultReportType;
+  }
+
+  public void setDefaultReportType(ReportType defaultReportType) {
+    this.defaultReportType = defaultReportType;
   }
 }

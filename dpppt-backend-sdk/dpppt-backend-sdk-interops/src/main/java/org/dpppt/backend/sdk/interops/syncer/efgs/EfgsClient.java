@@ -5,7 +5,9 @@ import java.io.IOException;
 import java.net.URI;
 import java.security.GeneralSecurityException;
 import java.security.cert.CertificateException;
+import java.time.Duration;
 import java.time.LocalDate;
+import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
 import java.util.Base64;
@@ -21,9 +23,12 @@ import org.dpppt.backend.sdk.interops.syncer.efgs.signing.CryptoProvider;
 import org.dpppt.backend.sdk.interops.utils.RestTemplateHelper;
 import org.dpppt.backend.sdk.model.gaen.GaenKey;
 import org.dpppt.backend.sdk.model.gaen.GaenKeyForInterops;
+import org.dpppt.backend.sdk.model.gaen.GaenUnit;
+import org.dpppt.backend.sdk.model.gaen.ReportType;
 import org.dpppt.backend.sdk.model.interops.proto.EfgsProto;
 import org.dpppt.backend.sdk.model.interops.proto.EfgsProto.DiagnosisKey;
 import org.dpppt.backend.sdk.model.interops.proto.EfgsProto.DiagnosisKeyBatch;
+import org.dpppt.backend.sdk.utils.UTCInstant;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.http.HttpHeaders;
@@ -42,6 +47,8 @@ public class EfgsClient {
   private final RestTemplate rt;
   private final BatchSigner signer;
   private final List<String> visitedCountries;
+  private final Integer defaultTransmissionRiskLevel;
+  private final ReportType defaultReportType;
 
   private static final String UPLOAD_PATH = "/diagnosiskeys/upload";
   private static final String DOWNLOAD_PATH = "/diagnosiskeys/download/%s";
@@ -65,6 +72,8 @@ public class EfgsClient {
                 efgsGatewayConfig.getSignClientCertPrivateKey()),
             efgsGatewayConfig.getSignAlgorithmName());
     this.visitedCountries = efgsGatewayConfig.getVisitedCountries();
+    this.defaultTransmissionRiskLevel = efgsGatewayConfig.getDefaultTransmissionRiskLevel();
+    this.defaultReportType = efgsGatewayConfig.getDefaultReportType();
   }
 
   public String getBaseUrl() {
@@ -200,12 +209,25 @@ public class EfgsClient {
         .setKeyData(ByteString.copyFrom(Base64.getDecoder().decode(gaenKey.getKeyData())))
         .setRollingStartIntervalNumber(gaenKey.getRollingStartNumber())
         .setRollingPeriod(gaenKey.getRollingPeriod())
-        .setTransmissionRiskLevel(gaenKey.getTransmissionRiskLevel())
+        .setTransmissionRiskLevel(defaultTransmissionRiskLevel)
         .addAllVisitedCountries(visitedCountries)
         .setOrigin(gaenKey.getOrigin())
-        //        .setReportType() // TODO
-        //        .setDaysSinceOnsetOfSymptoms() // TODO
+        .setReportType(
+            gaenKey.getReportType() != null
+                ? gaenKey.getReportType().toEfgsProtoReportType()
+                : defaultReportType.toEfgsProtoReportType())
+        .setDaysSinceOnsetOfSymptoms(
+            gaenKey.getDaysSinceOnsetOfSymptoms() != null
+                ? gaenKey.getDaysSinceOnsetOfSymptoms()
+                : calculateDsos(gaenKey))
         .build();
+  }
+
+  private int calculateDsos(GaenKeyForInterops gaenKey) {
+    LocalDateTime rollingStartNumber =
+        UTCInstant.of(gaenKey.getRollingStartNumber(), GaenUnit.TenMinutes).getLocalDateTime();
+    LocalDateTime receivedAt = gaenKey.getReceivedAt().getLocalDateTime();
+    return (int) Duration.between(receivedAt, rollingStartNumber).toDays() + 2000;
   }
 
   private List<GaenKeyForInterops> mapToGaenKeyWithOriginList(DiagnosisKeyBatch diagnosisKeyBatch) {
