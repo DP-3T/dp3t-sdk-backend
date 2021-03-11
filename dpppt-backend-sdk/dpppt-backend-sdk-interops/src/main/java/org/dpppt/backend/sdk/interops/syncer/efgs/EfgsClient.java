@@ -103,7 +103,7 @@ public class EfgsClient {
       try {
         if (response.getBody() != null) {
           DiagnosisKeyBatch diagnosisKeyBatch = DiagnosisKeyBatch.parseFrom(response.getBody());
-          keyBatch.setKeys(mapToGaenKeyWithOriginList(diagnosisKeyBatch));
+          keyBatch.setKeys(mapToGaenKeyForInteropsList(diagnosisKeyBatch));
         }
       } catch (Exception e) {
         logger.error(
@@ -230,22 +230,25 @@ public class EfgsClient {
     return (int) Duration.between(receivedAt, rollingStartNumber).toDays() + 2000;
   }
 
-  private List<GaenKeyForInterops> mapToGaenKeyWithOriginList(DiagnosisKeyBatch diagnosisKeyBatch) {
+  private List<GaenKeyForInterops> mapToGaenKeyForInteropsList(
+      DiagnosisKeyBatch diagnosisKeyBatch) {
     return diagnosisKeyBatch.getKeysList().stream()
-        .map(k -> mapToGaenKeyWithOrigin(k))
+        .map(k -> mapToGaenKeyForInterops(k))
         .collect(Collectors.toList());
   }
 
-  private GaenKeyForInterops mapToGaenKeyWithOrigin(DiagnosisKey diagnosisKey) {
-    GaenKeyForInterops keyWithOrigin = new GaenKeyForInterops();
-    keyWithOrigin.setGaenKey(new GaenKey());
-    keyWithOrigin.setKeyData(
+  private GaenKeyForInterops mapToGaenKeyForInterops(DiagnosisKey diagnosisKey) {
+    GaenKeyForInterops keyForInterops = new GaenKeyForInterops();
+    keyForInterops.setGaenKey(new GaenKey());
+    keyForInterops.setKeyData(
         java.util.Base64.getEncoder().encodeToString(diagnosisKey.getKeyData().toByteArray()));
-    keyWithOrigin.setRollingStartNumber(diagnosisKey.getRollingStartIntervalNumber());
-    keyWithOrigin.setRollingPeriod(diagnosisKey.getRollingPeriod());
-    keyWithOrigin.setTransmissionRiskLevel(diagnosisKey.getTransmissionRiskLevel());
-    keyWithOrigin.setFake(0);
-    keyWithOrigin.setOrigin(diagnosisKey.getOrigin());
-    return keyWithOrigin;
+    keyForInterops.setRollingStartNumber(diagnosisKey.getRollingStartIntervalNumber());
+    keyForInterops.setRollingPeriod(diagnosisKey.getRollingPeriod());
+    keyForInterops.setTransmissionRiskLevel(diagnosisKey.getTransmissionRiskLevel());
+    keyForInterops.setFake(0);
+    keyForInterops.setOrigin(diagnosisKey.getOrigin());
+    keyForInterops.setReportType(ReportType.fromEfgsProtoReportType(diagnosisKey.getReportType()));
+    keyForInterops.setDaysSinceOnsetOfSymptoms(diagnosisKey.getDaysSinceOnsetOfSymptoms());
+    return keyForInterops;
   }
 }

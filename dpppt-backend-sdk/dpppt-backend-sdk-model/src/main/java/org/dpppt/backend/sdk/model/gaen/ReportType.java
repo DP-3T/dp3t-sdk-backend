@@ -28,4 +28,23 @@ public enum ReportType {
         throw new RuntimeException("no efgs proto report type mapping for: " + this);
     }
   }
+
+  public static ReportType fromEfgsProtoReportType(EfgsProto.ReportType protoReportType) {
+    switch (protoReportType) {
+      case UNKNOWN:
+        return UNKNOWN;
+      case CONFIRMED_TEST:
+        return CONFIRMED_TEST;
+      case CONFIRMED_CLINICAL_DIAGNOSIS:
+        return CONFIRMED_CLINICAL_DIAGNOSIS;
+      case SELF_REPORT:
+        return SELF_REPORT;
+      case RECURSIVE:
+        return RECURSIVE;
+      case REVOKED:
+        return REVOKED;
+      default:
+        throw new RuntimeException("no report type mapping for: " + protoReportType);
+    }
+  }
 }
