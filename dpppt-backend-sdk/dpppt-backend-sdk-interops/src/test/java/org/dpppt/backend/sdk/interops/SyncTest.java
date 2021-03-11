@@ -15,8 +15,10 @@ import org.dpppt.backend.sdk.data.gaen.GaenDataService;
 import org.dpppt.backend.sdk.data.interops.SyncLogDataService;
 import org.dpppt.backend.sdk.interops.config.FlyWayConfig;
 import org.dpppt.backend.sdk.interops.config.GaenDataServiceConfig;
+import org.dpppt.backend.sdk.interops.config.InteropsInsertManagerConfig;
 import org.dpppt.backend.sdk.interops.config.StandaloneDataConfig;
 import org.dpppt.backend.sdk.interops.config.SyncLogDataServiceConfig;
+import org.dpppt.backend.sdk.interops.insertmanager.InteropsInsertManager;
 import org.dpppt.backend.sdk.interops.model.EfgsGatewayConfig;
 import org.dpppt.backend.sdk.interops.syncer.EfgsHubSyncer;
 import org.dpppt.backend.sdk.interops.syncer.efgs.EfgsClient;
@@ -39,13 +41,16 @@ import org.springframework.test.context.support.AnnotationConfigContextLoader;
       StandaloneDataConfig.class,
       FlyWayConfig.class,
       GaenDataServiceConfig.class,
-      SyncLogDataServiceConfig.class
+      SyncLogDataServiceConfig.class,
+      InteropsInsertManagerConfig.class
     })
 public class SyncTest {
 
   @Autowired private GaenDataService gaenDataService;
 
   @Autowired private SyncLogDataService syncLogDataService;
+
+  @Autowired private InteropsInsertManager interopsInsertManager;
 
   private static final SecureRandom SECURE_RANDOM = new SecureRandom();
 
@@ -68,14 +73,15 @@ public class SyncTest {
             new EfgsClient(getEfgsGatewayConfig()),
             Duration.ofDays(14),
             gaenDataService,
-            syncLogDataService);
+            syncLogDataService,
+            interopsInsertManager);
     syncer.download(UTCInstant.today().getLocalDate());
   }
 
   private EfgsGatewayConfig getEfgsGatewayConfig() {
     EfgsGatewayConfig efgsGatewayConfig = new EfgsGatewayConfig();
     efgsGatewayConfig.setId("efgs-gateway");
-    efgsGatewayConfig.setBaseUrl("https://api.ch-hub-r.bit.admin.ch");
+    efgsGatewayConfig.setBaseUrl("https://api-ch-hub-r.bag.admin.ch");
     efgsGatewayConfig.setAuthClientCert("base64:/*");
     efgsGatewayConfig.setAuthClientCertPassword("*");
     efgsGatewayConfig.setSignClientCert(
@@ -102,6 +108,7 @@ public class SyncTest {
       keyWithOrigin.setFake(0);
       keyWithOrigin.setOrigin("CH");
       keyWithOrigin.setId(i);
+      keyWithOrigin.setReceivedAt(UTCInstant.now());
       keys.add(keyWithOrigin);
     }
     return keys;

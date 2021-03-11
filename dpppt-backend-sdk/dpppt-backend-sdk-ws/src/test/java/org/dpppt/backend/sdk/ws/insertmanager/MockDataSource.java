@@ -44,7 +44,10 @@ public class MockDataSource implements GaenDataService {
 
   @Override
   public void upsertExposeeFromInterops(
-      GaenKey key, UTCInstant now, String origin) { // TODO Auto-generated method stub
+      List<GaenKey> keys,
+      UTCInstant now,
+      String origin,
+      String batchTag) { // TODO Auto-generated method stub
   }
 
   @Override

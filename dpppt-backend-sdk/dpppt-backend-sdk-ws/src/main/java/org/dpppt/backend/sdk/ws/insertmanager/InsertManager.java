@@ -16,9 +16,9 @@ import org.slf4j.LoggerFactory;
 /**
  * The insertion manager is responsible for inserting keys uploaded by clients into the database. To
  * make sure we only have valid keys in the database, a list of {@link KeyInsertionModifier} is
- * applied, and then a list of {@Link KeyInsertionFilter} is applied to the given list of keys. The
+ * applied, and then a list of {@link KeyInsertionFilter} is applied to the given list of keys. The
  * remaining keys are then inserted into the database. If any of the modifiers filters throws an
- * {@Link InsertException} the process of insertions is aborted and the exception is propagated back
+ * {@link InsertException} the process of insertions is aborted and the exception is propagated back
  * to the caller, which is responsible for handling the exception.
  */
 public class InsertManager {

@@ -20,6 +20,7 @@ import java.util.concurrent.atomic.AtomicInteger;
 import org.apache.commons.codec.binary.Base64;
 import org.dpppt.backend.sdk.data.gaen.GaenDataService;
 import org.dpppt.backend.sdk.data.interops.SyncLogDataService;
+import org.dpppt.backend.sdk.interops.insertmanager.InteropsInsertManager;
 import org.dpppt.backend.sdk.interops.model.GaenKeyBatch;
 import org.dpppt.backend.sdk.interops.syncer.efgs.EfgsClient;
 import org.dpppt.backend.sdk.model.gaen.GaenKeyForInterops;
@@ -47,16 +48,19 @@ public class EfgsHubSyncer {
   private final Duration retentionPeriod;
   private final GaenDataService gaenDataService;
   private final SyncLogDataService syncLogDataService;
+  private final InteropsInsertManager insertManager;
 
   public EfgsHubSyncer(
       EfgsClient efgsClient,
       Duration retentionPeriod,
       GaenDataService gaenDataService,
-      SyncLogDataService syncLogDataService) {
+      SyncLogDataService syncLogDataService,
+      InteropsInsertManager interopsInsertManager) {
     this.efgsClient = efgsClient;
     this.retentionPeriod = retentionPeriod;
     this.gaenDataService = gaenDataService;
     this.syncLogDataService = syncLogDataService;
+    this.insertManager = interopsInsertManager;
   }
 
   public void sync() {
@@ -122,7 +126,8 @@ public class EfgsHubSyncer {
         dayComplete = keyBatch.isLastBatchForDay();
         if (!keyBatch.getKeys().isEmpty()) {
           logger.info("upserting downloaded batch: {}", keyBatch);
-          upsertKeys(keyBatch.getKeys());
+          insertManager.insertIntoDatabase(
+              keyBatch.getKeys(), UTCInstant.now(), downloadedBatchTag);
           logDownload(start, date, downloadedBatchTag, true);
         } else if (downloadedBatchTag != null) {
           logger.info("empty batch: {}", downloadedBatchTag);
@@ -137,13 +142,6 @@ public class EfgsHubSyncer {
       date = date.plusDays(1);
     }
     logger.info("Download done");
-  }
-
-  private void upsertKeys(List<GaenKeyForInterops> keys) { // TODO insert manager
-    UTCInstant now = UTCInstant.now();
-    for (GaenKeyForInterops key : keys) {
-      gaenDataService.upsertExposeeFromInterops(key.getGaenKey(), now, key.getOrigin());
-    }
   }
 
   private String generateBatchTag(int counter, byte[] runnerHash) {

@@ -17,6 +17,12 @@ import org.dpppt.backend.sdk.data.gaen.GaenDataService;
 import org.dpppt.backend.sdk.data.gaen.JdbcGaenDataServiceImpl;
 import org.dpppt.backend.sdk.data.interops.JdbcSyncLogDataServiceImpl;
 import org.dpppt.backend.sdk.data.interops.SyncLogDataService;
+import org.dpppt.backend.sdk.interops.insertmanager.InteropsInsertManager;
+import org.dpppt.backend.sdk.interops.insertmanager.insertionfilters.AssertKeyFormat;
+import org.dpppt.backend.sdk.interops.insertmanager.insertionfilters.DsosFilter;
+import org.dpppt.backend.sdk.interops.insertmanager.insertionfilters.EnforceRetentionPeriod;
+import org.dpppt.backend.sdk.interops.insertmanager.insertionfilters.EnforceValidRollingPeriod;
+import org.dpppt.backend.sdk.interops.insertmanager.insertionfilters.RemoveKeysFromFuture;
 import org.dpppt.backend.sdk.interops.model.HubConfigs;
 import org.dpppt.backend.sdk.interops.syncer.EfgsHubSyncer;
 import org.dpppt.backend.sdk.interops.syncer.efgs.EfgsClient;
@@ -36,6 +42,9 @@ public abstract class WSBaseConfig implements WebMvcConfigurer {
 
   @Value("${ws.exposedlist.releaseBucketDuration: 7200000}")
   long releaseBucketDuration;
+
+  @Value("${ws.app.gaen.key_size: 16}")
+  int gaenKeySizeBytes;
 
   @Value("${ws.app.gaen.timeskew:PT2h}")
   Duration timeSkew;
@@ -71,8 +80,24 @@ public abstract class WSBaseConfig implements WebMvcConfigurer {
   public EfgsHubSyncer efgsHubSyncer(
       EfgsClient efgsClient,
       GaenDataService gaenDataService,
-      SyncLogDataService syncLogDataService) {
+      SyncLogDataService syncLogDataService,
+      InteropsInsertManager interopsInsertManager) {
     return new EfgsHubSyncer(
-        efgsClient, Duration.ofDays(retentionDays), gaenDataService, syncLogDataService);
+        efgsClient,
+        Duration.ofDays(retentionDays),
+        gaenDataService,
+        syncLogDataService,
+        interopsInsertManager);
+  }
+
+  @Bean
+  public InteropsInsertManager interopsInsertManager(GaenDataService gaenDataService) {
+    var manager = new InteropsInsertManager(gaenDataService);
+    manager.addFilter(new AssertKeyFormat(gaenKeySizeBytes));
+    manager.addFilter(new RemoveKeysFromFuture());
+    manager.addFilter(new EnforceRetentionPeriod(Duration.ofDays(retentionDays)));
+    manager.addFilter(new EnforceValidRollingPeriod());
+    manager.addFilter(new DsosFilter());
+    return manager;
   }
 }

@@ -229,7 +229,8 @@ public class IrishHubSyncer {
       if (irishKey.getOrigin() != null
           && !irishKey.getOrigin().isBlank()
           && !irishKey.getRegions().isEmpty()) {
-        gaenDataService.upsertExposeeFromInterops(gaenKey, now, irishKey.getOrigin());
+        gaenDataService.upsertExposeeFromInterops(
+            List.of(gaenKey), now, irishKey.getOrigin(), null);
       }
     }
   }

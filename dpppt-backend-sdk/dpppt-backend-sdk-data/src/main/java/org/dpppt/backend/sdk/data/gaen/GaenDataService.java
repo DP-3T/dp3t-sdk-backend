@@ -19,13 +19,15 @@ import org.dpppt.backend.sdk.utils.UTCInstant;
 public interface GaenDataService {
 
   /**
-   * Upserts (Update or Inserts) the given key received from interops synchronization.
+   * Upserts (Update or Inserts) the given keys received from interops synchronization.
    *
-   * @param key the exposed key to upsert
+   * @param keys the exposed keys to upsert
    * @param now time of the sync
    * @param origin the origin or the key
+   * @param batchTag batchTag of downloaded key
    */
-  void upsertExposeeFromInterops(GaenKey key, UTCInstant now, String origin);
+  void upsertExposeeFromInterops(
+      List<GaenKey> keys, UTCInstant now, String origin, String batchTag);
 
   /**
    * Upserts (Update or Inserts) the given list of exposed keys

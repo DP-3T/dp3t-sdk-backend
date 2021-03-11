@@ -59,8 +59,11 @@ public class JdbcGaenDataServiceImpl implements GaenDataService {
 
   @Override
   @Transactional(readOnly = false)
-  public void upsertExposeeFromInterops(GaenKey gaenKey, UTCInstant now, String origin) {
-    internalUpsertKey(gaenKey, now, origin, true);
+  public void upsertExposeeFromInterops(
+      List<GaenKey> gaenKeys, UTCInstant now, String origin, String batchTag) {
+    for (GaenKey gaenKey : gaenKeys) {
+      internalUpsertKey(gaenKey, now, origin, batchTag, true);
+    }
   }
 
   @Override
@@ -84,7 +87,7 @@ public class JdbcGaenDataServiceImpl implements GaenDataService {
             : delayedReceivedAt;
 
     for (var gaenKey : gaenKeys) {
-      internalUpsertKey(gaenKey, receivedAt, this.originCountry, withFederationGateway);
+      internalUpsertKey(gaenKey, receivedAt, this.originCountry, null, withFederationGateway);
     }
   }
 
@@ -294,25 +297,30 @@ public class JdbcGaenDataServiceImpl implements GaenDataService {
   }
 
   private void internalUpsertKey(
-      GaenKey gaenKey, UTCInstant receivedAt, String origin, boolean withFederationGateway) {
+      GaenKey gaenKey,
+      UTCInstant receivedAt,
+      String origin,
+      String batchTag,
+      boolean withFederationGateway) {
     String sqlKey = null;
     if (dbType.equals(PGSQL)) {
       sqlKey =
           "insert into t_gaen_exposed (key, rolling_start_number, rolling_period, received_at,"
-              + " origin, share_with_federation_gateway) values (:key, :rolling_start_number,"
-              + " :rolling_period, :received_at, :origin, :share_with_federation_gateway) on"
+              + " origin, share_with_federation_gateway, batch_tag)"
+              + " values (:key, :rolling_start_number, :rolling_period, :received_at,"
+              + " :origin, :share_with_federation_gateway, :batch_tag) on"
               + " conflict on constraint gaen_exposed_key do nothing";
     } else {
       sqlKey =
           "merge into t_gaen_exposed using (values(cast(:key as varchar(24)),"
               + " :rolling_start_number, :rolling_period, :received_at, cast(:origin as"
-              + " varchar(10)), :share_with_federation_gateway)) as vals(key,"
-              + " rolling_start_number, rolling_period, received_at, origin,"
-              + " share_with_federation_gateway) on t_gaen_exposed.key = vals.key when not matched"
-              + " then insert (key, rolling_start_number, rolling_period, received_at, origin,"
-              + " share_with_federation_gateway) values (vals.key, vals.rolling_start_number,"
-              + " vals.rolling_period, vals.received_at, vals.origin,"
-              + " vals.share_with_federation_gateway)";
+              + " varchar(10)), :share_with_federation_gateway, cast(:batch_tag as varchar(50))))"
+              + " as vals(key, rolling_start_number, rolling_period, received_at, origin,"
+              + " share_with_federation_gateway, batch_tag) on t_gaen_exposed.key = vals.key"
+              + " when not matched then insert (key, rolling_start_number, rolling_period,"
+              + " received_at, origin, share_with_federation_gateway, batch_tag)"
+              + " values (vals.key, vals.rolling_start_number, vals.rolling_period,"
+              + " vals.received_at, vals.origin, vals.share_with_federation_gateway, vals.batch_tag)";
     }
 
     MapSqlParameterSource params = new MapSqlParameterSource();
@@ -322,6 +330,7 @@ public class JdbcGaenDataServiceImpl implements GaenDataService {
     params.addValue("received_at", receivedAt.getDate());
     params.addValue("origin", origin);
     params.addValue("share_with_federation_gateway", withFederationGateway);
+    params.addValue("batch_tag", batchTag);
     KeyHolder keyHolder = new GeneratedKeyHolder();
     jt.update(sqlKey, params, keyHolder);
   }
