@@ -11,8 +11,7 @@ public class HubConfigs {
     return efgsGateways;
   }
 
-  public void setEfgsGateways(
-      List<EfgsGatewayConfig> efgsGateways) {
+  public void setEfgsGateways(List<EfgsGatewayConfig> efgsGateways) {
     this.efgsGateways = efgsGateways;
   }
 }

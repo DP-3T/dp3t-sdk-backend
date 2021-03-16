@@ -316,11 +316,11 @@ public class JdbcGaenDataServiceImpl implements GaenDataService {
               + " :rolling_start_number, :rolling_period, :received_at, cast(:origin as"
               + " varchar(10)), :share_with_federation_gateway, cast(:batch_tag as varchar(50))))"
               + " as vals(key, rolling_start_number, rolling_period, received_at, origin,"
-              + " share_with_federation_gateway, batch_tag) on t_gaen_exposed.key = vals.key"
-              + " when not matched then insert (key, rolling_start_number, rolling_period,"
-              + " received_at, origin, share_with_federation_gateway, batch_tag)"
-              + " values (vals.key, vals.rolling_start_number, vals.rolling_period,"
-              + " vals.received_at, vals.origin, vals.share_with_federation_gateway, vals.batch_tag)";
+              + " share_with_federation_gateway, batch_tag) on t_gaen_exposed.key = vals.key when"
+              + " not matched then insert (key, rolling_start_number, rolling_period, received_at,"
+              + " origin, share_with_federation_gateway, batch_tag) values (vals.key,"
+              + " vals.rolling_start_number, vals.rolling_period, vals.received_at, vals.origin,"
+              + " vals.share_with_federation_gateway, vals.batch_tag)";
     }
 
     MapSqlParameterSource params = new MapSqlParameterSource();

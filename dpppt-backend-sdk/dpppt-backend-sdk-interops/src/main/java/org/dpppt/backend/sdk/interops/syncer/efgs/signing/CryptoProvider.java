@@ -22,7 +22,8 @@ public class CryptoProvider {
   private final X509Certificate publicKey;
 
   /** Creates a CryptoProvider, using {@link BouncyCastleProvider}. */
-  public CryptoProvider(String signClientCert, String signClientCertPassword) throws CertificateException {
+  public CryptoProvider(String signClientCert, String signClientCertPassword)
+      throws CertificateException {
     privateKey = loadPrivateKey(signClientCertPassword);
     publicKey = loadPublicKey(signClientCert);
     Security.addProvider(new BouncyCastleProvider());

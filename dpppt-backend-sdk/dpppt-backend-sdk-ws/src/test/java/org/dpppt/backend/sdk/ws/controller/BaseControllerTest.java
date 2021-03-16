@@ -94,8 +94,7 @@ public abstract class BaseControllerTest {
 
   @Autowired ProtoSignature signer;
   @Autowired KeyVault keyVault;
-  @Autowired
-  GaenDataService gaenDataService;
+  @Autowired GaenDataService gaenDataService;
 
   protected TestJdbcGaen testGaenDataService;
 

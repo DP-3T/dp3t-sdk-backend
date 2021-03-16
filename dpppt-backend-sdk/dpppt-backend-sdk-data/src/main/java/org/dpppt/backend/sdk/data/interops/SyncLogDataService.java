@@ -16,8 +16,8 @@ import org.dpppt.backend.sdk.model.interops.FederationSyncLogEntry;
 public interface SyncLogDataService {
 
   /**
-   * returns the latest batch tag for the given `uploadDate` or null if no batches have been downloaded
-   * yet
+   * returns the latest batch tag for the given `uploadDate` or null if no batches have been
+   * downloaded yet
    *
    * @param uploadDate
    * @return

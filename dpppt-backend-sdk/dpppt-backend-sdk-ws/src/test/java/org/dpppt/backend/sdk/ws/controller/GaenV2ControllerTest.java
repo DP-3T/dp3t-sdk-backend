@@ -59,8 +59,7 @@ import org.springframework.transaction.annotation.Transactional;
 public class GaenV2ControllerTest extends BaseControllerTest {
   @Autowired ProtoSignature signer;
   @Autowired KeyVault keyVault;
-  @Autowired
-  GaenDataService gaenDataService;
+  @Autowired GaenDataService gaenDataService;
 
   Duration releaseBucketDuration = Duration.ofMillis(7200000L);
 
