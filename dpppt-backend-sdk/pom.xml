@@ -30,7 +30,7 @@
 		<jsonwebtoken-version>0.11.2</jsonwebtoken-version>
 		<protobuf-java-version>3.12.1</protobuf-java-version>
 		<spring-boot-version>2.3.6.RELEASE</spring-boot-version>
-		<testcontainers-version>1.15.0-rc2</testcontainers-version>
+		<testcontainers-version>1.15.2</testcontainers-version>
 
 		<itCoverageAgent></itCoverageAgent>
 
