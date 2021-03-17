@@ -29,15 +29,16 @@ jobs:
         servers: '[{"id": "github", "username": "${{ github.actor }}", "password": "${{ github.token}}"}, {"id": "github-annotation", "username": "${{ github.actor }}", "password": "${{ github.token }}"}]'
         repositories: '[{"id" : "github", "url" : "https://maven.pkg.github.com/Ubique-OSS/springboot-swagger3"}, {"id" : "github-annotation", "url" : "https://maven.pkg.github.com/Ubique-OSS/springboot-swagger3-annotations"}]'
     
-    - name: Cache Maven packages
-      uses: actions/cache@v1
+    - name: Cache local Maven repository
+      uses: actions/cache@v2
       with:
-        path: ~/.m2
-        key: ${{ runner.os }}-m2-${{ hashFiles('**/pom.xml') }}
-        restore-keys: ${{ runner.os }}-m2
+        path: ~/.m2/repository
+        key: ${{ runner.os }}-maven-${{ hashFiles('**/pom.xml') }}
+        restore-keys: |
+          ${{ runner.os }}-maven-
 
     - name: Cache SonarCloud packages
-      uses: actions/cache@v1
+      uses: actions/cache@v2
       with:
         path: ~/.sonar/cache
         key: ${{ runner.os }}-sonar
