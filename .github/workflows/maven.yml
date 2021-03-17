@@ -52,7 +52,7 @@ jobs:
         TESTCONTAINERS_RYUK_DISABLED: true
 
     - name: Analyze (sonar)
-      run: mvn verify -B sonar:sonar --file dpppt-backend-sdk/dpppt-backend-sdk-ws/pom.xml
+      run: mvn sonar:sonar --file dpppt-backend-sdk/dpppt-backend-sdk-ws/pom.xml
       env:
         SONAR_ORGANIZATION: ${{ secrets.SONAR_ORGANIZATION }}
         SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
