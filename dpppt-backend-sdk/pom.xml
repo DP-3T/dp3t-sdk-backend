@@ -64,7 +64,7 @@
 			<properties>
 				<sonar.pullrequest.branch>${env.GITHUB_HEAD_REF}</sonar.pullrequest.branch>
 				<sonar.pullrequest.base>${env.GITHUB_BASE_REF}</sonar.pullrequest.base>
-				<sonar.pullrequest.key>${env.GITHUB_REF.split("/")[2]}</sonar.pullrequest.key>
+				<sonar.pullrequest.key>${env.GITHUB_PULL_REQUEST_KEY}</sonar.pullrequest.key>
 			</properties>
 		</profile>
 	</profiles>

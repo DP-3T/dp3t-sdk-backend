@@ -57,6 +57,7 @@ jobs:
         SONAR_ORGANIZATION: ${{ secrets.SONAR_ORGANIZATION }}
         SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
         GITHUB_TOKEN: ${{ github.token }}
+        GITHUB_PULL_REQUEST_KEY: ${{ github.event.number }}
         TESTCONTAINERS_RYUK_DISABLED: true
 
     - name: Publish to GitHub Packages Apache Maven
