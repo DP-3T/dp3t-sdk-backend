@@ -46,7 +46,7 @@ jobs:
     
     - name: Build and run tests
       run: |
-        mvn install --file dpppt-backend-sdk/pom.xml; 
+        mvn clean install --file dpppt-backend-sdk/pom.xml; 
         mvn springboot-swagger-3:springboot-swagger-3 -f dpppt-backend-sdk/dpppt-backend-sdk-ws/pom.xml
       env:
         GITHUB_TOKEN: ${{ github.token }}
