@@ -42,6 +42,33 @@
 		<sonar.coverage.jacoco.xmlReportPaths>${project.basedir}/../dpppt-backend-sdk-report/target/site/jacoco-aggregate/jacoco.xml</sonar.coverage.jacoco.xmlReportPaths>
 	</properties>
 
+	<profiles>
+		<profile>
+			<id>ci-branch</id>
+			<activation>
+				<property>
+					<name>!env.GITHUB_BASE_REF</name>
+				</property>
+			</activation>
+			<properties>
+				<sonar.branch.name>${env.GITHUB_REF}</sonar.branch.name>
+			</properties>
+		</profile>
+		<profile>
+			<id>ci-pull-request</id>
+			<activation>
+				<property>
+					<name>env.GITHUB_BASE_REF</name>
+				</property>
+			</activation>
+			<properties>
+				<sonar.pullrequest.branch>${env.GITHUB_HEAD_REF}</sonar.pullrequest.branch>
+				<sonar.pullrequest.base>${env.GITHUB_BASE_REF}</sonar.pullrequest.base>
+				<sonar.pullrequest.key>${env.GITHUB_REF.split("/")[2]}</sonar.pullrequest.key>
+			</properties>
+		</profile>
+	</profiles>
+
 	<modules>
 		<module>dpppt-backend-sdk-model</module>
 		<module>dpppt-backend-sdk-data</module>
