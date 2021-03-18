@@ -3,16 +3,13 @@ package org.dpppt.backend.sdk.utils;
 import static org.dpppt.backend.sdk.utils.EfgsDsosUtil.DSOS_SYMPTOMATIC_UNKNOWN_ONSET_ZERO_POINT;
 import static org.junit.Assert.assertEquals;
 
-import java.io.IOException;
-import java.time.Clock;
-import java.time.ZoneOffset;
 import org.dpppt.backend.sdk.model.gaen.GaenKey;
 import org.dpppt.backend.sdk.model.gaen.GaenKeyForInterops;
 import org.junit.jupiter.api.Test;
 
 public class EfgsDsosUtilTest {
   @Test
-  void testDsosMapping(){
+  void testDsosMapping() {
     var now = UTCInstant.now();
 
     testWithSubmissionTime(now.atStartOfDay().plusHours(1));
@@ -28,7 +25,9 @@ public class EfgsDsosUtilTest {
     submissionDateKey.setRollingStartNumber(
         (int) submissionTime.atStartOfDay().get10MinutesSince1970());
 
-    assertEquals(DSOS_SYMPTOMATIC_UNKNOWN_ONSET_ZERO_POINT, EfgsDsosUtil.calculateDefaultDsosMapping(submissionDateKey));
+    assertEquals(
+        DSOS_SYMPTOMATIC_UNKNOWN_ONSET_ZERO_POINT,
+        EfgsDsosUtil.calculateDefaultDsosMapping(submissionDateKey));
 
     GaenKeyForInterops submissionPlus3Key = new GaenKeyForInterops();
     submissionPlus3Key.setGaenKey(new GaenKey());
@@ -36,7 +35,9 @@ public class EfgsDsosUtilTest {
     submissionPlus3Key.setRollingStartNumber(
         (int) submissionTime.plusDays(3).atStartOfDay().get10MinutesSince1970());
 
-    assertEquals(DSOS_SYMPTOMATIC_UNKNOWN_ONSET_ZERO_POINT + 3, EfgsDsosUtil.calculateDefaultDsosMapping(submissionPlus3Key));
+    assertEquals(
+        DSOS_SYMPTOMATIC_UNKNOWN_ONSET_ZERO_POINT + 3,
+        EfgsDsosUtil.calculateDefaultDsosMapping(submissionPlus3Key));
 
     GaenKeyForInterops submissionMinus10Key = new GaenKeyForInterops();
     submissionMinus10Key.setGaenKey(new GaenKey());
@@ -44,6 +45,8 @@ public class EfgsDsosUtilTest {
     submissionMinus10Key.setRollingStartNumber(
         (int) submissionTime.minusDays(10).atStartOfDay().get10MinutesSince1970());
 
-    assertEquals(DSOS_SYMPTOMATIC_UNKNOWN_ONSET_ZERO_POINT - 10, EfgsDsosUtil.calculateDefaultDsosMapping(submissionMinus10Key));
+    assertEquals(
+        DSOS_SYMPTOMATIC_UNKNOWN_ONSET_ZERO_POINT - 10,
+        EfgsDsosUtil.calculateDefaultDsosMapping(submissionMinus10Key));
   }
 }
