@@ -8,11 +8,10 @@
  * SPDX-License-Identifier: MPL-2.0
  */
 
-
 package org.dpppt.backend.sdk.utils;
 
-import java.time.Duration;
 import java.time.LocalDateTime;
+import java.time.Period;
 import org.dpppt.backend.sdk.model.gaen.GaenKeyForInterops;
 import org.dpppt.backend.sdk.model.gaen.GaenUnit;
 
@@ -22,7 +21,9 @@ public class EfgsDsosUtil {
     LocalDateTime rollingStartNumber =
         UTCInstant.of(gaenKey.getRollingStartNumber(), GaenUnit.TenMinutes).getLocalDateTime();
     LocalDateTime receivedAt = gaenKey.getReceivedAt().getLocalDateTime();
-    return (int) Duration.between(receivedAt, rollingStartNumber).toDays() + 2000;
-  }
 
+    int daysSinceSubmission =
+        Period.between(receivedAt.toLocalDate(), rollingStartNumber.toLocalDate()).getDays();
+    return daysSinceSubmission + 2000;
+  }
 }
