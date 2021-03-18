@@ -19,7 +19,7 @@ import org.dpppt.backend.sdk.data.interops.JdbcSyncLogDataServiceImpl;
 import org.dpppt.backend.sdk.data.interops.SyncLogDataService;
 import org.dpppt.backend.sdk.interops.insertmanager.InteropsInsertManager;
 import org.dpppt.backend.sdk.interops.insertmanager.insertionfilters.AssertKeyFormat;
-import org.dpppt.backend.sdk.interops.insertmanager.insertionfilters.DsosFilter;
+import org.dpppt.backend.sdk.interops.insertmanager.insertionfilters.EfgsDsosFilter;
 import org.dpppt.backend.sdk.interops.insertmanager.insertionfilters.EnforceRetentionPeriod;
 import org.dpppt.backend.sdk.interops.insertmanager.insertionfilters.EnforceValidRollingPeriod;
 import org.dpppt.backend.sdk.interops.insertmanager.insertionfilters.RemoveKeysFromFuture;
@@ -51,6 +51,24 @@ public abstract class WSBaseConfig implements WebMvcConfigurer {
 
   @Value("${ws.origin.country}")
   String originCountry;
+
+  @Value("${interops.efgs.dsosfilter.enabled: true}")
+  boolean efgsDsosFilterEnabled;
+
+  @Value("${interops.efgs.dsosfilter.symptomaticOnsetKnown.dropDaysBeforeOnset: -2}")
+  int efgsDsosFilterSymptomaticOnsetKnownDropDaysBeforeOnset;
+
+  @Value("${interops.efgs.dsosfilter.symptomaticOnsetRange.dropDaysBeforeRangeStart: -2}")
+  int efgsDsosFilterSymptomaticOnsetRangeDropDaysBeforeRangeStart;
+
+  @Value("${interops.efgs.dsosfilter.symptomaticUnknownOnset.dropDaysBeforeSubmission: -2}")
+  int efgsDsosFilterSymptomaticUnknownOnsetDropDaysBeforeSubmission;
+
+  @Value("${interops.efgs.dsosfilter.asympomatic.dropDaysBeforeSubmission: -2}")
+  int efgsDsosFilterAsymptomaticDropDaysBeforeSubmission;
+
+  @Value("${interops.efgs.dsosfilter.unknownSymptomStatus.dropDaysBeforeSubmission: -2}")
+  int efgsDsosFilterUnknownSymptomStatusDropDaysBeforeSubmission;
 
   protected final Logger logger = LoggerFactory.getLogger(getClass());
 
@@ -97,7 +115,15 @@ public abstract class WSBaseConfig implements WebMvcConfigurer {
     manager.addFilter(new RemoveKeysFromFuture());
     manager.addFilter(new EnforceRetentionPeriod(Duration.ofDays(retentionDays)));
     manager.addFilter(new EnforceValidRollingPeriod());
-    manager.addFilter(new DsosFilter());
+    if (efgsDsosFilterEnabled) {
+      manager.addFilter(
+          new EfgsDsosFilter(
+              efgsDsosFilterSymptomaticOnsetKnownDropDaysBeforeOnset,
+              efgsDsosFilterSymptomaticOnsetRangeDropDaysBeforeRangeStart,
+              efgsDsosFilterSymptomaticUnknownOnsetDropDaysBeforeSubmission,
+              efgsDsosFilterAsymptomaticDropDaysBeforeSubmission,
+              efgsDsosFilterUnknownSymptomStatusDropDaysBeforeSubmission));
+    }
     return manager;
   }
 }

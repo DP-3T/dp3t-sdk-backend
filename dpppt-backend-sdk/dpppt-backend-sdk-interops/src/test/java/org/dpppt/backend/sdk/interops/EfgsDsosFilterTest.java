@@ -1,10 +1,20 @@
+/*
+ * Copyright (c) 2020 Ubique Innovation AG <https://www.ubique.ch>
+ *
+ * This Source Code Form is subject to the terms of the Mozilla Public
+ * License, v. 2.0. If a copy of the MPL was not distributed with this
+ * file, You can obtain one at https://mozilla.org/MPL/2.0/.
+ *
+ * SPDX-License-Identifier: MPL-2.0
+ */
+
 package org.dpppt.backend.sdk.interops;
 
 import static org.junit.Assert.assertEquals;
 
 import java.util.ArrayList;
 import java.util.List;
-import org.dpppt.backend.sdk.interops.insertmanager.insertionfilters.DsosFilter;
+import org.dpppt.backend.sdk.interops.insertmanager.insertionfilters.EfgsDsosFilter;
 import org.dpppt.backend.sdk.model.gaen.GaenKeyForInterops;
 import org.dpppt.backend.sdk.utils.UTCInstant;
 import org.junit.Test;
@@ -12,11 +22,23 @@ import org.junit.runner.RunWith;
 import org.springframework.test.context.junit4.SpringJUnit4ClassRunner;
 
 @RunWith(SpringJUnit4ClassRunner.class)
-public class DsosFilterTest {
+public class EfgsDsosFilterTest {
+
+  int efgsDsosFilterSymptomaticOnsetKnownDropDaysBeforeOnset = -2;
+  int efgsDsosFilterSymptomaticOnsetRangeDropDaysBeforeRangeStart = -2;
+  int efgsDsosFilterSymptomaticUnknownOnsetDropDaysBeforeSubmission = -2;
+  int efgsDsosFilterAsymptomaticDropDaysBeforeSubmission = -2;
+  int efgsDsosFilterUnknownSymptomStatusDropDaysBeforeSubmission = -2;
+
   @Test
   public void testDsos7DayRange() {
+    // Symptomatic with onset range of 7 days
+    // Range: [700-14, 700+14]
+    // Zero point: Key from yesterday.
+
     List<GaenKeyForInterops> keys = new ArrayList<>();
 
+    // Should be dropped (daysSinceSubmission = -3)
     GaenKeyForInterops startRangeMinus3 = new GaenKeyForInterops();
     startRangeMinus3.setDaysSinceOnsetOfSymptoms(691);
     keys.add(startRangeMinus3);
@@ -64,19 +86,31 @@ public class DsosFilterTest {
     day8.setDaysSinceOnsetOfSymptoms(701);
     keys.add(day8);
 
-    DsosFilter filter = new DsosFilter();
+    EfgsDsosFilter filter =
+        new EfgsDsosFilter(
+            efgsDsosFilterSymptomaticOnsetKnownDropDaysBeforeOnset,
+            efgsDsosFilterSymptomaticOnsetRangeDropDaysBeforeRangeStart,
+            efgsDsosFilterSymptomaticUnknownOnsetDropDaysBeforeSubmission,
+            efgsDsosFilterAsymptomaticDropDaysBeforeSubmission,
+            efgsDsosFilterUnknownSymptomStatusDropDaysBeforeSubmission);
     List<GaenKeyForInterops> filteredKeys = filter.filter(UTCInstant.now(), keys);
     assertEquals(10, filteredKeys.size());
   }
 
   @Test
   public void testDsosAsymptomatic() {
+    // Asymptomatic (days since submission)
+    // Range: [2986, 3014]
+    // Zero point: Key from Today.
+
     List<GaenKeyForInterops> keys = new ArrayList<>();
 
+    // Should be dropped (daysSinceSubmission = -4)
     GaenKeyForInterops submissionMinus4 = new GaenKeyForInterops();
     submissionMinus4.setDaysSinceOnsetOfSymptoms(2996);
     keys.add(submissionMinus4);
 
+    // Should be dropped (daysSinceSubmission = -3)
     GaenKeyForInterops submissionMinus3 = new GaenKeyForInterops();
     submissionMinus3.setDaysSinceOnsetOfSymptoms(2997);
     keys.add(submissionMinus3);
@@ -94,19 +128,31 @@ public class DsosFilterTest {
     submissionDay.setDaysSinceOnsetOfSymptoms(3000);
     keys.add(submissionDay);
 
-    DsosFilter filter = new DsosFilter();
+    EfgsDsosFilter filter =
+        new EfgsDsosFilter(
+            efgsDsosFilterSymptomaticOnsetKnownDropDaysBeforeOnset,
+            efgsDsosFilterSymptomaticOnsetRangeDropDaysBeforeRangeStart,
+            efgsDsosFilterSymptomaticUnknownOnsetDropDaysBeforeSubmission,
+            efgsDsosFilterAsymptomaticDropDaysBeforeSubmission,
+            efgsDsosFilterUnknownSymptomStatusDropDaysBeforeSubmission);
     List<GaenKeyForInterops> filteredKeys = filter.filter(UTCInstant.now(), keys);
     assertEquals(3, filteredKeys.size());
   }
 
   @Test
   public void testDsosSymptomaticOnsetUnknown() {
+    // Symptomatic with unknown onset (days since submission)
+    // Range: [1986, 2014]
+    // Zero point: Key from Today.
+
     List<GaenKeyForInterops> keys = new ArrayList<>();
 
+    // Should be dropped (daysSinceSubmission = -4)
     GaenKeyForInterops submissionMinus4 = new GaenKeyForInterops();
     submissionMinus4.setDaysSinceOnsetOfSymptoms(1996);
     keys.add(submissionMinus4);
 
+    // Should be dropped (daysSinceSubmission = -3)
     GaenKeyForInterops submissionMinus3 = new GaenKeyForInterops();
     submissionMinus3.setDaysSinceOnsetOfSymptoms(1997);
     keys.add(submissionMinus3);
@@ -124,19 +170,31 @@ public class DsosFilterTest {
     submissionDay.setDaysSinceOnsetOfSymptoms(2000);
     keys.add(submissionDay);
 
-    DsosFilter filter = new DsosFilter();
+    EfgsDsosFilter filter =
+        new EfgsDsosFilter(
+            efgsDsosFilterSymptomaticOnsetKnownDropDaysBeforeOnset,
+            efgsDsosFilterSymptomaticOnsetRangeDropDaysBeforeRangeStart,
+            efgsDsosFilterSymptomaticUnknownOnsetDropDaysBeforeSubmission,
+            efgsDsosFilterAsymptomaticDropDaysBeforeSubmission,
+            efgsDsosFilterUnknownSymptomStatusDropDaysBeforeSubmission);
     List<GaenKeyForInterops> filteredKeys = filter.filter(UTCInstant.now(), keys);
     assertEquals(3, filteredKeys.size());
   }
 
   @Test
   public void testDsosUnknown() {
+    // Unknown symptom status (days since submission)
+    // Range: [3986, 4014]
+    // Zero point: Key from Today.
+
     List<GaenKeyForInterops> keys = new ArrayList<>();
 
+    // Should be dropped (daysSinceSubmission = -4)
     GaenKeyForInterops submissionMinus4 = new GaenKeyForInterops();
     submissionMinus4.setDaysSinceOnsetOfSymptoms(3996);
     keys.add(submissionMinus4);
 
+    // Should be dropped (daysSinceSubmission = -3)
     GaenKeyForInterops submissionMinus3 = new GaenKeyForInterops();
     submissionMinus3.setDaysSinceOnsetOfSymptoms(3997);
     keys.add(submissionMinus3);
@@ -154,7 +212,13 @@ public class DsosFilterTest {
     submissionDay.setDaysSinceOnsetOfSymptoms(4000);
     keys.add(submissionDay);
 
-    DsosFilter filter = new DsosFilter();
+    EfgsDsosFilter filter =
+        new EfgsDsosFilter(
+            efgsDsosFilterSymptomaticOnsetKnownDropDaysBeforeOnset,
+            efgsDsosFilterSymptomaticOnsetRangeDropDaysBeforeRangeStart,
+            efgsDsosFilterSymptomaticUnknownOnsetDropDaysBeforeSubmission,
+            efgsDsosFilterAsymptomaticDropDaysBeforeSubmission,
+            efgsDsosFilterUnknownSymptomStatusDropDaysBeforeSubmission);
     List<GaenKeyForInterops> filteredKeys = filter.filter(UTCInstant.now(), keys);
     assertEquals(3, filteredKeys.size());
   }
@@ -163,6 +227,7 @@ public class DsosFilterTest {
   public void testDsosSpecificDate() {
     List<GaenKeyForInterops> keys = new ArrayList<>();
 
+    // Should be dropped (days since onset = -3)
     GaenKeyForInterops onsetDayMinus3 = new GaenKeyForInterops();
     onsetDayMinus3.setDaysSinceOnsetOfSymptoms(-3);
     keys.add(onsetDayMinus3);
@@ -184,7 +249,13 @@ public class DsosFilterTest {
     submissionDay.setDaysSinceOnsetOfSymptoms(1);
     keys.add(submissionDay);
 
-    DsosFilter filter = new DsosFilter();
+    EfgsDsosFilter filter =
+        new EfgsDsosFilter(
+            efgsDsosFilterSymptomaticOnsetKnownDropDaysBeforeOnset,
+            efgsDsosFilterSymptomaticOnsetRangeDropDaysBeforeRangeStart,
+            efgsDsosFilterSymptomaticUnknownOnsetDropDaysBeforeSubmission,
+            efgsDsosFilterAsymptomaticDropDaysBeforeSubmission,
+            efgsDsosFilterUnknownSymptomStatusDropDaysBeforeSubmission);
     List<GaenKeyForInterops> filteredKeys = filter.filter(UTCInstant.now(), keys);
     assertEquals(4, filteredKeys.size());
   }
