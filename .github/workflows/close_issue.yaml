@@ -28,7 +28,7 @@ jobs:
             const body = pr.body;
             const lines = body.split('\n').map((l)=>l.trim());
             const closers = new RegExp(
-              /(close|closes|closed|fix|fixes|fixed|resolve|resolves|resolved)/i);
+              /^(close|closes|closed|fix|fixes|fixed|resolve|resolves|resolved) .*#/i);
             const issues = lines.filter((l)=>l.match(closers));
             const issue_nbrs = issues.map((i) => i.replace(/.*#/, ''));
             issue_nbrs.forEach((i) => {
