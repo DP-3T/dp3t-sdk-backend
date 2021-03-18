@@ -25,7 +25,7 @@ public class WSSchedulingBaseConfig {
     this.efgsHubSyncer = efgsHubSyncer;
   }
 
-  @Scheduled(cron = "${ws.interops.efgs.syncCron: 0 0/10 * * * ?}")
+  @Scheduled(cron = "${interops.efgs.syncCron: 0 0/10 * * * ?}")
   public void efgsHubSync() {
     efgsHubSyncer.sync();
   }

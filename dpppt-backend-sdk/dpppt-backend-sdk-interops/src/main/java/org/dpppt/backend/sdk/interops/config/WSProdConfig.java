@@ -51,12 +51,6 @@ public class WSProdConfig extends WSBaseConfig {
   @Value("${datasource.connectionTimeout}")
   String dataSourceConnectionTimeout;
 
-  @Value("${ws.ecdsa.credentials.privateKey:}")
-  private String privateKey;
-
-  @Value("${ws.ecdsa.credentials.publicKey:}")
-  public String publicKey;
-
   @Bean(destroyMethod = "close")
   public DataSource dataSource() {
     HikariConfig config = new HikariConfig();

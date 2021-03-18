@@ -39,7 +39,7 @@ public class ActuatorSecurity extends WebSecurityConfigurerAdapter {
 
   private static final String PROMETHEUS_ROLE = "PROMETHEUS";
 
-  @Value("${ws.monitor.prometheus.user}")
+  @Value("${interops.monitor.prometheus.user}")
   private String user;
 
   @Autowired Environment environment;
@@ -77,7 +77,7 @@ public class ActuatorSecurity extends WebSecurityConfigurerAdapter {
   @ConditionalOnMissingBean
   ActuatorSecurityConfig passwordDefault() {
     return new ActuatorSecurityConfig(
-        user, environment.getProperty("ws.monitor.prometheus.password"));
+        user, environment.getProperty("interops.monitor.prometheus.password"));
   }
   // ----------------------------------------------------------------------------------------------------------------------------------
   // endregion
