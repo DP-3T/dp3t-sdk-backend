@@ -17,6 +17,10 @@ import org.dpppt.backend.sdk.model.gaen.GaenUnit;
 
 public class EfgsDsosUtil {
 
+  public static int DSOS_SYMPTOMATIC_UNKNOWN_ONSET_ZERO_POINT = 2000;
+  public static int DSOS_ASYMPTOMATIC_ZERO_POINT = 3000;
+  public static int DSOS_UNKNOWN_SYMPTOM_STATUS_ZERO_POINT = 2000;
+
   public static int calculateDefaultDsosMapping(GaenKeyForInterops gaenKey) {
     LocalDateTime rollingStartNumber =
         UTCInstant.of(gaenKey.getRollingStartNumber(), GaenUnit.TenMinutes).getLocalDateTime();
@@ -24,6 +28,6 @@ public class EfgsDsosUtil {
 
     int daysSinceSubmission =
         Period.between(receivedAt.toLocalDate(), rollingStartNumber.toLocalDate()).getDays();
-    return daysSinceSubmission + 2000;
+    return DSOS_SYMPTOMATIC_UNKNOWN_ONSET_ZERO_POINT + daysSinceSubmission;
   }
 }
