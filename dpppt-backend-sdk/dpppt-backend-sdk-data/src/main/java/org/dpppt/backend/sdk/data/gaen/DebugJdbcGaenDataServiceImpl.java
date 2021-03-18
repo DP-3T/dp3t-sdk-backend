@@ -23,15 +23,15 @@ import org.springframework.jdbc.core.namedparam.MapSqlParameterSource;
 import org.springframework.jdbc.core.namedparam.NamedParameterJdbcTemplate;
 import org.springframework.transaction.annotation.Transactional;
 
-public class DebugJDBCGAENDataServiceImpl implements DebugGAENDataService {
+public class DebugJdbcGaenDataServiceImpl implements DebugGaenDataService {
 
-  private static final Logger logger = LoggerFactory.getLogger(DebugJDBCGAENDataServiceImpl.class);
+  private static final Logger logger = LoggerFactory.getLogger(DebugJdbcGaenDataServiceImpl.class);
 
   private static final String PGSQL = "pgsql";
   private final String dbType;
   private final NamedParameterJdbcTemplate jt;
 
-  public DebugJDBCGAENDataServiceImpl(String dbType, DataSource dataSource) {
+  public DebugJdbcGaenDataServiceImpl(String dbType, DataSource dataSource) {
     this.dbType = dbType;
     this.jt = new NamedParameterJdbcTemplate(dataSource);
   }

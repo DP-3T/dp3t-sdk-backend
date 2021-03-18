@@ -181,7 +181,8 @@ public class GaenControllerTest extends BaseControllerTest {
             midnight.minusDays(1),
             UTCInstant.midnight1970(),
             now.roundToNextBucket(releaseBucketDuration),
-            now);
+            now,
+            true);
     // all keys are invalid
     assertEquals(0, result.size());
   }
@@ -285,12 +286,17 @@ public class GaenControllerTest extends BaseControllerTest {
             midnight.minusDays(1),
             UTCInstant.midnight1970(),
             now.roundToNextBucket(releaseBucketDuration),
-            now);
+            now,
+            true);
     // all keys are invalid
     assertEquals(0, result.size());
     result =
         gaenDataService.getSortedExposedForKeyDate(
-            midnight, UTCInstant.midnight1970(), now.roundToNextBucket(releaseBucketDuration), now);
+            midnight,
+            UTCInstant.midnight1970(),
+            now.roundToNextBucket(releaseBucketDuration),
+            now,
+            true);
     // all keys are invalid
     assertEquals(0, result.size());
   }
@@ -655,7 +661,8 @@ public class GaenControllerTest extends BaseControllerTest {
             midnight.minusDays(2),
             UTCInstant.midnight1970(),
             now.roundToNextBucket(releaseBucketDuration),
-            now);
+            now,
+            true);
 
     assertEquals(0, result.size());
   }
@@ -749,7 +756,8 @@ public class GaenControllerTest extends BaseControllerTest {
             midnight.plusDays(2),
             UTCInstant.midnight1970(),
             now.roundToNextBucket(releaseBucketDuration),
-            now);
+            now,
+            true);
 
     assertEquals(0, result.size());
   }
@@ -800,7 +808,8 @@ public class GaenControllerTest extends BaseControllerTest {
             midnight.minusDays(22),
             UTCInstant.midnight1970(),
             now.roundToNextBucket(releaseBucketDuration),
-            now);
+            now,
+            true);
     assertEquals(0, result.size());
   }
 

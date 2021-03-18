@@ -24,11 +24,11 @@ import java.util.List;
 import java.util.Map;
 import java.util.TimeZone;
 import javax.sql.DataSource;
-import org.dpppt.backend.sdk.data.JDBCRedeemDataServiceImpl;
+import org.dpppt.backend.sdk.data.JdbcRedeemDataServiceImpl;
 import org.dpppt.backend.sdk.data.RedeemDataService;
 import org.dpppt.backend.sdk.data.gaen.FakeKeyService;
-import org.dpppt.backend.sdk.data.gaen.GAENDataService;
-import org.dpppt.backend.sdk.data.gaen.JDBCGAENDataServiceImpl;
+import org.dpppt.backend.sdk.data.gaen.GaenDataService;
+import org.dpppt.backend.sdk.data.gaen.JdbcGaenDataServiceImpl;
 import org.dpppt.backend.sdk.ws.controller.GaenController;
 import org.dpppt.backend.sdk.ws.controller.GaenV2Controller;
 import org.dpppt.backend.sdk.ws.filter.ResponseWrapperFilter;
@@ -144,6 +144,15 @@ public abstract class WSBaseConfig implements SchedulingConfigurer, WebMvcConfig
   @Value("${ws.app.gaen.timeskew:PT2h}")
   Duration timeSkew;
 
+  @Value("${ws.origin.country}")
+  String originCountry;
+
+  @Value("${ws.federation.download.defaultvalue:true}")
+  boolean withFederationGatewayDownloadDefaultValue;
+
+  @Value("${ws.federation.upload.defaultvalue:true}")
+  boolean withFederationGatewayUploadDefaultValue;
+
   @Autowired(required = false)
   ValidateRequest requestValidator;
 
@@ -184,9 +193,13 @@ public abstract class WSBaseConfig implements SchedulingConfigurer, WebMvcConfig
               .locations("classpath:/db/migration/hsqldb")
               .load();
       flyWay.migrate();
-      GAENDataService fakeGaenService =
-          new JDBCGAENDataServiceImpl(
-              "hsql", fakeDataSource, Duration.ofMillis(releaseBucketDuration), timeSkew);
+      GaenDataService fakeGaenService =
+          new JdbcGaenDataServiceImpl(
+              "hsql",
+              fakeDataSource,
+              Duration.ofMillis(releaseBucketDuration),
+              timeSkew,
+              originCountry);
       return new FakeKeyService(
           fakeGaenService,
           Integer.valueOf(randomkeyamount),
@@ -307,24 +320,29 @@ public abstract class WSBaseConfig implements SchedulingConfigurer, WebMvcConfig
         insertManagerExposed(),
         theValidator,
         gaenValidationUtils(),
-        fakeKeyService(),
         gaenSigner(),
         gaenDataService(),
         Duration.ofMillis(releaseBucketDuration),
         Duration.ofMillis(requestTime),
         Duration.ofMillis(exposedListCacheControl),
-        Duration.ofDays(retentionDays));
+        Duration.ofDays(retentionDays),
+        withFederationGatewayDownloadDefaultValue,
+        withFederationGatewayUploadDefaultValue);
   }
 
   @Bean
-  public GAENDataService gaenDataService() {
-    return new JDBCGAENDataServiceImpl(
-        getDbType(), dataSource(), Duration.ofMillis(releaseBucketDuration), timeSkew);
+  public GaenDataService gaenDataService() {
+    return new JdbcGaenDataServiceImpl(
+        getDbType(),
+        dataSource(),
+        Duration.ofMillis(releaseBucketDuration),
+        timeSkew,
+        originCountry);
   }
 
   @Bean
   public RedeemDataService redeemDataService() {
-    return new JDBCRedeemDataServiceImpl(dataSource());
+    return new JdbcRedeemDataServiceImpl(dataSource());
   }
 
   @Bean

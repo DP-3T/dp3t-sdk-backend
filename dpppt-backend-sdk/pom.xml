@@ -17,7 +17,7 @@
 	<groupId>org.dpppt</groupId>
 	<artifactId>dpppt-backend-sdk</artifactId>
 	<packaging>pom</packaging>
-	<version>2.0.3-SNAPSHOT</version>
+	<version>2.1.0-SNAPSHOT</version>
 	<name>DP3T Backend SDK</name>
 
 	<properties>	
@@ -29,7 +29,7 @@
 		<jackson-version>2.11.1</jackson-version>
 		<jsonwebtoken-version>0.11.2</jsonwebtoken-version>
 		<protobuf-java-version>3.12.1</protobuf-java-version>
-		<spring-boot-version>2.3.6.RELEASE</spring-boot-version>
+		<spring-boot-version>2.3.9.RELEASE</spring-boot-version>
 		<testcontainers-version>1.15.2</testcontainers-version>
 
 		<itCoverageAgent></itCoverageAgent>
@@ -74,6 +74,7 @@
 		<module>dpppt-backend-sdk-data</module>
 		<module>dpppt-backend-sdk-ws</module>
 		<module>dpppt-backend-sdk-report</module>
+		<module>dpppt-backend-sdk-interops</module>
 	</modules>
 
 	<dependencies>
@@ -118,6 +119,12 @@
 		<dependency>
 			<groupId>com.google.protobuf</groupId>
 			<artifactId>protobuf-java</artifactId>
+		</dependency>
+
+		<dependency>
+			<groupId>com.google.guava</groupId>
+			<artifactId>guava</artifactId>
+			<version>30.1-jre</version>
 		</dependency>
 
 	</dependencies>

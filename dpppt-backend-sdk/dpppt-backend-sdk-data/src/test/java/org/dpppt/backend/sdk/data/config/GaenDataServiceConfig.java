@@ -13,11 +13,11 @@ package org.dpppt.backend.sdk.data.config;
 import java.security.NoSuchAlgorithmException;
 import java.time.Duration;
 import javax.sql.DataSource;
-import org.dpppt.backend.sdk.data.JDBCRedeemDataServiceImpl;
+import org.dpppt.backend.sdk.data.JdbcRedeemDataServiceImpl;
 import org.dpppt.backend.sdk.data.RedeemDataService;
 import org.dpppt.backend.sdk.data.gaen.FakeKeyService;
-import org.dpppt.backend.sdk.data.gaen.GAENDataService;
-import org.dpppt.backend.sdk.data.gaen.JDBCGAENDataServiceImpl;
+import org.dpppt.backend.sdk.data.gaen.GaenDataService;
+import org.dpppt.backend.sdk.data.gaen.JdbcGaenDataServiceImpl;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
@@ -54,29 +54,29 @@ public class GaenDataServiceConfig {
   @Autowired String dbType;
 
   @Bean
-  public GAENDataService gaenDataService() {
-    return new JDBCGAENDataServiceImpl(
-        dbType, dataSource, Duration.ofMillis(releaseBucketDuration), timeSkew);
-  }
-
-  @Bean
-  public RedeemDataService redeemDataService() {
-    return new JDBCRedeemDataServiceImpl(dataSource);
-  }
-
-  @Bean
-  public GAENDataService fakeService() {
-    return new JDBCGAENDataServiceImpl(
-        "hsql", fakeDataSource(), Duration.ofMillis(releaseBucketDuration), timeSkew);
-  }
-
-  @Bean
-  public FakeKeyService fakeKeyService() throws NoSuchAlgorithmException {
-    return new FakeKeyService(fakeService(), 10, 16, Duration.ofDays(21), randomkeysenabled);
+  public GaenDataService gaenDataService() {
+    return new JdbcGaenDataServiceImpl(
+        dbType, dataSource, Duration.ofMillis(releaseBucketDuration), timeSkew, "CH");
   }
 
   @Bean
   public PlatformTransactionManager transactionManger() {
     return new DataSourceTransactionManager(dataSource);
+  }
+
+  @Bean
+  public RedeemDataService redeemDataService() {
+    return new JdbcRedeemDataServiceImpl(dataSource);
+  }
+
+  @Bean
+  public GaenDataService fakeService() {
+    return new JdbcGaenDataServiceImpl(
+        "hsql", fakeDataSource(), Duration.ofMillis(releaseBucketDuration), timeSkew, "CH");
+  }
+
+  @Bean
+  public FakeKeyService fakeKeyService() throws NoSuchAlgorithmException {
+    return new FakeKeyService(fakeService(), 10, 16, Duration.ofDays(21), randomkeysenabled);
   }
 }

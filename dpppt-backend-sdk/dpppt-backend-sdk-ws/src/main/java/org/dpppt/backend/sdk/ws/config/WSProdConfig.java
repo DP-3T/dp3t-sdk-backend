@@ -17,8 +17,8 @@ import java.util.Arrays;
 import java.util.Base64;
 import java.util.Properties;
 import javax.sql.DataSource;
-import org.dpppt.backend.sdk.data.gaen.DebugGAENDataService;
-import org.dpppt.backend.sdk.data.gaen.DebugJDBCGAENDataServiceImpl;
+import org.dpppt.backend.sdk.data.gaen.DebugGaenDataService;
+import org.dpppt.backend.sdk.data.gaen.DebugJdbcGaenDataServiceImpl;
 import org.dpppt.backend.sdk.ws.controller.DebugController;
 import org.dpppt.backend.sdk.ws.insertmanager.InsertManager;
 import org.dpppt.backend.sdk.ws.insertmanager.insertionfilters.AssertKeyFormat;
@@ -171,14 +171,14 @@ public class WSProdConfig extends WSBaseConfig {
     }
 
     @Bean
-    DebugGAENDataService dataService() {
+    DebugGaenDataService dataService() {
       String dbType = "";
       if (isProd()) {
         dbType = "pgsql";
       } else if (isDev()) {
         dbType = "hsqldb";
       }
-      return new DebugJDBCGAENDataServiceImpl(dbType, dataSource);
+      return new DebugJdbcGaenDataServiceImpl(dbType, dataSource);
     }
 
     @Bean

@@ -110,12 +110,12 @@ public class MultipleJWTConfig {
     @Autowired @Lazy KeyVault keyVault;
 
     @Bean
-    public JWTValidator jwtValidatorGAEN() {
+    public JWTValidator jwtValidatorGaen() {
       return new JWTValidator(redeemDataService, Duration.ofDays(3));
     }
 
     @Bean
-    public JWTClaimSetConverter claimConverterGAEN() {
+    public JWTClaimSetConverter claimConverterGaen() {
       return new JWTClaimSetConverter();
     }
 
@@ -128,7 +128,7 @@ public class MultipleJWTConfig {
 
       OAuth2TokenValidator<Jwt> defaultValidators = JwtValidators.createDefault();
       jwtDecoder.setJwtValidator(
-          new DelegatingOAuth2TokenValidator<>(defaultValidators, jwtValidatorGAEN()));
+          new DelegatingOAuth2TokenValidator<>(defaultValidators, jwtValidatorGaen()));
       return jwtDecoder;
     }
   }

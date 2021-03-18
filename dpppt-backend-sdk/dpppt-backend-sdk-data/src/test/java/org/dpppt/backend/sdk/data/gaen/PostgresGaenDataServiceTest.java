@@ -54,12 +54,16 @@ public class PostgresGaenDataServiceTest {
   private static final String APP_SOURCE = "test-app";
   private static final Duration BATCH_LENGTH = Duration.ofHours(2);
 
-  @Autowired private GAENDataService gaenDataService;
+  @Autowired private GaenDataService gaenDataService;
   @Autowired private FakeKeyService fakeKeyService;
 
   @Autowired private RedeemDataService redeemDataService;
 
   @Autowired private DataSource dataSource;
+
+  static {
+    System.setProperty("ws.origin.country", "CH");
+  }
 
   @After
   public void tearDown() throws SQLException {
@@ -152,14 +156,14 @@ public class PostgresGaenDataServiceTest {
 
     List<GaenKey> sortedExposedForDay =
         gaenDataService.getSortedExposedForKeyDate(
-            receivedAt.minusDays(1), UTCInstant.midnight1970(), now, now);
+            receivedAt.minusDays(1), UTCInstant.midnight1970(), now, now, true);
 
     assertFalse(sortedExposedForDay.isEmpty());
 
     gaenDataService.cleanDB(Duration.ofDays(21));
     sortedExposedForDay =
         gaenDataService.getSortedExposedForKeyDate(
-            receivedAt.minusDays(1), UTCInstant.midnight1970(), now, now);
+            receivedAt.minusDays(1), UTCInstant.midnight1970(), now, now, true);
 
     assertTrue(sortedExposedForDay.isEmpty());
   }
@@ -172,10 +176,9 @@ public class PostgresGaenDataServiceTest {
     tmpKey.setKeyData(Base64.getEncoder().encodeToString("testKey32Bytes--".getBytes("UTF-8")));
     tmpKey.setRollingPeriod(144);
     tmpKey.setFake(0);
-    tmpKey.setTransmissionRiskLevel(0);
     List<GaenKey> keys = List.of(tmpKey);
 
-    gaenDataService.upsertExposees(keys, UTCInstant.now());
+    gaenDataService.upsertExposees(keys, UTCInstant.now(), false);
 
     var now = UTCInstant.now();
     // calculate exposed until bucket, but get bucket in the future, as keys have
@@ -187,7 +190,8 @@ public class PostgresGaenDataServiceTest {
             UTCInstant.today().minus(Duration.ofDays(1)),
             UTCInstant.midnight1970(),
             publishedUntil,
-            now);
+            now,
+            true);
 
     assertEquals(keys.size(), returnedKeys.size());
     assertEquals(keys.get(0).getKeyData(), returnedKeys.get(0).getKeyData());
@@ -205,7 +209,7 @@ public class PostgresGaenDataServiceTest {
 
     var returnedKeys =
         gaenDataService.getSortedExposedForKeyDate(
-            receivedAt.minus(Duration.ofDays(2)), UTCInstant.midnight1970(), batchTime, now);
+            receivedAt.minus(Duration.ofDays(2)), UTCInstant.midnight1970(), batchTime, now, true);
 
     assertEquals(1, returnedKeys.size());
     GaenKey actual = returnedKeys.get(0);
@@ -213,7 +217,7 @@ public class PostgresGaenDataServiceTest {
 
     returnedKeys =
         gaenDataService.getSortedExposedForKeyDate(
-            receivedAt.minus(Duration.ofDays(2)), batchTime, batchTime.plusHours(2), now);
+            receivedAt.minus(Duration.ofDays(2)), batchTime, batchTime.plusHours(2), now, true);
     assertEquals(0, returnedKeys.size());
   }
 
@@ -222,7 +226,8 @@ public class PostgresGaenDataServiceTest {
     Connection connection = dataSource.getConnection();
     String sql =
         "into t_gaen_exposed (pk_exposed_id, key, received_at, rolling_start_number,"
-            + " rolling_period, transmission_risk_level) values (100, ?, ?, ?, 144, 0)";
+            + " rolling_period, origin, share_with_federation_gateway) values (100, ?, ?, ?, 144,"
+            + " 'CH', 'true')";
     PreparedStatement preparedStatement = connection.prepareStatement("insert " + sql);
     preparedStatement.setString(1, key);
     preparedStatement.setTimestamp(2, new Timestamp(receivedAt.toEpochMilli()));

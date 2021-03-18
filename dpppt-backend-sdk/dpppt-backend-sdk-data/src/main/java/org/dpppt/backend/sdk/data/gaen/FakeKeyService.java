@@ -13,7 +13,7 @@ import org.slf4j.LoggerFactory;
 
 public class FakeKeyService {
 
-  private final GAENDataService dataService;
+  private final GaenDataService dataService;
   private final Integer minNumOfKeys;
   private final SecureRandom random;
   private final Integer keySize;
@@ -23,7 +23,7 @@ public class FakeKeyService {
   private static final Logger logger = LoggerFactory.getLogger(FakeKeyService.class);
 
   public FakeKeyService(
-      GAENDataService dataService,
+      GaenDataService dataService,
       Integer minNumOfKeys,
       Integer keySize,
       Duration retentionPeriod,
@@ -48,12 +48,12 @@ public class FakeKeyService {
       for (int i = 0; i < minNumOfKeys; i++) {
         byte[] keyData = new byte[keySize];
         random.nextBytes(keyData);
-        var keyGAENTime = (int) tmpDate.get10MinutesSince1970();
-        var key = new GaenKey(Base64.getEncoder().encodeToString(keyData), keyGAENTime, 144, 0);
+        var keyGaenTime = (int) tmpDate.get10MinutesSince1970();
+        var key = new GaenKey(Base64.getEncoder().encodeToString(keyData), keyGaenTime, 144);
         keys.add(key);
       }
       // TODO: Check if currentKeyDate is indeed intended here
-      this.dataService.upsertExposees(keys, currentKeyDate);
+      this.dataService.upsertExposees(keys, currentKeyDate, false);
       tmpDate = tmpDate.plusDays(1);
     } while (tmpDate.isBeforeDateOf(currentKeyDate));
   }
@@ -75,7 +75,7 @@ public class FakeKeyService {
     }
     var fakeKeys =
         this.dataService.getSortedExposedForKeyDate(
-            keyDate, publishedafter, UTCInstant.today().plusDays(1), now);
+            keyDate, publishedafter, UTCInstant.today().plusDays(1), now, true);
 
     keys.addAll(fakeKeys);
     return keys;
