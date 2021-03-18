@@ -30,7 +30,7 @@
 		<jsonwebtoken-version>0.11.2</jsonwebtoken-version>
 		<protobuf-java-version>3.12.1</protobuf-java-version>
 		<spring-boot-version>2.3.6.RELEASE</spring-boot-version>
-		<testcontainers-version>1.15.0-rc2</testcontainers-version>
+		<testcontainers-version>1.15.2</testcontainers-version>
 
 		<itCoverageAgent></itCoverageAgent>
 
@@ -41,6 +41,33 @@
 		<sonar.login>${env.SONAR_TOKEN}</sonar.login>
 		<sonar.coverage.jacoco.xmlReportPaths>${project.basedir}/../dpppt-backend-sdk-report/target/site/jacoco-aggregate/jacoco.xml</sonar.coverage.jacoco.xmlReportPaths>
 	</properties>
+
+	<profiles>
+		<profile>
+			<id>ci-branch</id>
+			<activation>
+				<property>
+					<name>!env.GITHUB_BASE_REF</name>
+				</property>
+			</activation>
+			<properties>
+				<sonar.branch.name>${env.GITHUB_REF}</sonar.branch.name>
+			</properties>
+		</profile>
+		<profile>
+			<id>ci-pull-request</id>
+			<activation>
+				<property>
+					<name>env.GITHUB_BASE_REF</name>
+				</property>
+			</activation>
+			<properties>
+				<sonar.pullrequest.branch>${env.GITHUB_HEAD_REF}</sonar.pullrequest.branch>
+				<sonar.pullrequest.base>${env.GITHUB_BASE_REF}</sonar.pullrequest.base>
+				<sonar.pullrequest.key>${env.GITHUB_PULL_REQUEST_KEY}</sonar.pullrequest.key>
+			</properties>
+		</profile>
+	</profiles>
 
 	<modules>
 		<module>dpppt-backend-sdk-model</module>
