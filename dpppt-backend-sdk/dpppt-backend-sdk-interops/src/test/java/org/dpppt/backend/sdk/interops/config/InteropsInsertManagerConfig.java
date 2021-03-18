@@ -25,10 +25,10 @@ import org.springframework.context.annotation.Configuration;
 @Configuration
 public class InteropsInsertManagerConfig {
 
-  @Value("${ws.retentiondays: 14}")
+  @Value("${interops.retentiondays: 14}")
   int retentionDays;
 
-  @Value("${ws.app.gaen.key_size: 16}")
+  @Value("${interops.gaen.key_size: 16}")
   int gaenKeySizeBytes;
 
   @Value("${interops.efgs.dsosfilter.enabled: true}")

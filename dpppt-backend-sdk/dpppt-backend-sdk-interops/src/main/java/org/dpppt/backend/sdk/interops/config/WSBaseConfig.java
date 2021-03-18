@@ -37,19 +37,19 @@ import org.springframework.web.servlet.config.annotation.WebMvcConfigurer;
 @Configuration
 public abstract class WSBaseConfig implements WebMvcConfigurer {
 
-  @Value("${ws.retentiondays: 14}")
+  @Value("${interops.retentiondays: 14}")
   int retentionDays;
 
-  @Value("${ws.exposedlist.releaseBucketDuration: 7200000}")
+  @Value("${interops.releaseBucketDuration: 7200000}")
   long releaseBucketDuration;
 
-  @Value("${ws.app.gaen.key_size: 16}")
+  @Value("${interops.gaen.key_size: 16}")
   int gaenKeySizeBytes;
 
-  @Value("${ws.app.gaen.timeskew:PT2h}")
+  @Value("${interops.gaen.timeskew:PT2h}")
   Duration timeSkew;
 
-  @Value("${ws.origin.country}")
+  @Value("${interops.origin.country}")
   String originCountry;
 
   @Value("${interops.efgs.dsosfilter.enabled: true}")

@@ -22,7 +22,7 @@ import org.springframework.context.annotation.Configuration;
 @Configuration
 public class GaenDataServiceConfig {
 
-  @Value("${ws.exposedlist.releaseBucketDuration: 7200000}")
+  @Value("${interops.releaseBucketDuration: 7200000}")
   long releaseBucketDuration;
 
   final String originCountry = "CH";

@@ -1,3 +1,13 @@
+/*
+ * Copyright (c) 2020 Ubique Innovation AG <https://www.ubique.ch>
+ *
+ * This Source Code Form is subject to the terms of the Mozilla Public
+ * License, v. 2.0. If a copy of the MPL was not distributed with this
+ * file, You can obtain one at https://mozilla.org/MPL/2.0/.
+ *
+ * SPDX-License-Identifier: MPL-2.0
+ */
+
 package org.dpppt.backend.sdk.interops.config;
 
 import org.dpppt.backend.sdk.interops.config.configbeans.ActuatorSecurityConfig;
@@ -29,7 +39,7 @@ public class ActuatorSecurity extends WebSecurityConfigurerAdapter {
 
   private static final String PROMETHEUS_ROLE = "PROMETHEUS";
 
-  @Value("${ws.monitor.prometheus.user}")
+  @Value("${interops.monitor.prometheus.user}")
   private String user;
 
   @Autowired Environment environment;
@@ -67,7 +77,7 @@ public class ActuatorSecurity extends WebSecurityConfigurerAdapter {
   @ConditionalOnMissingBean
   ActuatorSecurityConfig passwordDefault() {
     return new ActuatorSecurityConfig(
-        user, environment.getProperty("ws.monitor.prometheus.password"));
+        user, environment.getProperty("interops.monitor.prometheus.password"));
   }
   // ----------------------------------------------------------------------------------------------------------------------------------
   // endregion
