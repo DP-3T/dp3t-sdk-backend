@@ -10,14 +10,14 @@
 
 package org.dpppt.backend.sdk.interops.syncer.efgs;
 
+import static org.dpppt.backend.sdk.utils.EfgsDsosUtil.calculateDefaultDsosMapping;
+
 import com.google.protobuf.ByteString;
 import java.io.IOException;
 import java.net.URI;
 import java.security.GeneralSecurityException;
 import java.security.cert.CertificateException;
-import java.time.Duration;
 import java.time.LocalDate;
-import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
 import java.util.Base64;
@@ -33,12 +33,10 @@ import org.dpppt.backend.sdk.interops.syncer.efgs.signing.CryptoProvider;
 import org.dpppt.backend.sdk.interops.utils.RestTemplateHelper;
 import org.dpppt.backend.sdk.model.gaen.GaenKey;
 import org.dpppt.backend.sdk.model.gaen.GaenKeyForInterops;
-import org.dpppt.backend.sdk.model.gaen.GaenUnit;
 import org.dpppt.backend.sdk.model.gaen.ReportType;
 import org.dpppt.backend.sdk.model.interops.proto.EfgsProto;
 import org.dpppt.backend.sdk.model.interops.proto.EfgsProto.DiagnosisKey;
 import org.dpppt.backend.sdk.model.interops.proto.EfgsProto.DiagnosisKeyBatch;
-import org.dpppt.backend.sdk.utils.UTCInstant;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.http.HttpHeaders;
@@ -229,15 +227,8 @@ public class EfgsClient {
         .setDaysSinceOnsetOfSymptoms(
             gaenKey.getDaysSinceOnsetOfSymptoms() != null
                 ? gaenKey.getDaysSinceOnsetOfSymptoms()
-                : calculateDsos(gaenKey))
+                : calculateDefaultDsosMapping(gaenKey))
         .build();
-  }
-
-  private int calculateDsos(GaenKeyForInterops gaenKey) {
-    LocalDateTime rollingStartNumber =
-        UTCInstant.of(gaenKey.getRollingStartNumber(), GaenUnit.TenMinutes).getLocalDateTime();
-    LocalDateTime receivedAt = gaenKey.getReceivedAt().getLocalDateTime();
-    return (int) Duration.between(receivedAt, rollingStartNumber).toDays() + 2000;
   }
 
   private List<GaenKeyForInterops> mapToGaenKeyForInteropsList(
