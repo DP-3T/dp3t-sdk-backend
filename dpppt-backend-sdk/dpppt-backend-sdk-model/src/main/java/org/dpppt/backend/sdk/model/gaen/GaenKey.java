@@ -1,6 +1,8 @@
 package org.dpppt.backend.sdk.model.gaen;
 
 import ch.ubique.openapi.docannotations.Documentation;
+import javax.validation.constraints.Max;
+import javax.validation.constraints.Min;
 import javax.validation.constraints.NotNull;
 import javax.validation.constraints.Size;
 
@@ -34,23 +36,21 @@ public class GaenKey {
       description =
           "According to the Google API description a value between 0 and 4096, with higher values"
               + " indicating a higher risk")
-  private Integer transmissionRiskLevel;
+  @Deprecated
+  private Integer transmissionRiskLevel = 0;
 
   @Documentation(
       description = "If fake = 0, the key is a valid key. If fake = 1, the key will be discarded.")
+  @Min(value = 0)
+  @Max(value = 1)
   private Integer fake = 0;
 
   public GaenKey() {}
 
-  public GaenKey(
-      String keyData,
-      Integer rollingStartNumber,
-      Integer rollingPeriod,
-      Integer transmissionRiskLevel) {
+  public GaenKey(String keyData, Integer rollingStartNumber, Integer rollingPeriod) {
     this.keyData = keyData;
     this.rollingStartNumber = rollingStartNumber;
     this.rollingPeriod = rollingPeriod;
-    this.transmissionRiskLevel = transmissionRiskLevel;
   }
 
   public String getKeyData() {

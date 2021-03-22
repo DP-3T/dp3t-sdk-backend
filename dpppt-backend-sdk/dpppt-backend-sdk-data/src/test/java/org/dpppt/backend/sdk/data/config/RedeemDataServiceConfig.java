@@ -11,7 +11,7 @@
 package org.dpppt.backend.sdk.data.config;
 
 import javax.sql.DataSource;
-import org.dpppt.backend.sdk.data.JDBCRedeemDataServiceImpl;
+import org.dpppt.backend.sdk.data.JdbcRedeemDataServiceImpl;
 import org.dpppt.backend.sdk.data.RedeemDataService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
@@ -26,6 +26,6 @@ public class RedeemDataServiceConfig {
 
   @Bean
   public RedeemDataService redeemDataService() {
-    return new JDBCRedeemDataServiceImpl(dataSource);
+    return new JdbcRedeemDataServiceImpl(dataSource);
   }
 }

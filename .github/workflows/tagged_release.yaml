@@ -31,8 +31,11 @@ jobs:
       env:
         GITHUB_TOKEN: ${{ github.token }}
         TESTCONTAINERS_RYUK_DISABLED: true
-    - name: shasum
+    - name: "Calculate shasum for SDK WS"
       run: shasum -a 256 dpppt-backend-sdk/dpppt-backend-sdk-ws/target/dpppt-backend-sdk-ws.jar > dpppt-backend-sdk/dpppt-backend-sdk-ws/target/dpppt-backend-sdk-ws.sha256
+      shell: bash
+    - name: "Calculate shasum for SDK Interops"
+      run: shasum -a 256 dpppt-backend-sdk/dpppt-backend-sdk-interops/target/dpppt-backend-sdk-interops.jar > dpppt-backend-sdk/dpppt-backend-sdk-interops/target/dpppt-backend-sdk-interops.sha256
       shell: bash
     - name: "Create new release"
       uses: "marvinpinto/action-automatic-releases@latest"
@@ -43,4 +46,6 @@ jobs:
           dpppt-backend-sdk/dpppt-backend-sdk-ws/target/dpppt-backend-sdk-ws.jar
           dpppt-backend-sdk/dpppt-backend-sdk-ws/target/dpppt-backend-sdk-ws.sha256
           dpppt-backend-sdk/dpppt-backend-sdk-ws/generated/swagger/swagger.yaml
-
+          dpppt-backend-sdk/dpppt-backend-sdk-interops/target/dpppt-backend-sdk-interops.jar
+          dpppt-backend-sdk/dpppt-backend-sdk-interops/target/dpppt-backend-sdk-interops.sha256          
+ 

@@ -2,8 +2,8 @@ package org.dpppt.backend.sdk.ws.insertmanager;
 
 import java.util.ArrayList;
 import java.util.List;
-import org.dpppt.backend.sdk.data.gaen.DebugGAENDataService;
-import org.dpppt.backend.sdk.data.gaen.GAENDataService;
+import org.dpppt.backend.sdk.data.gaen.DebugGaenDataService;
+import org.dpppt.backend.sdk.data.gaen.GaenDataService;
 import org.dpppt.backend.sdk.model.gaen.GaenKey;
 import org.dpppt.backend.sdk.semver.Version;
 import org.dpppt.backend.sdk.utils.UTCInstant;
@@ -16,9 +16,9 @@ import org.slf4j.LoggerFactory;
 /**
  * The insertion manager is responsible for inserting keys uploaded by clients into the database. To
  * make sure we only have valid keys in the database, a list of {@link KeyInsertionModifier} is
- * applied, and then a list of {@Link KeyInsertionFilter} is applied to the given list of keys. The
+ * applied, and then a list of {@link KeyInsertionFilter} is applied to the given list of keys. The
  * remaining keys are then inserted into the database. If any of the modifiers filters throws an
- * {@Link InsertException} the process of insertions is aborted and the exception is propagated back
+ * {@link InsertException} the process of insertions is aborted and the exception is propagated back
  * to the caller, which is responsible for handling the exception.
  */
 public class InsertManager {
@@ -26,27 +26,27 @@ public class InsertManager {
   private final List<KeyInsertionFilter> filterList = new ArrayList<>();
   private final List<KeyInsertionModifier> modifierList = new ArrayList<>();
 
-  private final GAENDataService dataService;
+  private final GaenDataService dataService;
   private final ValidationUtils validationUtils;
 
-  private DebugGAENDataService debugDataService;
+  private DebugGaenDataService debugDataService;
 
   private static final Logger logger = LoggerFactory.getLogger(InsertManager.class);
 
-  public InsertManager(GAENDataService dataService, ValidationUtils validationUtils) {
+  public InsertManager(GaenDataService dataService, ValidationUtils validationUtils) {
     this.dataService = dataService;
     this.validationUtils = validationUtils;
     this.debugDataService = null;
   }
 
-  private InsertManager(DebugGAENDataService debugDataService, ValidationUtils validationUtils) {
+  private InsertManager(DebugGaenDataService debugDataService, ValidationUtils validationUtils) {
     this.debugDataService = debugDataService;
     this.validationUtils = validationUtils;
     this.dataService = null;
   }
 
   public static InsertManager getDebugInsertManager(
-      DebugGAENDataService debugDataService, ValidationUtils validationUtils) {
+      DebugGaenDataService debugDataService, ValidationUtils validationUtils) {
     return new InsertManager(debugDataService, validationUtils);
   }
 
@@ -66,11 +66,17 @@ public class InsertManager {
    * @param header request header from client
    * @param principal key upload authorization, for example a JWT token.
    * @param now current timestamp to work with.
+   * @param withFederationGateway wether key can be shared with federation gateways
    * @throws InsertException filters are allowed to throw errors, for example to signal client
    *     errors in the key upload
    */
   public void insertIntoDatabase(
-      List<GaenKey> keys, String header, Object principal, UTCInstant now) throws InsertException {
+      List<GaenKey> keys,
+      String header,
+      Object principal,
+      UTCInstant now,
+      boolean withFederationGateway)
+      throws InsertException {
 
     if (keys == null || keys.isEmpty()) {
       return;
@@ -79,7 +85,7 @@ public class InsertManager {
     // if no keys remain or this is a fake request, just return. Else, insert the
     // remaining keys.
     if (!internalKeys.isEmpty() && !validationUtils.jwtIsFake(principal)) {
-      dataService.upsertExposees(internalKeys, now);
+      dataService.upsertExposees(internalKeys, now, withFederationGateway);
     }
   }
 

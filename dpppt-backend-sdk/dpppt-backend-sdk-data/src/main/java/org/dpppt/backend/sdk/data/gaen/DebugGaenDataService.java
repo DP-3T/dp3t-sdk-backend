@@ -16,7 +16,7 @@ import java.util.Map;
 import org.dpppt.backend.sdk.model.gaen.GaenKey;
 import org.dpppt.backend.sdk.utils.UTCInstant;
 
-public interface DebugGAENDataService {
+public interface DebugGaenDataService {
 
   /**
    * Upserts (Update or Inserts) the given list of exposed keys in the debug store

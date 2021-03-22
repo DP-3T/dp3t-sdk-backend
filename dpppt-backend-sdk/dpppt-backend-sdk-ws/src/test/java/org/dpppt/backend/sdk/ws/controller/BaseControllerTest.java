@@ -47,7 +47,7 @@ import java.util.zip.ZipInputStream;
 import javax.servlet.Filter;
 import javax.sql.DataSource;
 import org.apache.commons.io.IOUtils;
-import org.dpppt.backend.sdk.data.gaen.GAENDataService;
+import org.dpppt.backend.sdk.data.gaen.GaenDataService;
 import org.dpppt.backend.sdk.model.gaen.GaenKey;
 import org.dpppt.backend.sdk.model.gaen.GaenRequest;
 import org.dpppt.backend.sdk.model.gaen.proto.TemporaryExposureKeyFormat.TEKSignatureList;
@@ -56,7 +56,7 @@ import org.dpppt.backend.sdk.utils.UTCInstant;
 import org.dpppt.backend.sdk.ws.filter.ResponseWrapperFilter;
 import org.dpppt.backend.sdk.ws.security.KeyVault;
 import org.dpppt.backend.sdk.ws.security.signature.ProtoSignature;
-import org.dpppt.backend.sdk.ws.util.TestJDBCGaen;
+import org.dpppt.backend.sdk.ws.util.TestJdbcGaen;
 import org.junit.Before;
 import org.junit.runner.RunWith;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -75,7 +75,7 @@ import org.springframework.web.context.WebApplicationContext;
 @RunWith(SpringRunner.class)
 @SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT)
 @ActiveProfiles({"dev", "jwt", "debug", "test-config"})
-@TestPropertySource(properties = {"ws.app.source=org.dpppt.demo"})
+@TestPropertySource(properties = {"ws.app.source=org.dpppt.demo", "ws.origin.country=CH"})
 public abstract class BaseControllerTest {
 
   protected MockMvc mockMvc;
@@ -94,9 +94,9 @@ public abstract class BaseControllerTest {
 
   @Autowired ProtoSignature signer;
   @Autowired KeyVault keyVault;
-  @Autowired GAENDataService gaenDataService;
+  @Autowired GaenDataService gaenDataService;
 
-  protected TestJDBCGaen testGaenDataService;
+  protected TestJdbcGaen testGaenDataService;
 
   protected static final String androidUserAgent =
       "ch.admin.bag.dp3t.dev;1.0.7;1595591959493;Android;29";
@@ -113,7 +113,7 @@ public abstract class BaseControllerTest {
             .build();
     this.objectMapper = new ObjectMapper(new JsonFactory());
     this.objectMapper.registerModule(new JavaTimeModule());
-    this.testGaenDataService = new TestJDBCGaen("hsqldb", dataSource);
+    this.testGaenDataService = new TestJdbcGaen("hsqldb", dataSource);
   }
 
   private void loadPrivateKey() throws Exception {
@@ -292,9 +292,10 @@ public abstract class BaseControllerTest {
     var result =
         gaenDataService.getSortedExposedForKeyDate(
             now.atStartOfDay().minusDays(1),
-            null,
+            UTCInstant.midnight1970(),
             now.roundToNextBucket(releaseBucketDuration),
-            now);
+            now,
+            true);
     assertEquals(2, result.size());
     for (var key : result) {
       assertEquals(Integer.valueOf(144), key.getRollingPeriod());
@@ -303,9 +304,10 @@ public abstract class BaseControllerTest {
     result =
         gaenDataService.getSortedExposedForKeyDate(
             now.atStartOfDay().minusDays(1),
-            null,
+            UTCInstant.midnight1970(),
             now.roundToBucketStart(releaseBucketDuration),
-            now);
+            now,
+            true);
     assertEquals(0, result.size());
 
     // third key should be released tomorrow (at four)
@@ -313,19 +315,28 @@ public abstract class BaseControllerTest {
     result =
         gaenDataService.getSortedExposedForKeyDate(
             now.atStartOfDay(),
-            null,
+            UTCInstant.midnight1970(),
             tomorrow2AM.roundToNextBucket(releaseBucketDuration),
-            tomorrow2AM);
+            tomorrow2AM,
+            true);
     assertEquals(1, result.size());
 
     result =
         gaenDataService.getSortedExposedForKeyDate(
-            now.atStartOfDay(), null, now.roundToNextBucket(releaseBucketDuration), now);
+            now.atStartOfDay(),
+            UTCInstant.midnight1970(),
+            now.roundToNextBucket(releaseBucketDuration),
+            now,
+            true);
     assertEquals(0, result.size());
 
     result =
         gaenDataService.getSortedExposedForKeyDate(
-            now.atStartOfDay(), null, now.atStartOfDay().plusDays(1), now);
+            now.atStartOfDay(),
+            UTCInstant.midnight1970(),
+            now.atStartOfDay().plusDays(1),
+            now,
+            true);
     assertEquals(0, result.size());
   }
 

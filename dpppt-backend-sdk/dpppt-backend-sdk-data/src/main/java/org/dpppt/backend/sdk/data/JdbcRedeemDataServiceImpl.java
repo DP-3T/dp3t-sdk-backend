@@ -20,14 +20,14 @@ import org.springframework.jdbc.core.namedparam.NamedParameterJdbcTemplate;
 import org.springframework.jdbc.core.simple.SimpleJdbcInsert;
 import org.springframework.transaction.annotation.Transactional;
 
-public class JDBCRedeemDataServiceImpl implements RedeemDataService {
+public class JdbcRedeemDataServiceImpl implements RedeemDataService {
 
-  private static final Logger logger = LoggerFactory.getLogger(JDBCRedeemDataServiceImpl.class);
+  private static final Logger logger = LoggerFactory.getLogger(JdbcRedeemDataServiceImpl.class);
 
   private final NamedParameterJdbcTemplate jt;
   private final SimpleJdbcInsert reedemUUIDInsert;
 
-  public JDBCRedeemDataServiceImpl(DataSource dataSource) {
+  public JdbcRedeemDataServiceImpl(DataSource dataSource) {
     this.jt = new NamedParameterJdbcTemplate(dataSource);
     this.reedemUUIDInsert =
         new SimpleJdbcInsert(dataSource)
