@@ -9,6 +9,10 @@ import javax.validation.constraints.Size;
 
 public class GaenV2UploadKeysRequest {
 
+  @Valid
+  @Documentation(description = "If true, the uploaded keys can be shared with federations gateway")
+  private Boolean withFederationGateway;
+
   @NotNull
   @NotEmpty
   @Valid
@@ -23,5 +27,13 @@ public class GaenV2UploadKeysRequest {
 
   public void setGaenKeys(List<GaenKey> gaenKeys) {
     this.gaenKeys = gaenKeys;
+  }
+
+  public Boolean getWithFederationGateway() {
+    return withFederationGateway;
+  }
+
+  public void setWithFederationGateway(Boolean withFederationGateway) {
+    this.withFederationGateway = withFederationGateway;
   }
 }
