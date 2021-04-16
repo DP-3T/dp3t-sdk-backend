@@ -57,13 +57,25 @@ Parts of the Maven build depends on artifacts, that are hosted on [GitHub Packag
 Please consult the [official documentation](https://help.github.com/en/packages/using-github-packages-with-your-projects-ecosystem/configuring-apache-maven-for-use-with-github-packages) for further maven specific instructions. 
 
 ### Database
-For development purposes an hsqldb can be used to run the webservice locally. For production systems, it is recommended to connect to a PostgreSQL dabatase (cluster if possible). There are two tables storing keys, one for the DP3T vendor independent format, one for the Google/Apple approach format. Further, to protect against JWT replay attacks a third table stores the JTI temporarily. The schemas are as following :
+For development purposes an hsqldb can be used to run the webservice locally. For production systems, it is recommended to connect to a PostgreSQL dabatase (cluster if possible).
 
-![](documentation/img/t_exposed.svg)
+#### Keys
 
-![](documentation/img/t_gaen_exposed.svg)
+The keys that are stored in the database contain the `GAEN` key data as specified by Google/Apple, as well as some more fields to indicate the origin of the keys, and if the keys should be shared with a federation gateway. For the federation gateway a further field `batch_tag` is needed to indicate the batch this key has been uploaded with.
 
-![](documentation/img/t_redeem_uuid.svg)
+![](documentation/img/t_gaen_exposed.png)
+
+#### JWT
+
+This schema contains the `uuid` field to be stored temporarily. This is used to prevent replay attacks of the same token twice and the entry will be removed, after the validity of the token has been expired.
+
+![](documentation/img/t_redeem_uuid.png)
+
+#### Federation
+
+To allow a monitoring of uploads to a federation gateway, this table holds log entries indicating different actions and error messages.
+
+![](documentation/img/t_federation_sync_log.png)
 
 
 ## Environments
