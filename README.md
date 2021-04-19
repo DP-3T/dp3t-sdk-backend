@@ -28,6 +28,14 @@ Please read the [Contribution Guide](CONTRIBUTING.md) before submitting any pull
 ## Introduction
 This documentation describes the backend used for the SwissCovid application. It is focused on providing information for the requests used for the Exposure Notification framework. Although, code of the old format is still provided, no documentation or support is available except the code itself.
 
+## Federation Gateway Service
+### Introduction 
+Since multiple countries are now using the Exposure Notifications Framework, the European Union started an effort to allow federation of keys coming from multiple countries. Every country connected to the gateway can then up- and download keys from all participating countries (relayed via the gateway). This means that people e.g. using the Swiss app in Germany can, if they decide to share the keys with Germany, infect people in Germany and vice versa.
+
+For this another module was added, which periodically synchronizes keys, which are marked for sharing to a gateway service. The official European Federation Gateway Service (EFGS) can be found [here](https://github.com/eu-federation-gateway-service/efgs-federation-gateway). The [Swiss fork](https://github.com/admin-ch/chgs-federation-gateway) adds Postgres-Support as well as some other minor features.
+
+Further information on the Interoperability Module can be found in the [dpppt-backend-sdk-interops module](dpppt-backend-sdk/dpppt-backend-sdk-interops/README.md)
+
 ## Reproducible Builds
 In order to have reproducible builds the [io.github.zlika](https://github.com/zlika/reproducible-build-maven-plugin) maven plugin is used. It replaces all timestamp with the timestamp of the last commit, and orders the entries in the JAR alphabetically. The github action then computes the sha256sum of the resulting JAR and adds the output as an build artifact.
 
@@ -35,26 +43,7 @@ In order to have reproducible builds the [io.github.zlika](https://github.com/zl
 * Spring Boot 2.2.10
 * Java 11 (or higher)
 * Logback
-* [Springboot-Swagger-3](https://github.com/Ubique-OSS/springboot-swagger3)
-
-### GitHub Packages
-Parts of the Maven build depends on artifacts, that are hosted on [GitHub Packages](https://help.github.com/en/packages). To gain access, a personal access token is required: 
-
-* Issue a personal access token from https://github.com/settings/tokens and be sure to assign the `read:packages` scope to it. 
-* Append the server configuration to your local Maven settings.xml, in most cases `~/.m2/settings.xml`. In the servers tag, add a child server tag with the id `github`, replacing `GITHUB_USERNAME` with your GitHub username, and `PERSONAL_ACCESS_TOKEN` with your personal access token.
-    ```xml 
-    ...
-    <servers>
-        <server>
-               <id>github</id>
-               <username>GITHUB_USERNAME</username>
-               <password>PERSONAL_ACCESS_TOKEN</password>
-             </server>
-         </servers>
-    ...
-    ``` 
-
-Please consult the [official documentation](https://help.github.com/en/packages/using-github-packages-with-your-projects-ecosystem/configuring-apache-maven-for-use-with-github-packages) for further maven specific instructions. 
+* [Springboot-Swagger-3](https://github.com/Ubique-OSS/springboot-swagger3) (From Bintray)
 
 ### Database
 For development purposes an hsqldb can be used to run the webservice locally. For production systems, it is recommended to connect to a PostgreSQL dabatase (cluster if possible).
