@@ -18,7 +18,21 @@ Most of the properties found in the `WSBaseConfig` are similar to the ones found
 - `interops.efgs.dsosfilter.asympomatic.dropDaysBeforeSubmission`: Drop keys which are older than `submission - n`, where submission indicates the submission date of the keys, and the person uploading the keys was asymptomatic. Negative values reference to days *before* onset. *DEFAULT: -2*
 
 - `interops.efgs.dsosfilter.unknownSymptomStatus.dropDaysBeforeSubmission`: Drop keys which are older than `submission - n`, where submission indicates the submission date of the keys, and it is not known if the person uploading the keys was symptomatic or asymptomatic. Negative values reference to days *before* onset. *DEFAULT: -2*
-### Configuration Beans
+### Configuration Properties
+For the gateway configuration SpringBoot `@ConfigurationProperties` classes are used. They allow to group multiple properties or environment variables into one class, based on a specific prefix (e.g. `interops.hubs` -> `interops.hubs.efgsGateways[0].id=efgs-gateway`). 
+
+---
+
+**NOTE**
+
+Although technically the interoperability service would support configuring multiple gateways, as of now only the first configuration is used!
+
+---
+
+#### `HubConfigs`
+
+This class holds a list of gateway configurations.
+#### `EfgsGatewayConfig`
 
 ## Federation Gateway Synchronization
 TODO: Describe architecture of sync service
