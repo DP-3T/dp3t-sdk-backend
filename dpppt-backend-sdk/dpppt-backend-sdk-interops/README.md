@@ -141,6 +141,13 @@ User knows that he had definitely nothing (e.g. never had cough, fever etc.)
 `4000: The onset coincides with this keys' date`
 
 User does not know which Symptoms are Covid-symptoms or he did something wrong in the app during the submission.
+
+--- 
+Figure 1: An overview of the DSOS values and their meaning. Figure was taken from EFGS documentation.
+
+![](dsos_tabelle.png)
+
+---
 ## References
 - [European Federation Gateway Service](https://github.com/eu-federation-gateway-service/efgs-federation-gateway)
 - [Swiss Federation Gateway Service](https://github.com/admin-ch/chgs-federation-gateway)
