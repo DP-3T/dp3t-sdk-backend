@@ -75,6 +75,30 @@ Further, the sync status is logged and saved in the database for future retrieva
 
 ### Download Batching Logic
 
+According to the documentation of the EFGS, calls to the download endpoint have a required parameter - the date for which keys were uploaded - and an optional parameter, specifying the batch the client downloaded last. Since the batches for a specific day are implemented as a linked list, where each response contains the next batch tag, or null if there aren't any left, specifying a batch tag allows skipping the `n` batches before `batchTag`. This helps reduce the load on the Federation Gateway and simplifies insertion logic on the Interoperability Service, as we can avoid trying to insert already inserted keys.
+
+The Interoperability Service therefore implements the following batch logic:
+
+#### Download 
+
+1) get `batchTag` of last successfully downloaded batch from `today - retentationDay` (this is needed, as we cannot know if we downloaded the last batch, as it could be that the Interoperability Services was shut down over a certain period of time)
+
+2) use `batchTag` to download the next available batch.
+
+3) if the `batchTag` of the newly downloaded batch is not empty, and the batch itself is non empty, insert it into the database
+
+4) check if the `nextBatchTag` is not null and goto `2)`
+
+5) increase the `downloadDate` by 1 and repeat `2)` through `4)` (until the last batch of today is downloaded)
+
+#### Upload
+
+1) get all keys which are available for upload
+
+2) partition keys into subsets with a size of maximal `MAX_UPLOAD_BATCH_SIZE`
+
+3) for each partition assign a unique `batchTag` and upload to EFGS
+
 ### Uploading Batching Logic
 ## Days Since Onset of Symptoms
 
