@@ -18,8 +18,8 @@ public class EfgsGatewayConfig {
   private String baseUrl;
   private String authClientCert; // P12 base-64 encoded
   private String authClientCertPassword; // string secret
-  private String signClientCert; // PEM
-  private String signClientCertPrivateKey; // PEM
+  private String signClientCert; // P12 base-64 encoded
+  private String signClientCertPassword; // string secret
   private String signAlgorithmName;
   private List<String> visitedCountries;
   private Integer defaultTransmissionRiskLevel = Integer.MAX_VALUE;
@@ -65,12 +65,12 @@ public class EfgsGatewayConfig {
     this.signClientCert = signClientCert;
   }
 
-  public String getSignClientCertPrivateKey() {
-    return signClientCertPrivateKey;
+  public String getSignClientCertPassword() {
+    return signClientCertPassword;
   }
 
-  public void setSignClientCertPrivateKey(String signClientCertPrivateKey) {
-    this.signClientCertPrivateKey = signClientCertPrivateKey;
+  public void setSignClientCertPassword(String signClientCertPassword) {
+    this.signClientCertPassword = signClientCertPassword;
   }
 
   public String getSignAlgorithmName() {

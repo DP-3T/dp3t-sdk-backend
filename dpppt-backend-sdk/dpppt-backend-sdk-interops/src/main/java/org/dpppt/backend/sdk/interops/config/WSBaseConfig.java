@@ -10,6 +10,10 @@
 
 package org.dpppt.backend.sdk.interops.config;
 
+import java.io.IOException;
+import java.security.KeyStoreException;
+import java.security.NoSuchAlgorithmException;
+import java.security.UnrecoverableKeyException;
 import java.security.cert.CertificateException;
 import java.time.Duration;
 import javax.sql.DataSource;
@@ -90,7 +94,9 @@ public abstract class WSBaseConfig implements WebMvcConfigurer {
   }
 
   @Bean
-  public EfgsClient efgsClient(HubConfigs hubConfigs) throws CertificateException {
+  public EfgsClient efgsClient(HubConfigs hubConfigs)
+      throws CertificateException, UnrecoverableKeyException, KeyStoreException,
+          NoSuchAlgorithmException, IOException {
     return new EfgsClient(hubConfigs.getEfgsGateways().get(0));
   }
 
