@@ -1,4 +1,12 @@
 # Interoperability
+
+## Introduction
+
+The Interoperability Service operates as a single standalone micro service. It periodically connects to the Federation Gateway Service to exchange any new keys from and to the `dpppt-backend-sdk-ws`-Database. The service uses mTLS to connect to the Federation Gateway and a default database connector to connect to the database. 
+
+Hence, the service needs the capability to connect to external services. Further, in order for mTLS to work, the connection _MUST_ either _NOT_ be proxied (peer to peer connection), or the load balancer used _MUST_ support establishing mTLS connection based on certificate finger/thumb prints.
+
+Further, as the `dpppt-backend-sdk-ws` the Interoperability Service needs access to the database storing the EN-Keys.
 ## Federation Gateway Options
 As for the `dpppt-backend-sdk-ws` different configuration classes provide the option to parameterize the runtime behavior of the interoperability service. 
 
@@ -68,8 +76,6 @@ Since the EN framework does not provide a way to encode meta information about t
 In order to solve this flaw of the EN framework, the EFGS introduced an encoding of such meta information into the `days_since_onset_of_symptoms` field of the EN struct. The following is an overview of how the encoding works, and explained in context of the `EfgsDsosFilter` class used in the Swiss instance.
 
 The encoding uses mutually exclusive ranges over the whole domain of possible values ( the `days_since_onset_of_symptoms` field is a signed 32-bit integer) to encode different ways of explaining the circumstances of the onset of symptoms and the date. 
-//TODO: Fix reference
-[EFGS](LINK)
 ### Symptomatic with known onset
 `Range: [-14,+14]`
 
