@@ -45,9 +45,20 @@ The key exchange is outside the scope of this documentation, and the EFGS docume
 
 - `authClientCert`: A base64 encoded String of a P12 containing the private key and the certificate used for mutual TLS communication.
 
-- `authClientCertPassword`: The password set to protect the P12.
+- `authClientCertPassword`: The password set to protect the `authClientCert` P12.
 
-- `signClientCert`: 
+- `signClientCert`: A base64 encoded String of a P12 containing the private key and the certificate used for signing the batches.
+
+- `signClientCertPassword`: The password set to protect the `signClientCert` P12.
+
+- `signAlgorithmName`: The signature algorithm used to sign the batches. Note that the algorithm _MUST_ match the key type given by the `signClientCert` (e.g. `sha256WithRSAEncryption`). The string value is directly used in the constructor of `JcaContentSignerBuilder`, hence check the `BouncyCastle` documentation for supported signature types.
+
+- `visitedCountries`: List of strings to indicate which countries a key visited. For now this all uploaded keys are marked with all countries present in `visitedCountries`, so theoretically the keys would always be distributed to all countries. This might change in the future. Though, since it is extremely hard to anonymize the list of visited countries on a individual level, the decision to distribute _all_ the key material to _all_ countries was preferred over a complex obfuscation scheme.
+
+- `defaultTransmissionRiskLevel`: This value is not used anymore and defaults to `Integer.MAX_VALUE`. Keep in mind that Java does not interpret unsigned integers, so the decimal, numerical value is `2147483647`. On a byte level this corresponds to `0x7f_ff_ff_ff`.
+
+- `defaultReportType`: When no `ReportType` is given, use `defaultReportType` instead. The default is `ReportType.CONFIRMED_TEST`.
+
 ## Federation Gateway Synchronization
 TODO: Describe architecture of sync service
 ## Days Since Onset of Symptoms
