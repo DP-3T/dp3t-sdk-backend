@@ -54,19 +54,19 @@ The keys that are stored in the database contain the `GAEN` key data as specifie
 
 ![](documentation/img/t_gaen_exposed.png)
 
-| Column                        | Description   |
-| ----------------------------- |:-------------:|
-| pk_exposed_id                 |               |
-| key                           |               |
-| rolling_start_number          |               |
-| rolling_period                |               |
-| received_at                   |               |
-| report_type                   |               |
-| days_since_onset_of_symptoms  |               |
-| origin                        |               |
-| rolling_start_number          |               |
-| batch_tag                     |               |
-| share_with_federation_gateway |               |
+| Column                        | Description                                                                                                                |
+| ----------------------------- |:--------------------------------------------------------------------------------------------------------------------------:|
+| pk_exposed_id                 |                                                                                                                            |
+| key                           |                                                                                                                            |
+| rolling_start_number          |                                                                                                                            |
+| rolling_period                |                                                                                                                            |
+| received_at                   |                                                                                                                            |
+| rolling_start_number          |                                                                                                                            |
+| report_type                   | The `reportType` indicating how the person uploading the key was "verified" (e.g. confirmed test)                          |
+| days_since_onset_of_symptoms  | c.f. [Interops documentation](dpppt-backend-sdk/dpppt-backend-sdk-interops/README.md)                                      |
+| origin                        | String where this key was retrieved from [ISO-3166-1-Alpha-2](https://en.wikipedia.org/wiki/List_of_ISO_3166_country_codes)|
+| batch_tag                     | If uploaded to EFGS, indicates the `batchTag` of the batch this key was uploaded with                                      |
+| share_with_federation_gateway | Indicate if this key should be shared with the federation gateway                                                          |
 
 
 #### JWT
@@ -88,16 +88,16 @@ To allow a monitoring of uploads to a federation gateway, this table holds log e
 
 ![](documentation/img/t_federation_sync_log.png)
 
-| Column                        | Description   |
-| ----------------------------- |:-------------:|
-| pk_federation_sync_log_id     |               |
-| gateway                       |               |
-| action                        |               |
-| batch_tag                     |               |
-| upload_date                   |               |
-| start_time                    |               |
-| end_time                      |               |
-| state                         |               |
+| Column                        | Description                                                                           |
+| ----------------------------- |:-------------------------------------------------------------------------------------:|
+| pk_federation_sync_log_id     |                                                                                       |
+| gateway                       | Which gateway the log originated from                                                 |
+| action                        | The action associated with the entry (UPLOAD|DOWNLOAD)                                |
+| batch_tag                     | The `batchTag` associated with the batch the message was generated for                |
+| upload_date                   | The date the batch was uploaded (the parameter given for the API call to the gateway) |
+| start_time                    | When the action started. (`end - start = duration`)                                   |
+| end_time                      | When the action ended. (`end - start = duration`)                                     |
+| state                         | If the action was successful (ERROR|DONE)                                             |
 
 ## Environments
 To control different behaviors, SpringBoot profiles are used. The idea is to provide an abstract base class, which defines everything needed. Such properties can be defined as abstract, and their implementation can be provided in an extended class.
