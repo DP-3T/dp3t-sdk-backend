@@ -16,7 +16,6 @@ import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.ZoneOffset;
 import java.util.List;
-import java.util.concurrent.atomic.AtomicInteger;
 import org.apache.commons.codec.binary.Base64;
 import org.dpppt.backend.sdk.data.gaen.GaenDataService;
 import org.dpppt.backend.sdk.data.interops.SyncLogDataService;
@@ -90,11 +89,11 @@ public class EfgsHubSyncer {
 
     byte[] hash = new byte[4];
     SECURE_RANDOM.nextBytes(hash);
-    AtomicInteger batchCounter = new AtomicInteger(0);
+    int batchCounter = 0;
     for (List<GaenKeyForInterops> batchToUpload :
         Lists.partition(keysToUpload, MAX_UPLOAD_BATCH_SIZE)) {
-      UTCInstant start = UTCInstant.now();
-      String batchTag = generateBatchTag(batchCounter.getAndIncrement(), hash);
+      UTCInstant actionStart = UTCInstant.now();
+      String batchTag = generateBatchTag(batchCounter, hash);
 
       boolean success = true;
       try {
@@ -105,41 +104,47 @@ public class EfgsHubSyncer {
         logger.error("Exception uploading keys:", e);
         success = false;
       } finally {
-        logUpload(start, batchTag, success);
+        logUpload(actionStart, batchTag, success);
       }
+      batchCounter++;
     }
     logger.info("Upload done");
   }
 
   public void download(LocalDate today) {
-    LocalDate date = today.atStartOfDay().minus(retentionPeriod).toLocalDate();
-    logger.info("Start download: " + date + " - " + today);
-    while (date.isBefore(today.plusDays(1))) {
-      String nextBatchTag = syncLogDataService.getLatestBatchTagForDay(date);
+    LocalDate dateToDownload = today.atStartOfDay().minus(retentionPeriod).toLocalDate();
+    logger.info("Start download: " + dateToDownload + " - " + today);
+    while (dateToDownload.isBefore(today.plusDays(1))) {
+      String nextBatchTag = syncLogDataService.getLatestBatchTagForDay(dateToDownload);
       boolean dayComplete = false;
       final long emergencyBreak = 100000L;
       long loopCounter = 0L;
-      while (!dayComplete && loopCounter < emergencyBreak) {
-        UTCInstant start = UTCInstant.now();
-        GaenKeyBatch keyBatch = efgsClient.download(date, nextBatchTag);
+      boolean maxIterExceeded = loopCounter >= emergencyBreak;
+      // loop over all batches for date to download. break if caught in endless loop
+      while (!dayComplete && !maxIterExceeded) {
+        UTCInstant actionStart = UTCInstant.now();
+        GaenKeyBatch keyBatch = efgsClient.download(dateToDownload, nextBatchTag);
         String downloadedBatchTag = keyBatch.getBatchTag();
-        dayComplete = keyBatch.isLastBatchForDay();
-        if (!keyBatch.getKeys().isEmpty()) {
-          logger.info("upserting downloaded batch: {}", keyBatch);
-          insertManager.insertIntoDatabase(
-              keyBatch.getKeys(), UTCInstant.now(), downloadedBatchTag);
-          logDownload(start, date, downloadedBatchTag, true);
-        } else if (downloadedBatchTag != null) {
-          logger.info("empty batch: {}", downloadedBatchTag);
-          logDownload(start, date, downloadedBatchTag, true);
+        if (downloadedBatchTag != null) {
+          if (!keyBatch.getKeys().isEmpty()) {
+            logger.info("upserting downloaded batch: {}", keyBatch);
+            insertManager.insertIntoDatabase(
+                keyBatch.getKeys(), UTCInstant.now(), downloadedBatchTag);
+          } else {
+            logger.info("empty batch: {}", downloadedBatchTag);
+          }
+          logDownload(actionStart, dateToDownload, downloadedBatchTag, true);
         }
         nextBatchTag = keyBatch.getNextBatchTag();
+
         loopCounter++;
+        maxIterExceeded = loopCounter >= emergencyBreak;
+        dayComplete = keyBatch.isLastBatchForDay();
       }
-      if (loopCounter == emergencyBreak) {
-        logger.error("check break condition, emergency break pulled for date: {}", date);
+      if (maxIterExceeded) {
+        logger.error("check break condition, emergency break pulled for date: {}", dateToDownload);
       }
-      date = date.plusDays(1);
+      dateToDownload = dateToDownload.plusDays(1);
     }
     logger.info("Download done");
   }
