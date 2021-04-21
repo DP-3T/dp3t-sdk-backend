@@ -54,11 +54,33 @@ The keys that are stored in the database contain the `GAEN` key data as specifie
 
 ![](documentation/img/t_gaen_exposed.png)
 
+| Column                        | Description   |
+| ----------------------------- |:-------------:|
+| pk_exposed_id                 |               |
+| key                           |               |
+| rolling_start_number          |               |
+| rolling_period                |               |
+| received_at                   |               |
+| report_type                   |               |
+| days_since_onset_of_symptoms  |               |
+| origin                        |               |
+| rolling_start_number          |               |
+| batch_tag                     |               |
+| share_with_federation_gateway |               |
+
+
 #### JWT
 
 This schema contains the `uuid` field to be stored temporarily. This is used to prevent replay attacks of the same token twice and the entry will be removed, after the validity of the token has been expired.
 
 ![](documentation/img/t_redeem_uuid.png)
+
+
+| Column                        | Description   |
+| ----------------------------- |:-------------:|
+| pk_redeem_uuid_id             |               |
+| uuid                          |               |
+| received_at                   |               |
 
 #### Federation
 
@@ -66,6 +88,16 @@ To allow a monitoring of uploads to a federation gateway, this table holds log e
 
 ![](documentation/img/t_federation_sync_log.png)
 
+| Column                        | Description   |
+| ----------------------------- |:-------------:|
+| pk_federation_sync_log_id     |               |
+| gateway                       |               |
+| action                        |               |
+| batch_tag                     |               |
+| upload_date                   |               |
+| start_time                    |               |
+| end_time                      |               |
+| state                         |               |
 
 ## Environments
 To control different behaviors, SpringBoot profiles are used. The idea is to provide an abstract base class, which defines everything needed. Such properties can be defined as abstract, and their implementation can be provided in an extended class.
