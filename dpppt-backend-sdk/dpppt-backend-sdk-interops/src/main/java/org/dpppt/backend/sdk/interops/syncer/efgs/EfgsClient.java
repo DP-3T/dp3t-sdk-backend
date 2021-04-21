@@ -16,6 +16,9 @@ import com.google.protobuf.ByteString;
 import java.io.IOException;
 import java.net.URI;
 import java.security.GeneralSecurityException;
+import java.security.KeyStoreException;
+import java.security.NoSuchAlgorithmException;
+import java.security.UnrecoverableKeyException;
 import java.security.cert.CertificateException;
 import java.time.LocalDate;
 import java.time.format.DateTimeFormatter;
@@ -61,7 +64,7 @@ public class EfgsClient {
   private static final String UPLOAD_PATH = "/diagnosiskeys/upload";
   private static final String DOWNLOAD_PATH = "/diagnosiskeys/download/%s";
 
-  public EfgsClient(EfgsGatewayConfig efgsGatewayConfig) throws CertificateException {
+  public EfgsClient(EfgsGatewayConfig efgsGatewayConfig) throws CertificateException, UnrecoverableKeyException, KeyStoreException, NoSuchAlgorithmException, IOException {
     this.gatewayId = efgsGatewayConfig.getId();
     this.baseUrl = efgsGatewayConfig.getBaseUrl();
     this.rt =
@@ -77,7 +80,7 @@ public class EfgsClient {
         new BatchSigner(
             new CryptoProvider(
                 efgsGatewayConfig.getSignClientCert(),
-                efgsGatewayConfig.getSignClientCertPrivateKey()),
+                efgsGatewayConfig.getSignClientCertPassword()),
             efgsGatewayConfig.getSignAlgorithmName());
     this.visitedCountries = efgsGatewayConfig.getVisitedCountries();
     this.defaultTransmissionRiskLevel = efgsGatewayConfig.getDefaultTransmissionRiskLevel();
