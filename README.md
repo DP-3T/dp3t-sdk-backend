@@ -46,7 +46,7 @@ In order to have reproducible builds the [io.github.zlika](https://github.com/zl
 * [Springboot-Swagger-3](https://github.com/Ubique-OSS/springboot-swagger3) (From Bintray)
 
 ### Database
-For development purposes an hsqldb can be used to run the webservice locally. For production systems, it is recommended to connect to a PostgreSQL dabatase (cluster if possible).
+For development purposes an hsqldb can be used to run the web service locally. For production systems, it is recommended to connect to a PostgreSQL database (cluster if possible).
 
 #### Keys
 
@@ -115,7 +115,7 @@ If you plan to provide new extensions or make adjustments and want to provide th
 There is also a possible extension to the base web service provided. The JWT config is intended to implement a possibility to authorize the post requests used to publish the secret keys from the clients. JWTs, which are signed by a health authority, are used. An interface is provided, which can be used to define the behavior of authorization (c.f. the `ValidateRequest` class and its implementation in `NoValidateRequest` and `JWTValidator`). 
 
 ## Fake Requests
-Since a client has to send its keys to the backend, it would be possible to filter traffic based on post requests to the backend, in order to find out, which IP addressess are "infected". To minimize such a risk clients will send a fake request, where the time delay is based on a Poisson distribution. 
+Since a client has to send its keys to the backend, it would be possible to filter traffic based on post requests to the backend, in order to find out, which IP addresses are "infected". To minimize such a risk clients will send a fake request, where the time delay is based on a Poisson distribution. 
 
 ### Time Delay
 In order to minimize the risk of timing attacks, to find out whether a request was fake or not, a time-delay of 1.5s is  introduced for the `POST` request.
@@ -144,11 +144,11 @@ The web-service provides three endpoints, which map the Exposure Notification sp
 
 - /v1/gaen/exposed/\<timestamp\>?publishedafter=\<publishedAfter\>: `GET` Returns a list of keys, which were used at `timestamp`. Note that `timestamp` needs to be epoch milliseconds. Since the behaviour of Android and iOS aren't the same, the optional `publishedAfter` parameter is added. If set only keys, which were received *after* `publishAfter` are returned. This request returns `ZIP` file containing `export.bin` and `export.sig`, where the keys and the signature are stored, as need by the EN framework. The class for signing and serializing is `ProtoSignature`.
 
-Further endpoints are added to the controller for debugging purposes. Those requests can e.g. be blocked by a WAF rule or similiar.
+Further endpoints are added to the controller for debugging purposes. Those requests can e.g. be blocked by a WAF rule or similar.
 
 ## JWT Validation
 In order to prevent replay attacks, a JWT is only valid once. After one usage the "jit" claim is stored temporarily (longer than the validity).
-The JWTs are validated based on the following criterias:
+The JWTs are validated based on the following criteria:
 
   - JWT needs an expiresAt claim which is valid
   - The expiresAt claim should not be longer than the set value in the config
@@ -175,7 +175,7 @@ Depending on the key-size and the algorithm and/or if you are using the `PemRead
 
 To load the keys you can use the `KeyVault` class. The class works by registering functions, which implement a possible decoding from a `String` to a `KeyPair` (respectively `PrivateKey` or `PublicKey`). To register a new provider, the static functions `registerNewPublicEncodingProvider` and `registerNewPrivateEncodingProvider` can be used. Have a look at the `KeyVault` class to see examples of decoding providers.
 
-There are two possible ways of using the class. The recommended way is, to load it as a `Bean` and define all the `KeyPairs` used. The `KeyVault` is autowired into the `BaseConfiguration` and hence needs a instance, provided by one of the concrete configurations. Here is an example from the `DevConfig`:
+There are two possible ways of using the class. The recommended way is, to load it as a `Bean` and define all the `KeyPairs` used. The `KeyVault` is `@Autowired` into the `BaseConfiguration` and hence needs a instance, provided by one of the concrete configurations. Here is an example from the `DevConfig`:
 
 ```java
 var gaen = new KeyVault.KeyVaultEntry("gaen", getPrivateKey(), getPublicKey(), "EC");
@@ -188,7 +188,7 @@ try {
   throw new RuntimeException(e);
 }
 ```
-The constructor inserts the `KeyPairs` into a hashmap, from which you can get the entries.
+The constructor inserts the `KeyPairs` into a hash map, from which you can get the entries.
 
 One does not need to use the constructor though, since the static functions `loadPrivateKey` and `loadPublicKey` can be used directly as well. It can be convenient, if one does not need to provide a `KeyPair` as, for example when only the `PublicKey` is provided, to verify signatures. The following code shows how to load a `PublicKey`.
 
@@ -224,7 +224,7 @@ mvn install
 java -jar dpppt-backend-sdk-ws/target/dpppt-backend-sdk-ws-*.jar
 ```
 ## Dockerfiles
-The dockerfile includes a base jdk image to run the jar. To actually build the docker container, you need to place the generated jar in the bin folder.
+The Dockerfile includes a base JDK image to run the jar. To actually build the docker container, you need to place the generated jar in the bin folder.
 
 ```bash
 cp dpppt-sdk-backend/dpppt-backend-sdk-ws/target/dpppt-backend-sdk-ws-1.0.0-SNAPSHOT.jar ws-sdk/ws/bin/dpppt-backend-sdk-ws-1.0.0
