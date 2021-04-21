@@ -91,6 +91,9 @@ The Interoperability Service therefore implements the following batch logic:
 
 5) increase the `downloadDate` by 1 and repeat `2)` through `4)` (until the last batch of today is downloaded)
 
+### Uploading Batching Logic
+
+During upload the EFGS documentation specifies that a batch _MUST NOT_ exceed 4000 keys. Hence, if more keys are available, the set of keys has to be partitioned. Each of those batches a unique batch tag has to be assigned. 
 #### Upload
 
 1) get all keys which are available for upload
@@ -98,8 +101,6 @@ The Interoperability Service therefore implements the following batch logic:
 2) partition keys into subsets with a size of maximal `MAX_UPLOAD_BATCH_SIZE`
 
 3) for each partition assign a unique `batchTag` and upload to EFGS
-
-### Uploading Batching Logic
 ## Days Since Onset of Symptoms
 
 Since the EN framework does not provide a way to encode meta information about the infection of someone who uploaded the key. This though can be crucial (e.g.symptomatic vs asymptomatic, or fixed onset vs ranged onset) in certain situations to estimate the risk factor on the client.
