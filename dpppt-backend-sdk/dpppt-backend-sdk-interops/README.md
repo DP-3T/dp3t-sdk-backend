@@ -33,7 +33,21 @@ Although technically the interoperability service would support configuring mult
 
 This class holds a list of gateway configurations.
 #### `EfgsGatewayConfig`
+This class holds all the necessary configuration options to communicate and synchronize with a federation gateway. The implementation should be compatible with the original EFGS implementation and the Swiss implementation (CHGS). For detailed description on the communication protocols with the federation gateway, we refer to the corresponding documentation in the Github repos linked below.
 
+The Federation Gateway deploys to means of security: the first is a mutual TLS connection, where a client certificate is used to prove the identity to the gateway system. Further, every "batch" (collection of exposure keys) is signed to prove the authenticity of the submitted data. Hence, the interoperability service needs two different key-pairs, an authentication pair and a signing pair.
+
+The key exchange is outside the scope of this documentation, and the EFGS documentation should be consulted. For countries hosting their own gateway service, a set of tools to simplify the process of creating and exchanging certificates is available on the EFGS repository.
+
+- `id`: An identifier for this gateway configuration.
+
+- `baseUrl`: The base URL pointing to the federation gateway. All routes will be relative to the base URL.
+
+- `authClientCert`: A base64 encoded String of a P12 containing the private key and the certificate used for mutual TLS communication.
+
+- `authClientCertPassword`: The password set to protect the P12.
+
+- `signClientCert`: 
 ## Federation Gateway Synchronization
 TODO: Describe architecture of sync service
 ## Days Since Onset of Symptoms
