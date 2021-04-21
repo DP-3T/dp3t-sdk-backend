@@ -68,7 +68,14 @@ The key exchange is outside the scope of this documentation, and the EFGS docume
 - `defaultReportType`: When no `ReportType` is given, use `defaultReportType` instead. The default is `ReportType.CONFIRMED_TEST`.
 
 ## Federation Gateway Synchronization
-TODO: Describe architecture of sync service
+
+The Interoperability Service will synchronize with the Federation Gateway service with a period defined by the cron string in the `WSSchedulingBaseConfig`. This defaults to `0 0/10 * * *`, meaning the sync starts every 10 minutes starting at 00:00. During the synchronization two events happen: first the Interoperability Service tries to download new keys for the last `n` days. Then all keys, which are allowed to be released and haven't been released before are uploaded to the Federation Gateway. Since the potential payload of such requests can be quite large, a batching logic is applied, which is further described in the next parts.
+
+Further, the sync status is logged and saved in the database for future retrieval. Those entries are being used during download, in order to reduce load on the Federation Gateway, since the Interoperability Service can start directly from the last retrieved batch, rather than following the linked list from the start (in case of longer down time periods extending over date boundaries, we otherwise could miss keys uploaded late at night).
+
+### Download Batching Logic
+
+### Uploading Batching Logic
 ## Days Since Onset of Symptoms
 
 Since the EN framework does not provide a way to encode meta information about the infection of someone who uploaded the key. This though can be crucial (e.g.symptomatic vs asymptomatic, or fixed onset vs ranged onset) in certain situations to estimate the risk factor on the client.
