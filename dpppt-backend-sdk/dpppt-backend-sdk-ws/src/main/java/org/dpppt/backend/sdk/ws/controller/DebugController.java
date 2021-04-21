@@ -22,6 +22,8 @@ import org.dpppt.backend.sdk.ws.security.ValidateRequest.InvalidDateException;
 import org.dpppt.backend.sdk.ws.security.ValidateRequest.WrongScopeException;
 import org.dpppt.backend.sdk.ws.security.signature.ProtoSignature;
 import org.dpppt.backend.sdk.ws.util.ValidationUtils.BadBatchReleaseTimeException;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
@@ -48,6 +50,8 @@ public class DebugController {
   private final ProtoSignature gaenSigner;
   private final DebugGaenDataService dataService;
 
+  private static final Logger logger = LoggerFactory.getLogger(DebugController.class);
+
   public DebugController(
       DebugGaenDataService dataService,
       ProtoSignature gaenSigner,
@@ -69,7 +73,7 @@ public class DebugController {
       @RequestHeader(value = "User-Agent", required = true) String userAgent,
       @RequestHeader(value = "X-Device-Name", required = true) String deviceName,
       @AuthenticationPrincipal Object principal)
-      throws WrongScopeException, InsertException {
+      throws WrongScopeException, InsertException, InterruptedException {
     var now = UTCInstant.now();
     this.validateRequest.isValid(principal);
 
@@ -128,14 +132,10 @@ public class DebugController {
     return ResponseEntity.ok(dayBuckets);
   }
 
-  private void normalizeRequestTime(long now) {
+  private void normalizeRequestTime(long now) throws InterruptedException {
     long after = UTCInstant.now().getTimestamp();
     long duration = after - now;
-    try {
-      Thread.sleep(Math.max(requestTime.minusMillis(duration).toMillis(), 0));
-    } catch (Exception ex) {
-
-    }
+    Thread.sleep(Math.max(requestTime.minusMillis(duration).toMillis(), 0));
   }
 
   @ExceptionHandler({
