@@ -38,3 +38,7 @@ hs_err_pid*
 # maven
 **/target
 **/generated
+
+dpppt-backend-sdk/dpppt-backend-sdk-model/.sts4-cache/classpath-data.json
+
+dpppt-backend-sdk/dpppt-backend-sdk-interops/.factorypath
