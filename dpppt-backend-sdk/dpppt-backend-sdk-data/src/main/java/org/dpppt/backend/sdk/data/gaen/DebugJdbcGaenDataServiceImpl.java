@@ -10,6 +10,7 @@
 
 package org.dpppt.backend.sdk.data.gaen;
 
+import java.sql.Timestamp;
 import java.time.Duration;
 import java.util.ArrayList;
 import java.util.List;
@@ -78,8 +79,9 @@ public class DebugJdbcGaenDataServiceImpl implements DebugGaenDataService {
             + " transmission_risk_level from t_debug_gaen_exposed where received_at >= :startBatch"
             + " and received_at < :batchReleaseTime order by pk_exposed_id desc";
     MapSqlParameterSource params = new MapSqlParameterSource();
-    params.addValue("batchReleaseTime", batchReleaseTime.getDate());
-    params.addValue("startBatch", batchReleaseTime.minus(releaseBucketDuration).getDate());
+    params.addValue("batchReleaseTime", new Timestamp(batchReleaseTime.getTimestamp()));
+    params.addValue(
+        "startBatch", new Timestamp(batchReleaseTime.minus(releaseBucketDuration).getTimestamp()));
     return jt.query(sql, params, new DebugGaenKeyResultSetExtractor());
   }
 }

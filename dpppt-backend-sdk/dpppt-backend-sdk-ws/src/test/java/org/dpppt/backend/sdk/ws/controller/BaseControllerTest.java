@@ -60,6 +60,7 @@ import org.dpppt.backend.sdk.ws.util.TestJdbcGaen;
 import org.junit.Before;
 import org.junit.runner.RunWith;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.boot.test.autoconfigure.actuate.metrics.AutoConfigureMetrics;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.core.io.ClassPathResource;
 import org.springframework.http.MediaType;
@@ -76,6 +77,8 @@ import org.springframework.web.context.WebApplicationContext;
 @SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT)
 @ActiveProfiles({"dev", "jwt", "debug", "test-config"})
 @TestPropertySource(properties = {"ws.app.source=org.dpppt.demo", "ws.origin.country=CH"})
+// to make sure promethues is exposed in tests
+@AutoConfigureMetrics
 public abstract class BaseControllerTest {
 
   protected MockMvc mockMvc;
