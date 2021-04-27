@@ -40,7 +40,7 @@ Further information on the Interoperability Module can be found in the [dpppt-ba
 In order to have reproducible builds the [io.github.zlika](https://github.com/zlika/reproducible-build-maven-plugin) maven plugin is used. It replaces all timestamp with the timestamp of the last commit, and orders the entries in the JAR alphabetically. The github action then computes the sha256sum of the resulting JAR and adds the output as an build artifact.
 
 ## Dependencies
-* Spring Boot 2.2.10
+* Spring Boot 2.4.5
 * Java 11 (or higher)
 * Logback
 * [Springboot-Swagger-3](https://github.com/Ubique-OSS/springboot-swagger3) (From Bintray)
