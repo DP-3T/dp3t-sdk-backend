@@ -69,13 +69,13 @@ The key exchange is outside the scope of this documentation, and the EFGS docume
 
 ## Federation Gateway Synchronization
 
-The Interoperability Service will synchronize with the Federation Gateway service with a period defined by the cron string in the `WSSchedulingBaseConfig`. This defaults to `0 0/10 * * *`, meaning the sync starts every 10 minutes starting at 00:00. During the synchronization two events happen: first the Interoperability Service tries to download new keys for the last `n` days. Then all keys, which are allowed to be released and haven't been released before are uploaded to the Federation Gateway. Since the potential payload of such requests can be quite large, a batching logic is applied, which is further described in the next parts.
+The Interoperability Service will synchronize with the Federation Gateway service with a period defined by the cron string (controlled by the SpringBoot property `interops.efgs.syncCron`) in the `WSSchedulingBaseConfig`. This defaults to `0 0/10 * * *`, meaning the sync starts every 10 minutes starting at 00:00. During the synchronization two events happen: first the Interoperability Service tries to download new keys for the last `n` days, where `n` can be controlled by `interops.retentiondays`. Then all keys, which are allowed to be released and haven't been released before are uploaded to the Federation Gateway. Since the potential payload of such requests can be quite large, a batching logic is applied, which is further described in the next parts.
 
 Further, the sync status is logged and saved in the database for future retrieval. Those entries are being used during download, in order to reduce load on the Federation Gateway, since the Interoperability Service can start directly from the last retrieved batch, rather than following the linked list from the start (in case of longer down time periods extending over date boundaries, we otherwise could miss keys uploaded late at night).
 
 ### Download Batching Logic
 
-According to the documentation of the EFGS, calls to the download endpoint have a required parameter - the date for which keys were uploaded - and an optional parameter, specifying the batch the client downloaded last. Since the batches for a specific day are implemented as a linked list, where each response contains the next batch tag, or null if there aren't any left, specifying a batch tag allows skipping the `n` batches before `batchTag`. This helps reduce the load on the Federation Gateway and simplifies insertion logic on the Interoperability Service, as we can avoid trying to insert already inserted keys.
+According to the documentation of the EFGS, calls to the download endpoint have a required parameter - the date for which keys were uploaded - and an optional parameter, specifying the batch the client downloaded last. Since the batches for a specific day are implemented as a linked list, where each response contains the next batch tag, or null if there aren't any left, specifying a batch tag allows skipping the `n` batches before `batchTag`. This helps reduce the load on the Federation Gateway and the load on the DP3T database server.
 
 The Interoperability Service therefore implements the following batch logic:
 
@@ -115,7 +115,7 @@ The encoding uses mutually exclusive ranges over the whole domain of possible va
 
 User knows exactly the Date of onset of Symptoms (e.g. cough started 5 days ago before submission)
 ### Symptomatic with onset range of `n` days
-`Range: [n*100-14,n*100+14]`
+`Range: [n*100-14,n*100+14] where n in [1,19]`
 
 `n*100: Onset coincides with yesterday's key date`
 
@@ -133,7 +133,7 @@ User knows that he had symptoms, but didn't know exactly when they started.
 
 `3000: The onset coincides with this keys' date`
 
-User knows that he had definitely nothing (e.g. never had cough, fever etc.)
+User knows that he definitely had no symptoms (e.g. never had cough, fever etc.)
 
 ### Unknown symptom status (days since submission)
 `Range: [4000-14,4000+14] = [3986, 4014]`

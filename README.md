@@ -30,7 +30,7 @@ This documentation describes the backend used for the SwissCovid application. It
 
 ## Federation Gateway Service
 ### Introduction 
-Since multiple countries are now using the Exposure Notifications Framework, the European Union started an effort to allow federation of keys coming from multiple countries. Every country connected to the gateway can then up- and download keys from all participating countries (relayed via the gateway). This means that people e.g. using the Swiss app in Germany can, if they decide to share the keys with Germany, infect people in Germany and vice versa.
+Since multiple countries are now using the Exposure Notifications Framework, the European Union started an effort to allow federation of keys coming from multiple countries. Every country connected to the gateway can then up- and download keys from all participating countries (relayed via the gateway). This means that people e.g. using the Swiss app in Germany can, if they decide to share their keys with Germany, infect people using the German app and vice versa.
 
 For this another module was added, which periodically synchronizes keys, which are marked for sharing to a gateway service. The official European Federation Gateway Service (EFGS) can be found [here](https://github.com/eu-federation-gateway-service/efgs-federation-gateway). The [Swiss fork](https://github.com/admin-ch/chgs-federation-gateway) adds Postgres-Support as well as some other minor features.
 
