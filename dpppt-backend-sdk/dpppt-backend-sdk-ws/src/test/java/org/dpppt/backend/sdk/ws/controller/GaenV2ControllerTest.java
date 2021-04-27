@@ -97,6 +97,63 @@ public class GaenV2ControllerTest extends BaseControllerTest {
     assertTrue(authenticateError.contains("Bearer"));
   }
 
+  private void testJWTFakeNoKeysInserted(boolean useV2Upload) throws Exception {
+    var now = UTCInstant.now();
+    List<GaenKey> keys = new ArrayList<>();
+    for (int i = 0; i < 30; i++) {
+      var tmpKey = new GaenKey();
+      tmpKey.setRollingStartNumber((int) now.atStartOfDay().minusDays(i).get10MinutesSince1970());
+      var keyData = String.format("testKey32Bytes%02d", i);
+      tmpKey.setKeyData(Base64.getEncoder().encodeToString(keyData.getBytes("UTF-8")));
+      tmpKey.setRollingPeriod(144);
+      tmpKey.setFake(0);
+      tmpKey.setTransmissionRiskLevel(0);
+      keys.add(tmpKey);
+    }
+
+    Object uploadPayload;
+    if (useV2Upload) {
+      GaenV2UploadKeysRequest exposeeRequest = new GaenV2UploadKeysRequest();
+      exposeeRequest.setGaenKeys(keys);
+      uploadPayload = exposeeRequest;
+    } else {
+      GaenRequest exposeeRequest = new GaenRequest();
+      exposeeRequest.setGaenKeys(keys);
+      exposeeRequest.setDelayedKeyDate((int) now.atStartOfDay().get10MinutesSince1970());
+      uploadPayload = exposeeRequest;
+    }
+
+    String token = createToken(true, now.plusMinutes(5));
+    MvcResult responseAsync =
+        mockMvc
+            .perform(
+                post(useV2Upload ? "/v2/gaen/exposed" : "/v1/gaen/exposed")
+                    .contentType(MediaType.APPLICATION_JSON)
+                    .header("Authorization", "Bearer " + token)
+                    .header("User-Agent", androidUserAgent)
+                    .content(json(uploadPayload)))
+            .andExpect(request().asyncStarted())
+            .andReturn();
+    mockMvc.perform(asyncDispatch(responseAsync)).andExpect(status().isOk());
+
+    // Check that no keys were inserted
+    var result =
+        gaenDataService.getSortedExposedSince(
+            now.minusDays(14), now.roundToNextBucket(releaseBucketDuration));
+
+    assertEquals(0, result.size());
+  }
+
+  @Test
+  public void testJWTFakeNoKeysInsertedV1() throws Exception {
+    testJWTFakeNoKeysInserted(false);
+  }
+
+  @Test
+  public void testJWTFakeNoKeysInsertedV2() throws Exception {
+    testJWTFakeNoKeysInserted(true);
+  }
+
   @Test
   public void testMalciousTokenFails() throws Exception {
     var requestList = new GaenRequest();
