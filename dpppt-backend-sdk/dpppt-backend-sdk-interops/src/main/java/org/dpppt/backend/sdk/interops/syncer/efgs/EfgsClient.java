@@ -16,6 +16,9 @@ import com.google.protobuf.ByteString;
 import java.io.IOException;
 import java.net.URI;
 import java.security.GeneralSecurityException;
+import java.security.KeyStoreException;
+import java.security.NoSuchAlgorithmException;
+import java.security.UnrecoverableKeyException;
 import java.security.cert.CertificateException;
 import java.time.LocalDate;
 import java.time.format.DateTimeFormatter;
@@ -58,10 +61,13 @@ public class EfgsClient {
   private final Integer defaultTransmissionRiskLevel;
   private final ReportType defaultReportType;
 
+  private static String PROTOBUF_V1 = "application/protobuf; version=1.0";
   private static final String UPLOAD_PATH = "/diagnosiskeys/upload";
   private static final String DOWNLOAD_PATH = "/diagnosiskeys/download/%s";
 
-  public EfgsClient(EfgsGatewayConfig efgsGatewayConfig) throws CertificateException {
+  public EfgsClient(EfgsGatewayConfig efgsGatewayConfig)
+      throws CertificateException, UnrecoverableKeyException, KeyStoreException,
+          NoSuchAlgorithmException, IOException {
     this.gatewayId = efgsGatewayConfig.getId();
     this.baseUrl = efgsGatewayConfig.getBaseUrl();
     this.rt =
@@ -77,7 +83,7 @@ public class EfgsClient {
         new BatchSigner(
             new CryptoProvider(
                 efgsGatewayConfig.getSignClientCert(),
-                efgsGatewayConfig.getSignClientCertPrivateKey()),
+                efgsGatewayConfig.getSignClientCertPassword()),
             efgsGatewayConfig.getSignAlgorithmName());
     this.visitedCountries = efgsGatewayConfig.getVisitedCountries();
     this.defaultTransmissionRiskLevel = efgsGatewayConfig.getDefaultTransmissionRiskLevel();
@@ -107,7 +113,15 @@ public class EfgsClient {
       logger.info("downloading keys for date: {} batchTag: {}", date, batchTag);
       ResponseEntity<byte[]> response = rt.exchange(request, byte[].class);
       keyBatch.setBatchTag(response.getHeaders().get("batchTag").get(0));
-      keyBatch.setNextBatchTag(response.getHeaders().get("nextBatchTag").get(0));
+      List<String> nextBatchTagHeader = response.getHeaders().get("nextBatchTag");
+      // at the moment the `nextBatchTag` header is set to string "null" when the requested batch
+      // tag was the last for the given date. in case this changes later on and the `nextBatchTag`
+      // header is not set do null check
+      if (nextBatchTagHeader == null || nextBatchTagHeader.isEmpty()) {
+        keyBatch.setNextBatchTag(null);
+      } else {
+        keyBatch.setNextBatchTag(nextBatchTagHeader.get(0));
+      }
       try {
         if (response.getBody() != null) {
           DiagnosisKeyBatch diagnosisKeyBatch = DiagnosisKeyBatch.parseFrom(response.getBody());
@@ -194,7 +208,7 @@ public class EfgsClient {
     if (lastBatchTag != null) {
       headers.add("batchTag", lastBatchTag);
     }
-    headers.add(HttpHeaders.ACCEPT, "application/protobuf; version=1.0");
+    headers.add(HttpHeaders.ACCEPT, PROTOBUF_V1);
     return headers;
   }
 
@@ -202,7 +216,7 @@ public class EfgsClient {
     HttpHeaders headers = new HttpHeaders();
     headers.add("batchTag", batchTag);
     headers.add("batchSignature", batchSignature);
-    headers.add(HttpHeaders.CONTENT_TYPE, "application/protobuf; version=1.0");
+    headers.add(HttpHeaders.CONTENT_TYPE, PROTOBUF_V1);
     return headers;
   }
 

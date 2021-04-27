@@ -9,6 +9,7 @@
  */
 package org.dpppt.backend.sdk.ws.util;
 
+import java.sql.Timestamp;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.HashMap;
@@ -85,7 +86,7 @@ public class TestJdbcGaen {
       params.addValue("key", gaenKey.getKeyData());
       params.addValue("rolling_start_number", gaenKey.getRollingStartNumber());
       params.addValue("rolling_period", gaenKey.getRollingPeriod());
-      params.addValue("received_at", receivedAt.getDate());
+      params.addValue("received_at", new Timestamp(receivedAt.getTimestamp()));
       params.addValue("origin", "CH");
       params.addValue("share_with_federation_gateway", false);
       parameterList.add(params);
@@ -120,7 +121,7 @@ public class TestJdbcGaen {
       params.addValue("rolling_start_number", gaenKey.getRollingStartNumber());
       params.addValue("rolling_period", gaenKey.getRollingPeriod());
       params.addValue("transmission_risk_level", gaenKey.getTransmissionRiskLevel());
-      params.addValue("received_at", receivedAt.getDate());
+      params.addValue("received_at", new Timestamp(receivedAt.getTimestamp()));
       parameterList.add(params);
     }
     jt.batchUpdate(sql, parameterList.toArray(new MapSqlParameterSource[0]));

@@ -10,6 +10,7 @@
 
 package org.dpppt.backend.sdk.data.gaen;
 
+import java.sql.Timestamp;
 import java.time.Duration;
 import java.util.ArrayList;
 import java.util.List;
@@ -117,8 +118,8 @@ public class JdbcGaenDataServiceImpl implements GaenDataService {
       UTCInstant maxBucket,
       boolean withFederationGateway) {
     MapSqlParameterSource params = new MapSqlParameterSource();
-    params.addValue("since", keysSince.getDate());
-    params.addValue("maxBucket", maxBucket.getDate());
+    params.addValue("since", new Timestamp(keysSince.getTimestamp()));
+    params.addValue("maxBucket", new Timestamp(maxBucket.getTimestamp()));
     params.addValue("timeSkewSeconds", timeSkew.toSeconds());
 
     // Select keys since the given date. We need to make sure, only keys are returned
@@ -327,7 +328,7 @@ public class JdbcGaenDataServiceImpl implements GaenDataService {
     params.addValue("key", gaenKey.getKeyData());
     params.addValue("rolling_start_number", gaenKey.getRollingStartNumber());
     params.addValue("rolling_period", gaenKey.getRollingPeriod());
-    params.addValue("received_at", receivedAt.getDate());
+    params.addValue("received_at", new Timestamp(receivedAt.getTimestamp()));
     params.addValue("origin", origin);
     params.addValue("share_with_federation_gateway", withFederationGateway);
     params.addValue("batch_tag", batchTag);
