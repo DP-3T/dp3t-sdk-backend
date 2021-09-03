@@ -27,6 +27,7 @@
 		<protobuf-java-version>3.12.1</protobuf-java-version>
 		<spring-boot-version>2.4.5</spring-boot-version>
 		<testcontainers-version>1.15.2</testcontainers-version>
+		<spring-cloud-connectors-version>2.0.7.RELEASE</spring-cloud-connectors-version>
 
 		<itCoverageAgent></itCoverageAgent>
 
