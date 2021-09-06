@@ -1,4 +1,4 @@
-<!-- ~ Copyright (c) 2020 Ubique Innovation AG <https://www.ubique.ch> ~ 
+ <!-- ~ Copyright (c) 2020 Ubique Innovation AG <https://www.ubique.ch> ~
 	~ This Source Code Form is subject to the terms of the Mozilla Public ~ License, 
 	v. 2.0. If a copy of the MPL was not distributed with this ~ file, You can 
 	obtain one at https://mozilla.org/MPL/2.0/. ~ ~ SPDX-License-Identifier: 
@@ -13,7 +13,7 @@
 	<groupId>org.dpppt</groupId>
 	<artifactId>dpppt-backend-sdk</artifactId>
 	<packaging>pom</packaging>
-	<version>2.2.0-SNAPSHOT</version>
+	<version>2.2.1-SNAPSHOT</version>
 	<name>DP3T Backend SDK</name>
 
 	<properties>
@@ -25,8 +25,8 @@
 		<jackson-version>2.11.1</jackson-version>
 		<jsonwebtoken-version>0.11.2</jsonwebtoken-version>
 		<protobuf-java-version>3.12.1</protobuf-java-version>
-		<spring-boot-version>2.4.5</spring-boot-version>
-		<testcontainers-version>1.15.2</testcontainers-version>
+		<spring-boot-version>2.4.10</spring-boot-version>
+		<testcontainers-version>1.16.0</testcontainers-version>
 		<spring-cloud-connectors-version>2.0.7.RELEASE</spring-cloud-connectors-version>
 
 		<itCoverageAgent></itCoverageAgent>
@@ -124,6 +124,11 @@
 		<dependency>
 			<groupId>org.slf4j</groupId>
 			<artifactId>jcl-over-slf4j</artifactId>
+		</dependency>
+		<dependency>
+			<groupId>ch.admin.bag.covidcertificate</groupId>
+			<artifactId>cc-backend-logging</artifactId>
+			<version>1.0.0</version>
 		</dependency>
 
 		<dependency>
