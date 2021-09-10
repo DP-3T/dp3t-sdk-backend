@@ -10,21 +10,40 @@
 
 package org.dpppt.backend.sdk.interops.config;
 
+import java.util.Map;
 import javax.sql.DataSource;
 import org.flywaydb.core.Flyway;
-import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
+import org.springframework.cloud.CloudFactory;
+import org.springframework.cloud.service.PooledServiceConnectorConfig.PoolConfig;
+import org.springframework.cloud.service.relational.DataSourceConfig;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
-import org.springframework.context.annotation.Lazy;
 
 @Configuration
 public abstract class WSCloudBaseConfig extends WSBaseConfig {
 
-  @Autowired @Lazy private DataSource dataSource;
+  @Value("${datasource.maximumPoolSize:5}")
+  int dataSourceMaximumPoolSize;
 
+  @Value("${datasource.connectionTimeout:30000}")
+  int dataSourceConnectionTimeout;
+
+  @Value("${datasource.leakDetectionThreshold:0}")
+  int dataSourceLeakDetectionThreshold;
+
+  @Bean
   @Override
   public DataSource dataSource() {
-    return dataSource;
+    PoolConfig poolConfig = new PoolConfig(dataSourceMaximumPoolSize, dataSourceConnectionTimeout);
+    DataSourceConfig dbConfig =
+        new DataSourceConfig(
+            poolConfig,
+            null,
+            null,
+            Map.of("leakDetectionThreshold", dataSourceLeakDetectionThreshold));
+    CloudFactory factory = new CloudFactory();
+    return factory.getCloud().getSingletonServiceConnector(DataSource.class, dbConfig);
   }
 
   @Bean

@@ -13,6 +13,11 @@ package org.dpppt.backend.sdk.ws.controller;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
 import org.springframework.context.annotation.ComponentScan;
 
-@ComponentScan(basePackages = {"org.dpppt.backend.sdk.ws.config"})
+@ComponentScan(
+    basePackages = {
+      "org.dpppt.backend.sdk.ws.config",
+      "ch.admin.bag.covidcertificate.log",
+      "ch.admin.bag.covidcertificate.rest"
+    })
 @SpringBootApplication
 public class TestApplication {}

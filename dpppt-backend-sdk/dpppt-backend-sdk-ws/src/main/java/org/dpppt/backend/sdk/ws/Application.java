@@ -19,7 +19,12 @@ import org.springframework.context.annotation.Configuration;
 import org.springframework.web.servlet.config.annotation.EnableWebMvc;
 
 @Configuration
-@ComponentScan(basePackages = {"org.dpppt.backend.sdk.ws.config"})
+@ComponentScan(
+    basePackages = {
+      "org.dpppt.backend.sdk.ws.config",
+      "ch.admin.bag.covidcertificate.log",
+      "ch.admin.bag.covidcertificate.rest"
+    })
 @EnableAutoConfiguration(
     exclude = {SecurityAutoConfiguration.class, ManagementWebSecurityAutoConfiguration.class})
 @EnableWebMvc

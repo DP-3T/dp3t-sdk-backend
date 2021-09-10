@@ -21,7 +21,12 @@ import org.springframework.web.servlet.config.annotation.EnableWebMvc;
 
 @Configuration
 @ConfigurationPropertiesScan("org.dpppt.backend.sdk.interops.model")
-@ComponentScan(basePackages = {"org.dpppt.backend.sdk.interops.config"})
+@ComponentScan(
+    basePackages = {
+      "org.dpppt.backend.sdk.interops.config",
+      "ch.admin.bag.covidcertificate.log",
+      "ch.admin.bag.covidcertificate.rest"
+    })
 @EnableAutoConfiguration(
     exclude = {SecurityAutoConfiguration.class, ManagementWebSecurityAutoConfiguration.class})
 @EnableWebMvc
