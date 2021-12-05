@@ -22,8 +22,10 @@
 		<project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
 		<project.reporting.outputEncoding>UTF-8</project.reporting.outputEncoding>
 
+		<dependency-check-maven.version>6.0.2</dependency-check-maven.version>
 		<jackson-version>2.11.1</jackson-version>
 		<jsonwebtoken-version>0.11.2</jsonwebtoken-version>
+		<log4j2-version>2.13.3</log4j2-version>
 		<protobuf-java-version>3.12.1</protobuf-java-version>
 		<spring-boot-version>2.4.10</spring-boot-version>
 		<testcontainers-version>1.16.0</testcontainers-version>
@@ -73,6 +75,47 @@
 		<module>dpppt-backend-sdk-report</module>
 		<module>dpppt-backend-sdk-interops</module>
 	</modules>
+
+	<profiles>
+		<profile>
+			<id>securitycheck</id>
+			<dependencies>
+				<dependency>
+					<groupId>org.owasp</groupId>
+					<artifactId>dependency-check-maven</artifactId>
+					<version>${dependency-check-maven.version}</version>
+					<exclusions>
+						<exclusion>
+							<groupId>commons-logging</groupId>
+							<artifactId>commons-logging</artifactId>
+						</exclusion>
+					</exclusions>
+				</dependency>
+			</dependencies>
+			<build>
+				<plugins>
+					<plugin>
+						<groupId>org.owasp</groupId>
+						<artifactId>dependency-check-maven</artifactId>
+						<version>${dependency-check-maven.version}</version>
+						<configuration>
+							<!--<suppressionFiles>${basedir}/suppressed.xml</suppressionFiles>-->
+							<failBuildOnAnyVulnerability>true</failBuildOnAnyVulnerability>
+							<!--<failBuildOnCVSS>5</failBuildOnCVSS>-->
+						</configuration>
+						<executions>
+							<execution>
+								<phase>test</phase>
+								<goals>
+									<goal>check</goal>
+								</goals>
+							</execution>
+						</executions>
+					</plugin>
+				</plugins>
+			</build>
+		</profile>
+	</profiles>
 
 	<dependencies>
 
@@ -253,6 +296,18 @@
 				<artifactId>snakeyaml</artifactId>
 				<version>1.27</version>
 			</dependency>
+
+			<dependency>
+				<groupId>org.apache.logging.log4j</groupId>
+				<artifactId>log4j-api</artifactId>
+				<version>${log4j2-version}</version>
+			</dependency>
+			<dependency>
+				<groupId>org.apache.logging.log4j</groupId>
+				<artifactId>log4j-to-slf4j</artifactId>
+				<version>${log4j2-version}</version>
+			</dependency>
+
 		</dependencies>
 	</dependencyManagement>
 
