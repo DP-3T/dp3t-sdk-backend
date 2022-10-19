@@ -22,7 +22,7 @@
 		<project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
 		<project.reporting.outputEncoding>UTF-8</project.reporting.outputEncoding>
 
-		<jackson-version>2.11.1</jackson-version>
+		<jackson-version>2.13.4.1</jackson-version>
 		<jsonwebtoken-version>0.11.2</jsonwebtoken-version>
 		<protobuf-java-version>3.12.1</protobuf-java-version>
 		<spring-boot-version>2.4.10</spring-boot-version>
