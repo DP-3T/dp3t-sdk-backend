@@ -17,15 +17,15 @@
 	<name>DP3T Backend SDK</name>
 
 	<properties>
-		<java-version>11</java-version>
+		<java-version>17</java-version>
 
 		<project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
 		<project.reporting.outputEncoding>UTF-8</project.reporting.outputEncoding>
 
 		<jackson-version>2.11.1</jackson-version>
 		<jsonwebtoken-version>0.11.2</jsonwebtoken-version>
-		<protobuf-java-version>3.12.1</protobuf-java-version>
-		<spring-boot-version>2.4.10</spring-boot-version>
+		<protobuf-java-version>3.21.9</protobuf-java-version>
+		<spring-boot-version>2.4.13</spring-boot-version>
 		<testcontainers-version>1.16.0</testcontainers-version>
 		<spring-cloud-connectors-version>2.0.7.RELEASE</spring-cloud-connectors-version>
 
@@ -312,6 +312,7 @@
 			<plugin>
 				<groupId>org.jacoco</groupId>
 				<artifactId>jacoco-maven-plugin</artifactId>
+				<version>0.8.8</version>
 				<executions>
 					<!-- set arg line property for surefire -->
 					<execution>
@@ -485,7 +486,7 @@
 				<plugin>
 					<groupId>org.jacoco</groupId>
 					<artifactId>jacoco-maven-plugin</artifactId>
-					<version>0.8.5</version>
+					<version>0.8.8</version>
 				</plugin>
 				<plugin>
 					<groupId>org.sonarsource.scanner.maven</groupId>
